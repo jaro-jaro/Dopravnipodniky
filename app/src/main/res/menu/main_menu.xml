@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/actionKalibrovat"
+        android:icon="@drawable/ic_baseline_home_24"
+        android:title="@string/kalibrovat"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/actionZobrazitBusyNeboLinky"
+        android:icon="@drawable/ic_baseline_timeline_24"
+        android:title="@string/zobrazit_linky"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/actionUspechy"
+        android:icon="@drawable/ic_baseline_emoji_events_24"
+        android:title="@string/uspechy"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_more"
+        android:icon="@drawable/ic_baseline_more_vert_24"
+        android:title="@string/dalsi"
+        app:showAsAction="always">
+        <menu>
+            <item
+                android:id="@+id/actionNastaveni"
+                android:icon="@drawable/ic_baseline_settings_24_white"
+                android:title="@string/nastaveni" />
+            <item
+                android:id="@+id/actionInfo"
+                android:icon="@drawable/ic_baseline_info_24_white"
+                android:title="@string/o_aplikaci" />
+        </menu>
+    </item>
+</menu>

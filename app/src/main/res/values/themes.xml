@@ -1,0 +1,26 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+
+    <style name="Theme.DopravníPodniky" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/red_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/red_300</item>
+        <item name="colorOnPrimaryContainer">@color/red_700</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/red_700</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondaryContainer">@color/red_300</item>
+        <item name="colorOnSecondaryContainer">@color/red_700</item>
+        <!-- Tertiary brand color. -->
+        <item name="colorTertiary">@color/red_700</item>
+        <item name="colorOnTertiary">@color/white</item>
+        <item name="colorTertiaryContainer">@color/red_300</item>
+        <item name="colorOnTertiaryContainer">@color/red_700</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <!-- Customize your theme here. -->
+        <item name="backgroundColor">@color/white</item>
+        <item name="android:colorBackground">@color/white</item>
+    </style>
+</resources>

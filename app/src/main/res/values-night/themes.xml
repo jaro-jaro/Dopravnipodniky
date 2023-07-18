@@ -1,0 +1,658 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    
+    <style name="Theme.DopravníPodniky.Zaklad" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:homeAsUpIndicator">@drawable/ic_baseline_arrow_back_24</item>
+        <item name="toolbarStyle">@style/ToolbarStyle</item>
+
+        <item name="windowActionModeOverlay">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+        <item name="android:actionModeCloseDrawable">@drawable/ic_baseline_done_24</item>
+        <item name="actionModeStyle">@style/ActionModeStyle</item>
+    </style>
+
+    <style name="ActionModeStyle" parent="Widget.Material3.ActionMode">
+        <item name="background">?attr/colorPrimary</item>
+        <item name="titleTextStyle">@style/TitleTextStyle</item>
+    </style>
+
+    <style name="ToolbarStyle" parent="Widget.Material3.Toolbar">
+        <item name="background">?attr/colorPrimaryDark</item>
+        <item name="titleTextStyle">@style/TitleTextStyle</item>
+    </style>
+
+    <style name="TitleTextStyle" parent="TextAppearance.Material3.ActionBar.Title">
+        <item name="android:textColor">@color/tmava</item>
+    </style>
+
+    <style name="Theme.DopravníPodniky.Cervene" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/cervene_primary</item>
+        <item name="colorOnPrimary">@color/cervene_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/cervene_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/cervene_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/cervene_secondary</item>
+        <item name="colorOnSecondary">@color/cervene_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/cervene_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/cervene_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/cervene_tertiary</item>
+        <item name="colorOnTertiary">@color/cervene_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/cervene_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/cervene_onTertiaryContainer</item>
+        <item name="colorError">@color/cervene_error</item>
+        <item name="colorErrorContainer">@color/cervene_errorContainer</item>
+        <item name="colorOnError">@color/cervene_onError</item>
+        <item name="colorOnErrorContainer">@color/cervene_onErrorContainer</item>
+        <item name="android:colorBackground">@color/cervene_background</item>
+        <item name="colorOnBackground">@color/cervene_onBackground</item>
+        <item name="colorSurface">@color/cervene_surface</item>
+        <item name="colorOnSurface">@color/cervene_onSurface</item>
+        <item name="colorSurfaceVariant">@color/cervene_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/cervene_onSurfaceVariant</item>
+        <item name="colorOutline">@color/cervene_outline</item>
+        <item name="colorOnSurfaceInverse">@color/cervene_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/cervene_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/cervene_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.Ruzove" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/ruzove_primary</item>
+        <item name="colorOnPrimary">@color/ruzove_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/ruzove_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/ruzove_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/ruzove_secondary</item>
+        <item name="colorOnSecondary">@color/ruzove_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/ruzove_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/ruzove_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/ruzove_tertiary</item>
+        <item name="colorOnTertiary">@color/ruzove_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/ruzove_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/ruzove_onTertiaryContainer</item>
+        <item name="colorError">@color/ruzove_error</item>
+        <item name="colorErrorContainer">@color/ruzove_errorContainer</item>
+        <item name="colorOnError">@color/ruzove_onError</item>
+        <item name="colorOnErrorContainer">@color/ruzove_onErrorContainer</item>
+        <item name="android:colorBackground">@color/ruzove_background</item>
+        <item name="colorOnBackground">@color/ruzove_onBackground</item>
+        <item name="colorSurface">@color/ruzove_surface</item>
+        <item name="colorOnSurface">@color/ruzove_onSurface</item>
+        <item name="colorSurfaceVariant">@color/ruzove_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/ruzove_onSurfaceVariant</item>
+        <item name="colorOutline">@color/ruzove_outline</item>
+        <item name="colorOnSurfaceInverse">@color/ruzove_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/ruzove_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/ruzove_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.Fialove" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/fialove_primary</item>
+        <item name="colorOnPrimary">@color/fialove_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/fialove_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/fialove_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/fialove_secondary</item>
+        <item name="colorOnSecondary">@color/fialove_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/fialove_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/fialove_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/fialove_tertiary</item>
+        <item name="colorOnTertiary">@color/fialove_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/fialove_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/fialove_onTertiaryContainer</item>
+        <item name="colorError">@color/fialove_error</item>
+        <item name="colorErrorContainer">@color/fialove_errorContainer</item>
+        <item name="colorOnError">@color/fialove_onError</item>
+        <item name="colorOnErrorContainer">@color/fialove_onErrorContainer</item>
+        <item name="android:colorBackground">@color/fialove_background</item>
+        <item name="colorOnBackground">@color/fialove_onBackground</item>
+        <item name="colorSurface">@color/fialove_surface</item>
+        <item name="colorOnSurface">@color/fialove_onSurface</item>
+        <item name="colorSurfaceVariant">@color/fialove_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/fialove_onSurfaceVariant</item>
+        <item name="colorOutline">@color/fialove_outline</item>
+        <item name="colorOnSurfaceInverse">@color/fialove_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/fialove_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/fialove_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.SyteFialove" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/syte_fialove_primary</item>
+        <item name="colorOnPrimary">@color/syte_fialove_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/syte_fialove_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/syte_fialove_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/syte_fialove_secondary</item>
+        <item name="colorOnSecondary">@color/syte_fialove_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/syte_fialove_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/syte_fialove_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/syte_fialove_tertiary</item>
+        <item name="colorOnTertiary">@color/syte_fialove_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/syte_fialove_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/syte_fialove_onTertiaryContainer</item>
+        <item name="colorError">@color/syte_fialove_error</item>
+        <item name="colorErrorContainer">@color/syte_fialove_errorContainer</item>
+        <item name="colorOnError">@color/syte_fialove_onError</item>
+        <item name="colorOnErrorContainer">@color/syte_fialove_onErrorContainer</item>
+        <item name="android:colorBackground">@color/syte_fialove_background</item>
+        <item name="colorOnBackground">@color/syte_fialove_onBackground</item>
+        <item name="colorSurface">@color/syte_fialove_surface</item>
+        <item name="colorOnSurface">@color/syte_fialove_onSurface</item>
+        <item name="colorSurfaceVariant">@color/syte_fialove_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/syte_fialove_onSurfaceVariant</item>
+        <item name="colorOutline">@color/syte_fialove_outline</item>
+        <item name="colorOnSurfaceInverse">@color/syte_fialove_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/syte_fialove_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/syte_fialove_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.Indigove" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/indigove_primary</item>
+        <item name="colorOnPrimary">@color/indigove_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/indigove_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/indigove_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/indigove_secondary</item>
+        <item name="colorOnSecondary">@color/indigove_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/indigove_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/indigove_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/indigove_tertiary</item>
+        <item name="colorOnTertiary">@color/indigove_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/indigove_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/indigove_onTertiaryContainer</item>
+        <item name="colorError">@color/indigove_error</item>
+        <item name="colorErrorContainer">@color/indigove_errorContainer</item>
+        <item name="colorOnError">@color/indigove_onError</item>
+        <item name="colorOnErrorContainer">@color/indigove_onErrorContainer</item>
+        <item name="android:colorBackground">@color/indigove_background</item>
+        <item name="colorOnBackground">@color/indigove_onBackground</item>
+        <item name="colorSurface">@color/indigove_surface</item>
+        <item name="colorOnSurface">@color/indigove_onSurface</item>
+        <item name="colorSurfaceVariant">@color/indigove_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/indigove_onSurfaceVariant</item>
+        <item name="colorOutline">@color/indigove_outline</item>
+        <item name="colorOnSurfaceInverse">@color/indigove_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/indigove_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/indigove_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.Modre" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/modre_primary</item>
+        <item name="colorOnPrimary">@color/modre_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/modre_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/modre_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/modre_secondary</item>
+        <item name="colorOnSecondary">@color/modre_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/modre_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/modre_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/modre_tertiary</item>
+        <item name="colorOnTertiary">@color/modre_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/modre_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/modre_onTertiaryContainer</item>
+        <item name="colorError">@color/modre_error</item>
+        <item name="colorErrorContainer">@color/modre_errorContainer</item>
+        <item name="colorOnError">@color/modre_onError</item>
+        <item name="colorOnErrorContainer">@color/modre_onErrorContainer</item>
+        <item name="android:colorBackground">@color/modre_background</item>
+        <item name="colorOnBackground">@color/modre_onBackground</item>
+        <item name="colorSurface">@color/modre_surface</item>
+        <item name="colorOnSurface">@color/modre_onSurface</item>
+        <item name="colorSurfaceVariant">@color/modre_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/modre_onSurfaceVariant</item>
+        <item name="colorOutline">@color/modre_outline</item>
+        <item name="colorOnSurfaceInverse">@color/modre_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/modre_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/modre_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.SvetleModre" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/svetle_modre_primary</item>
+        <item name="colorOnPrimary">@color/svetle_modre_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/svetle_modre_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/svetle_modre_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/svetle_modre_secondary</item>
+        <item name="colorOnSecondary">@color/svetle_modre_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/svetle_modre_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/svetle_modre_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/svetle_modre_tertiary</item>
+        <item name="colorOnTertiary">@color/svetle_modre_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/svetle_modre_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/svetle_modre_onTertiaryContainer</item>
+        <item name="colorError">@color/svetle_modre_error</item>
+        <item name="colorErrorContainer">@color/svetle_modre_errorContainer</item>
+        <item name="colorOnError">@color/svetle_modre_onError</item>
+        <item name="colorOnErrorContainer">@color/svetle_modre_onErrorContainer</item>
+        <item name="android:colorBackground">@color/svetle_modre_background</item>
+        <item name="colorOnBackground">@color/svetle_modre_onBackground</item>
+        <item name="colorSurface">@color/svetle_modre_surface</item>
+        <item name="colorOnSurface">@color/svetle_modre_onSurface</item>
+        <item name="colorSurfaceVariant">@color/svetle_modre_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/svetle_modre_onSurfaceVariant</item>
+        <item name="colorOutline">@color/svetle_modre_outline</item>
+        <item name="colorOnSurfaceInverse">@color/svetle_modre_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/svetle_modre_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/svetle_modre_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.Tyrkysove" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/tyrkysove_primary</item>
+        <item name="colorOnPrimary">@color/tyrkysove_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/tyrkysove_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/tyrkysove_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/tyrkysove_secondary</item>
+        <item name="colorOnSecondary">@color/tyrkysove_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/tyrkysove_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/tyrkysove_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/tyrkysove_tertiary</item>
+        <item name="colorOnTertiary">@color/tyrkysove_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/tyrkysove_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/tyrkysove_onTertiaryContainer</item>
+        <item name="colorError">@color/tyrkysove_error</item>
+        <item name="colorErrorContainer">@color/tyrkysove_errorContainer</item>
+        <item name="colorOnError">@color/tyrkysove_onError</item>
+        <item name="colorOnErrorContainer">@color/tyrkysove_onErrorContainer</item>
+        <item name="android:colorBackground">@color/tyrkysove_background</item>
+        <item name="colorOnBackground">@color/tyrkysove_onBackground</item>
+        <item name="colorSurface">@color/tyrkysove_surface</item>
+        <item name="colorOnSurface">@color/tyrkysove_onSurface</item>
+        <item name="colorSurfaceVariant">@color/tyrkysove_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/tyrkysove_onSurfaceVariant</item>
+        <item name="colorOutline">@color/tyrkysove_outline</item>
+        <item name="colorOnSurfaceInverse">@color/tyrkysove_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/tyrkysove_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/tyrkysove_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.Modrozelene" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/modrozelene_primary</item>
+        <item name="colorOnPrimary">@color/modrozelene_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/modrozelene_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/modrozelene_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/modrozelene_secondary</item>
+        <item name="colorOnSecondary">@color/modrozelene_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/modrozelene_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/modrozelene_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/modrozelene_tertiary</item>
+        <item name="colorOnTertiary">@color/modrozelene_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/modrozelene_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/modrozelene_onTertiaryContainer</item>
+        <item name="colorError">@color/modrozelene_error</item>
+        <item name="colorErrorContainer">@color/modrozelene_errorContainer</item>
+        <item name="colorOnError">@color/modrozelene_onError</item>
+        <item name="colorOnErrorContainer">@color/modrozelene_onErrorContainer</item>
+        <item name="android:colorBackground">@color/modrozelene_background</item>
+        <item name="colorOnBackground">@color/modrozelene_onBackground</item>
+        <item name="colorSurface">@color/modrozelene_surface</item>
+        <item name="colorOnSurface">@color/modrozelene_onSurface</item>
+        <item name="colorSurfaceVariant">@color/modrozelene_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/modrozelene_onSurfaceVariant</item>
+        <item name="colorOutline">@color/modrozelene_outline</item>
+        <item name="colorOnSurfaceInverse">@color/modrozelene_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/modrozelene_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/modrozelene_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.Zelene" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/zelene_primary</item>
+        <item name="colorOnPrimary">@color/zelene_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/zelene_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/zelene_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/zelene_secondary</item>
+        <item name="colorOnSecondary">@color/zelene_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/zelene_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/zelene_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/zelene_tertiary</item>
+        <item name="colorOnTertiary">@color/zelene_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/zelene_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/zelene_onTertiaryContainer</item>
+        <item name="colorError">@color/zelene_error</item>
+        <item name="colorErrorContainer">@color/zelene_errorContainer</item>
+        <item name="colorOnError">@color/zelene_onError</item>
+        <item name="colorOnErrorContainer">@color/zelene_onErrorContainer</item>
+        <item name="android:colorBackground">@color/zelene_background</item>
+        <item name="colorOnBackground">@color/zelene_onBackground</item>
+        <item name="colorSurface">@color/zelene_surface</item>
+        <item name="colorOnSurface">@color/zelene_onSurface</item>
+        <item name="colorSurfaceVariant">@color/zelene_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/zelene_onSurfaceVariant</item>
+        <item name="colorOutline">@color/zelene_outline</item>
+        <item name="colorOnSurfaceInverse">@color/zelene_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/zelene_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/zelene_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.SvetleZelene" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/svetle_zelene_primary</item>
+        <item name="colorOnPrimary">@color/svetle_zelene_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/svetle_zelene_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/svetle_zelene_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/svetle_zelene_secondary</item>
+        <item name="colorOnSecondary">@color/svetle_zelene_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/svetle_zelene_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/svetle_zelene_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/svetle_zelene_tertiary</item>
+        <item name="colorOnTertiary">@color/svetle_zelene_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/svetle_zelene_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/svetle_zelene_onTertiaryContainer</item>
+        <item name="colorError">@color/svetle_zelene_error</item>
+        <item name="colorErrorContainer">@color/svetle_zelene_errorContainer</item>
+        <item name="colorOnError">@color/svetle_zelene_onError</item>
+        <item name="colorOnErrorContainer">@color/svetle_zelene_onErrorContainer</item>
+        <item name="android:colorBackground">@color/svetle_zelene_background</item>
+        <item name="colorOnBackground">@color/svetle_zelene_onBackground</item>
+        <item name="colorSurface">@color/svetle_zelene_surface</item>
+        <item name="colorOnSurface">@color/svetle_zelene_onSurface</item>
+        <item name="colorSurfaceVariant">@color/svetle_zelene_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/svetle_zelene_onSurfaceVariant</item>
+        <item name="colorOutline">@color/svetle_zelene_outline</item>
+        <item name="colorOnSurfaceInverse">@color/svetle_zelene_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/svetle_zelene_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/svetle_zelene_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.Limetkove" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/limetkove_primary</item>
+        <item name="colorOnPrimary">@color/limetkove_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/limetkove_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/limetkove_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/limetkove_secondary</item>
+        <item name="colorOnSecondary">@color/limetkove_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/limetkove_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/limetkove_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/limetkove_tertiary</item>
+        <item name="colorOnTertiary">@color/limetkove_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/limetkove_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/limetkove_onTertiaryContainer</item>
+        <item name="colorError">@color/limetkove_error</item>
+        <item name="colorErrorContainer">@color/limetkove_errorContainer</item>
+        <item name="colorOnError">@color/limetkove_onError</item>
+        <item name="colorOnErrorContainer">@color/limetkove_onErrorContainer</item>
+        <item name="android:colorBackground">@color/limetkove_background</item>
+        <item name="colorOnBackground">@color/limetkove_onBackground</item>
+        <item name="colorSurface">@color/limetkove_surface</item>
+        <item name="colorOnSurface">@color/limetkove_onSurface</item>
+        <item name="colorSurfaceVariant">@color/limetkove_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/limetkove_onSurfaceVariant</item>
+        <item name="colorOutline">@color/limetkove_outline</item>
+        <item name="colorOnSurfaceInverse">@color/limetkove_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/limetkove_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/limetkove_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.Zlute" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/zlute_primary</item>
+        <item name="colorOnPrimary">@color/zlute_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/zlute_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/zlute_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/zlute_secondary</item>
+        <item name="colorOnSecondary">@color/zlute_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/zlute_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/zlute_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/zlute_tertiary</item>
+        <item name="colorOnTertiary">@color/zlute_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/zlute_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/zlute_onTertiaryContainer</item>
+        <item name="colorError">@color/zlute_error</item>
+        <item name="colorErrorContainer">@color/zlute_errorContainer</item>
+        <item name="colorOnError">@color/zlute_onError</item>
+        <item name="colorOnErrorContainer">@color/zlute_onErrorContainer</item>
+        <item name="android:colorBackground">@color/zlute_background</item>
+        <item name="colorOnBackground">@color/zlute_onBackground</item>
+        <item name="colorSurface">@color/zlute_surface</item>
+        <item name="colorOnSurface">@color/zlute_onSurface</item>
+        <item name="colorSurfaceVariant">@color/zlute_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/zlute_onSurfaceVariant</item>
+        <item name="colorOutline">@color/zlute_outline</item>
+        <item name="colorOnSurfaceInverse">@color/zlute_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/zlute_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/zlute_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.Jantarove" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/jantarove_primary</item>
+        <item name="colorOnPrimary">@color/jantarove_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/jantarove_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/jantarove_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/jantarove_secondary</item>
+        <item name="colorOnSecondary">@color/jantarove_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/jantarove_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/jantarove_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/jantarove_tertiary</item>
+        <item name="colorOnTertiary">@color/jantarove_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/jantarove_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/jantarove_onTertiaryContainer</item>
+        <item name="colorError">@color/jantarove_error</item>
+        <item name="colorErrorContainer">@color/jantarove_errorContainer</item>
+        <item name="colorOnError">@color/jantarove_onError</item>
+        <item name="colorOnErrorContainer">@color/jantarove_onErrorContainer</item>
+        <item name="android:colorBackground">@color/jantarove_background</item>
+        <item name="colorOnBackground">@color/jantarove_onBackground</item>
+        <item name="colorSurface">@color/jantarove_surface</item>
+        <item name="colorOnSurface">@color/jantarove_onSurface</item>
+        <item name="colorSurfaceVariant">@color/jantarove_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/jantarove_onSurfaceVariant</item>
+        <item name="colorOutline">@color/jantarove_outline</item>
+        <item name="colorOnSurfaceInverse">@color/jantarove_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/jantarove_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/jantarove_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.Oranzove" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/oranzove_primary</item>
+        <item name="colorOnPrimary">@color/oranzove_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/oranzove_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/oranzove_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/oranzove_secondary</item>
+        <item name="colorOnSecondary">@color/oranzove_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/oranzove_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/oranzove_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/oranzove_tertiary</item>
+        <item name="colorOnTertiary">@color/oranzove_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/oranzove_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/oranzove_onTertiaryContainer</item>
+        <item name="colorError">@color/oranzove_error</item>
+        <item name="colorErrorContainer">@color/oranzove_errorContainer</item>
+        <item name="colorOnError">@color/oranzove_onError</item>
+        <item name="colorOnErrorContainer">@color/oranzove_onErrorContainer</item>
+        <item name="android:colorBackground">@color/oranzove_background</item>
+        <item name="colorOnBackground">@color/oranzove_onBackground</item>
+        <item name="colorSurface">@color/oranzove_surface</item>
+        <item name="colorOnSurface">@color/oranzove_onSurface</item>
+        <item name="colorSurfaceVariant">@color/oranzove_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/oranzove_onSurfaceVariant</item>
+        <item name="colorOutline">@color/oranzove_outline</item>
+        <item name="colorOnSurfaceInverse">@color/oranzove_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/oranzove_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/oranzove_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.SyteOranzove" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/syte_oranzove_primary</item>
+        <item name="colorOnPrimary">@color/syte_oranzove_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/syte_oranzove_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/syte_oranzove_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/syte_oranzove_secondary</item>
+        <item name="colorOnSecondary">@color/syte_oranzove_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/syte_oranzove_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/syte_oranzove_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/syte_oranzove_tertiary</item>
+        <item name="colorOnTertiary">@color/syte_oranzove_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/syte_oranzove_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/syte_oranzove_onTertiaryContainer</item>
+        <item name="colorError">@color/syte_oranzove_error</item>
+        <item name="colorErrorContainer">@color/syte_oranzove_errorContainer</item>
+        <item name="colorOnError">@color/syte_oranzove_onError</item>
+        <item name="colorOnErrorContainer">@color/syte_oranzove_onErrorContainer</item>
+        <item name="android:colorBackground">@color/syte_oranzove_background</item>
+        <item name="colorOnBackground">@color/syte_oranzove_onBackground</item>
+        <item name="colorSurface">@color/syte_oranzove_surface</item>
+        <item name="colorOnSurface">@color/syte_oranzove_onSurface</item>
+        <item name="colorSurfaceVariant">@color/syte_oranzove_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/syte_oranzove_onSurfaceVariant</item>
+        <item name="colorOutline">@color/syte_oranzove_outline</item>
+        <item name="colorOnSurfaceInverse">@color/syte_oranzove_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/syte_oranzove_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/syte_oranzove_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.Hnede" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/hnede_primary</item>
+        <item name="colorOnPrimary">@color/hnede_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/hnede_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/hnede_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/hnede_secondary</item>
+        <item name="colorOnSecondary">@color/hnede_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/hnede_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/hnede_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/hnede_tertiary</item>
+        <item name="colorOnTertiary">@color/hnede_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/hnede_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/hnede_onTertiaryContainer</item>
+        <item name="colorError">@color/hnede_error</item>
+        <item name="colorErrorContainer">@color/hnede_errorContainer</item>
+        <item name="colorOnError">@color/hnede_onError</item>
+        <item name="colorOnErrorContainer">@color/hnede_onErrorContainer</item>
+        <item name="android:colorBackground">@color/hnede_background</item>
+        <item name="colorOnBackground">@color/hnede_onBackground</item>
+        <item name="colorSurface">@color/hnede_surface</item>
+        <item name="colorOnSurface">@color/hnede_onSurface</item>
+        <item name="colorSurfaceVariant">@color/hnede_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/hnede_onSurfaceVariant</item>
+        <item name="colorOutline">@color/hnede_outline</item>
+        <item name="colorOnSurfaceInverse">@color/hnede_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/hnede_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/hnede_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.Sede" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/sede_primary</item>
+        <item name="colorOnPrimary">@color/sede_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/sede_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/sede_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/sede_secondary</item>
+        <item name="colorOnSecondary">@color/sede_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/sede_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/sede_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/sede_tertiary</item>
+        <item name="colorOnTertiary">@color/sede_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/sede_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/sede_onTertiaryContainer</item>
+        <item name="colorError">@color/sede_error</item>
+        <item name="colorErrorContainer">@color/sede_errorContainer</item>
+        <item name="colorOnError">@color/sede_onError</item>
+        <item name="colorOnErrorContainer">@color/sede_onErrorContainer</item>
+        <item name="android:colorBackground">@color/sede_background</item>
+        <item name="colorOnBackground">@color/sede_onBackground</item>
+        <item name="colorSurface">@color/sede_surface</item>
+        <item name="colorOnSurface">@color/sede_onSurface</item>
+        <item name="colorSurfaceVariant">@color/sede_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/sede_onSurfaceVariant</item>
+        <item name="colorOutline">@color/sede_outline</item>
+        <item name="colorOnSurfaceInverse">@color/sede_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/sede_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/sede_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.Modrosede" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/modrosede_primary</item>
+        <item name="colorOnPrimary">@color/modrosede_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/modrosede_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/modrosede_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/modrosede_secondary</item>
+        <item name="colorOnSecondary">@color/modrosede_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/modrosede_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/modrosede_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/modrosede_tertiary</item>
+        <item name="colorOnTertiary">@color/modrosede_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/modrosede_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/modrosede_onTertiaryContainer</item>
+        <item name="colorError">@color/modrosede_error</item>
+        <item name="colorErrorContainer">@color/modrosede_errorContainer</item>
+        <item name="colorOnError">@color/modrosede_onError</item>
+        <item name="colorOnErrorContainer">@color/modrosede_onErrorContainer</item>
+        <item name="android:colorBackground">@color/modrosede_background</item>
+        <item name="colorOnBackground">@color/modrosede_onBackground</item>
+        <item name="colorSurface">@color/modrosede_surface</item>
+        <item name="colorOnSurface">@color/modrosede_onSurface</item>
+        <item name="colorSurfaceVariant">@color/modrosede_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/modrosede_onSurfaceVariant</item>
+        <item name="colorOutline">@color/modrosede_outline</item>
+        <item name="colorOnSurfaceInverse">@color/modrosede_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/modrosede_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/modrosede_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.Cerne" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/cerne_primary</item>
+        <item name="colorOnPrimary">@color/cerne_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/cerne_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/cerne_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/cerne_secondary</item>
+        <item name="colorOnSecondary">@color/cerne_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/cerne_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/cerne_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/cerne_tertiary</item>
+        <item name="colorOnTertiary">@color/cerne_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/cerne_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/cerne_onTertiaryContainer</item>
+        <item name="colorError">@color/cerne_error</item>
+        <item name="colorErrorContainer">@color/cerne_errorContainer</item>
+        <item name="colorOnError">@color/cerne_onError</item>
+        <item name="colorOnErrorContainer">@color/cerne_onErrorContainer</item>
+        <item name="android:colorBackground">@color/cerne_background</item>
+        <item name="colorOnBackground">@color/cerne_onBackground</item>
+        <item name="colorSurface">@color/cerne_surface</item>
+        <item name="colorOnSurface">@color/cerne_onSurface</item>
+        <item name="colorSurfaceVariant">@color/cerne_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/cerne_onSurfaceVariant</item>
+        <item name="colorOutline">@color/cerne_outline</item>
+        <item name="colorOnSurfaceInverse">@color/cerne_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/cerne_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/cerne_primaryInverse</item>
+        
+    </style>
+
+    <style name="Theme.DopravníPodniky.Bile" parent="Theme.DopravníPodniky.Zaklad">
+        <item name="colorPrimary">@color/bile_primary</item>
+        <item name="colorOnPrimary">@color/bile_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/bile_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/bile_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/bile_secondary</item>
+        <item name="colorOnSecondary">@color/bile_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/bile_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/bile_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/bile_tertiary</item>
+        <item name="colorOnTertiary">@color/bile_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/bile_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/bile_onTertiaryContainer</item>
+        <item name="colorError">@color/bile_error</item>
+        <item name="colorErrorContainer">@color/bile_errorContainer</item>
+        <item name="colorOnError">@color/bile_onError</item>
+        <item name="colorOnErrorContainer">@color/bile_onErrorContainer</item>
+        <item name="android:colorBackground">@color/bile_background</item>
+        <item name="colorOnBackground">@color/bile_onBackground</item>
+        <item name="colorSurface">@color/bile_surface</item>
+        <item name="colorOnSurface">@color/bile_onSurface</item>
+        <item name="colorSurfaceVariant">@color/bile_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/bile_onSurfaceVariant</item>
+        <item name="colorOutline">@color/bile_outline</item>
+        <item name="colorOnSurfaceInverse">@color/bile_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/bile_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/bile_primaryInverse</item>
+        
+    </style>
+</resources>
