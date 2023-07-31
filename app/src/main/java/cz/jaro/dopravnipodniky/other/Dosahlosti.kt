@@ -43,7 +43,7 @@ object Dosahlosti {
                 setBackgroundTint(getColor(R.color.tmava))
                 setTextColor(getColor(R.color.white))
 
-                setTheme(R.style.Widget_Material3_Snackbar_FullWidth)
+//                setTheme(R.style.Widget_Material3_Snackbar_FullWidth)
 
                 setAction(getString(R.string.zobrazit)) {
 

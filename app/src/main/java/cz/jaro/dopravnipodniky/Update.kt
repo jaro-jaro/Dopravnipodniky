@@ -17,7 +17,7 @@ import cz.jaro.dopravnipodniky.other.Smer.POZITIVNE
 import cz.jaro.dopravnipodniky.other.Trakce.TROLEJBUS
 import cz.jaro.dopravnipodniky.other.Tutorial.zobrazitTutorial
 import cz.jaro.dopravnipodniky.other.times
-import java.util.*
+import java.util.Calendar
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
@@ -48,7 +48,7 @@ fun MainActivity.update() {
 
         MaterialAlertDialogBuilder(this).apply {
             setIcon(R.drawable.ic_baseline_attach_money_24)
-            setTheme(R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
+//            setTheme(R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
             setTitle(R.string.slovo_vyuctovani)
             setMessage(
                 getString(

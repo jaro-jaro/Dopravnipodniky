@@ -16,14 +16,22 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import cz.jaro.dopravnipodniky.*
+import cz.jaro.dopravnipodniky.BARVICKYTEMAT
 import cz.jaro.dopravnipodniky.BuildConfig.DEBUG
 import cz.jaro.dopravnipodniky.BuildConfig.VERSION_NAME
+import cz.jaro.dopravnipodniky.NAZVYTEMAT
+import cz.jaro.dopravnipodniky.R
+import cz.jaro.dopravnipodniky.TEMATA
+import cz.jaro.dopravnipodniky.TPS
 import cz.jaro.dopravnipodniky.adapters.DosahlostiAdapter
+import cz.jaro.dopravnipodniky.bonusoveVydajeZaNeekologickeBusy
+import cz.jaro.dopravnipodniky.bonusoveVydajeZaPoloekologickeBusy
 import cz.jaro.dopravnipodniky.classes.Dosahlost
 import cz.jaro.dopravnipodniky.classes.OrigoDosahlost
 import cz.jaro.dopravnipodniky.databinding.ActivityMainBinding
 import cz.jaro.dopravnipodniky.databinding.NastaveniBinding
+import cz.jaro.dopravnipodniky.editor
+import cz.jaro.dopravnipodniky.formatovat
 import cz.jaro.dopravnipodniky.other.Dosahlosti.dosahni
 import cz.jaro.dopravnipodniky.other.Dosahlosti.seznamDosahlosti
 import cz.jaro.dopravnipodniky.other.Podtyp
@@ -31,8 +39,11 @@ import cz.jaro.dopravnipodniky.other.PrefsHelper.dp
 import cz.jaro.dopravnipodniky.other.PrefsHelper.vse
 import cz.jaro.dopravnipodniky.other.Tutorial.zobrazitTutorial
 import cz.jaro.dopravnipodniky.sketches.Sketch
+import cz.jaro.dopravnipodniky.udrzbaTroleje
+import cz.jaro.dopravnipodniky.udrzbaZastavky
+import cz.jaro.dopravnipodniky.update
 import processing.android.PFragment
-import java.util.*
+import java.util.Locale
 import kotlin.math.roundToLong
 
 

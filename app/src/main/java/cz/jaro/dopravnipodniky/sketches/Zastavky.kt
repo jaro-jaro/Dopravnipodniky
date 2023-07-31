@@ -2,10 +2,16 @@ package cz.jaro.dopravnipodniky.sketches
 
 import android.widget.Toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import cz.jaro.dopravnipodniky.*
+import cz.jaro.dopravnipodniky.BuildConfig
+import cz.jaro.dopravnipodniky.R
+import cz.jaro.dopravnipodniky.cenaTroleje
+import cz.jaro.dopravnipodniky.cenaZastavky
 import cz.jaro.dopravnipodniky.classes.Zastavka
+import cz.jaro.dopravnipodniky.formatovat
 import cz.jaro.dopravnipodniky.other.PrefsHelper.dp
 import cz.jaro.dopravnipodniky.other.PrefsHelper.vse
+import cz.jaro.dopravnipodniky.sedZastavky
+import cz.jaro.dopravnipodniky.velikostZastavky
 import processing.core.PApplet
 import kotlin.math.roundToInt
 

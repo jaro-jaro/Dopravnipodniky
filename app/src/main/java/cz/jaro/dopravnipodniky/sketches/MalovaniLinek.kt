@@ -9,7 +9,10 @@ import androidx.core.graphics.green
 import androidx.core.graphics.red
 import androidx.core.text.isDigitsOnly
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import cz.jaro.dopravnipodniky.*
+import cz.jaro.dopravnipodniky.BARVICKY
+import cz.jaro.dopravnipodniky.BuildConfig
+import cz.jaro.dopravnipodniky.NAZVYBARVICEK
+import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.classes.Linka
 import cz.jaro.dopravnipodniky.databinding.LinkaDialogBinding
 import cz.jaro.dopravnipodniky.other.Dosahlosti.dosahni
@@ -17,6 +20,8 @@ import cz.jaro.dopravnipodniky.other.Orientace.SVISLE
 import cz.jaro.dopravnipodniky.other.Orientace.VODOROVNE
 import cz.jaro.dopravnipodniky.other.PrefsHelper.dp
 import cz.jaro.dopravnipodniky.other.PrefsHelper.vse
+import cz.jaro.dopravnipodniky.sirkaUlice
+import cz.jaro.dopravnipodniky.velikostUlicovyhoBloku
 import processing.core.PApplet
 import processing.core.PConstants.CENTER
 import kotlin.math.sqrt

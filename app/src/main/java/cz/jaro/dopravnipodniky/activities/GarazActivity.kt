@@ -107,7 +107,7 @@ class GarazActivity : AppCompatActivity() {
                     val prodejniCena = vybrane.sumOf { it.prodejniCena }.toLong()
                     MaterialAlertDialogBuilder(this@GarazActivity).apply {
                         setIcon(R.drawable.ic_baseline_delete_24_white)
-                        setTheme(R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
+//                        setTheme(R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
                         setTitle(R.string.prodat_vsechna_vozidla)
                         setMessage(getString(R.string.prodat_vsechna_vozidla_za, prodejniCena.formatovat()))
 
