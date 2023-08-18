@@ -135,35 +135,35 @@
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/dieselovy" />
+                    android:text="@string/dieselovy_autobus" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chPodTypZemeplynovy"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/zemeplynovy" />
+                    android:text="@string/zemeplynovy_autobus" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chPodTypHybridni"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/hybridni" />
+                    android:text="@string/hybridni_autobus" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chPodTypVodikovy"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/vodikovy" />
+                    android:text="@string/vodikovy_autobus" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chPodTypParcialni"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/parcialni" />
+                    android:text="@string/parcialni_trolejbus" />
 
             </com.google.android.material.chip.ChipGroup>
 

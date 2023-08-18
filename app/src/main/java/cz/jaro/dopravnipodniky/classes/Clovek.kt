@@ -1,9 +1,7 @@
 package cz.jaro.dopravnipodniky.classes
 
 import android.content.Context
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import cz.jaro.dopravnipodniky.R
-import cz.jaro.dopravnipodniky.other.PrefsHelper.dp
 import kotlin.math.pow
 import kotlin.random.Random
 import kotlin.random.Random.Default.nextDouble
@@ -44,30 +42,30 @@ class Clovek {
         jmeno = jmena.random() + " " + prijmeni
     }
 
-    fun sebevrazda(ctx: Context) {
-        dp.baraky.filter { it.cloveci != 0 }.random().cloveci --
-        pojmenuj(ctx)
-        MaterialAlertDialogBuilder(ctx).apply{
-            setTitle(R.string.sebevrazda)
-
-            setCancelable(false)
-
-            val inputStream = ctx.resources.openRawResource(R.raw.sebevrazdy)
-
-            val bufferedReader = inputStream.bufferedReader()
-
-            val sebevrazdy = bufferedReader.use { it.readText().split("\n") }
-
-            setMessage(context.getString(R.string.sebevrazda_dialog, jmeno, if (muz) "" else context.getString(R.string.zenska_pripona_a), sebevrazdy.random().replace("$", if (muz) "" else context.getString(R.string.zenska_pripona_a)), if (muz) context.getString(R.string.muzska_pripona_ho) else context.getString(R.string.zenska_pripona_ji)))
-
-            setPositiveButton(android.R.string.ok) { dialog, _ -> dialog.cancel()}
-
-            show()
-        }
-    }
-    fun smrt(ctx: Context) {
-        dp.baraky.filter { it.cloveci != 0 }.random().cloveci --
-        pojmenuj(ctx)
-
-    }
+//    fun sebevrazda(ctx: Context) {
+//        dp.baraky.filter { it.cloveci != 0 }.random().cloveci --
+//        pojmenuj(ctx)
+//        MaterialAlertDialogBuilder(ctx).apply{
+//            setTitle(R.string.sebevrazda)
+//
+//            setCancelable(false)
+//
+//            val inputStream = ctx.resources.openRawResource(R.raw.sebevrazdy)
+//
+//            val bufferedReader = inputStream.bufferedReader()
+//
+//            val sebevrazdy = bufferedReader.use { it.readText().split("\n") }
+//
+//            setMessage(context.getString(R.string.sebevrazda_dialog, jmeno, if (muz) "" else context.getString(R.string.zenska_pripona_a), sebevrazdy.random().replace("$", if (muz) "" else context.getString(R.string.zenska_pripona_a)), if (muz) context.getString(R.string.muzska_pripona_ho) else context.getString(R.string.zenska_pripona_ji)))
+//
+//            setPositiveButton(android.R.string.ok) { dialog, _ -> dialog.cancel()}
+//
+//            show()
+//        }
+//    }
+//    fun smrt(ctx: Context) {
+//        dp.baraky.filter { it.cloveci != 0 }.random().cloveci --
+//        pojmenuj(ctx)
+//
+//    }
 }

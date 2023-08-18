@@ -1,18 +1,25 @@
 package cz.jaro.dopravnipodniky.sketches
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import cz.jaro.dopravnipodniky.pocatecniPosunutiX
 import cz.jaro.dopravnipodniky.pocatecniPosunutiY
-import processing.core.PApplet
+import cz.jaro.dopravnipodniky.pocatecniPriblizeni
 
 var s: Float = 0F
 
-var tx: Float = pocatecniPosunutiX // v px
-var ty: Float = pocatecniPosunutiY // v px
+var tx by mutableStateOf(pocatecniPosunutiX)
+var ty by mutableStateOf(pocatecniPosunutiY)
 
 var x1: Float = -1F
 var y1: Float = -1F
 
-fun Sketch.zachovavatPodobnost() {
+var priblizeni by mutableFloatStateOf(pocatecniPriblizeni)
+
+/*
+fun DrawScope.zachovavatPodobnost() {
 
     val (klik1, klik2) = touches.toList().subList(0, 2)
 
@@ -23,12 +30,12 @@ fun Sketch.zachovavatPodobnost() {
 
     if (s == 0F) s = d
 
-    velikostBloku *= d / s
+    priblizeni *= d / s
 
     s = d
 }
 
-fun Sketch.sunout() {
+fun DrawScope.sunout() {
 
     val x2 = touches.first().x
     val y2 = touches.first().y
@@ -45,4 +52,4 @@ fun Sketch.sunout() {
     x1 = x2
     y1 = y2
 
-}
+}*/

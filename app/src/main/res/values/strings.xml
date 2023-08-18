@@ -181,12 +181,12 @@
     <string name="pridejte_vozidla_na_linku">Přidejte nějaká vozidla na linku</string>
     <string name="moc_vozidel_na_rozmisteni">Na rozmístění vozidel po lince jich je moc</string>
     <string name="solaris" translatable="false">Solaris bus &amp; coach</string>
-    <string name="obycejny" translatable="false">obyčejný</string>
-    <string name="dieselovy" translatable="false">dieselový</string>
-    <string name="zemeplynovy" translatable="false">zeměplynový</string>
-    <string name="hybridni" translatable="false">hybridní</string>
-    <string name="vodikovy" translatable="false">vodíkový</string>
-    <string name="parcialni" translatable="false">parciální</string>
+    <string name="obycejny">obyčejný</string>
+    <string name="dieselovy_autobus">dieselový autobus</string>
+    <string name="zemeplynovy_autobus">zeměplynový autobus</string>
+    <string name="hybridni_autobus">hybridní autobus</string>
+    <string name="vodikovy_autobus">vodíkový autobus</string>
+    <string name="parcialni_trolejbus">parciální trolejbus</string>
     <string name="karosa" translatable="false">Karosa</string>
     <string name="volvo" translatable="false">Volvo</string>
     <string name="renalut" translatable="false">Renault</string>
@@ -271,7 +271,7 @@
     <string name="uspesne_splnen_uspech">Úspěšně splněn úspěch %s</string>
     <string name="d_n_projet_zastavku">Zastávka na znamení</string>
     <string name="d_p_projet_zastavku">Když nejsou lidi, nemá smysl zastavovat!</string>
-    <string name="d_n_stejne_linky"></string>
+    <string name="d_n_stejne_linky" />
     <string name="d_p_stejne_linky">K čemu jsou dvě naprosto stejné linky?</string>
     <string name="d_nap_stejne_linky">Jako vejce vejci</string>
     <string name="d_n_vecne1">Křemže gone</string>
@@ -340,5 +340,6 @@
     <string name="ano_kc">Ano, %s Kč</string>
     <string name="nastavit_jizdne_na">Nastavit jízdné na %s Kč</string>
     <string name="prumer_je">\n\nPrůměr je %s Kč</string>
+    <string name="nic" />
 
 </resources>

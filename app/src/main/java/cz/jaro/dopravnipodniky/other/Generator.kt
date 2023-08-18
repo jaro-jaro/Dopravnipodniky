@@ -1,93 +1,90 @@
 package cz.jaro.dopravnipodniky.other
 
 import android.util.Log
-import cz.jaro.dopravnipodniky.*
+import cz.jaro.dopravnipodniky.TypBaraku
 import cz.jaro.dopravnipodniky.classes.Barak
 import cz.jaro.dopravnipodniky.classes.DopravniPodnik
 import cz.jaro.dopravnipodniky.classes.Ulice
+import cz.jaro.dopravnipodniky.jednotky.Peniz
+import cz.jaro.dopravnipodniky.jednotky.Pozice
+import cz.jaro.dopravnipodniky.jednotky.UlicovyBlok
+import cz.jaro.dopravnipodniky.jednotky.to
+import cz.jaro.dopravnipodniky.jednotky.ulicovychBloku
+import cz.jaro.dopravnipodniky.pocatecniCenaMesta
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
-class Generator(private val investice: Long) {
+class Generator(
+    private val investice: Peniz,
+    private val jmenoMesta: String,
+) {
+    companion object {
+        fun vygenerujMiPrvniMesto(): DopravniPodnik = Generator(
+            investice = pocatecniCenaMesta,
+            jmenoMesta = "Křemže", // TODO!!
+        ).vygenerujMiMestoAToHnedVykricnik()
 
-    private val velikost: Int = (investice * nasobitelInvestice).roundToInt()
-    private val dp = DopravniPodnik()
+        private const val nasobitelInvestice = 1 / 65536.0
+        private const val nahodnostPoObnoveni = .35F
+        private const val nahodnostNaZacatku = .5F
+        private const val rozdilNahodnosti = .05F
+        private const val nasobitelRedukce = .75F
+    }
+
+    private val velikost: Int = (investice * nasobitelInvestice).value.roundToInt()
+
+    private val ulicove = mutableListOf<Ulice>()
 
     fun vygenerujMiMestoAToHnedVykricnik(): DopravniPodnik {
         // Okej hned to bude, nez bys rekl pi
+        ulicove.clear()
 
-        dp.ulicove.clear()
-
-        opakovac(1, listOf(0 to 0), nahodnostNaZacatku)
+        opakovac(1, listOf(0.ulicovychBloku to 0.ulicovychBloku), nahodnostNaZacatku)
 
         zbarakuj()
 
-        val inputStream = App.res.openRawResource(R.raw.mesta)
-
-        val bufferedReader = inputStream.bufferedReader()
-
-        val mesta = bufferedReader.use {
-            it.readText().split("\n")
-        }
-
-        dp.jmenoMesta = mesta.random()
-
-        return dp
-
+        return DopravniPodnik(jmenoMesta = jmenoMesta, ulicove = ulicove)
     }
 
-    private fun opakovac (hloubka: Int, krizovatky: List<Pair<Int, Int>>, sance: Float) {
+    private fun opakovac(hloubka: Int, posledniKrizovatky: List<Pozice<UlicovyBlok>>, sance: Float) {
 
         if (hloubka > velikost) return
 
-        val noveKrizovatky = mutableListOf<Pair<Int, Int>>()
-
-        for (zacatek in krizovatky) {
+        val noveKrizovatky = posledniKrizovatky.flatMap { krivovatka ->
 
             val sousedi = mutableListOf(
-                zacatek.first - 1 to zacatek.second,
-                zacatek.first to zacatek.second - 1,
-                zacatek.first + 1 to zacatek.second,
-                zacatek.first to zacatek.second + 1,
+                krivovatka.x - 1.ulicovychBloku to krivovatka.y,
+                krivovatka.x to krivovatka.y - 1.ulicovychBloku,
+                krivovatka.x + 1.ulicovychBloku to krivovatka.y,
+                krivovatka.x to krivovatka.y + 1.ulicovychBloku,
             )
 
-            for (konec in sousedi) {
+            sousedi
+                .filter { // todo snizit sanci pokud sousedi uz jsou
+                    Random.nextFloat() < sance
+                }
+                .map { soused ->
+                    val (zacatek, konec) =
+                        if (krivovatka.x < soused.x || krivovatka.y < soused.y) krivovatka to soused else soused to krivovatka
 
-                if (Random.nextFloat() < sance) {
-                    noveKrizovatky += konec
-
-                    if (zacatek.first  < konec.first ||
-                        zacatek.second < konec.second
-                    ) {
-
-                        if (dp.ulicove.any { it.zacatek == zacatek && it.konec == konec }) {
-
-                            dp.ulicove.first { it.zacatek == zacatek && it.konec == konec }.potencial++
-
-                        } else {
-                            dp.ulicove += Ulice(zacatek, konec)
-                        }
-
+                    if (ulicove.none { it.zacatek == zacatek && it.konec == konec }) {
+                        ulicove += Ulice(zacatek, konec)
                     } else {
-
-                        if (dp.ulicove.any { it.zacatek == konec && it.konec == zacatek }) {
-
-                            dp.ulicove.first { it.zacatek == konec && it.konec == zacatek }.potencial++
-
-                        } else {
-                            dp.ulicove += Ulice(konec, zacatek)
-                        }
+                        val i = ulicove.indexOfFirst { it.zacatek == zacatek && it.konec == konec }
+                        ulicove[i] = ulicove[i].copy(
+                            potencial = ulicove[i].potencial + 1
+                        )
                     }
 
-
+                    soused
                 }
-            }
         }
 
-        Log.i("generace", "$hloubka z $velikost -> ${Regex("[1]*..[.]..").find("0${(hloubka / velikost.toDouble() * 100)}0")?.groupValues?.first()} %")
+        val procentaz = Regex("1*..[.]..").find("0${(hloubka / velikost.toDouble() * 100)}0")?.groupValues?.first()
+        Log.i("generace", "$hloubka z $velikost -> $procentaz %")
 
         if (noveKrizovatky.isEmpty()) {
-            val zredukovanyKrizovatky = krizovatky.shuffled().subList(0, (krizovatky.size * nasobitelRedukce).roundToInt())
+            val zredukovanyKrizovatky = posledniKrizovatky.shuffled().take((posledniKrizovatky.size * nasobitelRedukce).roundToInt())
             opakovac(hloubka + 1, zredukovanyKrizovatky, nahodnostPoObnoveni)
         } else {
             opakovac(hloubka + 1, noveKrizovatky, sance - rozdilNahodnosti)
@@ -96,16 +93,23 @@ class Generator(private val investice: Long) {
 
     private fun zbarakuj() {
 
-        dp.ulicove.forEachIndexed { i, ulice ->
+        ulicove.forEachIndexed { i, ulice ->
 
             if ("3141592" in investice.toString()) {
-                ulice.potencial = 100
+                ulicove[i] = ulicove[i].copy(
+                    potencial = 100
+                )
             }
             repeat((ulice.potencial * Random.nextFloat() * 4).roundToInt().coerceAtMost(8)) {
-                ulice.baraky += Barak(ulice.id, ulice.potencial >= 6 && Random.nextBoolean(), false, i)
+                val typ = if (ulice.potencial >= 6 && Random.nextBoolean()) TypBaraku.Panelak else TypBaraku.Normalni
+                ulicove[i] = ulicove[i].copy(
+                    baraky = ulicove[i].baraky + Barak(typ, i)
+                )
             }
             if (Random.nextFloat() >= .25F && ulice.potencial >= 10)
-                ulice.baraky += Barak(ulice.id, panelak = true, stredovy = true, i)
+                ulicove[i] = ulicove[i].copy(
+                    baraky = ulicove[i].baraky + Barak(TypBaraku.Stredovy, i)
+                )
         }
 
     }

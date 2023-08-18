@@ -1,18 +1,44 @@
 package cz.jaro.dopravnipodniky
 
-import android.graphics.Color
-import androidx.core.graphics.blue
-import androidx.core.graphics.green
-import androidx.core.graphics.red
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.classes.DopravniPodnik
-import cz.jaro.dopravnipodniky.other.App
-import cz.jaro.dopravnipodniky.other.PrefsHelper.vse
-import processing.core.PApplet
-import processing.core.PConstants.HALF_PI
+import cz.jaro.dopravnipodniky.classes.maZastavku
+import cz.jaro.dopravnipodniky.classes.pocetLinek
+import cz.jaro.dopravnipodniky.jednotky.bloku
+import cz.jaro.dopravnipodniky.jednotky.metru
+import cz.jaro.dopravnipodniky.jednotky.penez
+import cz.jaro.dopravnipodniky.jednotky.penezZaMin
+import cz.jaro.dopravnipodniky.jednotky.toTiky
+import cz.jaro.dopravnipodniky.theme.black
+import cz.jaro.dopravnipodniky.theme.blue_500
+import cz.jaro.dopravnipodniky.theme.blue_900
+import cz.jaro.dopravnipodniky.theme.brown_500
+import cz.jaro.dopravnipodniky.theme.cyan_300
+import cz.jaro.dopravnipodniky.theme.cyan_500
+import cz.jaro.dopravnipodniky.theme.cyan_900
+import cz.jaro.dopravnipodniky.theme.green_500
+import cz.jaro.dopravnipodniky.theme.green_900
+import cz.jaro.dopravnipodniky.theme.lightBlue_500
+import cz.jaro.dopravnipodniky.theme.lightGreen_500
+import cz.jaro.dopravnipodniky.theme.orange_500
+import cz.jaro.dopravnipodniky.theme.pink_500
+import cz.jaro.dopravnipodniky.theme.purple_300
+import cz.jaro.dopravnipodniky.theme.purple_500
+import cz.jaro.dopravnipodniky.theme.purple_900
+import cz.jaro.dopravnipodniky.theme.red_300
+import cz.jaro.dopravnipodniky.theme.red_500
+import cz.jaro.dopravnipodniky.theme.red_900
+import cz.jaro.dopravnipodniky.theme.yellow_300
+import cz.jaro.dopravnipodniky.theme.yellow_500
+import cz.jaro.dopravnipodniky.theme.yellow_900
+import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 
 /**
@@ -121,41 +147,49 @@ import kotlin.math.sqrt
 
 const val todocka = 0
 
-// generace města
-
-const val minimumInvestice = 1_000_000L
-const val pocatecniCenaMesta = 1_200_000L // prachy
-const val nasobitelInvestice = 1 / 65536.0 // prachy
-const val nahodnostPoObnoveni = .35F
-const val nahodnostNaZacatku = .5F
-const val rozdilNahodnosti = .05F
-
-const val nasobitelRedukce = .75F
+val minimumInvestice = 1_000_000L.penez
+val pocatecniCenaMesta = 3_141_592.penez//1_200_000L.penez
 
 // vykreslovani
 
 const val pocatecniPriblizeni = .75F
-const val pocatecniPosunutiX = 200F
-const val pocatecniPosunutiY = 600F
+const val oddalenyRezim = .6F
+const val maximalniOddaleni = .2F
+val pocatecniPosunutiX = 0.dp//200
+val pocatecniPosunutiY = 0.dp//600
 
-const val sirkaUlice = 30 // bloku
-const val velikostZastavky = 48
-const val velikostBaraku = 24 // bloku
-const val sirkaObrubniku = 1F
-const val sirkaBusu = 10F
-const val odsazeniBaraku = 3F
+val ulicovyBlok = 150.bloku
 
-// O---BBTBBBBTBB----BBTBBBBTBB---O
+val sirkaUlice = 34.bloku
+val velikostZastavky = 48.bloku
+val odsazeniBaraku = 5.bloku
+const val barakuVUlici = 5
+val velikostBaraku = (ulicovyBlok - odsazeniBaraku * (barakuVUlici + 1)) / barakuVUlici
+val sirkaObrubniku = 3.bloku
+val sirkaBusu = 10.bloku
 
-const val CERNA = 0F
-const val BILA = 255F
-const val sedUlice = 135F
-const val sedPozadi = 16F
-const val sedZastavky = 200F
-const val sedObrubniku = 200F
-const val sedTroleje = 32F
-const val sedBaraku = 150F
-val ZLUTA = PApplet().color(255, 255, 0)
+val sirkaTroleje = 1.bloku
+val predsazeniTrolejiS = 8.bloku
+val predsazeniTrolejiL = 28.bloku
+val rozchodTroleji = 5.bloku
+val odsazeniTroleje = 6.bloku
+val odsazeniPrvniTroleje = odsazeniTroleje
+val odsazeniDruheTroleje = odsazeniTroleje + rozchodTroleji
+val odsazeniTretiTroleje = odsazeniDruheTroleje + odsazeniTroleje + odsazeniTroleje
+val odsazeniCtvrteTroleje = odsazeniTretiTroleje + rozchodTroleji
+val odsazeniTroleji = listOf(odsazeniPrvniTroleje, odsazeniDruheTroleje, odsazeniTretiTroleje, odsazeniCtvrteTroleje)
+
+// OOO----BBTBBBBTBB-------BBTBBBBTBB----OOO
+
+val CERNA = Color(0, 0, 0)
+val BILA = Color(255, 255, 255)
+val sedUlice = Color(135, 135, 135)
+val sedPozadi = Color(16, 16, 16)
+val sedZastavky = Color(200, 200, 200)
+val sedObrubniku = Color(200, 200, 200)
+val sedTroleje = Color(32, 32, 32)
+val sedBaraku = Color(150, 150, 150)
+val ZLUTA = Color(255, 255, 0)
 
 const val velikostUlicovyhoBloku = 150 // bloku
 
@@ -166,171 +200,71 @@ const val TPM = TPS * 60
 const val TPH = TPM * 60
 
 const val nasobitelDelkyBusu = 2F
-const val uliceMetru = 100.0
-const val pocatecniObnosPenez = 150_000.0  // prachy
-const val nasobitelRychlosti = 1 / 60F
-const val nasobitelZiskuPoOffline = 1 / 20.0  // prachy
-const val nasobitelZisku = 1.0  // prachy
+val delkaUlice = 100.metru
+val pocatecniObnosPenez = 150_000.penez
+const val nasobitelZiskuPoOffline = 1 / 20.0
+const val nasobitelZisku = 1
 const val nasobitelUrovne = 1 / 1.0
 const val nasobitelRozsahlosti = 200.0
-const val nasobitelMaxCloveku = HALF_PI
-const val dobaVymreni = 30 * TPM
-const val dobaZnovuobnoveniPopulace = (1.5 * dobaVymreni).toInt()
-const val dobaKalibraceS = 1 // sekunda
-const val dobaKalibraceT = dobaKalibraceS * TPS // sekunda
-const val dobaPobytuNaZastavceS = 1F // s
-const val dobaPobytuNaZastavceT = dobaPobytuNaZastavceS * TPS
-const val cenaZastavky = 5_000  // prachy
-const val cenaTroleje = 20_000  // prachy
-const val udrzbaZastavky = 100  // prachy
-const val udrzbaTroleje = 1_000  // prachy
-const val bonusoveVydajeZaNeekologickeBusy = 800  // prachy // Kč/min
-const val bonusoveVydajeZaPoloekologickeBusy = 400  // prachy // Kč/min
+const val nasobitelMaxCloveku = PI / 2
+const val nahodnostVymreniKazdouMinutu = 30
+const val nahodnostVymreniKazdyTik = nahodnostVymreniKazdouMinutu * TPM
+const val nahodnostNarozeniKazdyTik = (1.5 * nahodnostVymreniKazdyTik).toInt()
+val dobaKalibraceS = 1.seconds
+val dobaKalibraceT = dobaKalibraceS.toTiky()
+val dobaPobytuNaZastavceS = 1.seconds
+val dobaPobytuNaZastavceT = dobaPobytuNaZastavceS.toTiky()
+val cenaZastavky = 5_000.penez
+val cenaTroleje = 20_000.penez
+val udrzbaZastavky = 100.penez
+val udrzbaTroleje = 1_000.penez
+val bonusoveVydajeZaNeekologickeBusy = 800.penezZaMin
+val bonusoveVydajeZaPoloekologickeBusy = 400.penezZaMin
 const val nahodnostProjetiZastavky = 200
-const val nahodnostKamionu = 45 * TPM // tiky, za jak dlouho prijede
-const val nahodnostSebevrazdy = 10 * TPM
-const val cenaPruzkumuVerejnehoMineni = 50_000 // prachy
+const val nahodnostKamionuKazdouMinutu = 45
+const val nahodnostKamionuKazdyTik = nahodnostKamionuKazdouMinutu * TPM
+const val nahodnostSebevrazdyKazdouMinutu = 10
+const val nahodnostSebevrazdyKazdyTik = nahodnostSebevrazdyKazdouMinutu * TPS * 60
+val cenaPruzkumuVerejnehoMineni = 50_000.penez
 
 // ---------------- SEZNAMY -----------------
 
 val BARVICKY /*jeej*/ = listOf(
-    App.res.getColor(R.color.black),
-    App.res.getColor(R.color.red_500),
-    App.res.getColor(R.color.green_500),
-    App.res.getColor(R.color.blue_500),
-    App.res.getColor(R.color.yellow_500),
-    App.res.getColor(R.color.cyan_500),
-    App.res.getColor(R.color.purple_500),
-    App.res.getColor(R.color.red_900),
-    App.res.getColor(R.color.green_900),
-    App.res.getColor(R.color.blue_900),
-    App.res.getColor(R.color.yellow_900),
-    App.res.getColor(R.color.cyan_900),
-    App.res.getColor(R.color.purple_900),
-    App.res.getColor(R.color.red_300),
-    App.res.getColor(R.color.light_green_500),
-    App.res.getColor(R.color.light_blue_500),
-    App.res.getColor(R.color.yellow_300),
-    App.res.getColor(R.color.cyan_300),
-    App.res.getColor(R.color.purple_300),
-    App.res.getColor(R.color.pink_500),
-    App.res.getColor(R.color.orange_500),
-    App.res.getColor(R.color.brown_500),
-)
-val NAZVYBARVICEK = listOf(
-    App.res.getString(R.string.cerna)           ,
-    App.res.getString(R.string.cervena)         ,
-    App.res.getString(R.string.zelena)          ,
-    App.res.getString(R.string.modra)           ,
-    App.res.getString(R.string.zluta)           ,
-    App.res.getString(R.string.tyrkysova)       ,
-    App.res.getString(R.string.fialova)         ,
-    App.res.getString(R.string.tmave_cervena)   ,
-    App.res.getString(R.string.tmave_zelena)    ,
-    App.res.getString(R.string.tmave_modra)     ,
-    App.res.getString(R.string.tmave_zluta)     , // App.res.getString(R.string.hovnova)
-    App.res.getString(R.string.tmave_tyrkysova) ,
-    App.res.getString(R.string.tmave_fialova)   ,
-    App.res.getString(R.string.svetle_cervena)  ,
-    App.res.getString(R.string.svetle_zelena)   ,
-    App.res.getString(R.string.svetle_modra)    ,
-    App.res.getString(R.string.svetle_zluta)    ,
-    App.res.getString(R.string.svetle_tyrkysova),
-    App.res.getString(R.string.svetle_fialova)  ,
-    App.res.getString(R.string.ruzova)          ,
-    App.res.getString(R.string.oranzova)        ,
-    App.res.getString(R.string.hneda)           ,
-)
-
-val SVETLEBARVICKY = listOf(
-    false,
-    false,
-    true ,
-    false,
-    true ,
-    true ,
-    true ,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    true ,
-    false,
-    true ,
-)
-
-val TEMATA = listOf(
-    R.style.Theme_DopravníPodniky_Cerne, // cerne
-    R.style.Theme_DopravníPodniky_Cervene,
-    R.style.Theme_DopravníPodniky_Ruzove,
-    R.style.Theme_DopravníPodniky_Fialove,
-    R.style.Theme_DopravníPodniky_SyteFialove,
-    R.style.Theme_DopravníPodniky_Indigove,
-    R.style.Theme_DopravníPodniky_Modre,
-    R.style.Theme_DopravníPodniky_SvetleModre,
-    R.style.Theme_DopravníPodniky_Tyrkysove,
-    R.style.Theme_DopravníPodniky_Modrozelene,
-    R.style.Theme_DopravníPodniky_Zelene,
-    R.style.Theme_DopravníPodniky_SvetleZelene,
-    R.style.Theme_DopravníPodniky_Limetkove,
-    R.style.Theme_DopravníPodniky_Zlute,
-    R.style.Theme_DopravníPodniky_Jantarove,
-    R.style.Theme_DopravníPodniky_Oranzove,
-    R.style.Theme_DopravníPodniky_SyteOranzove,
-)
-val BARVICKYTEMAT = listOf(
-    App.res.getColor(R.color.t0),
-    App.res.getColor(R.color.t1),
-    App.res.getColor(R.color.t2),
-    App.res.getColor(R.color.t3),
-    App.res.getColor(R.color.t4),
-    App.res.getColor(R.color.t5),
-    App.res.getColor(R.color.t6),
-    App.res.getColor(R.color.t7),
-    App.res.getColor(R.color.t8),
-    App.res.getColor(R.color.t9),
-    App.res.getColor(R.color.t10),
-    App.res.getColor(R.color.t11),
-    App.res.getColor(R.color.t12),
-    App.res.getColor(R.color.t13),
-    App.res.getColor(R.color.t14),
-    App.res.getColor(R.color.t15),
-    App.res.getColor(R.color.t16),
-)
-
-val NAZVYTEMAT = listOf(
-    App.res.getString(R.string.cerne),
-    App.res.getString(R.string.cervene),
-    App.res.getString(R.string.ruzove),
-    App.res.getString(R.string.fialove),
-    App.res.getString(R.string.syte_fialove),
-    App.res.getString(R.string.indigove),
-    App.res.getString(R.string.modre),
-    App.res.getString(R.string.svetle_modre),
-    App.res.getString(R.string.tyrkysove),
-    App.res.getString(R.string.modrozelene),
-    App.res.getString(R.string.zelene),
-    App.res.getString(R.string.svetle_zelene),
-    App.res.getString(R.string.limetkove),
-    App.res.getString(R.string.zlute),
-    App.res.getString(R.string.jantarove),
-    App.res.getString(R.string.oranzove),
-    App.res.getString(R.string.syte_cervene),
+    Triple(black, R.string.cerna, false),
+    Triple(red_500, R.string.cervena, false),
+    Triple(green_500, R.string.zelena, true),
+    Triple(blue_500, R.string.modra, false),
+    Triple(yellow_500, R.string.zluta, true),
+    Triple(cyan_500, R.string.tyrkysova, true),
+    Triple(purple_500, R.string.fialova, true),
+    Triple(red_900, R.string.tmave_cervena, false),
+    Triple(green_900, R.string.tmave_zelena, false),
+    Triple(blue_900, R.string.tmave_modra, false),
+    Triple(yellow_900, R.string.tmave_zluta, false),
+    Triple(cyan_900, R.string.tmave_tyrkysova, false),
+    Triple(purple_900, R.string.tmave_fialova, false),
+    Triple(red_300, R.string.svetle_cervena, true),
+    Triple(lightGreen_500, R.string.svetle_zelena, false),
+    Triple(lightBlue_500, R.string.svetle_modra, true),
+    Triple(yellow_300, R.string.svetle_zluta, true),
+    Triple(cyan_300, R.string.svetle_tyrkysova, true),
+    Triple(purple_300, R.string.svetle_fialova, true),
+    Triple(pink_500, R.string.ruzova, false),
+    Triple(orange_500, R.string.oranzova, false),
+    Triple(brown_500, R.string.hneda, false),
 )
 
 // ---------------- FUNKCE -----------------
 /**
  * Zformátuje číslo, aby vypadalo hezky
  */
-fun Number.formatovat(): String {
-    if (this == Double.POSITIVE_INFINITY.toLong()) return App.res.getString(R.string.nekonecne_mnoho)
-    if (this == Double.NEGATIVE_INFINITY.toLong()) return App.res.getString(R.string.nekonecne_malo)
+fun Number.formatovat(): Text {
+    if (this == Double.POSITIVE_INFINITY.toLong()) return R.string.nekonecne_mnoho.toText()
+    if (this == Double.NEGATIVE_INFINITY.toLong()) return R.string.nekonecne_malo.toText()
 
     val vysledek = mutableListOf<Char>()
 
-    this.toString().toList().reversed().forEachIndexed {i , cislice ->
+    this.toString().toList().reversed().forEachIndexed { i, cislice ->
         vysledek += cislice
 
         if ((i + 1) % 3 == 0) {
@@ -340,7 +274,7 @@ fun Number.formatovat(): String {
 
     vysledek.reverse()
 
-    return vysledek.joinToString("").removePrefix(" ")
+    return vysledek.joinToString("").removePrefix(" ").toText()
 }
 
 /**
@@ -348,27 +282,26 @@ fun Number.formatovat(): String {
  *
  * Pro trolejbusy odpovídá dvojnásobku
  */
-fun naklady(naklady: Double, trolejbus: Boolean = false): String {
+fun naklady(naklady: Double, trolejbus: Boolean = false): Int {
 
     val nakladove = if (trolejbus) naklady * 2 else naklady
 
-    val slovemNaklady = App.res.getString(when {
+    return when {
 
-        nakladove < 50  -> R.string.velmi_nizke
-        nakladove < 60  -> R.string.hodne_nizke
-        nakladove < 65  -> R.string.nizke
-        nakladove < 70  -> R.string.pomerne_nizke
-        nakladove < 75  -> R.string.snizene
-        nakladove < 80  -> R.string.normalni
-        nakladove < 85  -> R.string.pomerne_vysoke
-        nakladove < 90  -> R.string.vysoke
-        nakladove < 95  -> R.string.hodne_vysoke
+        nakladove < 50 -> R.string.velmi_nizke
+        nakladove < 60 -> R.string.hodne_nizke
+        nakladove < 65 -> R.string.nizke
+        nakladove < 70 -> R.string.pomerne_nizke
+        nakladove < 75 -> R.string.snizene
+        nakladove < 80 -> R.string.normalni
+        nakladove < 85 -> R.string.pomerne_vysoke
+        nakladove < 90 -> R.string.vysoke
+        nakladove < 95 -> R.string.hodne_vysoke
         nakladove < 100 -> R.string.velmi_vysoke
         nakladove < 500 -> R.string.muzejni_bus
         else -> R.string.JOSTOVSKE
 
-    } )
-    return slovemNaklady
+    }
 }
 
 /**
@@ -382,19 +315,17 @@ fun uroven(plocha: Int, obyv: Int, ulice: Int, potencialy: Int): Int =
  * Vrátí velikost města na základě jeho plochy, počtu obyvatel a úrovně
  */
 
-fun velkomesto(plocha: Int, obyv: Int, uroven: Int): String {
+fun velkomesto(plocha: Int, obyvatel: Int, uroven: Int): Text = when {
+    plocha >= 500_000_000 && obyvatel >= 5_000_000 && uroven >= 10_000_000 -> R.string.mesto_jostless
+    plocha >= 25_000_000 && obyvatel >= 500_000 && uroven >= 500_000 -> R.string.super_mesto
+    plocha >= 15_000_000 && obyvatel >= 250_000 && uroven >= 100_000 -> R.string.ultra_velkomesto
+    plocha >= 5_000_000 && obyvatel >= 150_000 && uroven >= 25_000 -> R.string.velkomesto
+    plocha >= 2_500_000 && obyvatel >= 40_000 && uroven >= 600 -> R.string.velke_mesto
+    plocha >= 1_500_000 && obyvatel >= 10_000 && uroven >= 300 -> R.string.mesto
+    plocha >= 500_000 && obyvatel >= 4_000 && uroven >= 40 -> R.string.mestecko
+    else -> R.string.vesnice
+}.toText()
 
-    return App.res.getString(when {
-        plocha >= 500_000_000 && obyv >= 5_000_000 && uroven >= 10_000_000 -> R.string.mesto_jostless
-        plocha >= 25_000_000 && obyv >= 500_000 && uroven >= 500_000 -> R.string.super_mesto
-        plocha >= 15_000_000 && obyv >= 250_000 && uroven >= 100_000 -> R.string.ultra_velkomesto
-        plocha >= 5_000_000 && obyv >= 150_000 && uroven >= 25_000 -> R.string.velkomesto
-        plocha >= 2_500_000 && obyv >= 40_000 && uroven >= 600 -> R.string.velke_mesto
-        plocha >= 1_500_000 && obyv >= 10_000 && uroven >= 300 -> R.string.mesto
-        plocha >= 500_000 && obyv >= 4_000 && uroven >= 40 -> R.string.mestecko
-        else -> R.string.vesnice
-    } )
-}
 
 /**
  * Udělá ideální barvu pozadí cardviewu za daných kritérií
@@ -406,9 +337,9 @@ fun velkomesto(plocha: Int, obyv: Int, uroven: Int): String {
  * 6 -> tmavě
  */
 
-fun pozadi(delitel: Int): Int {
-    return Color.rgb(vse.barva.red / delitel, vse.barva.green / delitel, vse.barva.blue / delitel)
-}
+//fun pozadi(delitel: Int): Int {
+//    return Color.rgb(vse.barva.red / delitel, vse.barva.green / delitel, vse.barva.blue / delitel)
+//}
 
 /**
  * Vrátí násobitel náhodnosti, vytvořené z kapacity busu a kapacity zastávky, udávající, kolik lidí je ochotno nastoupit do busu závisle na ceně jízdenky a rozsáhlosti dopravního podniku
@@ -417,20 +348,22 @@ fun pozadi(delitel: Int): Int {
 fun nasobitelPoctuLidiKteryTiNastoupiDoBusuNaZastavceKdyzZastaviANakyLidiTamJsouAMaVSobeJesteVolneMisto(dp: DopravniPodnik): Double {
 
     val naRozsahlosti = sqrt(1.0 - (1.0 / (dp.busy.size.coerceAtLeast(1) + 1))) *
-            (dp.zastavky.count { dp.ulice(it.ulice).pocetLinek != 0 }.toDouble() /
+            (dp.ulicove.filter { it.maZastavku }.count { it.pocetLinek(dp) != 0 }.toDouble() /
                     dp.ulicove.size.toDouble())
 
-    var naJizdnem = 1.0 - 
-        abs( .6 - 
-            abs(.5 - 
-                ((dp.jizdne - nasobitelRozsahlosti * naRozsahlosti) /
-                    (nasobitelRozsahlosti * naRozsahlosti / 2.0)
-                ).pow(2)
+    var naJizdnem = 1.0 -
+            abs(
+                .6 -
+                        abs(
+                            .5 -
+                                    ((dp.jizdne.value - nasobitelRozsahlosti * naRozsahlosti) /
+                                            (nasobitelRozsahlosti * naRozsahlosti / 2.0)
+                                            ).pow(2)
+                        )
             )
-        )
-    
-    if (dp.jizdne <= nasobitelRozsahlosti * naRozsahlosti  * 2/5.0) {
-        naJizdnem = 4/9.0
+
+    if (dp.jizdne.value <= nasobitelRozsahlosti * naRozsahlosti * 2 / 5.0) {
+        naJizdnem = 4 / 9.0
     }
 
     //Log.d("funguj", "---${dp.jizdne}/${(naRozsahlosti * nasobitelRozsahlosti).roundToInt()}---")
@@ -440,11 +373,18 @@ fun nasobitelPoctuLidiKteryTiNastoupiDoBusuNaZastavceKdyzZastaviANakyLidiTamJsou
 
     return sqrt(naJizdnem.coerceAtLeast(.0))
 }
-fun soucinPromenneNaRozsahlostiVNasobiteliPoctuLidiKteryTiNastoupiDoBusuNaZastavceKdyzZastaviANakyLidiTamJsouAMaVSobeJesteVolneMistoANasobiteleRozsahlosti(dp: DopravniPodnik): Double {
+
+fun soucinPromenneNaRozsahlostiVNasobiteliPoctuLidiKteryTiNastoupiDoBusuNaZastavceKdyzZastaviANakyLidiTamJsouAMaVSobeJesteVolneMistoANasobiteleRozsahlosti(
+    dp: DopravniPodnik
+): Double {
 
 
     return sqrt(1.0 - (1.0 / (dp.busy.size.coerceAtLeast(1) + 1))) *
-            (dp.zastavky.count { dp.ulice(it.ulice).pocetLinek != 0 }.toDouble() /
+            (dp.ulicove.filter { it.maZastavku }.count { it.pocetLinek(dp) != 0 }.toDouble() /
                     dp.ulicove.size.toDouble()) *
             nasobitelRozsahlosti
 }
+
+
+val Duration.minutes get() = inWholeSeconds / 60.0
+val Duration.hours get() = minutes / 60.0

@@ -1,19 +1,19 @@
 package cz.jaro.dopravnipodniky.other
 
 import android.app.Application
-import android.content.Context
-import android.content.SharedPreferences
-import android.content.res.Resources
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
+import org.koin.ksp.generated.defaultModule
 
 class App : Application() {
     override fun onCreate() {
         super.onCreate()
-        res = resources
-        prefs = getSharedPreferences("podnik", Context.MODE_PRIVATE)
-    }
 
-    companion object {
-        lateinit var res: Resources
-        lateinit var prefs: SharedPreferences
+        startKoin {
+            androidContext(this@App)
+            androidLogger()
+            defaultModule()
+        }
     }
 }

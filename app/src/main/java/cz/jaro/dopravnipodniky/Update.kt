@@ -1,31 +1,8 @@
 package cz.jaro.dopravnipodniky
 
-import android.util.Log
-import android.view.View
-import androidx.core.content.edit
-import androidx.lifecycle.Lifecycle.State.STARTED
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.gson.GsonBuilder
-import cz.jaro.dopravnipodniky.activities.MainActivity
-import cz.jaro.dopravnipodniky.classes.Clovek
-import cz.jaro.dopravnipodniky.other.App
-import cz.jaro.dopravnipodniky.other.Dosahlosti.dosahni
-import cz.jaro.dopravnipodniky.other.PrefsHelper.dp
-import cz.jaro.dopravnipodniky.other.PrefsHelper.vse
-import cz.jaro.dopravnipodniky.other.Smer.NEGATIVNE
-import cz.jaro.dopravnipodniky.other.Smer.POZITIVNE
-import cz.jaro.dopravnipodniky.other.Trakce.TROLEJBUS
-import cz.jaro.dopravnipodniky.other.Tutorial.zobrazitTutorial
-import cz.jaro.dopravnipodniky.other.times
-import java.util.Calendar
-import kotlin.math.absoluteValue
-import kotlin.math.roundToInt
-import kotlin.math.roundToLong
-import kotlin.random.Random.Default.nextInt
+//var editor = false
 
-var editor = false
-
-fun MainActivity.update() {
+/*fun MainActivity.update() {
 
     // zistovani jestli nejses moc dlouho pryc
 
@@ -136,7 +113,7 @@ fun MainActivity.update() {
                 if (bus.poziceVUlici >= velikostUlicovyhoBloku) {  // odjel mimo ulici
                     bus.poziceVUlici = 0F
 
-                    bus.projeto = false // je zas pred zastavkou
+                    bus.neniVZastavce = false // je zas pred zastavkou
 
                     bus.poziceNaLince++
 
@@ -153,12 +130,12 @@ fun MainActivity.update() {
 
         if (
             bus.poziceVUlici.roundToInt() > (velikostUlicovyhoBloku + velikostZastavky) / 2 - bus.typBusu.delka * nasobitelDelkyBusu - odsazeniBaraku &&
-            !bus.projeto &&
+            !bus.neniVZastavce &&
             ulice.zastavka != null
         ) {
             // je na zastavce a jeste na ni nebyl a zastavka existuje
 
-            bus.projeto = true // uz tam je
+            bus.neniVZastavce = true // uz tam je
             bus.jeNaZastavce = true
 
             dosahni("busNaZastavce", binding.fl)
@@ -191,7 +168,7 @@ fun MainActivity.update() {
     // infrastruktura
 
     zisk -= dp.zastavky.size * udrzbaZastavky
-    zisk -= dp.ulicove.filter { it.trolej }.size * udrzbaTroleje
+    zisk -= dp.ulicove.filter { it.maTrolej }.size * udrzbaTroleje
 
     // zobrazovani
 
@@ -251,7 +228,7 @@ fun MainActivity.update() {
 
     // mimoradnosti
 
-    if (nextInt(0, nahodnostKamionu) == 1 && dp.ulicove.any { it.trolej }) {
+    if (nextInt(0, nahodnostKamionu) == 1 && dp.ulicove.any { it.maTrolej }) {
         MaterialAlertDialogBuilder(this).apply {
             setTitle(R.string.kamion)
             setCancelable(false)
@@ -260,7 +237,7 @@ fun MainActivity.update() {
             show()
         }
 
-        dp.ulicove.forEach { it.trolej = false }
+        dp.ulicove.forEach { it.maTrolej = false }
     }
 
     if (dp.busy.size != 0) {
@@ -315,4 +292,4 @@ fun MainActivity.update() {
     prefs.edit {
         putString("vse", gson.toJson(vse))
     }
-}
+}*/

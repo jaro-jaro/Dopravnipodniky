@@ -182,11 +182,11 @@
     <string name="pridejte_vozidla_na_linku">Přidejte nějaká vozidla na linku</string>
     <string name="moc_vozidel_na_rozmisteni">Na rozmístění vozidel po lince jich je moc</string>
     <string name="obycejny">obyčejný</string>
-    <string name="dieselovy">dieselový</string>
-    <string name="zemeplynovy">zeměplynový</string>
-    <string name="hybridni">hybridní</string>
-    <string name="vodikovy">vodíkový</string>
-    <string name="parcialni">parciální</string>
+    <string name="dieselovy_autobus">dieselový</string>
+    <string name="zemeplynovy_autobus">zeměplynový</string>
+    <string name="hybridni_autobus">hybridní</string>
+    <string name="vodikovy_autobus">vodíkový</string>
+    <string name="parcialni_trolejbus">parciální</string>
     <string name="bus_zastavil">Bus ev. č. %1$s zastavil. Vystoupilo %2$s lidí a nastoupilo %3$s lidí. Aktuálně je v busu %4$s, na zastávce je %5$s lidí. Vydělali jste %6$s Kč.</string>
     <string name="sebevrazda">Sebevražda</string>
     <string name="kalibrovat">Kalibrovat</string>
@@ -256,7 +256,7 @@
     <string name="uspesne_splnen_uspech">Úspěšně splněn úspěch %s</string>
     <string name="d_n_projet_zastavku">Zastávka na znamení</string>
     <string name="d_p_projet_zastavku">Když nejsou lidi, nemá smysl zastavovat!</string>
-    <string name="d_n_stejne_linky"></string>
+    <string name="d_n_stejne_linky">" "</string>
     <string name="d_p_stejne_linky">K čemu jsou dvě naprosto stejné linky?</string>
     <string name="d_nap_stejne_linky">Jako vejce vejci</string>
     <string name="d_n_vecne1">Křemže gone</string>
@@ -325,6 +325,7 @@
     <string name="ano_kc">ano %s Kč</string>
     <string name="nastavit_jizdne_na">Nastavit jízdné na %s Kč</string>
     <string name="prumer_je">\n\nPrůměr je %s Kč</string>
+    <string name="nic" />
 
 
 </resources>

@@ -1,21 +1,6 @@
 package cz.jaro.dopravnipodniky.sketches
 
-import android.widget.Toast
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import cz.jaro.dopravnipodniky.BuildConfig
-import cz.jaro.dopravnipodniky.R
-import cz.jaro.dopravnipodniky.cenaTroleje
-import cz.jaro.dopravnipodniky.cenaZastavky
-import cz.jaro.dopravnipodniky.classes.Zastavka
-import cz.jaro.dopravnipodniky.formatovat
-import cz.jaro.dopravnipodniky.other.PrefsHelper.dp
-import cz.jaro.dopravnipodniky.other.PrefsHelper.vse
-import cz.jaro.dopravnipodniky.sedZastavky
-import cz.jaro.dopravnipodniky.velikostZastavky
-import processing.core.PApplet
-import kotlin.math.roundToInt
-
-fun Sketch.moznaChcesUdelatZastavku() {
+/*fun DrawScope.moznaChcesUdelatZastavku() {
 
     for (ulice in dp.ulicove) {
 
@@ -49,7 +34,7 @@ fun Sketch.moznaChcesUdelatZastavku() {
                     }
 
                     if (vse.tutorial != 4 && vse.tutorial != 5) {
-                        arr += if (!ulice.trolej) {
+                        arr += if (!ulice.maTrolej) {
                             context.getString(R.string.postavit_troleje, cenaTroleje.formatovat())
                         } else {
                             context.getString(R.string.odstranit_troleje, (cenaTroleje * .2).roundToInt().formatovat())
@@ -88,24 +73,24 @@ fun Sketch.moznaChcesUdelatZastavku() {
                                 dp.zastavky.add(z)
 
                             }
-                            pos == 1 && ulice.trolej -> {
+                            pos == 1 && ulice.maTrolej -> {
                                 if (vse.prachy < cenaTroleje * .2) {
                                     Toast.makeText(context, R.string.malo_penez, Toast.LENGTH_LONG).show()
                                     return@setItems
                                 }
 
-                                ulice.trolej = false
+                                ulice.maTrolej = false
 
                                 vse.prachy -= .2 * cenaTroleje
 
                             }
-                            pos == 1 && !ulice.trolej -> {
+                            pos == 1 && !ulice.maTrolej -> {
                                 if (vse.prachy < cenaTroleje) {
                                     Toast.makeText(context, R.string.malo_penez, Toast.LENGTH_LONG).show()
                                     return@setItems
                                 }
 
-                                ulice.trolej = true
+                                ulice.maTrolej = true
 
                                 vse.prachy -= cenaTroleje
                             }
@@ -144,26 +129,25 @@ fun Sketch.moznaChcesUdelatZastavku() {
             }
         }
     }
-}
+}*/
 
-fun Zastavka.draw(sk: Sketch) {
-    sk.apply {
-        val ulice = dp.ulice(ulice)
+/*context(DrawScope)
+fun Zastavka.draw() {
+    val ulice = dp.ulice(ulice)
 
-        fill(sedZastavky)
-        rectMode(PApplet.CENTER)
+    fill(sedZastavky)
+    rectMode(PApplet.CENTER)
 
-        val zacatekXPx = ulice.zacatekXBlokuu * velikostBloku
-        val zacatekYPx = ulice.zacatekYBlokuu * velikostBloku
-        val konecXPx = ulice.konecXBlokuu * velikostBloku
-        val konecYPx = ulice.konecYBlokuu * velikostBloku
+    val zacatekXPx = ulice.zacatekXBlokuu * velikostBloku
+    val zacatekYPx = ulice.zacatekYBlokuu * velikostBloku
+    val konecXPx = ulice.konecXBlokuu * velikostBloku
+    val konecYPx = ulice.konecYBlokuu * velikostBloku
 
-        rect(
-            (zacatekXPx + konecXPx) / 2,
-            (zacatekYPx + konecYPx) / 2,
-            velikostZastavky * velikostBloku,
-            velikostZastavky * velikostBloku,
-            6F * velikostBloku
-        )
-    }
-}
+    rect(
+        (zacatekXPx + konecXPx) / 2,
+        (zacatekYPx + konecYPx) / 2,
+        velikostZastavky * velikostBloku,
+        velikostZastavky * velikostBloku,
+        6F * velikostBloku
+    )
+}*/

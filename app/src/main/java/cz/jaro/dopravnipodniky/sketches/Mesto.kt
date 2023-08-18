@@ -1,284 +1,299 @@
 package cz.jaro.dopravnipodniky.sketches
 
-import cz.jaro.dopravnipodniky.*
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.DrawStyle
+import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.graphics.drawscope.translate
+import cz.jaro.dopravnipodniky.Orientace.SVISLE
+import cz.jaro.dopravnipodniky.Orientace.VODOROVNE
+import cz.jaro.dopravnipodniky.TypBaraku
 import cz.jaro.dopravnipodniky.classes.Barak
+import cz.jaro.dopravnipodniky.classes.DopravniPodnik
 import cz.jaro.dopravnipodniky.classes.Ulice
-import cz.jaro.dopravnipodniky.other.Orientace.SVISLE
-import cz.jaro.dopravnipodniky.other.Orientace.VODOROVNE
-import cz.jaro.dopravnipodniky.other.PrefsHelper.dp
-import cz.jaro.dopravnipodniky.other.PrefsHelper.vse
-import processing.core.PApplet
-import processing.core.PConstants.*
+import cz.jaro.dopravnipodniky.jednotky.Pozice
+import cz.jaro.dopravnipodniky.jednotky.UlicovyBlok
+import cz.jaro.dopravnipodniky.jednotky.bloku
+import cz.jaro.dopravnipodniky.jednotky.blokuSUlicema
+import cz.jaro.dopravnipodniky.jednotky.toDp
+import cz.jaro.dopravnipodniky.odsazeniBaraku
+import cz.jaro.dopravnipodniky.sedObrubniku
+import cz.jaro.dopravnipodniky.sedUlice
+import cz.jaro.dopravnipodniky.sirkaObrubniku
+import cz.jaro.dopravnipodniky.sirkaUlice
+import cz.jaro.dopravnipodniky.theme.Theme
+import cz.jaro.dopravnipodniky.velikostBaraku
+import cz.jaro.dopravnipodniky.velikostUlicovyhoBloku
 
-
-fun Sketch.namalovatKrizovatku(x: Int, y: Int) {
+context(DrawScope)
+fun namalovatKrizovatku(
+    dp: DopravniPodnik,
+    krizovatka: Pozice<UlicovyBlok>,
+) {
+    val (x, y) = krizovatka
 
     val sousedi = dp.ulicove.filter {
-        it.konec == x to y || it.zacatek == x to y
+        it.konec == krizovatka || it.zacatek == krizovatka
     }
 
-    val zacatekXPx = velikostBloku *  x * (velikostUlicovyhoBloku + sirkaUlice) // v px
-    val zacatekYPx = velikostBloku *  y * (velikostUlicovyhoBloku + sirkaUlice) // v px
-    val konecXPx   = velikostBloku * (x * (velikostUlicovyhoBloku + sirkaUlice) + sirkaUlice) // v px
-    val konecYPx   = velikostBloku * (y * (velikostUlicovyhoBloku + sirkaUlice) + sirkaUlice) // v px
+    val zacatekX = x.blokuSUlicema.toDp(priblizeni)
+    val zacatekY = y.blokuSUlicema.toDp(priblizeni)
+    val konecX = (x.blokuSUlicema + sirkaUlice).toDp(priblizeni)
+    val konecY = (y.blokuSUlicema + sirkaUlice).toDp(priblizeni)
 
-    fill(sedUlice)
+    val velikost = sirkaUlice.toDp(priblizeni)
 
-    rectMode(PApplet.CORNERS)
-    rect(zacatekXPx, zacatekYPx, konecXPx, konecYPx)
+    drawRect(
+        color = sedUlice,
+        topLeft = Offset(zacatekX.toPx(), zacatekY.toPx()),
+        bottomRight = Offset(konecX.toPx(), konecY.toPx()),
+    )
 
-    fill(sedObrubniku)
+    val obrubnik = sirkaObrubniku.toDp(priblizeni/*.coerceAtLeast(1F)*/)
 
-    val obrubnik = if (velikostBloku < 1) sirkaObrubniku else sirkaObrubniku * velikostBloku
-
-    if (sousedi.none { it.konecY == y && it.orietace == SVISLE })
-        rect(zacatekXPx, zacatekYPx - obrubnik, konecXPx, zacatekYPx) // nahore
-    if (sousedi.none { it.zacatekX == x && it.orietace == VODOROVNE })
-        rect(konecXPx, zacatekYPx, konecXPx + obrubnik, konecYPx) // vpravo
-    if (sousedi.none { it.zacatekY == y && it.orietace == SVISLE })
-        rect(zacatekXPx, konecYPx, konecXPx, konecYPx + obrubnik) // dole
-    if (sousedi.none { it.konecX == x && it.orietace == VODOROVNE })
-        rect(zacatekXPx - obrubnik, zacatekYPx, zacatekXPx, konecYPx) // vlevo
+    if (sousedi.none { it.konec == krizovatka && it.orietace == SVISLE }) drawRect(
+        color = sedObrubniku,
+        topLeft = Offset(zacatekX.toPx(), zacatekY.toPx() - obrubnik.toPx()),
+        size = Size(velikost.toPx(), obrubnik.toPx())
+    ) // nahore
+    if (sousedi.none { it.konec == krizovatka && it.orietace == VODOROVNE }) drawRect(
+        color = sedObrubniku,
+        topLeft = Offset(zacatekX.toPx() - obrubnik.toPx(), zacatekY.toPx()),
+        size = Size(obrubnik.toPx(), velikost.toPx())
+    ) // vlevo
+    if (sousedi.none { it.zacatek == krizovatka && it.orietace == SVISLE }) drawRect(
+        color = sedObrubniku,
+        topLeft = Offset(zacatekX.toPx(), konecY.toPx()),
+        size = Size(velikost.toPx(), obrubnik.toPx())
+    ) // dole
+    if (sousedi.none { it.zacatek == krizovatka && it.orietace == VODOROVNE }) drawRect(
+        color = sedObrubniku,
+        topLeft = Offset(konecX.toPx(), zacatekY.toPx()),
+        size = Size(obrubnik.toPx(), velikost.toPx())
+    ) // vpravo
 }
 
-context(Sketch)
-fun Ulice.draw(sk: Sketch) {
-    sk.apply {
-        zastavka?.draw(this)
+context (DrawScope)
+fun Barak.draw(
+    tema: Theme,
+    ulice: Ulice,
+) {
+    val (i, barakJeNaDruheStraneUlice) = ulice.baraky.indexOf(this@draw).let { i ->
+        val jeNaDruheStrane = i >= ulice.baraky.size / 2
 
-        val zacatekXPx = zacatekXBlokuu * velikostBloku // v px
-        val zacatekYPx = zacatekYBlokuu * velikostBloku // v px
-        val konecXPx = konecXBlokuu * velikostBloku // v px
-        val konecYPx = konecYBlokuu * velikostBloku // v px
-
-        //fill(BARVICKY[ulice.potencial])
-        //fill(ulice.potencial * 20)
-        fill(sedUlice)
-
-        rectMode(PApplet.CORNERS)
-        rect(zacatekXPx, zacatekYPx, konecXPx, konecYPx)
-
-        fill(sedObrubniku)
-
-        val obrubnik = if (velikostBloku < 1) sirkaObrubniku else sirkaObrubniku * velikostBloku
-
-        rect(zacatekXPx, zacatekYPx - obrubnik, konecXPx, zacatekYPx) // nahore
-        rect(konecXPx, zacatekYPx, konecXPx + obrubnik, konecYPx) // vpravo
-        rect(zacatekXPx, konecYPx, konecXPx, konecYPx + obrubnik) // dole
-        rect(zacatekXPx - obrubnik, zacatekYPx, zacatekXPx, konecYPx) // vlevo
-
+        (if (jeNaDruheStrane) i - ulice.baraky.size / 2 else i) to jeNaDruheStrane
     }
-}
 
-fun Ulice.nakreslitTroleje(sk: Sketch) {
+    val zacatekUliceX = ulice.zacatekX.toDp(priblizeni).toPx()
+    val zacatekUliceY = ulice.zacatekY.toDp(priblizeni).toPx()
+    val konecUliceX = ulice.konecX.toDp(priblizeni).toPx()
+    val konecUliceY = ulice.konecY.toDp(priblizeni).toPx()
 
-    sk.apply {
+    val odsazeni = odsazeniBaraku.toDp(priblizeni).toPx()
 
-        val zacatekXPx = zacatekXBlokuu * velikostBloku // v px
-        val zacatekYPx = zacatekYBlokuu * velikostBloku // v px
-        val konecXPx = konecXBlokuu * velikostBloku // v px
-        val konecYPx = konecYBlokuu * velikostBloku // v px
+    val indexbarvy = Theme.entries.indexOf(tema)
+    val indexSkoroNoveBarvy = indexbarvy + barvicka
+    val indexNoveBarvy = indexSkoroNoveBarvy
+        .minus(if (indexSkoroNoveBarvy >= Theme.entries.size) Theme.entries.size else 0)
+        .plus(if (indexSkoroNoveBarvy < 1) Theme.entries.lastIndex else 0)
+    val barvicka = Theme.entries[indexNoveBarvy].barva // todo je to cerny
 
-        val p = 5 * velikostBloku // P jako poslech
+//    val rohovy = (i == 0 && !barakJeNaDruheStraneUlice) || (i == 3 && barakJeNaDruheStraneUlice)
 
-        stroke(sedTroleje)
-        strokeWeight(if (velikostBloku > 1) velikostBloku else 1F)
+    val scitanecVysky = 0F
 
-        if (orietace == VODOROVNE) {
-            line(zacatekXPx + p, zacatekYPx + 5  * velikostBloku, konecXPx - p, zacatekYPx + 5  * velikostBloku)
-            line(zacatekXPx + p, zacatekYPx + 10 * velikostBloku, konecXPx - p, zacatekYPx + 10 * velikostBloku)
-            line(zacatekXPx + p, zacatekYPx + 20 * velikostBloku, konecXPx - p, zacatekYPx + 20 * velikostBloku)
-            line(zacatekXPx + p, zacatekYPx + 25 * velikostBloku, konecXPx - p, zacatekYPx + 25 * velikostBloku)
-        } else {
-            line(zacatekXPx + 5  * velikostBloku, zacatekYPx + p, zacatekXPx + 5  * velikostBloku, konecYPx - p)
-            line(zacatekXPx + 10 * velikostBloku, zacatekYPx + p, zacatekXPx + 10 * velikostBloku, konecYPx - p)
-            line(zacatekXPx + 20 * velikostBloku, zacatekYPx + p, zacatekXPx + 20 * velikostBloku, konecYPx - p)
-            line(zacatekXPx + 25 * velikostBloku, zacatekYPx + p, zacatekXPx + 25 * velikostBloku, konecYPx - p)
-        }
+    val sirka = velikostBaraku.toDp(priblizeni).toPx()
 
-        // arc(x, y, w, h, start, stop)
+    @Suppress("UnnecessaryVariable")
+    val vyska = /*if (ulice.maZastavku && !rohovy) {
+        scitanecVysky = .3F * sirka
+        sirka * .65F
+    } else*/ sirka
 
-        val ctyrkrizovatkaZacatek = dp.ulicove.filter { (it.zacatek == zacatek || it.konec == zacatek) && it.trolej }.size == 4
-        val ctyrkrizovatkaKonec = dp.ulicove.filter { (it.zacatek == konec || it.konec == konec) && it.trolej }.size == 4
+    if (typ == TypBaraku.Stredovy) {
 
-        for (dalsiUlice in dp.ulicove) {
-
-            noFill()
-
-            if (dalsiUlice.zacatek == zacatek && dalsiUlice.konec == konec) continue
-
-            when {
-                orietace == SVISLE && dalsiUlice.trolej && (dalsiUlice.konec == konec || dalsiUlice.zacatek == konec) -> {
-
-                    // odshora dolu a pak...
-
-                    when {
-                        dalsiUlice.zacatekX < konecX && !ctyrkrizovatkaKonec -> {
-                            // vlevo
-
-                            arc(konecXPx - sirkaUlice * velikostBloku - p, konecYPx - p, 10 * velikostBloku + 2*p, 10 * velikostBloku + 2*p, 0F, HALF_PI)
-                            arc(konecXPx - sirkaUlice * velikostBloku - p, konecYPx - p, 20 * velikostBloku + 2*p, 20 * velikostBloku + 2*p, 0F, HALF_PI)
-                            arc(konecXPx - sirkaUlice * velikostBloku - p, konecYPx - p, 40 * velikostBloku + 2*p, 40 * velikostBloku + 2*p, 0F, HALF_PI)
-                            arc(konecXPx - sirkaUlice * velikostBloku - p, konecYPx - p, 50 * velikostBloku + 2*p, 50 * velikostBloku + 2*p, 0F, HALF_PI)
-
-                        }
-                        dalsiUlice.orietace == SVISLE -> {
-                            // dolu
-
-                            line(zacatekXPx + 5  * velikostBloku, konecYPx - p, zacatekXPx + 5  * velikostBloku, konecYPx + sirkaUlice * velikostBloku + p)
-                            line(zacatekXPx + 10 * velikostBloku, konecYPx - p, zacatekXPx + 10 * velikostBloku, konecYPx + sirkaUlice * velikostBloku + p)
-                            line(zacatekXPx + 20 * velikostBloku, konecYPx - p, zacatekXPx + 20 * velikostBloku, konecYPx + sirkaUlice * velikostBloku + p)
-                            line(zacatekXPx + 25 * velikostBloku, konecYPx - p, zacatekXPx + 25 * velikostBloku, konecYPx + sirkaUlice * velikostBloku + p)
-                        }
-                    }
-                }
-                orietace == VODOROVNE && dalsiUlice.trolej && (dalsiUlice.konec == konec || dalsiUlice.zacatek == konec) -> {
-
-                    // zleva doprava a pak...
-
-                    when {
-                        dalsiUlice.konecY > konecY && !ctyrkrizovatkaKonec -> {
-                            // dolu
-
-                            arc(konecXPx - p, konecYPx + p, 10 * velikostBloku + 2*p, 10 * velikostBloku + 2*p, PI + HALF_PI, TWO_PI)
-                            arc(konecXPx - p, konecYPx + p, 20 * velikostBloku + 2*p, 20 * velikostBloku + 2*p, PI + HALF_PI, TWO_PI)
-                            arc(konecXPx - p, konecYPx + p, 40 * velikostBloku + 2*p, 40 * velikostBloku + 2*p, PI + HALF_PI, TWO_PI)
-                            arc(konecXPx - p, konecYPx + p, 50 * velikostBloku + 2*p, 50 * velikostBloku + 2*p, PI + HALF_PI, TWO_PI)
-
-                        }
-                        dalsiUlice.orietace == VODOROVNE -> {
-                            // doprava
-
-                            line(konecXPx - p, zacatekYPx + 5  * velikostBloku, konecXPx + sirkaUlice * velikostBloku + p, zacatekYPx + 5  * velikostBloku)
-                            line(konecXPx - p, zacatekYPx + 10 * velikostBloku, konecXPx + sirkaUlice * velikostBloku + p, zacatekYPx + 10 * velikostBloku)
-                            line(konecXPx - p, zacatekYPx + 20 * velikostBloku, konecXPx + sirkaUlice * velikostBloku + p, zacatekYPx + 20 * velikostBloku)
-                            line(konecXPx - p, zacatekYPx + 25 * velikostBloku, konecXPx + sirkaUlice * velikostBloku + p, zacatekYPx + 25 * velikostBloku)
-                        }
-                    }
-                }
-                orietace == SVISLE && dalsiUlice.trolej && (dalsiUlice.konec == zacatek || dalsiUlice.zacatek == zacatek) -> {
-                    // odspoda nahoru a pak...
-
-                    if (dalsiUlice.konecX > zacatekX && !ctyrkrizovatkaZacatek) {
-                        // vpravo
-
-                        arc(zacatekXPx + sirkaUlice * velikostBloku + p, zacatekYPx + p, 10 * velikostBloku + 2*p, 10 * velikostBloku + 2*p, PI, PI + HALF_PI)
-                        arc(zacatekXPx + sirkaUlice * velikostBloku + p, zacatekYPx + p, 20 * velikostBloku + 2*p, 20 * velikostBloku + 2*p, PI, PI + HALF_PI)
-                        arc(zacatekXPx + sirkaUlice * velikostBloku + p, zacatekYPx + p, 40 * velikostBloku + 2*p, 40 * velikostBloku + 2*p, PI, PI + HALF_PI)
-                        arc(zacatekXPx + sirkaUlice * velikostBloku + p, zacatekYPx + p, 50 * velikostBloku + 2*p, 50 * velikostBloku + 2*p, PI, PI + HALF_PI)
-
-                    }
-
-                }
-                orietace == VODOROVNE && dalsiUlice.trolej && (dalsiUlice.konec == zacatek || dalsiUlice.zacatek == zacatek) -> {
-
-                    // zprava doleva a pak...
-
-                    if (dalsiUlice.zacatekY < zacatekY && !ctyrkrizovatkaZacatek) {
-                        // nahoru
-
-                        arc(zacatekXPx + p, zacatekYPx - p, 10 * velikostBloku + 2*p, 10 * velikostBloku + 2*p, HALF_PI, PI)
-                        arc(zacatekXPx + p, zacatekYPx - p, 20 * velikostBloku + 2*p, 20 * velikostBloku + 2*p, HALF_PI, PI)
-                        arc(zacatekXPx + p, zacatekYPx - p, 40 * velikostBloku + 2*p, 40 * velikostBloku + 2*p, HALF_PI, PI)
-                        arc(zacatekXPx + p, zacatekYPx - p, 50 * velikostBloku + 2*p, 50 * velikostBloku + 2*p, HALF_PI, PI)
-
-                    }
-
+        val pulUlicovyhoBloku = velikostUlicovyhoBloku.bloku.toDp(priblizeni).toPx() / 2
+        translate(
+            left = zacatekUliceX,
+            top = zacatekUliceY,
+        ) {
+            val rohBloku = when (ulice.orietace) {
+                SVISLE -> Offset(x = sirkaUlice.toDp(priblizeni).toPx())
+                VODOROVNE -> Offset(y = sirkaUlice.toDp(priblizeni).toPx())
+            }
+            translate(
+                offset = rohBloku
+            ) {
+                val stredBloku = Offset(
+                    x = pulUlicovyhoBloku,
+                    y = pulUlicovyhoBloku
+                )
+                translate(
+                    offset = stredBloku - Offset(x = sirka, y = sirka)
+                ) {
+                    drawRoundRect(
+                        color = barvicka,
+                        size = Size(sirka, sirka) * 2F,
+                        cornerRadius = CornerRadius(20.bloku.toDp(priblizeni).toPx())
+                    )
                 }
             }
         }
-        noStroke()
-    }
-}
-
-fun Barak.draw(sk: Sketch) {
-    sk.apply {
-
-        val ulice = dp.ulice(ulice)
-
-        var i = ulice.baraky.indexOf(this@draw)
-
-        val druha = i >= ulice.baraky.size / 2
-
-        if (druha) i -= ulice.baraky.size / 2
-        
-        val zacatekUliceXPx = ulice.zacatekXBlokuu * velikostBloku // v px
-        val zacatekUliceYPx = ulice.zacatekYBlokuu * velikostBloku // v px
-        val konecUliceXPx = ulice.konecXBlokuu * velikostBloku // v px
-        val konecUliceYPx = ulice.konecYBlokuu * velikostBloku // v px
-
-        val o = odsazeniBaraku * velikostBloku // odsazení od okraje
-
-        val zaklad = barvicka + BARVICKYTEMAT.indexOf(vse.barva)
-
-        val barvicka = BARVICKYTEMAT[
-            zaklad
-            - (if (zaklad >= BARVICKYTEMAT.size) BARVICKYTEMAT.size else 0)
-            + (if (zaklad < 1) BARVICKYTEMAT.lastIndex else 0)
-        ]
-
-        fill(barvicka) //(sedBaraku)
-        rectMode(CORNER)
-
-        val rohovy = (i == 0 && !druha) || (i == 3 && druha)
-
-        var scitanecVysky = 0F
-
-        val sirka = velikostBaraku * velikostBloku * if (stredovy) 2 else 1
-
-        val vyska = sirka * when {
-            ulice.zastavka != null && !rohovy -> {
-                scitanecVysky = .3F * sirka
-                .65F
-            }
-            else -> 1F
-        }
-
-        if (stredovy) {
-
-            rectMode(CENTER)
-
-            val plusX = if (ulice.orietace == SVISLE) sirkaUlice * velikostBloku else 0F
-            val plusY = if (ulice.orietace == VODOROVNE) sirkaUlice * velikostBloku else 0F
-
-            rect( // uprostřed
-                zacatekUliceXPx + velikostUlicovyhoBloku * velikostBloku / 2 + plusX,
-                zacatekUliceYPx + velikostUlicovyhoBloku * velikostBloku / 2 + plusY,
-                sirka,
-                sirka,
-                20F * velikostBloku
+    } else {
+        when (ulice.orietace to barakJeNaDruheStraneUlice) {
+            VODOROVNE to true -> drawRoundRect( // dole
+                color = barvicka,
+                topLeft = Offset(
+                    x = zacatekUliceX + odsazeni + sirka + odsazeni + i * (sirka + odsazeni),
+                    y = konecUliceY + odsazeni + (sirka - vyska),
+                ),
+                size = Size(
+                    width = sirka,
+                    height = vyska + scitanecVysky,
+                ),
+                cornerRadius = CornerRadius(5.bloku.toDp(priblizeni).toPx() * (sirka / vyska))
             )
-        } else {
-            when (ulice.orietace to druha) {
-                VODOROVNE to true -> rect( // dole
-                    zacatekUliceXPx + o + o + sirka + o + i * (o + sirka + o),
-                    konecUliceYPx + o + (sirka - vyska),
-                    sirka,
-                    vyska + scitanecVysky,
-                    5F * velikostBloku * (sirka / vyska)
-                )
-                VODOROVNE to false -> rect( // nahore
-                    zacatekUliceXPx + o + i * (o + sirka + o),
-                    zacatekUliceYPx - o - sirka - scitanecVysky,
-                    sirka,
-                    vyska + scitanecVysky,
-                    5F * velikostBloku * (sirka / vyska)
-                )
-                SVISLE to true -> rect( // vlevo
-                    zacatekUliceXPx - o - sirka - scitanecVysky,
-                    zacatekUliceYPx + o + sirka + o + o + i * (o + sirka + o),
-                    vyska + scitanecVysky,
-                    sirka,
-                    5F * velikostBloku * (sirka / vyska)
-                )
-                SVISLE to false -> rect( // vpravo
-                    konecUliceXPx + o + (sirka - vyska),
-                    zacatekUliceYPx + o + i * (o + sirka + o),
-                    vyska + scitanecVysky,
-                    sirka,
-                    5F * velikostBloku * (sirka / vyska)
-                )
-            }
+
+            VODOROVNE to false -> drawRoundRect( // nahore
+                color = barvicka,
+                topLeft = Offset(
+                    x = zacatekUliceX + odsazeni + i * (sirka + odsazeni),
+                    y = zacatekUliceY - odsazeni - sirka - scitanecVysky,
+                ),
+                size = Size(
+                    width = sirka,
+                    height = vyska + scitanecVysky,
+                ),
+                cornerRadius = CornerRadius(5.bloku.toDp(priblizeni).toPx() * (sirka / vyska))
+            )
+
+            SVISLE to true -> drawRoundRect( // vlevo
+                color = barvicka,
+                topLeft = Offset(
+                    x = zacatekUliceX - odsazeni - sirka - scitanecVysky,
+                    y = zacatekUliceY + sirka + odsazeni + odsazeni + i * (sirka + odsazeni),
+                ),
+                size = Size(
+                    width = vyska + scitanecVysky,
+                    height = sirka,
+                ),
+                cornerRadius = CornerRadius(5.bloku.toDp(priblizeni).toPx() * (sirka / vyska))
+            )
+
+            SVISLE to false -> drawRoundRect( // vpravo
+                color = barvicka,
+                topLeft = Offset(
+                    x = konecUliceX + odsazeni + (sirka - vyska),
+                    y = zacatekUliceY + odsazeni + i * (sirka + odsazeni),
+                ),
+                size = Size(
+                    width = vyska + scitanecVysky,
+                    height = sirka,
+                ),
+                cornerRadius = CornerRadius(5.bloku.toDp(priblizeni).toPx() * (sirka / vyska))
+            )
         }
     }
 }
+
+context(DrawScope)
+fun Ulice.draw() {
+//    zastavka?.draw()
+
+    val zacatekX = zacatekX.toDp(priblizeni)
+    val zacatekY = zacatekY.toDp(priblizeni)
+    val konecX = konecX.toDp(priblizeni)
+    val konecY = konecY.toDp(priblizeni)
+
+    //fill(BARVICKY[ulice.potencial])
+    //fill(ulice.potencial * 20)
+
+    drawRect(
+        color = sedUlice,
+        topLeft = Offset(zacatekX.toPx(), zacatekY.toPx()),
+        bottomRight = Offset(konecX.toPx(), konecY.toPx()),
+    )
+
+    val obrubnik = sirkaObrubniku.toDp(priblizeni/*.coerceAtLeast(1F)*/)
+
+    drawRect(
+        color = sedObrubniku,
+        topLeft = Offset(zacatekX.toPx(), zacatekY.toPx() - obrubnik.toPx()),
+        bottomRight = Offset(konecX.toPx(), zacatekY.toPx()),
+    ) // nahore
+    drawRect(
+        color = sedObrubniku,
+        topLeft = Offset(zacatekX.toPx() - obrubnik.toPx(), zacatekY.toPx()),
+        bottomRight = Offset(zacatekX.toPx(), konecY.toPx()),
+    ) // vlevo
+    drawRect(
+        color = sedObrubniku,
+        topLeft = Offset(zacatekX.toPx(), konecY.toPx()),
+        bottomRight = Offset(konecX.toPx(), konecY.toPx() + obrubnik.toPx()),
+    ) // dole
+    drawRect(
+        color = sedObrubniku,
+        topLeft = Offset(konecX.toPx(), zacatekY.toPx()),
+        bottomRight = Offset(konecX.toPx() + obrubnik.toPx(), konecY.toPx()),
+    ) // vpravo
+}
+
+fun DrawScope.drawRect(
+    color: Color,
+    topLeft: Offset,
+    bottomRight: Offset,
+    alpha: Float = 1.0f,
+    style: DrawStyle = Fill,
+    colorFilter: ColorFilter? = null,
+    blendMode: BlendMode = DrawScope.DefaultBlendMode
+) = drawRect(
+    color = color,
+    topLeft = topLeft,
+    size = Size(
+        width = bottomRight.x - topLeft.x,
+        height = bottomRight.y - topLeft.y,
+    ),
+    alpha = alpha,
+    style = style,
+    colorFilter = colorFilter,
+    blendMode = blendMode,
+)
+
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
+fun DrawScope.drawArc(
+    color: Color,
+    startAngle: Float,
+    sweepAngle: Float,
+    useCenter: Boolean,
+    center: Offset,
+    quadSize: Size,
+    alpha: Float = 1.0f,
+    style: DrawStyle = Fill,
+    colorFilter: ColorFilter? = null,
+    blendMode: BlendMode = DrawScope.DefaultBlendMode
+) = drawArc(
+    color = color,
+    startAngle = startAngle,
+    sweepAngle = sweepAngle,
+    useCenter = useCenter,
+    topLeft = Offset(center.x - quadSize.width, center.y - quadSize.height),
+    size = quadSize * 2F,
+    alpha = alpha,
+    style = style,
+    colorFilter = colorFilter,
+    blendMode = blendMode,
+)
+
+inline fun DrawScope.translate(
+    offset: Offset = Offset.Zero,
+    block: DrawScope.() -> Unit
+) = translate(
+    left = offset.x,
+    top = offset.y,
+    block = block,
+)

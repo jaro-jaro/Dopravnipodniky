@@ -6,23 +6,6 @@
     <color name="svetla">#FFEEEEEE</color>
     <color name="ulice">#878787</color>
 
-    <color name="b0" >#000000</color>
-    <color name="b1" >#FF0000</color>
-    <color name="b2" >#00FF00</color>
-    <color name="b3" >#0000FF</color>
-    <color name="b4" >#FFFF00</color>
-    <color name="b5" >#FF00FF</color>
-    <color name="b6" >#00FFFF</color>
-    <color name="b7" >#7F0000</color>
-    <color name="b8" >#007F00</color>
-    <color name="b9" >#00007F</color>
-    <color name="b10">#7F7F00</color>
-    <color name="b11">#7F007F</color>
-    <color name="b12">#007F7F</color>
-    <color name="b13">#FF7F00</color>
-    <color name="b14">#007FFF</color>
-    <color name="b15">#00FF7F</color>
-
     <color name="t0" >#000000</color>
     <color name="t1" >#D50000</color>
     <color name="t2" >#C51162</color>

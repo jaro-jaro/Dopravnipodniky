@@ -1,34 +1,8 @@
 package cz.jaro.dopravnipodniky.sketches
 
-import android.graphics.Color
-import android.view.LayoutInflater
-import android.widget.Button
-import android.widget.Toast
-import androidx.core.graphics.blue
-import androidx.core.graphics.green
-import androidx.core.graphics.red
-import androidx.core.text.isDigitsOnly
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import cz.jaro.dopravnipodniky.BARVICKY
-import cz.jaro.dopravnipodniky.BuildConfig
-import cz.jaro.dopravnipodniky.NAZVYBARVICEK
-import cz.jaro.dopravnipodniky.R
-import cz.jaro.dopravnipodniky.classes.Linka
-import cz.jaro.dopravnipodniky.databinding.LinkaDialogBinding
-import cz.jaro.dopravnipodniky.other.Dosahlosti.dosahni
-import cz.jaro.dopravnipodniky.other.Orientace.SVISLE
-import cz.jaro.dopravnipodniky.other.Orientace.VODOROVNE
-import cz.jaro.dopravnipodniky.other.PrefsHelper.dp
-import cz.jaro.dopravnipodniky.other.PrefsHelper.vse
-import cz.jaro.dopravnipodniky.sirkaUlice
-import cz.jaro.dopravnipodniky.velikostUlicovyhoBloku
-import processing.core.PApplet
-import processing.core.PConstants.CENTER
-import kotlin.math.sqrt
-
 val kliklyKrizovatky = mutableListOf<Pair<Int, Int>>() // (2 to 1) -> v Ulicovych blokach
 
-fun Sketch.pripravitNaVybiraniLinky() {
+/*fun DrawScope.pripravitNaVybiraniLinky() {
 
     // vytvorit novou linku
     kliklyKrizovatky.clear()
@@ -123,85 +97,9 @@ fun Sketch.pripravitNaVybiraniLinky() {
         kliklyKrizovatky.clear()
     }
 
-}
+}*/
 
-fun Sketch.namalovatVybiraniLinky() {
-
-    for ((i, krizovatka) in kliklyKrizovatky.withIndex()) {
-
-        val (xKrizovatky, yKrizovatky) = krizovatka
-
-        val zacatekXBloku = xKrizovatky * (velikostUlicovyhoBloku + sirkaUlice) + 5 // v Blocich
-        val zacatekYBloku = yKrizovatky * (velikostUlicovyhoBloku + sirkaUlice) + 5 // v Blocich
-        val konecXBloku =   xKrizovatky * (velikostUlicovyhoBloku + sirkaUlice) + sirkaUlice - 5 // v Blocich
-        val konecYBloku =   yKrizovatky * (velikostUlicovyhoBloku + sirkaUlice) + sirkaUlice - 5 // v Blocich
-
-
-        val zacatekXPxKrizovatky = (zacatekXBloku) * velikostBloku // Px
-        val zacatekYPxKrizovatky = (zacatekYBloku) * velikostBloku // Px
-        val konecXPxKrizovatky = (konecXBloku) * velikostBloku // Px
-        val konecYPxKrizovatky = (konecYBloku) * velikostBloku // Px
-
-        rectMode(PApplet.CORNERS)
-        fill(Color.rgb(255 - vse.barva.red, 255 - vse.barva.green, 255 - vse.barva.blue))
-
-        if (i == kliklyKrizovatky.lastIndex) {
-            ellipseMode(CENTER)
-            strokeWeight(3F)
-            circle(
-                (konecXPxKrizovatky + zacatekXPxKrizovatky) / 2,
-                (konecYPxKrizovatky + zacatekYPxKrizovatky) / 2,
-                sqrt(2F) * sirkaUlice * velikostBloku
-            )
-            noStroke()
-        }
-
-        if (i == 0) continue
-
-        val minulaKrizovatka = kliklyKrizovatky[i - 1]
-
-        val zacatekXBlokuMinulyKrizovatky = minulaKrizovatka.first  * (velikostUlicovyhoBloku + sirkaUlice) + 5 // v Blocich
-        val zacatekYBlokuMinulyKrizovatky = minulaKrizovatka.second * (velikostUlicovyhoBloku + sirkaUlice) + 5 // v Blocich
-        val konecXBlokuMinulyKrizovatky =   minulaKrizovatka.first  * (velikostUlicovyhoBloku + sirkaUlice) + sirkaUlice - 5 // v Blocich
-        val konecYBlokuMinulyKrizovatky =   minulaKrizovatka.second * (velikostUlicovyhoBloku + sirkaUlice) + sirkaUlice - 5 // v Blocich
-
-        val zacatekXPxMinulyKrizovatky = (zacatekXBlokuMinulyKrizovatky) * velikostBloku // Px
-        val zacatekYPxMinulyKrizovatky = (zacatekYBlokuMinulyKrizovatky) * velikostBloku // Px
-        val konecXPxMinulyKrizovatky =   (konecXBlokuMinulyKrizovatky)   * velikostBloku // Px
-        val konecYPxMinulyKrizovatky =   (konecYBlokuMinulyKrizovatky)   * velikostBloku // Px
-
-
-        if (
-            (zacatekXBlokuMinulyKrizovatky < zacatekXBloku
-                    && zacatekYBloku == zacatekYBlokuMinulyKrizovatky)
-            ||
-            (zacatekYBlokuMinulyKrizovatky < zacatekYBloku
-                    && zacatekXBloku == zacatekXBlokuMinulyKrizovatky)
-        ) {
-            rect(
-                zacatekXPxMinulyKrizovatky, zacatekYPxMinulyKrizovatky,
-                konecXPxKrizovatky, konecYPxKrizovatky,
-                (sirkaUlice - 10) * velikostBloku / 2
-            )
-        }
-        else if (
-            (zacatekXBlokuMinulyKrizovatky > zacatekXBloku
-                    && zacatekYBloku == zacatekYBlokuMinulyKrizovatky)
-            ||
-            (zacatekYBlokuMinulyKrizovatky > zacatekYBloku
-                    && zacatekXBloku == zacatekXBlokuMinulyKrizovatky)
-        ) {
-            rect(
-                zacatekXPxKrizovatky, zacatekYPxKrizovatky,
-                konecXPxMinulyKrizovatky, konecYPxMinulyKrizovatky,
-                (sirkaUlice - 10) * velikostBloku / 2
-            )
-        }
-    }
-
-}
-
-fun Sketch.poKliknutiPriVybiraniLinky() {
+/*fun DrawScope.poKliknutiPriVybiraniLinky() {
 
     for ((xKrizovatky, yKrizovatky) in seznamKrizovatek) {
 
@@ -233,7 +131,7 @@ fun Sketch.poKliknutiPriVybiraniLinky() {
             ) {
                 if (dp.ulicove.any {
                         it.zacatek == xKrizovatky to yKrizovatky && it.konec   == kliklyKrizovatky.last() ||
-                        it.konec   == xKrizovatky to yKrizovatky && it.zacatek == kliklyKrizovatky.last()
+                                it.konec   == xKrizovatky to yKrizovatky && it.zacatek == kliklyKrizovatky.last()
                     }) {
                     if (xKrizovatky to yKrizovatky !in kliklyKrizovatky) {
                         kliklyKrizovatky += xKrizovatky to yKrizovatky
@@ -244,9 +142,9 @@ fun Sketch.poKliknutiPriVybiraniLinky() {
             }
         }
     }
-}
+}*/
 
-fun Sketch.namalovatLinky() {
+/*fun DrawScope.namalovatLinky() {
     dp.ulicove.forEach { ulice ->
         val linky = dp.linky.filter { ulice.id in it.seznamUlic }
 
@@ -356,4 +254,80 @@ fun Sketch.namalovatLinky() {
         }
 
     }
-}
+}*/
+
+/*fun DrawScope.namalovatVybiraniLinky() {
+
+    for ((i, krizovatka) in kliklyKrizovatky.withIndex()) {
+
+        val (xKrizovatky, yKrizovatky) = krizovatka
+
+        val zacatekXBloku = xKrizovatky * (velikostUlicovyhoBloku + sirkaUlice) + 5 // v Blocich
+        val zacatekYBloku = yKrizovatky * (velikostUlicovyhoBloku + sirkaUlice) + 5 // v Blocich
+        val konecXBloku =   xKrizovatky * (velikostUlicovyhoBloku + sirkaUlice) + sirkaUlice - 5 // v Blocich
+        val konecYBloku =   yKrizovatky * (velikostUlicovyhoBloku + sirkaUlice) + sirkaUlice - 5 // v Blocich
+
+
+        val zacatekXPxKrizovatky = (zacatekXBloku) * velikostBloku // Px
+        val zacatekYPxKrizovatky = (zacatekYBloku) * velikostBloku // Px
+        val konecXPxKrizovatky = (konecXBloku) * velikostBloku // Px
+        val konecYPxKrizovatky = (konecYBloku) * velikostBloku // Px
+
+        rectMode(PApplet.CORNERS)
+        fill(Color.rgb(255 - vse.barva.red, 255 - vse.barva.green, 255 - vse.barva.blue))
+
+        if (i == kliklyKrizovatky.lastIndex) {
+            ellipseMode(CENTER)
+            strokeWeight(3F)
+            circle(
+                (konecXPxKrizovatky + zacatekXPxKrizovatky) / 2,
+                (konecYPxKrizovatky + zacatekYPxKrizovatky) / 2,
+                sqrt(2F) * sirkaUlice * velikostBloku
+            )
+            noStroke()
+        }
+
+        if (i == 0) continue
+
+        val minulaKrizovatka = kliklyKrizovatky[i - 1]
+
+        val zacatekXBlokuMinulyKrizovatky = minulaKrizovatka.first  * (velikostUlicovyhoBloku + sirkaUlice) + 5 // v Blocich
+        val zacatekYBlokuMinulyKrizovatky = minulaKrizovatka.second * (velikostUlicovyhoBloku + sirkaUlice) + 5 // v Blocich
+        val konecXBlokuMinulyKrizovatky =   minulaKrizovatka.first  * (velikostUlicovyhoBloku + sirkaUlice) + sirkaUlice - 5 // v Blocich
+        val konecYBlokuMinulyKrizovatky =   minulaKrizovatka.second * (velikostUlicovyhoBloku + sirkaUlice) + sirkaUlice - 5 // v Blocich
+
+        val zacatekXPxMinulyKrizovatky = (zacatekXBlokuMinulyKrizovatky) * velikostBloku // Px
+        val zacatekYPxMinulyKrizovatky = (zacatekYBlokuMinulyKrizovatky) * velikostBloku // Px
+        val konecXPxMinulyKrizovatky =   (konecXBlokuMinulyKrizovatky)   * velikostBloku // Px
+        val konecYPxMinulyKrizovatky =   (konecYBlokuMinulyKrizovatky)   * velikostBloku // Px
+
+
+        if (
+            (zacatekXBlokuMinulyKrizovatky < zacatekXBloku
+                    && zacatekYBloku == zacatekYBlokuMinulyKrizovatky)
+            ||
+            (zacatekYBlokuMinulyKrizovatky < zacatekYBloku
+                    && zacatekXBloku == zacatekXBlokuMinulyKrizovatky)
+        ) {
+            rect(
+                zacatekXPxMinulyKrizovatky, zacatekYPxMinulyKrizovatky,
+                konecXPxKrizovatky, konecYPxKrizovatky,
+                (sirkaUlice - 10) * velikostBloku / 2
+            )
+        }
+        else if (
+            (zacatekXBlokuMinulyKrizovatky > zacatekXBloku
+                    && zacatekYBloku == zacatekYBlokuMinulyKrizovatky)
+            ||
+            (zacatekYBlokuMinulyKrizovatky > zacatekYBloku
+                    && zacatekXBloku == zacatekXBlokuMinulyKrizovatky)
+        ) {
+            rect(
+                zacatekXPxKrizovatky, zacatekYPxKrizovatky,
+                konecXPxMinulyKrizovatky, konecYPxMinulyKrizovatky,
+                (sirkaUlice - 10) * velikostBloku / 2
+            )
+        }
+    }
+
+}*/

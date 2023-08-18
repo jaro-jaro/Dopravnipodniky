@@ -1,92 +1,82 @@
 package cz.jaro.dopravnipodniky.classes
 
-import androidx.core.content.edit
-import cz.jaro.dopravnipodniky.other.App
-import cz.jaro.dopravnipodniky.other.Orientace
-import cz.jaro.dopravnipodniky.other.Orientace.SVISLE
-import cz.jaro.dopravnipodniky.other.Orientace.VODOROVNE
-import cz.jaro.dopravnipodniky.other.UliceId
+import cz.jaro.dopravnipodniky.Orientace
+import cz.jaro.dopravnipodniky.Orientace.SVISLE
+import cz.jaro.dopravnipodniky.Orientace.VODOROVNE
+import cz.jaro.dopravnipodniky.UliceID
+import cz.jaro.dopravnipodniky.jednotky.Blok
+import cz.jaro.dopravnipodniky.jednotky.Pozice
+import cz.jaro.dopravnipodniky.jednotky.UlicovyBlok
+import cz.jaro.dopravnipodniky.jednotky.blokuSUlicema
+import cz.jaro.dopravnipodniky.kapacita
+import cz.jaro.dopravnipodniky.nasobitelMaxCloveku
 import cz.jaro.dopravnipodniky.sirkaUlice
-import cz.jaro.dopravnipodniky.velikostUlicovyhoBloku
+import kotlinx.serialization.Serializable
+import kotlin.math.roundToInt
 
 /**!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
 ///        ULICE VŽDY POZITIVNĚ        //
 ///    (ZLEVA DOPRAVA / ZHORA DOLŮ)    //
 ///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
-class Ulice(
-    val zacatek: Pair<Int, Int>, // v ulicovych blokach
-    val konec: Pair<Int, Int>, // v ulicovych blokach
+@Serializable
+data class Ulice(
+    val zacatek: Pozice<UlicovyBlok>,
+    val konec: Pozice<UlicovyBlok>,
+    val baraky: List<Barak> = listOf(),
+    val potencial: Int = 1,
+    val zastavka: Zastavka? = null,
+    val maTrolej: Boolean = true, //TODO false
+    val id: UliceID = UliceID.randomUUID()
 ) {
 
-    val baraky = mutableListOf<Barak>()
+    val cloveci get() = baraky.sumOf { it.cloveci }
+    val kapacita get() = baraky.sumOf { it.typ.kapacita }
 
-    val cloveci
-        get() = baraky.sumOf { it.cloveci }
-    val kapacita
-        get() = baraky.sumOf { it.kapacita }
+    val orietace: Orientace = when {
+        zacatek.x == konec.x -> SVISLE
+        zacatek.y == konec.y -> VODOROVNE
+        else -> SVISLE
+    }
 
-    var zacatekX = zacatek.first // v ulicovych blokach
-    var zacatekY = zacatek.second // v ulicovych blokach
-    var konecX = konec.first // v ulicovych blokach
-    var konecY = konec.second // v ulicovych blokach
+    val zacatekX: Blok
+    val zacatekY: Blok
+    val konecX: Blok
+    val konecY: Blok
 
-    var potencial = 1
-
-    var id: @UliceId Long
-
-    var zacatekXBlokuu = zacatekX * (velikostUlicovyhoBloku + sirkaUlice) // v blocich
-    var zacatekYBlokuu = zacatekY * (velikostUlicovyhoBloku + sirkaUlice) // v blocich
-    var konecXBlokuu   = konecX   * (velikostUlicovyhoBloku + sirkaUlice) // v blocich
-    var konecYBlokuu   = konecY   * (velikostUlicovyhoBloku + sirkaUlice) // v blocich
-
-    var orietace: Orientace
-
-    var zastavka: Zastavka? = null
-
-    var sirkaBlokuu: Int?
-    var delkaBlokuu: Int?
-
-    var pocetLinek = 0
-
-    var trolej = false
+    val sirka: Blok
+    val delka: Blok
 
     init {
-        val prefs = App.prefs
-
-        val posledniId = prefs.getLong("ulice_id", 0)
-
-        id = posledniId + 1
-
-        prefs.edit {
-            putLong("ulice_id", posledniId + 1)
-        }
-
-        if (zacatekX != konecX && zacatekY != konecY) { // diagonala
+        if (zacatek.x != konec.x && zacatek.y != konec.y) { // diagonala
             throw IllegalArgumentException("Vadná ulice")
-        }
-
-        orietace = when {
-            zacatekX == konecX -> SVISLE
-            zacatekY == konecY -> VODOROVNE
-            else -> SVISLE
         }
 
         when(orietace) {
             SVISLE -> {
-                zacatekYBlokuu += sirkaUlice
-                konecXBlokuu += sirkaUlice
+                zacatekX = zacatek.x.blokuSUlicema
+                zacatekY = zacatek.y.blokuSUlicema + sirkaUlice
+                konecX = konec.x.blokuSUlicema + sirkaUlice
+                konecY = konec.y.blokuSUlicema
 
-                sirkaBlokuu = konecXBlokuu - zacatekXBlokuu
-                delkaBlokuu = konecYBlokuu - zacatekYBlokuu
+                sirka = konecX - zacatekX
+                delka = konecY - zacatekY
             }
             VODOROVNE -> {
-                zacatekXBlokuu += sirkaUlice
-                konecYBlokuu += sirkaUlice
+                zacatekX = zacatek.x.blokuSUlicema + sirkaUlice
+                zacatekY = zacatek.y.blokuSUlicema
+                konecX = konec.x.blokuSUlicema
+                konecY = konec.y.blokuSUlicema + sirkaUlice
 
-                sirkaBlokuu = konecYBlokuu - zacatekYBlokuu
-                delkaBlokuu = konecXBlokuu - zacatekXBlokuu
+                sirka = konecY - zacatekY
+                delka = konecX - zacatekX
             }
         }
     }
+
+    val kapacitaZastavky = (kapacita * nasobitelMaxCloveku).roundToInt()
 }
+
+fun Ulice.pocetLinek(dp: DopravniPodnik) = dp.linky.count { id in it.ulice }
+
+val Ulice.maZastavku get() = zastavka != null

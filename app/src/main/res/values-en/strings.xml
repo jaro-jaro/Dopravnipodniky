@@ -148,7 +148,7 @@
     <string name="mestecko">Small town</string>
     <string name="vesnice">Village</string>
     <string name="kocka">Cat</string>
-    <string name="koncovka_dlouhy_velky_e"></string>
+    <string name="koncovka_dlouhy_velky_e">E</string>
     <string name="verze">Version: %s</string>
     <string name="vytvorilo_ro_studios">Made by RO studios</string>
     <string name="jazyk">Language: %s</string>
@@ -177,11 +177,11 @@
     <string name="pridejte_vozidla_na_linku">Add some vehicles to the line</string>
     <string name="moc_vozidel_na_rozmisteni">There are too many of them to deploy vehicles on the line</string>
     <string name="obycejny">common</string>
-    <string name="dieselovy">diesel</string>
-    <string name="zemeplynovy">earth gas</string>
-    <string name="hybridni">hybrid</string>
-    <string name="vodikovy">hydrogen</string>
-    <string name="parcialni">partial</string>
+    <string name="dieselovy_autobus">diesel bus</string>
+    <string name="zemeplynovy_autobus">earth gas bus</string>
+    <string name="hybridni_autobus">hybrid bus</string>
+    <string name="vodikovy_autobus">hydrogen bus</string>
+    <string name="parcialni_trolejbus">partial trolleybus</string>
     <string name="bus_zastavil">Bus reg. no. %1$s stopped. %2$s people stepped out and %3$s people stepped up. There are currently %4$s people on the bus, there are %5$s people at bus stop. You earned € %6$s.</string>
     <string name="sebevrazda">Suicide</string>
     <string name="kalibrovat">Calibrate</string>
@@ -251,7 +251,7 @@
     <string name="uspesne_splnen_uspech">Successful success %s</string>
     <string name="d_n_projet_zastavku">Stop at the sign</string>
     <string name="d_p_projet_zastavku">When there are no people, there is no point in stopping!</string>
-    <string name="d_n_stejne_linky"></string>
+    <string name="d_n_stejne_linky">" "</string>
     <string name ="d_p_stejne_linky">What are two identical lines for?</string>
     <string name ="d_nap_stejne_linky">Like eggs eggs</string>
     <string name ="d_n_vecne1">Křemže gone</string>
@@ -320,5 +320,6 @@
     <string name="ano_kc">Yes € %s</string>
     <string name="nastavit_jizdne_na">Set fare to € %s</string>
     <string name="prumer_je">\n\nAverage is € %s</string>
+    <string name="nic" />
 
 </resources>

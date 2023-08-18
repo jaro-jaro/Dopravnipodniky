@@ -12,25 +12,7 @@
         android:theme="@style/Theme.DopravníPodniky"
         tools:targetApi="31">
         <activity
-            android:name="cz.jaro.dopravnipodniky.activities.NovejPodnikActivity"
-            android:exported="false" />
-        <activity
-            android:name="cz.jaro.dopravnipodniky.activities.DopravniPodnikyActivity"
-            android:exported="false" />
-        <activity
-            android:name="cz.jaro.dopravnipodniky.activities.ObchodActivity"
-            android:exported="false" />
-        <activity
-            android:name="cz.jaro.dopravnipodniky.activities.VybiraniLinkyActivity"
-            android:exported="false" />
-        <activity
-            android:name="cz.jaro.dopravnipodniky.activities.LinkyActivity"
-            android:exported="false" />
-        <activity
-            android:name="cz.jaro.dopravnipodniky.activities.GarazActivity"
-            android:exported="false" />
-        <activity
-            android:name="cz.jaro.dopravnipodniky.activities.MainActivity"
+            android:name="cz.jaro.dopravnipodniky.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

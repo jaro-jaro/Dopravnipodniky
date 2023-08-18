@@ -1,4 +1,5 @@
 package cz.jaro.dopravnipodniky.other
+/*
 
 import android.content.Context
 import android.content.Intent
@@ -113,3 +114,4 @@ object Tutorial {
 }
 
 }
+*/

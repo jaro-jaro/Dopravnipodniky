@@ -1,25 +1,24 @@
 package cz.jaro.dopravnipodniky.classes
 
-import cz.jaro.dopravnipodniky.other.Podtyp
+import cz.jaro.dopravnipodniky.jednotky.BlokZaHodinu
+import cz.jaro.dopravnipodniky.jednotky.Metr
+import cz.jaro.dopravnipodniky.jednotky.Peniz
+import cz.jaro.dopravnipodniky.jednotky.PenizZaMinutu
 import cz.jaro.dopravnipodniky.other.Trakce
 import cz.jaro.dopravnipodniky.other.Vyrobce
-import kotlin.math.pow
+import kotlinx.serialization.Serializable
+import kotlin.time.Duration
 
-class TypBusu(
+@Serializable
+data class TypBusu(
     val model: String,
-    val podtyp: Podtyp,
     val trakce: Trakce,
     val vyrobce: Vyrobce,
     val kapacita: Int,
-    val rychlost: Int,
-    val nasobitelNakladuu: Double,
-    val cena: Int,
-    val delka: Float,
-
-    // Nezobrazovat:
-    maxHodin: Int, // max hodin co to ujede, než se to ponici
-
+    val rychlost: BlokZaHodinu,
+    val maxNaklady: PenizZaMinutu,
+    val cena: Peniz,
+    val delka: Metr,
+    val vydrz: Duration,
     val popis: String,
-) {
-    val nasobitelPonicenosti = (100.0.pow(1.0 / maxHodin))
-}
+)

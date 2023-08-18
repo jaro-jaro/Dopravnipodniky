@@ -1,10 +1,10 @@
 package cz.jaro.dopravnipodniky.sketches
-
+/*
 import cz.jaro.dopravnipodniky.*
 import cz.jaro.dopravnipodniky.classes.DopravniPodnik
 import cz.jaro.dopravnipodniky.classes.Ulice
-import cz.jaro.dopravnipodniky.other.Orientace.SVISLE
-import cz.jaro.dopravnipodniky.other.Orientace.VODOROVNE
+import cz.jaro.dopravnipodniky.Orientace.SVISLE
+import cz.jaro.dopravnipodniky.Orientace.VODOROVNE
 import processing.core.PApplet
 
 class MiniSketch(private val dp: DopravniPodnik) : PApplet() {
@@ -119,4 +119,4 @@ class MiniSketch(private val dp: DopravniPodnik) : PApplet() {
 
 
     }
-}
+}*/

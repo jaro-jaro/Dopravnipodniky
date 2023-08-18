@@ -1,7 +1,8 @@
-@Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -18,6 +19,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures {
+        compose = true
         viewBinding = true
         buildConfig = true
     }
@@ -33,6 +35,9 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.androidx.jetpack.compose.kotlin.compiler.get()
     }
     kotlinOptions {
         jvmTarget = "1.8"
@@ -59,4 +64,27 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
     implementation("androidx.navigation:navigation-fragment-ktx:$navigationVersion")
     implementation("androidx.navigation:navigation-ui-ktx:$navigationVersion")
+
+    implementation(libs.androidx.jetpack.compose.foundation)
+    implementation(libs.androidx.jetpack.compose.ui.graphics)
+    implementation(libs.androidx.jetpack.compose.ui)
+    implementation(libs.androidx.jetpack.compose.ui.tooling)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.jetpack.navigation.compose)
+    implementation(libs.androidx.jetpack.compose.material3)
+    implementation(libs.androidx.jetpack.compose.material.icons.extended)
+    implementation(libs.koin.android)
+    implementation(libs.koin.annotations)
+    implementation(libs.koin.navigation)
+    implementation(libs.koin.compose)
+    ksp(libs.koin.annotations.ksp)
+    implementation(libs.compose.destinations.core)
+    ksp(libs.compose.destinations.ksp)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.serialization)
+    implementation(libs.androidx.datastore)
+    implementation(libs.material3.themeadapter)
 }
