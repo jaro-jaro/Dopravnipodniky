@@ -6,7 +6,9 @@ import kotlin.time.Duration
 
 @Serializable
 @JvmInline
-value class Tik(val value: Long)
+value class Tik(val value: Long) {
+    operator fun rem(other: Tik) = Tik(value % other.value)
+}
 
 val Int.tiku get() = Tik(this.toLong())
 val Long.tiku get() = Tik(this)

@@ -15,13 +15,13 @@
     <string name="ikonka_busiku">Ikonka busíku</string>
     <string name="rozbalit">Rozbalit</string>
     <string name="zabalit">Zabalit</string>
-    <string name="ponicenost" formatted="true">Poničenost: %.2f %%</string>
+    <string name="ponicenost" formatted="true">Poničenost: %s %%</string>
     <string name="naklady">Náklady: %s Kč/min</string>
     <string name="autobus">autobus</string>
     <string name="trolejbus">trolejbus</string>
     <string name="elektrobus">elektrobus</string>
     <string name="susbus">susbus</string>
-    <string name="prodat_za">Prodat za \n%s Kč</string>
+    <string name="prodat_za">Prodat za %s</string>
     <string name="koupit">Koupit za %s Kč</string>
     <string name="ev_c_existuje">Toto evidenční číslo již existuej!</string>
     <string name="zadejte_ev_c">Zadejte evidenční číslo nového %su:</string>
@@ -340,6 +340,7 @@
     <string name="ano_kc">Ano, %s Kč</string>
     <string name="nastavit_jizdne_na">Nastavit jízdné na %s Kč</string>
     <string name="prumer_je">\n\nPrůměr je %s Kč</string>
-    <string name="nic" />
+    <string name="nic" >" "</string>
+    <string name="zmenit_linku">Změnit linku</string>
 
 </resources>

@@ -1,5 +1,10 @@
 package cz.jaro.dopravnipodniky.jednotky
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import cz.jaro.dopravnipodniky.R
+import cz.jaro.dopravnipodniky.composeString
+import cz.jaro.dopravnipodniky.formatovat
 import kotlinx.serialization.Serializable
 
 @JvmInline
@@ -14,3 +19,6 @@ val Int.penez get() = Peniz(this.toDouble())
 val Double.penez get() = Peniz(this)
 val Float.penez get() = Peniz(this.toDouble())
 val Long.penez get() = Peniz(this.toDouble())
+
+@Composable
+fun Peniz.asString() = stringResource(R.string.kc, value.formatovat().composeString())

@@ -1,14 +1,20 @@
 package cz.jaro.dopravnipodniky.jednotky
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.minutes
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration
 
 @Serializable
 @JvmInline
-value class PenizZaMinutu(val value: Double) {
+value class PenizZaMinutu(val value: Double) : Comparable<PenizZaMinutu> {
     operator fun plus(other: PenizZaMinutu) = PenizZaMinutu(value + other.value)
     operator fun times(other: Double) = PenizZaMinutu(value * other)
+    operator fun times(other: Int) = PenizZaMinutu(value * other)
+
+    override fun compareTo(other: PenizZaMinutu) = value.compareTo(other.value)
 }
 
 operator fun Peniz.div(other: Duration) = PenizZaMinutu(value / other.minutes)
@@ -18,3 +24,6 @@ val Int.penezZaMin get() = PenizZaMinutu(this.toDouble())
 val Double.penezZaMin get() = PenizZaMinutu(this)
 val Float.penezZaMin get() = PenizZaMinutu(this.toDouble())
 val Long.penezZaMin get() = PenizZaMinutu(this.toDouble())
+
+@Composable
+fun PenizZaMinutu.asString() = stringResource(R.string.naklady, value)

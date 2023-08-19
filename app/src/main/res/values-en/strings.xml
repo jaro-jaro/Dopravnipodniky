@@ -15,13 +15,13 @@
     <string name="ikonka_busiku">Icon of bus</string>
     <string name="rozbalit">Unpack</string>
     <string name="zabalit">Pack</string>
-    <string name="ponicenost" formatted="true">Damage: %.2f %%</string>
+    <string name="ponicenost" formatted="true">Damage: %s %%</string>
     <string name="naklady">Costs: € %s per min</string>
     <string name="autobus">bus</string>
     <string name="trolejbus">trolleybus</string>
     <string name="elektrobus">elektrobus</string>
     <string name="susbus">susbus</string>
-    <string name="prodat_za">Sell for \n€ %s</string>
+    <string name="prodat_za">Sell for %s</string>
     <string name="koupit">Buy for € %s</string>
     <string name="ev_c_existuje">This registration number already exists!</string>
     <string name="zadejte_ev_c">Enter registration number of your new %s:</string>
@@ -320,6 +320,7 @@
     <string name="ano_kc">Yes € %s</string>
     <string name="nastavit_jizdne_na">Set fare to € %s</string>
     <string name="prumer_je">\n\nAverage is € %s</string>
-    <string name="nic" />
+    <string name="nic" >" "</string>
+    <string name="zmenit_linku">Change line</string>
 
 </resources>

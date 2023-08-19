@@ -26,7 +26,7 @@ data class Ulice(
     val baraky: List<Barak> = listOf(),
     val potencial: Int = 1,
     val zastavka: Zastavka? = null,
-    val maTrolej: Boolean = true, //TODO false
+    val maTrolej: Boolean = false,
     val id: UliceID = UliceID.randomUUID()
 ) {
 

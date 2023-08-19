@@ -1,7 +1,9 @@
 package cz.jaro.dopravnipodniky.other
 
 import cz.jaro.dopravnipodniky.R
+import kotlinx.serialization.Serializable
 
+@Serializable
 enum class Vyrobce(
     val jmeno: Int
 ) {

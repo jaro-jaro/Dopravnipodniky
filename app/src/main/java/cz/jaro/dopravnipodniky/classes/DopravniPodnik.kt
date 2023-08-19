@@ -7,6 +7,7 @@ import cz.jaro.dopravnipodniky.jednotky.Peniz
 import cz.jaro.dopravnipodniky.jednotky.PenizZaMinutu
 import cz.jaro.dopravnipodniky.jednotky.Pozice
 import cz.jaro.dopravnipodniky.jednotky.UlicovyBlok
+import cz.jaro.dopravnipodniky.jednotky.UlicovyBlokRange
 import cz.jaro.dopravnipodniky.jednotky.penez
 import cz.jaro.dopravnipodniky.jednotky.penezZaMin
 import cz.jaro.dopravnipodniky.jednotky.times
@@ -66,4 +67,14 @@ val DopravniPodnik.seznamKrizovatek
         }
 
         sousedi.isNotEmpty()
+    }
+
+val DopravniPodnik.oblastiPodniku: Pair<UlicovyBlokRange, UlicovyBlokRange>
+    get() {
+        val (min, max) = velikostMesta
+
+        val rangeX = (min.x/* - 2.ulicovychBloku*/)..(max.x/* + 2.ulicovychBloku*/)
+        val rangeY = (min.y/* - 2.ulicovychBloku*/)..(max.y/* + 2.ulicovychBloku*/)
+
+        return rangeX to rangeY
     }

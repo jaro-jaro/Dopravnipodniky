@@ -147,15 +147,15 @@ import kotlin.time.Duration.Companion.seconds
 const val todocka = 0
 
 val minimumInvestice = 1_000_000L.penez
-val pocatecniCenaMesta = 3_141_592.penez//1_200_000L.penez
+val pocatecniCenaMesta = 1_200_000L.penez
 
 // vykreslovani
 
 const val pocatecniPriblizeni = .75F
 const val oddalenyRezim = .6F
 const val maximalniOddaleni = .2F
-val pocatecniPosunutiX = 0.dp//200
-val pocatecniPosunutiY = 0.dp//600
+val pocatecniPosunutiX = 0.dp //200
+val pocatecniPosunutiY = 0.dp //600
 
 val ulicovyBlok = 150.dp
 
@@ -258,6 +258,9 @@ val BARVICKY /*jeej*/ = listOf(
  * Zformátuje číslo, aby vypadalo hezky
  */
 fun Number.formatovat(): Text {
+    if (this is Double && this.toInt().toDouble() == this) return this.toInt().formatovat()
+    if (this is Double && this.toLong().toDouble() == this) return this.toLong().formatovat()
+    if (this is Float && this.toInt().toFloat() == this) return this.toInt().formatovat()
     if (this == Double.POSITIVE_INFINITY.toLong()) return R.string.nekonecne_mnoho.toText()
     if (this == Double.NEGATIVE_INFINITY.toLong()) return R.string.nekonecne_malo.toText()
 
@@ -267,40 +270,13 @@ fun Number.formatovat(): Text {
         vysledek += cislice
 
         if ((i + 1) % 3 == 0) {
-            vysledek += " ".single()
+            vysledek += ' '
         }
     }
 
     vysledek.reverse()
 
     return vysledek.joinToString("").removePrefix(" ").toText()
-}
-
-/**
- * Vrátí náklady busu slovy
- *
- * Pro trolejbusy odpovídá dvojnásobku
- */
-fun naklady(naklady: Double, trolejbus: Boolean = false): Int {
-
-    val nakladove = if (trolejbus) naklady * 2 else naklady
-
-    return when {
-
-        nakladove < 50 -> R.string.velmi_nizke
-        nakladove < 60 -> R.string.hodne_nizke
-        nakladove < 65 -> R.string.nizke
-        nakladove < 70 -> R.string.pomerne_nizke
-        nakladove < 75 -> R.string.snizene
-        nakladove < 80 -> R.string.normalni
-        nakladove < 85 -> R.string.pomerne_vysoke
-        nakladove < 90 -> R.string.vysoke
-        nakladove < 95 -> R.string.hodne_vysoke
-        nakladove < 100 -> R.string.velmi_vysoke
-        nakladove < 500 -> R.string.muzejni_bus
-        else -> R.string.JOSTOVSKE
-
-    }
 }
 
 /**

@@ -1,5 +1,7 @@
 package cz.jaro.dopravnipodniky
 
+import cz.jaro.dopravnipodniky.jednotky.Tik
+import cz.jaro.dopravnipodniky.jednotky.tiku
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
@@ -13,17 +15,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 
 @Single
-class Hodiny(
-
-) {
-    fun setup() {
-
-    }
-
-    fun update() {
-
-    }
-
+class Hodiny {
     companion object {
         private const val millisPerTik = 1000L / TPS
     }
@@ -37,16 +29,30 @@ class Hodiny(
         .filter { millis ->
             millis % millisPerTik == 0L
         }
-        .map { }
+        .map { millis ->
+            (millis / millisPerTik).tiku
+        }
         .flowOn(Dispatchers.IO)
 
-    val scope =  CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(Dispatchers.IO)
+
+    private val listeners: MutableList<Pair<Tik, suspend CoroutineScope.() -> Unit>> = mutableListOf()
+
+    fun registerListener(
+        every: Tik,
+        listener: suspend CoroutineScope.() -> Unit,
+    ) {
+        listeners += every to listener
+    }
 
     init {
-        setup()
         scope.launch {
-            cas.collect {
-                update()
+            cas.collect { tik ->
+                listeners.forEach { (every, listener) ->
+                    launch {
+                        if (tik % every == 0.tiku) listener()
+                    }
+                }
             }
         }
     }

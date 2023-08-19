@@ -4071,4 +4071,4 @@ private val elektrobusy = listOf(
     ),
 )
 
-val typy = autobusy + trolejbusy + elektrobusy
+val typyBusu = autobusy + trolejbusy + elektrobusy

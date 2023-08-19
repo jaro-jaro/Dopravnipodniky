@@ -12,7 +12,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @KoinViewModel
 class MainViewModel(
-    private val preferencesDataSource: PreferencesDataSource
+    private val preferencesDataSource: PreferencesDataSource,
 ) : ViewModel() {
     val dp = preferencesDataSource.dp
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
