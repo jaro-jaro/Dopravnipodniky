@@ -5,7 +5,6 @@ import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.classes.DopravniPodnik
 import cz.jaro.dopravnipodniky.classes.maZastavku
 import cz.jaro.dopravnipodniky.classes.pocetLinek
-import cz.jaro.dopravnipodniky.jednotky.bloku
 import cz.jaro.dopravnipodniky.jednotky.metru
 import cz.jaro.dopravnipodniky.jednotky.penez
 import cz.jaro.dopravnipodniky.jednotky.penezZaMin
@@ -158,21 +157,21 @@ const val maximalniOddaleni = .2F
 val pocatecniPosunutiX = 0.dp//200
 val pocatecniPosunutiY = 0.dp//600
 
-val ulicovyBlok = 150.bloku
+val ulicovyBlok = 150.dp
 
-val sirkaUlice = 34.bloku
-val velikostZastavky = 48.bloku
-val odsazeniBaraku = 5.bloku
+val sirkaUlice = 34.dp
+val velikostZastavky = 48.dp
+val odsazeniBaraku = 5.dp
 const val barakuVUlici = 5
 val velikostBaraku = (ulicovyBlok - odsazeniBaraku * (barakuVUlici + 1)) / barakuVUlici
-val sirkaObrubniku = 3.bloku
-val sirkaBusu = 10.bloku
+val sirkaObrubniku = 3.dp
+val sirkaBusu = 10.dp
 
-val sirkaTroleje = 1.bloku
-val predsazeniTrolejiS = 8.bloku
-val predsazeniTrolejiL = 28.bloku
-val rozchodTroleji = 5.bloku
-val odsazeniTroleje = 6.bloku
+val sirkaTroleje = 1.dp
+val predsazeniTrolejiS = 8.dp
+val predsazeniTrolejiL = 28.dp
+val rozchodTroleji = 5.dp
+val odsazeniTroleje = 6.dp
 val odsazeniPrvniTroleje = odsazeniTroleje
 val odsazeniDruheTroleje = odsazeniTroleje + rozchodTroleji
 val odsazeniTretiTroleje = odsazeniDruheTroleje + odsazeniTroleje + odsazeniTroleje

@@ -12,8 +12,7 @@ import cz.jaro.dopravnipodniky.classes.DopravniPodnik
 import cz.jaro.dopravnipodniky.classes.Ulice
 import cz.jaro.dopravnipodniky.jednotky.Pozice
 import cz.jaro.dopravnipodniky.jednotky.UlicovyBlok
-import cz.jaro.dopravnipodniky.jednotky.blokuSUlicema
-import cz.jaro.dopravnipodniky.jednotky.toDp
+import cz.jaro.dopravnipodniky.jednotky.dpSUlicema
 import cz.jaro.dopravnipodniky.odsazeniTroleji
 import cz.jaro.dopravnipodniky.predsazeniTrolejiL
 import cz.jaro.dopravnipodniky.predsazeniTrolejiS
@@ -27,14 +26,14 @@ private const val DEBUG_BARVY = false
 context (DrawScope)
 fun Ulice.nakreslitTroleje() {
 
-    val delkaUlice = delka.toDp(priblizeni).toPx()
-    val sirka = sirkaTroleje.toDp(priblizeni.coerceAtLeast(1F)).toPx()
-    val predsazeniS = predsazeniTrolejiS.toDp(priblizeni).toPx()
-    val troleje = odsazeniTroleji.map { it.toDp(priblizeni).toPx() }
+    val delkaUlice = delka.toPx()
+    val sirka = sirkaTroleje.toPx()
+    val predsazeniS = predsazeniTrolejiS.toPx()
+    val troleje = odsazeniTroleji.map { it.toPx() }
 
     translate(
-        left = zacatekX.toDp(priblizeni).toPx(),
-        top = zacatekY.toDp(priblizeni).toPx(),
+        left = zacatekX.toPx(),
+        top = zacatekY.toPx(),
     ) {
         when (orietace) {
             Orientace.VODOROVNE -> {
@@ -84,14 +83,14 @@ fun nakreslitTrolejeNaKrizovatku(
 
     val ctyrKrizovatka = sousedDole != null && sousedNahore != null && sousedVlevo != null && sousedVpravo != null
 
-    val zacatekX = krizovatka.x.blokuSUlicema.toDp(priblizeni).toPx()
-    val zacatekY = krizovatka.y.blokuSUlicema.toDp(priblizeni).toPx()
+    val zacatekX = krizovatka.x.dpSUlicema.toPx()
+    val zacatekY = krizovatka.y.dpSUlicema.toPx()
 
-    val sirka = sirkaTroleje.toDp(priblizeni.coerceAtLeast(1F)).toPx()
-    val sirkaUlice = sirkaUlice.toDp(priblizeni).toPx()
-    val predsazeniS = predsazeniTrolejiS.toDp(priblizeni).toPx()
-    val predsazeniL = predsazeniTrolejiL.toDp(priblizeni).toPx()
-    val troleje = odsazeniTroleji.map { it.toDp(priblizeni).toPx() }
+    val sirka = sirkaTroleje.toPx()
+    val sirkaUlice = sirkaUlice.toPx()
+    val predsazeniS = predsazeniTrolejiS.toPx()
+    val predsazeniL = predsazeniTrolejiL.toPx()
+    val troleje = odsazeniTroleji.map { it.toPx() }
 
     translate(
         left = zacatekX,

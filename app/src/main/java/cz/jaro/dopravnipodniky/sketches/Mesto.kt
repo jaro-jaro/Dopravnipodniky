@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.Orientace.SVISLE
 import cz.jaro.dopravnipodniky.Orientace.VODOROVNE
 import cz.jaro.dopravnipodniky.TypBaraku
@@ -18,9 +19,7 @@ import cz.jaro.dopravnipodniky.classes.DopravniPodnik
 import cz.jaro.dopravnipodniky.classes.Ulice
 import cz.jaro.dopravnipodniky.jednotky.Pozice
 import cz.jaro.dopravnipodniky.jednotky.UlicovyBlok
-import cz.jaro.dopravnipodniky.jednotky.bloku
-import cz.jaro.dopravnipodniky.jednotky.blokuSUlicema
-import cz.jaro.dopravnipodniky.jednotky.toDp
+import cz.jaro.dopravnipodniky.jednotky.dpSUlicema
 import cz.jaro.dopravnipodniky.odsazeniBaraku
 import cz.jaro.dopravnipodniky.sedObrubniku
 import cz.jaro.dopravnipodniky.sedUlice
@@ -41,12 +40,12 @@ fun namalovatKrizovatku(
         it.konec == krizovatka || it.zacatek == krizovatka
     }
 
-    val zacatekX = x.blokuSUlicema.toDp(priblizeni)
-    val zacatekY = y.blokuSUlicema.toDp(priblizeni)
-    val konecX = (x.blokuSUlicema + sirkaUlice).toDp(priblizeni)
-    val konecY = (y.blokuSUlicema + sirkaUlice).toDp(priblizeni)
+    val zacatekX = x.dpSUlicema
+    val zacatekY = y.dpSUlicema
+    val konecX = (x.dpSUlicema + sirkaUlice)
+    val konecY = (y.dpSUlicema + sirkaUlice)
 
-    val velikost = sirkaUlice.toDp(priblizeni)
+    val velikost = sirkaUlice
 
     drawRect(
         color = sedUlice,
@@ -54,7 +53,7 @@ fun namalovatKrizovatku(
         bottomRight = Offset(konecX.toPx(), konecY.toPx()),
     )
 
-    val obrubnik = sirkaObrubniku.toDp(priblizeni/*.coerceAtLeast(1F)*/)
+    val obrubnik = sirkaObrubniku
 
     if (sousedi.none { it.konec == krizovatka && it.orietace == SVISLE }) drawRect(
         color = sedObrubniku,
@@ -89,12 +88,12 @@ fun Barak.draw(
         (if (jeNaDruheStrane) i - ulice.baraky.size / 2 else i) to jeNaDruheStrane
     }
 
-    val zacatekUliceX = ulice.zacatekX.toDp(priblizeni).toPx()
-    val zacatekUliceY = ulice.zacatekY.toDp(priblizeni).toPx()
-    val konecUliceX = ulice.konecX.toDp(priblizeni).toPx()
-    val konecUliceY = ulice.konecY.toDp(priblizeni).toPx()
+    val zacatekUliceX = ulice.zacatekX.toPx()
+    val zacatekUliceY = ulice.zacatekY.toPx()
+    val konecUliceX = ulice.konecX.toPx()
+    val konecUliceY = ulice.konecY.toPx()
 
-    val odsazeni = odsazeniBaraku.toDp(priblizeni).toPx()
+    val odsazeni = odsazeniBaraku.toPx()
 
     val indexbarvy = Theme.entries.indexOf(tema)
     val indexSkoroNoveBarvy = indexbarvy + barvicka
@@ -107,7 +106,7 @@ fun Barak.draw(
 
     val scitanecVysky = 0F
 
-    val sirka = velikostBaraku.toDp(priblizeni).toPx()
+    val sirka = velikostBaraku.toPx()
 
     @Suppress("UnnecessaryVariable")
     val vyska = /*if (ulice.maZastavku && !rohovy) {
@@ -117,14 +116,14 @@ fun Barak.draw(
 
     if (typ == TypBaraku.Stredovy) {
 
-        val pulUlicovyhoBloku = velikostUlicovyhoBloku.bloku.toDp(priblizeni).toPx() / 2
+        val pulUlicovyhoBloku = velikostUlicovyhoBloku.dp.toPx() / 2
         translate(
             left = zacatekUliceX,
             top = zacatekUliceY,
         ) {
             val rohBloku = when (ulice.orietace) {
-                SVISLE -> Offset(x = sirkaUlice.toDp(priblizeni).toPx())
-                VODOROVNE -> Offset(y = sirkaUlice.toDp(priblizeni).toPx())
+                SVISLE -> Offset(x = sirkaUlice.toPx())
+                VODOROVNE -> Offset(y = sirkaUlice.toPx())
             }
             translate(
                 offset = rohBloku
@@ -139,7 +138,7 @@ fun Barak.draw(
                     drawRoundRect(
                         color = barvicka,
                         size = Size(sirka, sirka) * 2F,
-                        cornerRadius = CornerRadius(20.bloku.toDp(priblizeni).toPx())
+                        cornerRadius = CornerRadius(20.dp.toPx())
                     )
                 }
             }
@@ -156,7 +155,7 @@ fun Barak.draw(
                     width = sirka,
                     height = vyska + scitanecVysky,
                 ),
-                cornerRadius = CornerRadius(5.bloku.toDp(priblizeni).toPx() * (sirka / vyska))
+                cornerRadius = CornerRadius(5.dp.toPx() * (sirka / vyska))
             )
 
             VODOROVNE to false -> drawRoundRect( // nahore
@@ -169,7 +168,7 @@ fun Barak.draw(
                     width = sirka,
                     height = vyska + scitanecVysky,
                 ),
-                cornerRadius = CornerRadius(5.bloku.toDp(priblizeni).toPx() * (sirka / vyska))
+                cornerRadius = CornerRadius(5.dp.toPx() * (sirka / vyska))
             )
 
             SVISLE to true -> drawRoundRect( // vlevo
@@ -182,7 +181,7 @@ fun Barak.draw(
                     width = vyska + scitanecVysky,
                     height = sirka,
                 ),
-                cornerRadius = CornerRadius(5.bloku.toDp(priblizeni).toPx() * (sirka / vyska))
+                cornerRadius = CornerRadius(5.dp.toPx() * (sirka / vyska))
             )
 
             SVISLE to false -> drawRoundRect( // vpravo
@@ -195,7 +194,7 @@ fun Barak.draw(
                     width = vyska + scitanecVysky,
                     height = sirka,
                 ),
-                cornerRadius = CornerRadius(5.bloku.toDp(priblizeni).toPx() * (sirka / vyska))
+                cornerRadius = CornerRadius(5.dp.toPx() * (sirka / vyska))
             )
         }
     }
@@ -205,10 +204,10 @@ context(DrawScope)
 fun Ulice.draw() {
 //    zastavka?.draw()
 
-    val zacatekX = zacatekX.toDp(priblizeni)
-    val zacatekY = zacatekY.toDp(priblizeni)
-    val konecX = konecX.toDp(priblizeni)
-    val konecY = konecY.toDp(priblizeni)
+    val zacatekX = zacatekX
+    val zacatekY = zacatekY
+    val konecX = konecX
+    val konecY = konecY
 
     //fill(BARVICKY[ulice.potencial])
     //fill(ulice.potencial * 20)
@@ -219,7 +218,7 @@ fun Ulice.draw() {
         bottomRight = Offset(konecX.toPx(), konecY.toPx()),
     )
 
-    val obrubnik = sirkaObrubniku.toDp(priblizeni/*.coerceAtLeast(1F)*/)
+    val obrubnik = sirkaObrubniku
 
     drawRect(
         color = sedObrubniku,

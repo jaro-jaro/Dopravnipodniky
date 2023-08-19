@@ -1,19 +1,20 @@
 package cz.jaro.dopravnipodniky.classes
 
+import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.BusID
 import cz.jaro.dopravnipodniky.LinkaID
 import cz.jaro.dopravnipodniky.Smer
 import cz.jaro.dopravnipodniky.Smer.POZITIVNE
-import cz.jaro.dopravnipodniky.jednotky.Blok
 import cz.jaro.dopravnipodniky.jednotky.Peniz
 import cz.jaro.dopravnipodniky.jednotky.PenizZaMinutu
 import cz.jaro.dopravnipodniky.jednotky.Pozice
-import cz.jaro.dopravnipodniky.jednotky.bloku
+import cz.jaro.dopravnipodniky.jednotky.dp
 import cz.jaro.dopravnipodniky.jednotky.penez
 import cz.jaro.dopravnipodniky.jednotky.to
 import cz.jaro.dopravnipodniky.nasobitelPoctuLidiKteryTiNastoupiDoBusuNaZastavceKdyzZastaviANakyLidiTamJsouAMaVSobeJesteVolneMisto
 import cz.jaro.dopravnipodniky.other.Trakce
 import cz.jaro.dopravnipodniky.other.bonusoveVydajeZaNeekologicnost
+import cz.jaro.dopravnipodniky.sketches.SerializableDp
 import kotlinx.serialization.Serializable
 import kotlin.math.pow
 import kotlin.time.Duration
@@ -29,8 +30,8 @@ data class Bus(
     val jeNaZastavce: Boolean = false,
     /** Index ulice na lince */
     val poziceNaLince: Int = 0,
-    val pozice: Pozice<Blok> = 0.bloku to 0.bloku,
-    val poziceVUlici: Blok = 0.bloku,
+    val pozice: Pozice<SerializableDp> = 0.dp to 0.dp,
+    val poziceVUlici: SerializableDp = 0.dp,
     val smerNaLince: Smer = POZITIVNE,
     val linka: LinkaID? = null,
     val id: BusID = BusID.randomUUID(),
@@ -60,10 +61,10 @@ data class Bus(
         val prumernyVydelekZaZastavku = dp.jizdne * cloveci * nasobitelCloveku
 
         val busUjede = typBusu.rychlost * 1.minutes // za minutu
-        val ujetyZlomekLinky = busUjede / linka.delkaLinky.bloku // za minutu
+        val ujetyZlomekLinky = busUjede / linka.delkaLinky.dp // za minutu
         val pocetZastavek = ujetyZlomekLinky * zastavekNaLince // za minutu
 
-        return prumernyVydelekZaZastavku * pocetZastavek // * nasobitelZisku
+        return prumernyVydelekZaZastavku * pocetZastavek.toDouble() // * nasobitelZisku
     }
 
     fun vydelek(dp: DopravniPodnik) = vydelkuj(dp)

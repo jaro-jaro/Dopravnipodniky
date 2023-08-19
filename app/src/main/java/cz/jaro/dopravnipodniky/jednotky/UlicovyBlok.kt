@@ -36,8 +36,13 @@ class UlicovyBlokRange(
     }
 }
 
+@Deprecated("", level = DeprecationLevel.ERROR)
 val UlicovyBlok.bloku get() = ulicovyBlok * value
+@Deprecated("", level = DeprecationLevel.ERROR)
 val UlicovyBlok.blokuSUlicema get() = ulicovyBlok * value + sirkaUlice * value
+
+val UlicovyBlok.dp get() = ulicovyBlok * value
+val UlicovyBlok.dpSUlicema get() = ulicovyBlok * value + sirkaUlice * value
 
 val Int.ulicovychBloku get() = UlicovyBlok(this)
 val Long.ulicovychBloku get() = UlicovyBlok(this.toInt())

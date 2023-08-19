@@ -1,6 +1,6 @@
 package cz.jaro.dopravnipodniky.classes
 
-import cz.jaro.dopravnipodniky.jednotky.BlokZaHodinu
+import cz.jaro.dopravnipodniky.jednotky.DpZaHodinu
 import cz.jaro.dopravnipodniky.jednotky.Metr
 import cz.jaro.dopravnipodniky.jednotky.Peniz
 import cz.jaro.dopravnipodniky.jednotky.PenizZaMinutu
@@ -15,7 +15,7 @@ data class TypBusu(
     val trakce: Trakce,
     val vyrobce: Vyrobce,
     val kapacita: Int,
-    val rychlost: BlokZaHodinu,
+    val rychlost: DpZaHodinu,
     val maxNaklady: PenizZaMinutu,
     val cena: Peniz,
     val delka: Metr,

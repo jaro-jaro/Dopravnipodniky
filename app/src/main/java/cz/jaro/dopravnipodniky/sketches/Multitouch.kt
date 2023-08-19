@@ -1,23 +1,5 @@
 package cz.jaro.dopravnipodniky.sketches
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import cz.jaro.dopravnipodniky.pocatecniPosunutiX
-import cz.jaro.dopravnipodniky.pocatecniPosunutiY
-import cz.jaro.dopravnipodniky.pocatecniPriblizeni
-
-var s: Float = 0F
-
-var tx by mutableStateOf(pocatecniPosunutiX)
-var ty by mutableStateOf(pocatecniPosunutiY)
-
-var x1: Float = -1F
-var y1: Float = -1F
-
-var priblizeni by mutableFloatStateOf(pocatecniPriblizeni)
-
 /*
 fun DrawScope.zachovavatPodobnost() {
 

@@ -8,7 +8,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import java.time.LocalDate
 
-class LocalDateSeralizer : KSerializer<LocalDate> {
+class LocalDateSerializer : KSerializer<LocalDate> {
     override fun deserialize(decoder: Decoder): LocalDate {
         return LocalDate.ofEpochDay(decoder.decodeLong())
     }

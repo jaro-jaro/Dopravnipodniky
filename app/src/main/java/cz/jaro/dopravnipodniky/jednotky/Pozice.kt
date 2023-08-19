@@ -9,10 +9,9 @@ data class Pozice<T>(
     val y: T,
 )
 
-fun Pozice<Blok>.plus(other: Blok) = Pozice(x + other, y + other)
+fun Pozice<Dp>.plus(other: Dp) = Pozice(x + other, y + other)
 
-val Pozice<UlicovyBlok>.bloku get() = Pozice(x.bloku, y.bloku)
+val Pozice<UlicovyBlok>.dp get() = Pozice(x.dp, y.dp)
 
 infix fun UlicovyBlok.to(other: UlicovyBlok) = Pozice(this, other)
-infix fun Blok.to(other: Blok) = Pozice(this, other)
 infix fun Dp.to(other: Dp) = Pozice(this, other)

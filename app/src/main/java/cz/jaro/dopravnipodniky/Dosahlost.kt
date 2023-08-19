@@ -29,7 +29,7 @@ sealed interface Dosahlost {
     sealed interface Stav {
         @Serializable
         data class Splneno(
-            @Serializable(with = LocalDateSeralizer::class) val kdy: LocalDate,
+            @Serializable(with = LocalDateSerializer::class) val kdy: LocalDate,
         ) : Stav
 
         @Serializable

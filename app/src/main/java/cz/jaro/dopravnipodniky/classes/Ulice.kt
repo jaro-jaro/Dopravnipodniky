@@ -4,13 +4,13 @@ import cz.jaro.dopravnipodniky.Orientace
 import cz.jaro.dopravnipodniky.Orientace.SVISLE
 import cz.jaro.dopravnipodniky.Orientace.VODOROVNE
 import cz.jaro.dopravnipodniky.UliceID
-import cz.jaro.dopravnipodniky.jednotky.Blok
 import cz.jaro.dopravnipodniky.jednotky.Pozice
 import cz.jaro.dopravnipodniky.jednotky.UlicovyBlok
-import cz.jaro.dopravnipodniky.jednotky.blokuSUlicema
+import cz.jaro.dopravnipodniky.jednotky.dpSUlicema
 import cz.jaro.dopravnipodniky.kapacita
 import cz.jaro.dopravnipodniky.nasobitelMaxCloveku
 import cz.jaro.dopravnipodniky.sirkaUlice
+import cz.jaro.dopravnipodniky.sketches.SerializableDp
 import kotlinx.serialization.Serializable
 import kotlin.math.roundToInt
 
@@ -39,13 +39,13 @@ data class Ulice(
         else -> SVISLE
     }
 
-    val zacatekX: Blok
-    val zacatekY: Blok
-    val konecX: Blok
-    val konecY: Blok
+    val zacatekX: SerializableDp
+    val zacatekY: SerializableDp
+    val konecX: SerializableDp
+    val konecY: SerializableDp
 
-    val sirka: Blok
-    val delka: Blok
+    val sirka: SerializableDp
+    val delka: SerializableDp
 
     init {
         if (zacatek.x != konec.x && zacatek.y != konec.y) { // diagonala
@@ -54,19 +54,19 @@ data class Ulice(
 
         when(orietace) {
             SVISLE -> {
-                zacatekX = zacatek.x.blokuSUlicema
-                zacatekY = zacatek.y.blokuSUlicema + sirkaUlice
-                konecX = konec.x.blokuSUlicema + sirkaUlice
-                konecY = konec.y.blokuSUlicema
+                zacatekX = zacatek.x.dpSUlicema
+                zacatekY = zacatek.y.dpSUlicema + sirkaUlice
+                konecX = konec.x.dpSUlicema + sirkaUlice
+                konecY = konec.y.dpSUlicema
 
                 sirka = konecX - zacatekX
                 delka = konecY - zacatekY
             }
             VODOROVNE -> {
-                zacatekX = zacatek.x.blokuSUlicema + sirkaUlice
-                zacatekY = zacatek.y.blokuSUlicema
-                konecX = konec.x.blokuSUlicema
-                konecY = konec.y.blokuSUlicema + sirkaUlice
+                zacatekX = zacatek.x.dpSUlicema + sirkaUlice
+                zacatekY = zacatek.y.dpSUlicema
+                konecX = konec.x.dpSUlicema
+                konecY = konec.y.dpSUlicema + sirkaUlice
 
                 sirka = konecY - zacatekY
                 delka = konecX - zacatekX

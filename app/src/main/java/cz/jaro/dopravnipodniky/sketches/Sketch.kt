@@ -4,26 +4,48 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
+import cz.jaro.dopravnipodniky.DpSerializer
 import cz.jaro.dopravnipodniky.Vse
 import cz.jaro.dopravnipodniky.classes.DopravniPodnik
 import cz.jaro.dopravnipodniky.classes.seznamKrizovatek
 import cz.jaro.dopravnipodniky.maximalniOddaleni
 import cz.jaro.dopravnipodniky.oddalenyRezim
+import cz.jaro.dopravnipodniky.pocatecniPosunutiX
+import cz.jaro.dopravnipodniky.pocatecniPosunutiY
+import cz.jaro.dopravnipodniky.pocatecniPriblizeni
 import cz.jaro.dopravnipodniky.sedPozadi
+import kotlinx.serialization.Serializable
 import kotlin.math.roundToInt
+
+typealias SerializableDp = @Serializable(with = DpSerializer::class) Dp
 
 @Composable
 fun Sketch(
     dp: DopravniPodnik,
+    vse: Vse,
+    upravitDp: ((DopravniPodnik) -> DopravniPodnik) -> Unit,
+    upravitVse: ((Vse) -> Vse) -> Unit,
     modifier: Modifier = Modifier,
     vykreslitBusy: Boolean? = null,
     vykreslitLinky: Boolean? = null,
     vybiraniLinky: Boolean = false,
 ) {
+    val density = LocalDensity.current
+    var tx by rememberSaveable { mutableFloatStateOf(with(density) { pocatecniPosunutiX.toPx() }) }
+    var ty by rememberSaveable { mutableFloatStateOf(with(density) { pocatecniPosunutiY.toPx() }) }
+    var priblizeni by rememberSaveable { mutableFloatStateOf(pocatecniPriblizeni) }
+
 //    println(dp.ulicove.map { "(${it.zacatek.x.value} ${it.zacatek.y.value} - ${it.konec.x.value} ${it.konec.y.value})" })
 
     val nezajimaMeVykreslovani = vykreslitBusy == null && vykreslitLinky == null
@@ -41,8 +63,8 @@ fun Sketch(
             .pointerInput(Unit) {
                 detectTransformGestures(
                     onGesture = { _, pan, zoom, _ ->
-                        tx += pan.x.toDp()
-                        ty += pan.y.toDp() //todo locknout
+                        tx += pan.x / priblizeni
+                        ty += pan.y / priblizeni //todo locknout
 
                         priblizeni = (priblizeni * zoom).coerceAtLeast(maximalniOddaleni)
 //                        println("onGesture(centroid=$centroid, pan=$pan, zoom=$zoom, rotation=$rotation)")
@@ -57,11 +79,14 @@ fun Sketch(
             topLeft = Offset(),
             size = size
         )
-
-        translate(
-            left = tx.toPx(),
-            top = ty.toPx(),
+        scale(
+            scaleX = priblizeni,
+            scaleY = priblizeni,
         ) {
+            translate(
+                left = tx,
+                top = ty,
+            ) {
 
 //    if (!vybiraniLinky) {
 //        vykreslitLinky = vse.zobrazitLinky
@@ -71,40 +96,41 @@ fun Sketch(
 //        vykreslitBusy = false
 //    )
 
-            dp.ulicove.forEach { ulice ->
-                ulice.draw()
-            }
-
-            dp.ulicove.forEach { ulice ->
-                ulice.baraky.forEach { barak ->
-                    barak.draw(Vse(dp).tema, ulice) // todo vse
-                }
-            }
-
-            dp.seznamKrizovatek.forEach { krizovatka ->
-                namalovatKrizovatku(dp, krizovatka)
-            }
-
-            if (opravduVykreslitBusy) dp.busy.forEach { bus ->
-//                bus.draw(dp)
-            }
-
-            if (opravduVykreslitLinky) {
-//                namalovatLinky()
-            }
-
-            if (priblizeni > oddalenyRezim) {
                 dp.ulicove.forEach { ulice ->
-                    if (ulice.maTrolej) ulice.nakreslitTroleje()
+                    ulice.draw()
                 }
+
+                dp.ulicove.forEach { ulice ->
+                    ulice.baraky.forEach { barak ->
+                        barak.draw(vse.tema, ulice)
+                    }
+                }
+
                 dp.seznamKrizovatek.forEach { krizovatka ->
-                    nakreslitTrolejeNaKrizovatku(dp, krizovatka)
+                    namalovatKrizovatku(dp, krizovatka)
                 }
-            }
+
+                if (opravduVykreslitBusy) dp.busy.forEach { bus ->
+//                bus.draw(dp)
+                }
+
+                if (opravduVykreslitLinky) {
+//                namalovatLinky()
+                }
+
+                if (priblizeni > oddalenyRezim) {
+                    dp.ulicove.forEach { ulice ->
+                        if (ulice.maTrolej) ulice.nakreslitTroleje()
+                    }
+                    dp.seznamKrizovatek.forEach { krizovatka ->
+                        nakreslitTrolejeNaKrizovatku(dp, krizovatka)
+                    }
+                }
 
 //            if (vybiraniLinky) namalovatVybiraniLinky()
 
-            ulozit()
+                ulozit()
+            }
         }
     }
 }
