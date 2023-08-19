@@ -26,6 +26,7 @@ import cz.jaro.dopravnipodniky.oddalenyRezim
 import cz.jaro.dopravnipodniky.pocatecniPosunutiX
 import cz.jaro.dopravnipodniky.pocatecniPosunutiY
 import cz.jaro.dopravnipodniky.pocatecniPriblizeni
+import cz.jaro.dopravnipodniky.sedPozadi
 import kotlinx.serialization.Serializable
 import kotlin.math.roundToInt
 
@@ -79,7 +80,8 @@ fun CeleMesto(
     ) {
 
         drawRect(
-            color = vse.tema.darkColorScheme.surface,
+//            color = vse.tema.darkColorScheme.surface,
+            color = sedPozadi,
             topLeft = Offset(),
             size = size
         )
