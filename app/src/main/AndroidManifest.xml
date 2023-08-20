@@ -9,7 +9,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ikonka_aplikace_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.DopravníPodniky"
+        android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
         tools:targetApi="31">
         <activity
             android:name="cz.jaro.dopravnipodniky.MainActivity"

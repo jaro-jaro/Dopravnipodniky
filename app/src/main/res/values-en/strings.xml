@@ -16,7 +16,7 @@
     <string name="rozbalit">Unpack</string>
     <string name="zabalit">Pack</string>
     <string name="ponicenost" formatted="true">Damage: %s %%</string>
-    <string name="naklady">Costs: € %s per min</string>
+    <string name="naklady">Costs: %s</string>
     <string name="autobus">bus</string>
     <string name="trolejbus">trolleybus</string>
     <string name="elektrobus">elektrobus</string>
@@ -322,5 +322,7 @@
     <string name="prumer_je">\n\nAverage is € %s</string>
     <string name="nic" >" "</string>
     <string name="zmenit_linku">Change line</string>
+    <string name="zpet">Back</string>
+    <string name="moc_filtru">Sadly, we haven\'t found any vehicles that would satisfy your needs. Try changing the filters!</string>
 
 </resources>

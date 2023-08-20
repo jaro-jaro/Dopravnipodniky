@@ -4,24 +4,58 @@ import cz.jaro.dopravnipodniky.jednotky.Peniz
 import cz.jaro.dopravnipodniky.jednotky.penez
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
+import kotlin.reflect.KClass
 
 @Serializable
 sealed interface Dosahlost {
 
-    val jmeno: Int
-    val popis: Int
-    val odmena: Peniz get() = 0.penez
+    @Serializable
+    sealed interface NormalniDosahlost : Dosahlost {
+        val jmeno: Int
+        val popis: Int
+        val odmena: Peniz get() = 0.penez
+
+        val stav: Stav
+        fun stav(stav: Stav): NormalniDosahlost
+    }
 
     @Serializable
-    sealed interface Secret : Dosahlost {
+    sealed interface SkupinovaDosahlost : Dosahlost {
+        val dosahlosti: List<KClass<out Pocetni>>
+
+        @Serializable
+        data object Bus : SkupinovaDosahlost {
+            override val dosahlosti = listOf(
+                Bus1::class,
+                Bus2::class,
+                Bus12::class,
+                Bus60::class,
+                Bus1024::class,
+            )
+        }
+
+        @Serializable
+        data object Penize : SkupinovaDosahlost {
+            override val dosahlosti = listOf(
+                Penize200000::class,
+                Penize500000::class,
+                Penize1000000::class,
+                Penize2000000::class,
+                Penize10000000::class,
+            )
+        }
+    }
+
+    @Serializable
+    sealed interface Secret : NormalniDosahlost {
         val napoveda: Int? get() = null
     }
 
     @Serializable
-    sealed interface NeSecret : Dosahlost
+    sealed interface NeSecret : NormalniDosahlost
 
     @Serializable
-    sealed interface Pocetni : Dosahlost {
+    sealed interface Pocetni : NormalniDosahlost {
         val cil: Int
     }
 
@@ -41,14 +75,11 @@ sealed interface Dosahlost {
         ) : Stav
     }
 
-    val stav: Stav
-    fun stav(stav: Stav): Dosahlost
-
     @Serializable
     data class Linka1(
-        override val stav: Stav = Stav.Pocetni(0),
+        override val stav: Stav = Stav.Nesplneno,
     ) : Pocetni {
-        override fun stav(stav: Stav) = copy(stav = stav as Stav.Pocetni)
+        override fun stav(stav: Stav) = copy(stav = stav)
         override val cil: Int get() = 1
 
         override val jmeno get() = R.string.d_n_linka1
@@ -86,9 +117,9 @@ sealed interface Dosahlost {
 
     @Serializable
     data class Bus1(
-        override val stav: Stav = Stav.Pocetni(0),
+        override val stav: Stav = Stav.Nesplneno,
     ) : Pocetni {
-        override fun stav(stav: Stav) = copy(stav = stav as Stav.Pocetni)
+        override fun stav(stav: Stav) = copy(stav = stav)
         override val cil: Int get() = 1
         override val jmeno get() = R.string.d_n_bus1
         override val popis get() = R.string.d_p_bus1
@@ -97,9 +128,9 @@ sealed interface Dosahlost {
 
     @Serializable
     data class Bus2(
-        override val stav: Stav = Stav.Pocetni(0),
+        override val stav: Stav = Stav.Nesplneno,
     ) : Pocetni {
-        override fun stav(stav: Stav) = copy(stav = stav as Stav.Pocetni)
+        override fun stav(stav: Stav) = copy(stav = stav)
         override val cil: Int get() = 2
         override val jmeno get() = R.string.d_n_bus2
         override val popis get() = R.string.d_p_bus2
@@ -110,7 +141,7 @@ sealed interface Dosahlost {
     data class Bus12(
         override val stav: Stav = Stav.Pocetni(12),
     ) : Pocetni {
-        override fun stav(stav: Stav) = copy(stav = stav as Stav.Pocetni)
+        override fun stav(stav: Stav) = copy(stav = stav)
         override val cil: Int get() = 12
         override val jmeno get() = R.string.d_n_bus12
         override val popis get() = R.string.d_p_bus12
@@ -119,9 +150,9 @@ sealed interface Dosahlost {
 
     @Serializable
     data class Bus60(
-        override val stav: Stav = Stav.Pocetni(0),
+        override val stav: Stav = Stav.Nesplneno,
     ) : Pocetni {
-        override fun stav(stav: Stav) = copy(stav = stav as Stav.Pocetni)
+        override fun stav(stav: Stav) = copy(stav = stav)
         override val cil: Int get() = 60
         override val jmeno get() = R.string.d_n_bus60
         override val popis get() = R.string.d_p_bus60
@@ -130,9 +161,9 @@ sealed interface Dosahlost {
 
     @Serializable
     data class Bus1024(
-        override val stav: Stav = Stav.Pocetni(0),
+        override val stav: Stav = Stav.Nesplneno,
     ) : Pocetni {
-        override fun stav(stav: Stav) = copy(stav = stav as Stav.Pocetni)
+        override fun stav(stav: Stav) = copy(stav = stav)
         override val cil: Int get() = 1024
         override val jmeno get() = R.string.d_n_bus1024
         override val popis get() = R.string.d_p_bus1024
@@ -141,9 +172,9 @@ sealed interface Dosahlost {
 
     @Serializable
     data class Penize200000(
-        override val stav: Stav = Stav.Pocetni(0),
+        override val stav: Stav = Stav.Nesplneno,
     ) : Pocetni {
-        override fun stav(stav: Stav) = copy(stav = stav as Stav.Pocetni)
+        override fun stav(stav: Stav) = copy(stav = stav)
         override val cil: Int get() = 200_000
         override val jmeno get() = R.string.d_n_penize200000
         override val popis get() = R.string.d_p_penize200000
@@ -151,9 +182,9 @@ sealed interface Dosahlost {
 
     @Serializable
     data class Penize500000(
-        override val stav: Stav = Stav.Pocetni(0),
+        override val stav: Stav = Stav.Nesplneno,
     ) : Pocetni {
-        override fun stav(stav: Stav) = copy(stav = stav as Stav.Pocetni)
+        override fun stav(stav: Stav) = copy(stav = stav)
         override val cil: Int get() = 500_000
         override val jmeno get() = R.string.d_n_penize500000
         override val popis get() = R.string.d_p_penize500000
@@ -161,9 +192,9 @@ sealed interface Dosahlost {
 
     @Serializable
     data class Penize1000000(
-        override val stav: Stav = Stav.Pocetni(0),
+        override val stav: Stav = Stav.Nesplneno,
     ) : Pocetni {
-        override fun stav(stav: Stav) = copy(stav = stav as Stav.Pocetni)
+        override fun stav(stav: Stav) = copy(stav = stav)
         override val cil: Int get() = 1_000_000
         override val jmeno get() = R.string.d_n_penize1000000
         override val popis get() = R.string.d_p_penize1000000
@@ -171,9 +202,9 @@ sealed interface Dosahlost {
 
     @Serializable
     data class Penize2000000(
-        override val stav: Stav = Stav.Pocetni(0),
+        override val stav: Stav = Stav.Nesplneno,
     ) : Pocetni {
-        override fun stav(stav: Stav) = copy(stav = stav as Stav.Pocetni)
+        override fun stav(stav: Stav) = copy(stav = stav)
         override val cil: Int get() = 2_000_000
         override val jmeno get() = R.string.d_n_penize2000000
         override val popis get() = R.string.d_p_penize2000000
@@ -181,14 +212,72 @@ sealed interface Dosahlost {
 
     @Serializable
     data class Penize10000000(
-        override val stav: Stav = Stav.Pocetni(0),
+        override val stav: Stav = Stav.Nesplneno,
     ) : Pocetni {
-        override fun stav(stav: Stav) = copy(stav = stav as Stav.Pocetni)
+        override fun stav(stav: Stav) = copy(stav = stav)
         override val cil: Int get() = 10_000_000
         override val jmeno get() = R.string.d_n_penize10000000
         override val popis get() = R.string.d_p_penize10000000
     }
     //tak tady je doopravdy konec
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     @Serializable
@@ -252,6 +341,106 @@ sealed interface Dosahlost {
         override val odmena get() = Double.NEGATIVE_INFINITY.penez
     }
     // tady to končí doopravdy
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }

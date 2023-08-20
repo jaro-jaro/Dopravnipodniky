@@ -35,6 +35,7 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 import kotlin.math.sqrt
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -200,7 +201,7 @@ const val TPH = TPM * 60
 
 const val nasobitelDelkyBusu = 2F
 val delkaUlice = 100.metru
-val pocatecniObnosPenez = 150_000.penez
+val pocatecniObnosPenez = /*Double.POSITIVE_INFINITY.penez*//*150_000.penez*//*5_000_000.penez*/5_000_000_000.penez
 const val nasobitelZiskuPoOffline = 1 / 20.0
 const val nasobitelZisku = 1
 const val nasobitelUrovne = 1 / 1.0
@@ -257,27 +258,43 @@ val BARVICKY /*jeej*/ = listOf(
 /**
  * Zformátuje číslo, aby vypadalo hezky
  */
-fun Number.formatovat(): Text {
-    if (this is Double && this.toInt().toDouble() == this) return this.toInt().formatovat()
-    if (this is Double && this.toLong().toDouble() == this) return this.toLong().formatovat()
-    if (this is Float && this.toInt().toFloat() == this) return this.toInt().formatovat()
-    if (this == Double.POSITIVE_INFINITY.toLong()) return R.string.nekonecne_mnoho.toText()
-    if (this == Double.NEGATIVE_INFINITY.toLong()) return R.string.nekonecne_malo.toText()
+fun Double.formatovat(decimalPlaces: Int = 2): Text {
+    if (this == Double.POSITIVE_INFINITY) return R.string.nekonecne_mnoho.toText()
+    if (this == Double.NEGATIVE_INFINITY) return R.string.nekonecne_malo.toText()
 
-    val vysledek = mutableListOf<Char>()
-
-    this.toString().toList().reversed().forEachIndexed { i, cislice ->
-        vysledek += cislice
-
-        if ((i + 1) % 3 == 0) {
-            vysledek += ' '
+    return this
+        .times(10F.pow(decimalPlaces))
+        .roundToLong()
+        .toDouble()
+        .div(10F.pow(decimalPlaces))
+        .toString()
+        .split(".")
+        .let {
+            if (it[1] == "0") it.dropLast(1)
+            else if (it[1].length == 1) listOf(it[0], "${it[1]}0")
+            else it
         }
-    }
-
-    vysledek.reverse()
-
-    return vysledek.joinToString("").removePrefix(" ").toText()
+        .mapIndexed { i, it ->
+            if (i == 0) it.formatovatTrojice() else it
+        }
+        .joinToString(",")
+        .toText()
 }
+
+private fun String.formatovatTrojice() = toList()
+    .reversed()
+    .flatMapIndexed { i, cislice ->
+        val a = listOf(cislice)
+
+        if ((i + 1) % 3 == 0) a + ' ' else a
+    }
+    .reversed()
+    .joinToString("")
+    .trim()
+
+fun Float.formatovat(decimalPlaces: Int = 2) = toDouble().formatovat(decimalPlaces)
+fun Long.formatovat(decimalPlaces: Int = 2) = toDouble().formatovat(decimalPlaces)
+fun Int.formatovat(decimalPlaces: Int = 2) = toDouble().formatovat(decimalPlaces)
 
 /**
  * Vrátí úroveň města na základě jeho počtu obyvatel, počtu potenciálů, počtu ulic a nepřímo i plochy

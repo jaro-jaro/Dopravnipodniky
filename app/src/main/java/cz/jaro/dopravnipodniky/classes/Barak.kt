@@ -1,6 +1,7 @@
 package cz.jaro.dopravnipodniky.classes
 
 import cz.jaro.dopravnipodniky.TypBaraku
+import cz.jaro.dopravnipodniky.kapacita
 import kotlinx.serialization.Serializable
 import kotlin.random.Random.Default.nextInt
 
@@ -8,6 +9,9 @@ import kotlin.random.Random.Default.nextInt
 data class Barak (
     val typ: TypBaraku,
     val cisloPopisne: Int,
-    val barvicka: Int = nextInt(-2, 2),
-    val cloveci: Int = 5//nextInt(typ.kapacita / 2, typ.kapacita),
+    val barvicka: Int = barva(),
+    val kapacita: Int = typ.kapacita,
+    val cloveci: Int = nextInt(kapacita / 2, kapacita),
 )
+
+private fun barva() = nextInt(-2, 2)

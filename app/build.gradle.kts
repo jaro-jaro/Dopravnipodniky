@@ -20,7 +20,6 @@ android {
     }
     buildFeatures {
         compose = true
-        viewBinding = true
         buildConfig = true
     }
     buildTypes {
@@ -52,23 +51,9 @@ android {
 dependencies {
 
     implementation(libs.core.ktx)
-    implementation(libs.appcompat)
-    implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    
-    
-    val navigationVersion = "2.4.2"
-
-    implementation("com.google.code.gson:gson:2.9.0")
-
-    implementation(files("libs/processing-core.jar"))
-
-    implementation("androidx.constraintlayout:constraintlayout:2.1.3")
-    implementation("androidx.navigation:navigation-fragment-ktx:$navigationVersion")
-    implementation("androidx.navigation:navigation-ui-ktx:$navigationVersion")
-
     implementation(libs.androidx.jetpack.compose.foundation)
     implementation(libs.androidx.jetpack.compose.ui.graphics)
     implementation(libs.androidx.jetpack.compose.ui)
@@ -90,5 +75,5 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization)
     implementation(libs.androidx.datastore)
-    implementation(libs.material3.themeadapter)
+    implementation(kotlin("reflect"))
 }

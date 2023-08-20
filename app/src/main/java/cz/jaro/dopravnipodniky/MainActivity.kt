@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             DpTheme(
                 useDynamicColor = false,
-                theme = Theme.Cervene, // todo
+                theme = Theme.Zlute, // todo
             ) {
                 DestinationsNavHost(navGraph = NavGraphs.root)
             }

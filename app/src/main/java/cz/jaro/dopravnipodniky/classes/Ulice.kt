@@ -7,7 +7,6 @@ import cz.jaro.dopravnipodniky.UliceID
 import cz.jaro.dopravnipodniky.jednotky.Pozice
 import cz.jaro.dopravnipodniky.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.jednotky.dpSUlicema
-import cz.jaro.dopravnipodniky.kapacita
 import cz.jaro.dopravnipodniky.nasobitelMaxCloveku
 import cz.jaro.dopravnipodniky.sirkaUlice
 import cz.jaro.dopravnipodniky.sketches.SerializableDp
@@ -31,7 +30,7 @@ data class Ulice(
 ) {
 
     val cloveci get() = baraky.sumOf { it.cloveci }
-    val kapacita get() = baraky.sumOf { it.typ.kapacita }
+    val kapacita get() = baraky.sumOf { it.kapacita }
 
     val orietace: Orientace = when {
         zacatek.x == konec.x -> SVISLE

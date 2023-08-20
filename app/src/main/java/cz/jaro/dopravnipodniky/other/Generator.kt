@@ -1,6 +1,7 @@
 package cz.jaro.dopravnipodniky.other
 
 import android.util.Log
+import cz.jaro.dopravnipodniky.MESTA
 import cz.jaro.dopravnipodniky.TypBaraku
 import cz.jaro.dopravnipodniky.classes.Barak
 import cz.jaro.dopravnipodniky.classes.DopravniPodnik
@@ -16,12 +17,10 @@ import kotlin.random.Random
 
 class Generator(
     private val investice: Peniz,
-    private val jmenoMesta: String,
 ) {
     companion object {
         fun vygenerujMiPrvniMesto(): DopravniPodnik = Generator(
             investice = pocatecniCenaMesta,
-            jmenoMesta = "Křemže", // TODO!!
         ).vygenerujMiMestoAToHnedVykricnik()
 
         private const val nasobitelInvestice = 1 / 65536.0
@@ -34,6 +33,8 @@ class Generator(
     private val velikost: Int = (investice * nasobitelInvestice).value.roundToInt()
 
     private val ulicove = mutableListOf<Ulice>()
+
+    private val jmenoMesta = MESTA.trim().lines().random()
 
     fun vygenerujMiMestoAToHnedVykricnik(): DopravniPodnik {
         // Okej hned to bude, nez bys rekl pi

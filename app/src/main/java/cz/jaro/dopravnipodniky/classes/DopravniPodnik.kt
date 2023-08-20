@@ -12,7 +12,6 @@ import cz.jaro.dopravnipodniky.jednotky.penez
 import cz.jaro.dopravnipodniky.jednotky.penezZaMin
 import cz.jaro.dopravnipodniky.jednotky.times
 import cz.jaro.dopravnipodniky.jednotky.to
-import cz.jaro.dopravnipodniky.kapacita
 import cz.jaro.dopravnipodniky.nasobitelZiskuPoOffline
 import kotlinx.serialization.Serializable
 import java.util.Calendar
@@ -33,7 +32,7 @@ data class DopravniPodnik(
 
     val cloveci = baraky.sumOf { it.cloveci }
 
-    val kapacita = baraky.sumOf { it.typ.kapacita }
+    val kapacita = baraky.sumOf { it.kapacita }
 
     fun bus(id: BusID): Bus = busy.find { bus -> id == bus.id } ?: throw IndexOutOfBoundsException("tentoBusNeexistuje")
 

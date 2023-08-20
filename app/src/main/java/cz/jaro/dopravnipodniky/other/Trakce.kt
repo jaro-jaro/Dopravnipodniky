@@ -10,6 +10,18 @@ import kotlinx.serialization.Serializable
 sealed interface Trakce {
     val jmeno: Int
 
+    companion object {
+        val vse = listOf(
+            Autobus.Dieslovy,
+            Autobus.Zemeplynovy,
+            Autobus.Hybridni,
+            Autobus.Vodikovy,
+            Trolejbus.Obycejny,
+            Trolejbus.Parcialni,
+            Elektrobus,
+        )
+    }
+
     @Serializable
     sealed class Autobus(
         override val jmeno: Int,

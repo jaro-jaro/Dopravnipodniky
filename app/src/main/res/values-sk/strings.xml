@@ -17,7 +17,7 @@
     <string name="rozbalit">Rozbalit</string>
     <string name="zabalit">Zabalit</string>
     <string name="ponicenost" formatted="true">Poničenost: %s %%</string>
-    <string name="naklady">Náklady: %s €/min</string>
+    <string name="naklady">Náklady: %s</string>
     <string name="autobus">Autobus</string>
     <string name="trolejbus">trolejbus</string>
     <string name="elektrobus">elektrobus</string>
@@ -327,6 +327,8 @@
     <string name="prumer_je">\n\nPrůměr je %s Kč</string>
     <string name="nic" >" "</string>
     <string name="zmenit_linku">Změnit linku</string>
+    <string name="zpet">Zpět</string>
+    <string name="moc_filtru">Bohužel, nenašli jsme žádná vozidla, která by odpovídala vašim požadavkům. Zkuste poupravit filtry!</string>
 
 
 </resources>

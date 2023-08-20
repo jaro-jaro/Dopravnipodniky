@@ -9,10 +9,13 @@ import kotlinx.serialization.Serializable
 
 @JvmInline
 @Serializable
-value class Peniz(val value: Double) {
+value class Peniz(val value: Double) : Comparable<Peniz> {
     operator fun times(other: Double) = Peniz(value * other)
     operator fun times(other: Int) = Peniz(value * other)
     operator fun plus(other: Peniz) = Peniz(value + other.value)
+    operator fun minus(other: Peniz) = Peniz(value - other.value)
+
+    override fun compareTo(other: Peniz) = value.compareTo(other.value)
 }
 
 val Int.penez get() = Peniz(this.toDouble())

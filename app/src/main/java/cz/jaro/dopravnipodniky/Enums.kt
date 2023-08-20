@@ -1,6 +1,6 @@
 package cz.jaro.dopravnipodniky
 
-enum class Razeni {
+enum class TypRazeni {
     VZESTUPNE, SESTUPNE, NIJAK,
 }
 

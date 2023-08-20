@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 class Dosahlovac(
     private val dataSource: PreferencesDataSource,
 ) {
-    suspend fun dosahni(dosahlostKlass: KClass<Dosahlost>) {
+    suspend fun dosahni(dosahlostKlass: KClass<out Dosahlost>) {
 
         suspend fun ulozit(novaDosahlost: Dosahlost) {
             dataSource.zmenitVse { vse ->
@@ -21,12 +21,22 @@ class Dosahlovac(
             }
         }
 
-        val dosahlost = dataSource.vse.first().dosahlosti.first { it::class == dosahlostKlass }
+        val dosahlost = dataSource.vse.first().dosahlosti.find { it::class == dosahlostKlass }
+            ?: dosahlostKlass.objectInstance ?: dosahlostKlass.constructors.minBy { it.parameters.size }.call(Dosahlost.Stav.Nesplneno)
+
+        if (dosahlost is Dosahlost.SkupinovaDosahlost) {
+            dosahlost.dosahlosti.forEach {
+                dosahni(it)
+            }
+            return
+        }
+        dosahlost as Dosahlost.NormalniDosahlost
 
         if (dosahlost.stav is Dosahlost.Stav.Splneno) return
 
         if (dosahlost is Dosahlost.Pocetni) {
-            val stav = dosahlost.stav as Dosahlost.Stav.Pocetni
+            val stav =
+                if (dosahlost.stav is Dosahlost.Stav.Pocetni) dosahlost.stav as Dosahlost.Stav.Pocetni else Dosahlost.Stav.Pocetni(0)
             if (stav.pocet + 1 != dosahlost.cil) {
                 ulozit(dosahlost.stav(stav.copy(pocet = stav.pocet + 1)))
                 return
