@@ -2,7 +2,6 @@ package cz.jaro.dopravnipodniky.shared
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import cz.jaro.dopravnipodniky.shared.jednotky.metru
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.penezZaMin
 import cz.jaro.dopravnipodniky.shared.jednotky.toTiky
@@ -116,24 +115,23 @@ import kotlin.time.Duration.Companion.seconds
 const val todocka = 0
 
 val minimumInvestice = 1_000_000L.penez
-val pocatecniCenaMesta = 1_200_000L.penez
 
 // vykreslovani
 
-const val pocatecniPriblizeni = .75F
+const val pocatecniPriblizeni = .75F/*1F*/
 const val oddalenyRezim = .6F
-const val maximalniOddaleni = .2F
+const val maximalniOddaleni = .1F
 val pocatecniPosunutiX = 0.dp //200
 val pocatecniPosunutiY = 0.dp //600
 
-val ulicovyBlok = 150.dp
+val ulicovyBlok = 156.dp
 
 val sirkaUlice = 34.dp
-val velikostZastavky = 48.dp
-val odsazeniBaraku = 5.dp
+val velikostZastavky = 44.dp
+val odsazeniBaraku = 6.dp
 const val barakuVUlici = 5
 val velikostBaraku = (ulicovyBlok - odsazeniBaraku * (barakuVUlici + 1)) / barakuVUlici
-val sirkaObrubniku = 3.dp
+val sirkaObrubniku = 4.dp
 val sirkaBusu = 10.dp
 
 val sirkaTroleje = 1.dp
@@ -159,8 +157,6 @@ val sedTroleje = Color(32, 32, 32)
 val sedBaraku = Color(150, 150, 150)
 val ZLUTA = Color(255, 255, 0)
 
-const val velikostUlicovyhoBloku = 150 // bloku
-
 // další konstanty
 
 const val TPS = 30
@@ -168,7 +164,7 @@ const val TPM = TPS * 60
 const val TPH = TPM * 60
 
 const val nasobitelDelkyBusu = 2F
-val delkaUlice = 100.metru
+//val delkaUlice = 100.metru
 val pocatecniObnosPenez = /*Double.POSITIVE_INFINITY.penez*//*150_000.penez*//*5_000_000.penez*/5_000_000_000.penez
 const val nasobitelZiskuPoOffline = 1 / 20.0
 const val nasobitelZisku = 1

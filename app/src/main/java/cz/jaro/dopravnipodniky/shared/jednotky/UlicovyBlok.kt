@@ -2,10 +2,12 @@ package cz.jaro.dopravnipodniky.shared.jednotky
 
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable
 @JvmInline
+@Serializable
+@SerialName("UlicovyBlok")
 value class UlicovyBlok(
     val value: Int
 ) : Comparable<UlicovyBlok> {
@@ -15,6 +17,7 @@ value class UlicovyBlok(
     operator fun times(other: Int): UlicovyBlok = UlicovyBlok(value * other)
     operator fun minus(other: UlicovyBlok) = UlicovyBlok(value - other.value)
     operator fun plus(other: UlicovyBlok) = UlicovyBlok(value + other.value)
+    operator fun div(i: Int) = UlicovyBlok(value / i)
 }
 
 class UlicovyBlokRange(
@@ -35,11 +38,6 @@ class UlicovyBlokRange(
         }
     }
 }
-
-@Deprecated("", level = DeprecationLevel.ERROR)
-val UlicovyBlok.bloku get() = ulicovyBlok * value
-@Deprecated("", level = DeprecationLevel.ERROR)
-val UlicovyBlok.blokuSUlicema get() = ulicovyBlok * value + sirkaUlice * value
 
 val UlicovyBlok.dp get() = ulicovyBlok * value
 val UlicovyBlok.dpSUlicema get() = ulicovyBlok * value + sirkaUlice * value

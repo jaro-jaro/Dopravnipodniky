@@ -2,33 +2,50 @@ package cz.jaro.dopravnipodniky.dopravnipodnik
 
 import cz.jaro.dopravnipodniky.shared.BusID
 import cz.jaro.dopravnipodniky.shared.LinkaID
+import cz.jaro.dopravnipodniky.shared.UliceID
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.PenizZaMinutu
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
-import cz.jaro.dopravnipodniky.shared.UliceID
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlokRange
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.penezZaMin
-import cz.jaro.dopravnipodniky.shared.nasobitelZiskuPoOffline
 import cz.jaro.dopravnipodniky.shared.jednotky.times
 import cz.jaro.dopravnipodniky.shared.jednotky.to
+import cz.jaro.dopravnipodniky.shared.nasobitelZiskuPoOffline
+import cz.jaro.dopravnipodniky.theme.Theme
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.util.Calendar
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 
 @Serializable
+@SerialName("DopravniPodnik")
 data class DopravniPodnik(
-    val jizdne: Peniz = 10.penez,
+    val jizdne: Peniz,
     val cas: Long = Calendar.getInstance().toInstant().toEpochMilli(),
-    val jmenoMesta: String = "NeVěčné",
-    val linky: List<Linka> = listOf(),
-    val busy: List<Bus> = listOf(),
-    val ulicove: List<Ulice> = listOf(),
-    val zisk: PenizZaMinutu = 0.penezZaMin,
+    val jmenoMesta: String,
+    val linky: List<Linka>,
+    val busy: List<Bus>,
+    val ulicove: List<Ulice>,
+    val zisk: PenizZaMinutu,
+    val tema: Theme,
 ) {
-    val baraky = ulicove.flatMap { it.baraky }
+    constructor(
+        jmenoMesta: String,
+        ulicove: List<Ulice> = listOf(),
+    ) : this(
+        jizdne = 10.penez,
+        jmenoMesta = jmenoMesta,
+        linky = listOf(),
+        busy = listOf(),
+        ulicove = ulicove,
+        zisk = 0.penezZaMin,
+        tema = Theme.entries.random(),
+    )
+
+    private val baraky = ulicove.flatMap { it.baraky }
 
     val cloveci = baraky.sumOf { it.cloveci }
 
@@ -43,6 +60,10 @@ data class DopravniPodnik(
     private val dobaOdPoslednihoHrani = (Calendar.getInstance().toInstant().toEpochMilli() - cas).milliseconds
 
     val nevyzvednuto = (zisk * dobaOdPoslednihoHrani.coerceAtMost(8.hours)) * nasobitelZiskuPoOffline
+}
+
+val DopravniPodnik.stred get() = velikostMesta.let { (min, max) ->
+    (min.x + max.x) / 2 to (min.y + max.y) / 2
 }
 
 val DopravniPodnik.velikostMesta: Pair<Pozice<UlicovyBlok>, Pozice<UlicovyBlok>>

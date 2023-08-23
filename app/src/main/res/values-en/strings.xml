@@ -30,7 +30,7 @@
     <string name="upravit">Edit</string>
     <string name="odstranit">Delete</string>
     <string name="hotovo">Done</string>
-    <string name="zadejte_cislo_linky">Enter line number:</string>
+    <string name="zadejte_cislo_linky">Enter line number</string>
     <string name="nelze_prodat_dp">You can\'t sell this transport company, because it\'s currently open</string>
     <string name="vypravit">Get off</string>
     <string name="zvolte_barvu">Choose color:</string>
@@ -39,7 +39,7 @@
     <string name="pocet_ulic">%1$d streets from which %2$d has overhead contact line.</string>
     <string name="pocet_domu">%s houses</string>
     <string name="pocet_zastavek">%s stops</string>
-    <string name="barva_linky">"Color of line: %s</string>
+    <string name="barva_linky">"Color of line</string>
     <string name="barva_temata">"Color of theme: %s</string>
     <string name="linka_existuje">Line with this number already exists!</string>
     <string name="linka_kratka">Line must be at least in one street</string>

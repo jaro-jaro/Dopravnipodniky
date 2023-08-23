@@ -32,6 +32,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,26 +50,29 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.Direction
-import cz.jaro.dopravnipodniky.dopravnipodnik.DopravniPodnik
-import cz.jaro.dopravnipodniky.shared.MainViewModel
 import cz.jaro.dopravnipodniky.R
-import cz.jaro.dopravnipodniky.dopravnipodnik.Trakce
 import cz.jaro.dopravnipodniky.data.Vse
-import cz.jaro.dopravnipodniky.shared.jednotky.asString
-import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.destinations.ObchodScreenDestination
-import cz.jaro.dopravnipodniky.shared.formatovat
+import cz.jaro.dopravnipodniky.dopravnipodnik.DopravniPodnik
+import cz.jaro.dopravnipodniky.dopravnipodnik.Trakce
 import cz.jaro.dopravnipodniky.dopravnipodnik.ikonka
 import cz.jaro.dopravnipodniky.dopravnipodnik.jsouVsechnyZatrolejovane
 import cz.jaro.dopravnipodniky.dopravnipodnik.ulice
+import cz.jaro.dopravnipodniky.dosahlosti.Dosahlost
+import cz.jaro.dopravnipodniky.shared.SharedViewModel
+import cz.jaro.dopravnipodniky.shared.composeString
+import cz.jaro.dopravnipodniky.shared.formatovat
+import cz.jaro.dopravnipodniky.shared.jednotky.asString
+import cz.jaro.dopravnipodniky.shared.mutate
 import org.koin.androidx.compose.koinViewModel
+import kotlin.reflect.KClass
 
 @Composable
 @Destination
 fun GarazScreen(
     navigator: DestinationsNavigator,
 ) {
-    val viewModel = koinViewModel<MainViewModel>()
+    val viewModel = koinViewModel<SharedViewModel>()
 
     val dp by viewModel.dp.collectAsStateWithLifecycle()
     val vse by viewModel.vse.collectAsStateWithLifecycle()
@@ -80,6 +84,7 @@ fun GarazScreen(
         upravitVse = viewModel::zmenitVse,
         navigatate = navigator::navigate,
         navigatateBack = navigator::navigateUp,
+        dosahni = viewModel.dosahni
     )
 }
 
@@ -92,6 +97,7 @@ fun GarazScreen(
     upravitVse: ((Vse) -> Vse) -> Unit,
     navigatate: (Direction) -> Unit,
     navigatateBack: () -> Unit,
+    dosahni: (KClass<out Dosahlost>) -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -131,6 +137,9 @@ fun GarazScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
+            if (dp.busy.isEmpty()) item {
+                Text(stringResource(R.string.zadny_bus), Modifier.padding(8.dp))
+            }
             items(dp.busy.sortedBy { it.evCislo }, key = { it.evCislo }) { bus ->
                 val expanded = otevreno == bus.evCislo
                 Column(
@@ -159,7 +168,7 @@ fun GarazScreen(
                                 Modifier
                                     .width(40.dp)
                                     .height(40.dp),
-                                colorFilter = ColorFilter.tint(color = vse.tema.barva),
+                                colorFilter = ColorFilter.tint(color = dp.tema.barva),
                             )
                         },
                     )
@@ -212,6 +221,23 @@ fun GarazScreen(
                                         vybratLinku = false
                                     },
                                     confirmButton = { },
+                                    dismissButton = {
+                                        TextButton(
+                                            onClick = {
+                                                upravitDp { dopravniPodnik ->
+                                                    dopravniPodnik.copy(
+                                                        busy = dopravniPodnik.busy.mutate {
+                                                            this[indexOfFirst { it.id == bus.id }] = bus.copy(
+                                                                linka = null
+                                                            )
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        ) {
+                                            Text(stringResource(R.string.odebrat_bus_z_linek))
+                                        }
+                                    },
                                     title = {
                                         Text(stringResource(R.string.vyberte_linku))
                                     },
@@ -234,6 +260,7 @@ fun GarazScreen(
                                                                 }
                                                             )
                                                         }
+                                                        dosahni(Dosahlost.BusNaLince::class)
                                                     },
                                                 )
                                             }

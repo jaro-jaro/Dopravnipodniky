@@ -24,10 +24,12 @@ fun Double.formatovat(decimalPlaces: Int = 2): Text {
         .roundToLong()
         .toDouble()
         .div(10F.pow(decimalPlaces))
-        .toString()
+        .toBigDecimal()
+        .toPlainString()
         .split(".")
         .let {
-            if (it[1] == "0") it.dropLast(1)
+            if (it.size == 1) it
+            else if (it[1] == "0") it.dropLast(1)
             else if (it[1].length == 1) listOf(it[0], "${it[1]}0")
             else it
         }
@@ -137,3 +139,8 @@ fun soucinPromenneNaRozsahlostiVNasobiteliPoctuLidiKteryTiNastoupiDoBusuNaZastav
 
 val Duration.minutes get() = inWholeSeconds / 60.0
 val Duration.hours get() = minutes / 60.0
+
+fun <E> List<E>.mutate(mutator: MutableList<E>.() -> Unit): List<E> = buildList {
+    addAll(this@mutate)
+    apply(mutator)
+}

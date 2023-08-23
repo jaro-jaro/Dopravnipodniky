@@ -1,9 +1,11 @@
 package cz.jaro.dopravnipodniky.dopravnipodnik
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.random.Random.Default.nextInt
 
 @Serializable
+@SerialName("Barak")
 data class Barak(
     val typ: TypBaraku,
     val cisloPopisne: Int,

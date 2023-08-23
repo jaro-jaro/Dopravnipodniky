@@ -1,18 +1,19 @@
 package cz.jaro.dopravnipodniky.dopravnipodnik
 
 import androidx.compose.ui.unit.dp
+import cz.jaro.dopravnipodniky.main.SerializableDp
 import cz.jaro.dopravnipodniky.shared.BusID
 import cz.jaro.dopravnipodniky.shared.LinkaID
+import cz.jaro.dopravnipodniky.shared.Smer
+import cz.jaro.dopravnipodniky.shared.Smer.POZITIVNE
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.PenizZaMinutu
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
-import cz.jaro.dopravnipodniky.main.SerializableDp
-import cz.jaro.dopravnipodniky.shared.Smer
-import cz.jaro.dopravnipodniky.shared.Smer.POZITIVNE
 import cz.jaro.dopravnipodniky.shared.jednotky.dp
-import cz.jaro.dopravnipodniky.shared.nasobitelPoctuLidiKteryTiNastoupiDoBusuNaZastavceKdyzZastaviANakyLidiTamJsouAMaVSobeJesteVolneMisto
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.to
+import cz.jaro.dopravnipodniky.shared.nasobitelPoctuLidiKteryTiNastoupiDoBusuNaZastavceKdyzZastaviANakyLidiTamJsouAMaVSobeJesteVolneMisto
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.math.pow
 import kotlin.time.Duration
@@ -20,6 +21,7 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
 @Serializable
+@SerialName("Bus")
 data class Bus(
     val evCislo: Int,
     val typBusu: TypBusu,

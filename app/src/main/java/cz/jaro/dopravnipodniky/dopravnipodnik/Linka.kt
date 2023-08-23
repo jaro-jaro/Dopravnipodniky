@@ -1,14 +1,16 @@
 package cz.jaro.dopravnipodniky.dopravnipodnik
 
-import cz.jaro.dopravnipodniky.theme.Barvicka
 import cz.jaro.dopravnipodniky.shared.LinkaID
 import cz.jaro.dopravnipodniky.shared.UliceID
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.ulicovychBloku
+import cz.jaro.dopravnipodniky.theme.Barvicka
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.util.UUID
 
 @Serializable
+@SerialName("Linka")
 data class Linka(
     val cislo: Int,
     val ulice: List<UliceID> = listOf(),

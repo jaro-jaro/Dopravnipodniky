@@ -8,6 +8,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+@SerialName("Text")
 sealed class Text {
     @Serializable
     @SerialName("plain")

@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
@@ -35,25 +36,37 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.Direction
-import cz.jaro.dopravnipodniky.shared.MainViewModel
+import cz.jaro.dopravnipodniky.BuildConfig
 import cz.jaro.dopravnipodniky.R
+import cz.jaro.dopravnipodniky.data.Generator
 import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.destinations.GarazScreenDestination
+import cz.jaro.dopravnipodniky.destinations.LinkyScreenDestination
 import cz.jaro.dopravnipodniky.dopravnipodnik.DopravniPodnik
+import cz.jaro.dopravnipodniky.dopravnipodnik.stred
+import cz.jaro.dopravnipodniky.dopravnipodnik.velikostMesta
+import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
+import cz.jaro.dopravnipodniky.shared.jednotky.dpSUlicema
+import cz.jaro.dopravnipodniky.shared.jednotky.minus
+import cz.jaro.dopravnipodniky.shared.jednotky.plus
+import cz.jaro.dopravnipodniky.shared.jednotky.toPx
 import cz.jaro.dopravnipodniky.shared.maximalniOddaleni
-import cz.jaro.dopravnipodniky.shared.pocatecniPosunutiX
-import cz.jaro.dopravnipodniky.shared.pocatecniPosunutiY
 import cz.jaro.dopravnipodniky.shared.pocatecniPriblizeni
+import cz.jaro.dopravnipodniky.shared.ulicovyBlok
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -62,7 +75,7 @@ import org.koin.androidx.compose.koinViewModel
 fun MainScreen(
     navigator: DestinationsNavigator,
 ) {
-    val viewModel = koinViewModel<MainViewModel>()
+    val viewModel = koinViewModel<SharedViewModel>()
 
     val dp by viewModel.dp.collectAsStateWithLifecycle()
     val vse by viewModel.vse.collectAsStateWithLifecycle()
@@ -70,7 +83,6 @@ fun MainScreen(
     if (dp != null && vse != null) MainScreen(
         dp = dp!!,
         vse = vse!!,
-        upravitDp = viewModel::zmenitDp,
         upravitVse = viewModel::zmenitVse,
         navigatate = navigator::navigate,
     )
@@ -81,13 +93,14 @@ fun MainScreen(
 fun MainScreen(
     dp: DopravniPodnik,
     vse: Vse,
-    upravitDp: ((DopravniPodnik) -> DopravniPodnik) -> Unit,
+//    upravitDp: ((DopravniPodnik) -> DopravniPodnik) -> Unit,
     upravitVse: ((Vse) -> Vse) -> Unit,
     navigatate: (Direction) -> Unit,
 ) {
     val density = LocalDensity.current
-    val tx = remember { Animatable(with(density) { pocatecniPosunutiX.toPx() }) }
-    val ty = remember { Animatable(with(density) { pocatecniPosunutiY.toPx() }) }
+    val stred = remember { dp.stred.dpSUlicema }
+    val tx = remember { Animatable(with(density) { -stred.x.toPx() * pocatecniPriblizeni }) }
+    val ty = remember { Animatable(with(density) { -stred.y.toPx() * pocatecniPriblizeni }) }
     val priblizeni = remember { Animatable(pocatecniPriblizeni) }
     val scope = rememberCoroutineScope()
     Scaffold(
@@ -100,10 +113,10 @@ fun MainScreen(
                     IconButton(
                         onClick = {
                             scope.launch {
-                                tx.animateTo(with(density) { pocatecniPosunutiX.toPx() })
+                                tx.animateTo(with(density) { -stred.x.toPx() * pocatecniPriblizeni })
                             }
                             scope.launch {
-                                ty.animateTo(with(density) { pocatecniPosunutiY.toPx() })
+                                ty.animateTo(with(density) { -stred.y.toPx() * pocatecniPriblizeni })
                             }
                             scope.launch {
                                 priblizeni.animateTo(pocatecniPriblizeni)
@@ -111,6 +124,13 @@ fun MainScreen(
                         }
                     ) {
                         Icon(Icons.Default.Home, stringResource(R.string.kalibrovat))
+                    }
+                    if (BuildConfig.DEBUG) IconButton(
+                        onClick = {
+                            upravitVse { Vse(prvniDp = Generator.vygenerujMiPrvniMesto()) }
+                        }
+                    ) {
+                        Icon(Icons.Default.RestartAlt, null)
                     }
                     IconButton(
                         onClick = {
@@ -199,7 +219,6 @@ fun MainScreen(
         ) {
             CeleMesto(
                 dp = dp,
-                vse = vse,
                 tx = tx.value,
                 ty = ty.value,
                 priblizeni = priblizeni.value,
@@ -208,16 +227,52 @@ fun MainScreen(
                     .pointerInput(Unit) {
                         detectTransformGestures(
                             onGesture = { _, pan, zoom, _ ->
-//                        val (x, y) = dp.oblastiPodniku
-//                        println("${tx.toDp()}, ${tx.toDp().div(priblizeni)}, ${x.start.dpSUlicema}, ${x.endInclusive.dpSUlicema}")
                                 scope.launch {
-                                    tx.snapTo(tx.value + pan.x / priblizeni.value)/*.div(priblizeni).coerceIn(-x.endInclusive.dpSUlicema.toPx(), -x.start.dpSUlicema.toPx()*//* + (size.width)*//*).times(priblizeni)*/
-                                    ty.snapTo(ty.value + pan.y / priblizeni.value)/*.div(priblizeni).coerceIn(-y.endInclusive.dpSUlicema.toPx(), -y.start.dpSUlicema.toPx()*//* + (size.height)*//*).times(priblizeni)*/
-                                    // TODO
+                                    // t - posunuti, c - coercovaný, p - prostředek, x - max, i - min
+
+                                    val (start, stop) = dp.velikostMesta
+                                    val m = start.dpSUlicema
+                                        .minus(ulicovyBlok * 2)
+                                        .toPx()
+                                        .minus(size.center.toOffset())
+                                        .times(priblizeni.value)
+                                        .plus(size.center.toOffset())
+                                        .plus(
+                                            size.center
+                                                .times(priblizeni.value)
+                                                .toOffset()
+                                        )
+                                    val i = stop.dpSUlicema
+                                        .plus(ulicovyBlok * 2)
+                                        .toPx()
+                                        .minus(size.center.toOffset())
+                                        .times(priblizeni.value)
+                                        .plus(size.center.toOffset())
+                                        .plus(
+                                            size.center
+                                                .times(priblizeni.value)
+                                                .toOffset()
+                                        )
+                                        .minus(IntOffset(size.width, size.height).toOffset())
+                                    val p = (i + m) / 2F
+
+                                    val t = Offset(
+                                        tx.value.plus(pan.x / priblizeni.value),
+                                        ty.value.plus(pan.y / priblizeni.value),
+                                    )
+
+                                    val ti = -i / priblizeni.value
+                                    val tm = -m / priblizeni.value
+                                    val pt = -p / priblizeni.value
+                                    val txc = if (ti.x > tm.x) pt.x else t.x.coerceIn(ti.x, tm.x)
+                                    val tyc = if (ti.y > tm.y) pt.y else t.y.coerceIn(ti.y, tm.y)
+
+                                    tx.snapTo(txc)
+                                    ty.snapTo(tyc)
                                     priblizeni.snapTo((priblizeni.value * zoom).coerceAtLeast(maximalniOddaleni))
                                 }
-//                        println("onGesture(centroid=$centroid, pan=$pan, zoom=$zoom, rotation=$rotation)")
-                                println("tx=$tx, ty=$ty, priblizeni=$priblizeni")
+//                                println("onGesture(centroid=$centroid, pan=$pan, zoom=$zoom, rotation=$rotation)")
+//                                println("tx=${tx.value}, ty=${ty.value}, priblizeni=${priblizeni.value}")
                             }
                         )
                     },
@@ -274,7 +329,7 @@ fun MainScreen(
                     }
                     TextButton(
                         onClick = {
-
+                            navigatate(LinkyScreenDestination)
                         },
                         Modifier
                             .weight(1F)

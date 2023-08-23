@@ -8,9 +8,9 @@ import cz.jaro.dopravnipodniky.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
+import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.to
 import cz.jaro.dopravnipodniky.shared.jednotky.ulicovychBloku
-import cz.jaro.dopravnipodniky.shared.pocatecniCenaMesta
 import cz.jaro.dopravnipodniky.shared.seznamy.MESTA
 import kotlin.math.roundToInt
 import kotlin.random.Random
@@ -23,7 +23,10 @@ class Generator(
             investice = pocatecniCenaMesta,
         ).vygenerujMiMestoAToHnedVykricnik()
 
+        private val pocatecniCenaMesta = 1_200_000L.penez/*3_141_592.penez*//*10_000_000.penez*/
         private const val nasobitelInvestice = 1 / 65536.0
+        private const val nahodnostStaveniKOkupantum = .6F
+        private const val nahodnostStaveniKNeokupantum = 1.1F
         private const val nahodnostPoObnoveni = .35F
         private const val nahodnostNaZacatku = .5F
         private const val rozdilNahodnosti = .05F
@@ -61,8 +64,10 @@ class Generator(
             )
 
             sousedi
-                .filter { // todo snizit sanci pokud sousedi uz jsou
-                    Random.nextFloat() < sance
+                .filter { pozice ->
+                    val uzNekdoOkupujeSouseda = ulicove.any { it.zacatek == pozice || it.konec == pozice }
+                    val novaSance = if (uzNekdoOkupujeSouseda) sance * nahodnostStaveniKOkupantum else sance * nahodnostStaveniKNeokupantum
+                    Random.nextFloat() < novaSance
                 }
                 .map { soused ->
                     val (zacatek, konec) =
@@ -73,7 +78,7 @@ class Generator(
                     } else {
                         val i = ulicove.indexOfFirst { it.zacatek == zacatek && it.konec == konec }
                         ulicove[i] = ulicove[i].copy(
-                            potencial = ulicove[i].potencial + 1
+                            potencial = ulicove[i].potencial + 2
                         )
                     }
 

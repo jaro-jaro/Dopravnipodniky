@@ -7,9 +7,9 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
-import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.dopravnipodnik.Ulice
+import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.dpSUlicema
@@ -17,7 +17,6 @@ import cz.jaro.dopravnipodniky.shared.odsazeniTroleji
 import cz.jaro.dopravnipodniky.shared.predsazeniTrolejiL
 import cz.jaro.dopravnipodniky.shared.predsazeniTrolejiS
 import cz.jaro.dopravnipodniky.shared.sedTroleje
-import cz.jaro.dopravnipodniky.shared.sedUlice
 import cz.jaro.dopravnipodniky.shared.sirkaTroleje
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 
@@ -97,7 +96,7 @@ fun nakreslitTrolejeNaKrizovatku(
         top = zacatekY,
     ) {
         drawRect(
-            color = if (DEBUG_BARVY) Color.Red else sedUlice,
+            color = if (DEBUG_BARVY) Color.Red else Color.Transparent,
             topLeft = Offset.Zero,
             size = Size(sirkaUlice, sirkaUlice)
         )

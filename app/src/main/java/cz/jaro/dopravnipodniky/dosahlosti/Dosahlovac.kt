@@ -37,12 +37,12 @@ class Dosahlovac(
             val stav =
                 if (dosahlost.stav is Dosahlost.Stav.Pocetni) dosahlost.stav as Dosahlost.Stav.Pocetni else Dosahlost.Stav.Pocetni(0)
             if (stav.pocet + 1 != dosahlost.cil) {
-                ulozit(dosahlost.stav(stav.copy(pocet = stav.pocet + 1)))
+                ulozit(dosahlost.kopirovat(stav.copy(pocet = stav.pocet + 1)))
                 return
             }
         }
 
-        ulozit(dosahlost.stav(Dosahlost.Stav.Splneno(LocalDate.now())))
+        ulozit(dosahlost.kopirovat(Dosahlost.Stav.Splneno(LocalDate.now())))
         dataSource.zmenitVse {
             it.copy(
                 prachy = it.prachy + dosahlost.odmena

@@ -1,9 +1,11 @@
 package cz.jaro.dopravnipodniky.dopravnipodnik
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable
 @JvmInline
+@Serializable
+@SerialName("Zastavka")
 value class Zastavka(
     val cloveci: Int = 0
 )

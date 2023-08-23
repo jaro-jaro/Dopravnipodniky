@@ -11,11 +11,11 @@ import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.unit.dp
-import cz.jaro.dopravnipodniky.shared.Orientace.SVISLE
-import cz.jaro.dopravnipodniky.shared.Orientace.VODOROVNE
 import cz.jaro.dopravnipodniky.dopravnipodnik.Barak
 import cz.jaro.dopravnipodniky.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.dopravnipodnik.Ulice
+import cz.jaro.dopravnipodniky.shared.Orientace.SVISLE
+import cz.jaro.dopravnipodniky.shared.Orientace.VODOROVNE
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.dpSUlicema
@@ -24,8 +24,8 @@ import cz.jaro.dopravnipodniky.shared.sedObrubniku
 import cz.jaro.dopravnipodniky.shared.sedUlice
 import cz.jaro.dopravnipodniky.shared.sirkaObrubniku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
+import cz.jaro.dopravnipodniky.shared.ulicovyBlok
 import cz.jaro.dopravnipodniky.shared.velikostBaraku
-import cz.jaro.dopravnipodniky.shared.velikostUlicovyhoBloku
 import cz.jaro.dopravnipodniky.theme.Theme
 
 context(DrawScope)
@@ -115,7 +115,7 @@ fun Barak.draw(
 
     if (typ == cz.jaro.dopravnipodniky.dopravnipodnik.TypBaraku.Stredovy) {
 
-        val pulUlicovyhoBloku = velikostUlicovyhoBloku.dp.toPx() / 2
+        val pulUlicovyhoBloku = ulicovyBlok.toPx() / 2
         translate(
             left = zacatekUliceX,
             top = zacatekUliceY,
@@ -257,6 +257,29 @@ fun DrawScope.drawRect(
         height = bottomRight.y - topLeft.y,
     ),
     alpha = alpha,
+    style = style,
+    colorFilter = colorFilter,
+    blendMode = blendMode,
+)
+
+fun DrawScope.drawRoundRect(
+    color: Color,
+    topLeft: Offset,
+    bottomRight: Offset,
+    alpha: Float = 1.0f,
+    cornerRadius: CornerRadius = CornerRadius.Zero,
+    style: DrawStyle = Fill,
+    colorFilter: ColorFilter? = null,
+    blendMode: BlendMode = DrawScope.DefaultBlendMode
+) = drawRoundRect(
+    color = color,
+    topLeft = topLeft,
+    size = Size(
+        width = bottomRight.x - topLeft.x,
+        height = bottomRight.y - topLeft.y,
+    ),
+    alpha = alpha,
+    cornerRadius = cornerRadius,
     style = style,
     colorFilter = colorFilter,
     blendMode = blendMode,

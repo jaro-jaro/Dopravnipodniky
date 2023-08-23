@@ -1,15 +1,16 @@
 package cz.jaro.dopravnipodniky.dopravnipodnik
 
+import cz.jaro.dopravnipodniky.main.SerializableDp
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.Orientace.SVISLE
 import cz.jaro.dopravnipodniky.shared.Orientace.VODOROVNE
-import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
-import cz.jaro.dopravnipodniky.main.SerializableDp
 import cz.jaro.dopravnipodniky.shared.UliceID
+import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.dpSUlicema
 import cz.jaro.dopravnipodniky.shared.nasobitelMaxCloveku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.math.roundToInt
 
@@ -19,6 +20,7 @@ import kotlin.math.roundToInt
 ///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
 @Serializable
+@SerialName("Ulice")
 data class Ulice(
     val zacatek: Pozice<UlicovyBlok>,
     val konec: Pozice<UlicovyBlok>,
@@ -75,6 +77,8 @@ data class Ulice(
 
     val kapacitaZastavky = (kapacita * nasobitelMaxCloveku).roundToInt()
 }
+
+operator fun Ulice.contains(other: Pozice<UlicovyBlok>) = other == zacatek || other == konec
 
 fun Ulice.pocetLinek(dp: DopravniPodnik) = dp.linky.count { id in it.ulice }
 

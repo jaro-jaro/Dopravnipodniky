@@ -5,10 +5,12 @@ import androidx.compose.ui.res.stringResource
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @JvmInline
 @Serializable
+@SerialName("Peniz")
 value class Peniz(val value: Double) : Comparable<Peniz> {
     operator fun times(other: Double) = Peniz(value * other)
     operator fun times(other: Int) = Peniz(value * other)

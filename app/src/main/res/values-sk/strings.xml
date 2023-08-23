@@ -31,7 +31,7 @@
     <string name="upravit">Upravit</string>
     <string name="odstranit">Odstranit</string>
     <string name="hotovo">Hotovo</string>
-    <string name="zadejte_cislo_linky">Zadejte číslo linky:</string>
+    <string name="zadejte_cislo_linky">Zadejte číslo linky</string>
     <string name="nelze_prodat_dp">Tento dopravní podnik nelze prodat, protože je aktuálně otevřený</string>
     <string name="vypravit">Vypravit</string>
     <string name="zvolte_barvu">Zvolte barvu:</string>
@@ -40,7 +40,7 @@
     <string name="pocet_ulic">%1$d ulic z toho %2$d má troleje</string>
     <string name="pocet_domu">%s domů</string>
     <string name="pocet_zastavek">%s zastávek</string>
-    <string name="barva_linky">"Barva linky: %s</string>
+    <string name="barva_linky">"Barva linky</string>
     <string name="barva_temata">"Barva témata: %s</string>
     <string name="linka_existuje">Linka s tímto číslem již existuje!</string>
     <string name="linka_kratka">Linka musí být na alespoň jedné ulici</string>

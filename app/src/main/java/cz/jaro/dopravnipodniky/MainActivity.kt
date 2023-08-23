@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.DestinationsNavHost
 import cz.jaro.dopravnipodniky.data.PreferencesDataSource
+import cz.jaro.dopravnipodniky.data.aktualniDp
 import cz.jaro.dopravnipodniky.theme.DpTheme
 import org.koin.android.ext.android.get
 
@@ -22,7 +23,7 @@ class MainActivity : ComponentActivity() {
 
             if (faktVse != null) DpTheme(
                 useDynamicColor = false,
-                theme = faktVse!!.tema
+                theme = faktVse!!.aktualniDp.tema
             ) {
                 DestinationsNavHost(navGraph = NavGraphs.root)
             }

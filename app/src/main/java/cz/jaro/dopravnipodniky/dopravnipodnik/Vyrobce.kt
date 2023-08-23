@@ -1,9 +1,11 @@
 package cz.jaro.dopravnipodniky.dopravnipodnik
 
 import cz.jaro.dopravnipodniky.R
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+@SerialName("Vyrobce")
 enum class Vyrobce(
     val jmeno: Int
 ) {

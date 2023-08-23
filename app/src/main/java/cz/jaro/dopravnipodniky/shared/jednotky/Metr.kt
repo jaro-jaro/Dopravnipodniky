@@ -1,10 +1,12 @@
 package cz.jaro.dopravnipodniky.shared.jednotky
 
 import androidx.compose.ui.unit.Dp
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable
 @JvmInline
+@Serializable
+@SerialName("Metr")
 value class Metr(val value: Double)
 
 val Int.metru get() = Metr(this.toDouble())
