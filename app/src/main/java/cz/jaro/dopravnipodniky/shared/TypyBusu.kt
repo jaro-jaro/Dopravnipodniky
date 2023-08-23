@@ -2074,6 +2074,29 @@ private val autobusy = listOf(
         """.trimMargin()
     ),
     TypBusu(
+        model = "Solaris Urbino 18 IV hydrogen",
+        trakce = Autobus.Vodikovy,
+        vyrobce = SOLARIS,
+        kapacita = 136,
+        rychlost = 80.kilometruZaHodinu,
+        maxNaklady = 52.0.penezZaMin,
+        cena = 550_000.penez,
+        delka = 18F.metru,
+        vydrz = 270.hours,
+        popis = """
+            |On 14 September 2022 Solaris unveiled its Urbino 18 hydrogen bus. The heart of the Urbino 18 hydrogen bus is a cutting-edge fuel cell that acts as a miniature hydrogen power plant. Hydrogen is transformed by the fuel cell into electricity which is then transferred to the driveline. Solaris’s new vehicle doesn’t feature a conventional engine compartment as it has been equipped with a modular drive system. The space thus saved allowed the bus maker to increase the vehicle’s passenger capacity. Depending on the configuration, the bus will be able to carry up to 138 passengers.
+            |
+            |Výrobce: Solaris bus & coach
+            |Rok výroby: od roku 2022
+            |Délka: 18 000 mm
+            |Šířka: 2 550 mm
+            |Hmotnost: 17 400 kg
+            |Maximální rychlost: 80 km/h
+            |Míst k sezení: 52
+            |Míst k stání: 84
+        """.trimMargin()
+    ),
+    TypBusu(
         model = "Iveco Crossway 13M",
         trakce = Autobus.Dieslovy,
         vyrobce = IVECO,
@@ -3907,6 +3930,29 @@ private val elektrobusy = listOf(
             |Maximální rychlost: 80 km/h
             |Míst k sezení: 40
             |Míst k stání: 65
+        """.trimMargin()
+    ),
+    TypBusu(
+        model = "Solaris Urbino 15 IV LE electric",
+        trakce = Elektrobus,
+        vyrobce = SOLARIS,
+        kapacita = 125,
+        rychlost = 80.kilometruZaHodinu,
+        maxNaklady = 50.0.penezZaMin,
+        cena = 180_000.penez,
+        delka = 14.89F.metru,
+        vydrz = 250.hours,
+        popis = """
+            |Solaris Urbino 15 LE je model příměstského, částečně nízkopodlažního autobusu, který v letech 2008–2018 vyráběla polská firma Solaris Bus & Coach. První informace (včetně fotografií prototypu) o modelu Urbino 15 LE byly poprvé představeny na veletrhu Autotec 2008 v Brně. Oficiální premiéra proběhla na podzim roku 2008 na motoristických výstavách IAA Nutzfahrzeuge v německém Hannoveru a Transexpo v polských Kielcích. Vůz konstrukčně vycházel z vozidel Solaris Urbino 15, které byly jedny z mála vyráběných autobusů této délky (15 m) na světě. Tyto autobusy byly hojně využívány v letech 2015 až 2021 pro meziměstskou dopravu v okolí Teplic. 2 vozy v CNG provedení zasahují do provozu i v Ústí nad Labem. Dne 20. října 2020 byla představena IV. generace Urbina 15 LE ve verzi elektrobus (s konvenčním pohonem nemá být vyráběn).
+            |
+            |Výrobce: Solaris bus & coach
+            |Rok výroby: od roku 2021
+            |Délka: 14 890 mm
+            |Šířka: 2 550 mm
+            |Hmotnost: 12 400 kg
+            |Maximální rychlost: 80 km/h
+            |Míst k sezení: 65
+            |Míst k stání: 60
         """.trimMargin()
     ),
     TypBusu(
