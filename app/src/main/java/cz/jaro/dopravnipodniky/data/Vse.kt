@@ -1,13 +1,13 @@
 package cz.jaro.dopravnipodniky.data
 
-import cz.jaro.dopravnipodniky.dopravnipodnik.DopravniPodnik
-import cz.jaro.dopravnipodniky.dosahlosti.Dosahlost
-import cz.jaro.dopravnipodniky.garaz.obchod.Razeni
-import cz.jaro.dopravnipodniky.garaz.obchod.SkupinaFiltru
-import cz.jaro.dopravnipodniky.garaz.obchod.SkupinaFiltru.Companion.pocatecniFiltry
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
+import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.pocatecniObnosPenez
+import cz.jaro.dopravnipodniky.ui.garaz.obchod.Razeni
+import cz.jaro.dopravnipodniky.ui.garaz.obchod.SkupinaFiltru
+import cz.jaro.dopravnipodniky.ui.garaz.obchod.SkupinaFiltru.Companion.pocatecniFiltry
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

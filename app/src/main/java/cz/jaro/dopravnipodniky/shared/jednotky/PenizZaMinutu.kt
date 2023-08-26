@@ -15,6 +15,7 @@ import kotlin.time.Duration
 @SerialName("PenizZaMinutu")
 value class PenizZaMinutu(val value: Double) : Comparable<PenizZaMinutu> {
     operator fun plus(other: PenizZaMinutu) = PenizZaMinutu(value + other.value)
+    operator fun minus(other: PenizZaMinutu) = PenizZaMinutu(value - other.value)
     operator fun times(other: Double) = PenizZaMinutu(value * other)
     operator fun times(other: Int) = PenizZaMinutu(value * other)
 
@@ -23,6 +24,7 @@ value class PenizZaMinutu(val value: Double) : Comparable<PenizZaMinutu> {
 
 operator fun Peniz.div(other: Duration) = PenizZaMinutu(value / other.minutes)
 operator fun PenizZaMinutu.times(other: Duration) = Peniz(value * other.minutes)
+operator fun PenizZaMinutu.times(other: Tik) = times(other.toDuration())
 
 val Int.penezZaMin get() = PenizZaMinutu(this.toDouble())
 val Double.penezZaMin get() = PenizZaMinutu(this)

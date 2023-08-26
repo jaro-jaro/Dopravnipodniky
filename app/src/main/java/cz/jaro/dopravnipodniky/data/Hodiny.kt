@@ -1,8 +1,9 @@
 package cz.jaro.dopravnipodniky.data
 
-import cz.jaro.dopravnipodniky.shared.TPS
 import cz.jaro.dopravnipodniky.shared.jednotky.Tik
 import cz.jaro.dopravnipodniky.shared.jednotky.tiku
+import cz.jaro.dopravnipodniky.shared.jednotky.toTiky
+import cz.jaro.dopravnipodniky.shared.millisPerTik
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
@@ -14,14 +15,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
+import kotlin.time.Duration
 
 @Single
 class Hodiny {
-    companion object {
-        private const val millisPerTik = 1000L / TPS
-    }
 
-    private val cas = flow {
+    val cas = flow {
         while (currentCoroutineContext().isActive) {
             emit(System.currentTimeMillis())
         }
@@ -38,6 +37,13 @@ class Hodiny {
     private val scope = CoroutineScope(Dispatchers.IO)
 
     private val listeners: MutableList<Pair<Tik, suspend CoroutineScope.() -> Unit>> = mutableListOf()
+
+    fun registerListener(
+        every: Duration,
+        listener: suspend CoroutineScope.() -> Unit,
+    ) {
+        listeners += every.toTiky() to listener
+    }
 
     fun registerListener(
         every: Tik,

@@ -7,6 +7,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.math.roundToLong
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
 
 @JvmInline
 @Serializable
@@ -20,4 +21,4 @@ value class DpZaHodinu(val value: Long) {
 operator fun Dp.div(other: Duration) = DpZaHodinu((value / other.hours).roundToLong())
 
 val Int.dpZaHodinu get() = DpZaHodinu(toLong())
-val Int.kilometruZaHodinu get() = DpZaHodinu(toLong() * 90)
+val Int.kilometruZaHodinu get() = (this * 1_000L).metru.toDp() / 1.hours

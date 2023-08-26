@@ -4,11 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cz.jaro.dopravnipodniky.data.PreferencesDataSource
 import cz.jaro.dopravnipodniky.data.Vse
-import cz.jaro.dopravnipodniky.dopravnipodnik.DopravniPodnik
-import cz.jaro.dopravnipodniky.dosahlosti.Dosahlost
-import cz.jaro.dopravnipodniky.dosahlosti.Dosahlovac
-import cz.jaro.dopravnipodniky.garaz.obchod.SkupinaFiltru
-import cz.jaro.dopravnipodniky.garaz.obchod.SkupinaFiltru.Companion.filtrovat
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
+import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
+import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlovac
+import cz.jaro.dopravnipodniky.ui.garaz.obchod.SkupinaFiltru
+import cz.jaro.dopravnipodniky.ui.garaz.obchod.SkupinaFiltru.Companion.filtrovat
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.filterNotNull

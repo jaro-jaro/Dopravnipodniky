@@ -8,7 +8,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.DestinationsNavHost
 import cz.jaro.dopravnipodniky.data.PreferencesDataSource
 import cz.jaro.dopravnipodniky.data.aktualniDp
-import cz.jaro.dopravnipodniky.theme.DpTheme
+import cz.jaro.dopravnipodniky.ui.NavGraphs
+import cz.jaro.dopravnipodniky.ui.theme.DpTheme
 import org.koin.android.ext.android.get
 
 class MainActivity : ComponentActivity() {

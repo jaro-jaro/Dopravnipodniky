@@ -124,15 +124,18 @@ const val maximalniOddaleni = .1F
 val pocatecniPosunutiX = 0.dp //200
 val pocatecniPosunutiY = 0.dp //600
 
-val ulicovyBlok = 156.dp
+val ulicovyBlok = 320.dp
 
+val delkaUlice = ulicovyBlok
 val sirkaUlice = 34.dp
 val velikostZastavky = 44.dp
 val odsazeniBaraku = 6.dp
 const val barakuVUlici = 5
 val velikostBaraku = (ulicovyBlok - odsazeniBaraku * (barakuVUlici + 1)) / barakuVUlici
 val sirkaObrubniku = 4.dp
-val sirkaBusu = 10.dp
+
+//val sirkaBusu = 10.dp
+val odsazeniBusu = 4.dp
 
 val sirkaTroleje = 1.dp
 val predsazeniTrolejiS = 8.dp
@@ -162,6 +165,8 @@ val ZLUTA = Color(255, 255, 0)
 const val TPS = 30
 const val TPM = TPS * 60
 const val TPH = TPM * 60
+
+const val millisPerTik = 1000L / TPS
 
 const val nasobitelDelkyBusu = 2F
 //val delkaUlice = 100.metru

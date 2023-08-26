@@ -1,9 +1,9 @@
 package cz.jaro.dopravnipodniky.shared
 
 import cz.jaro.dopravnipodniky.R
-import cz.jaro.dopravnipodniky.dopravnipodnik.DopravniPodnik
-import cz.jaro.dopravnipodniky.dopravnipodnik.maZastavku
-import cz.jaro.dopravnipodniky.dopravnipodnik.pocetLinek
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.pocetLinek
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -137,7 +137,9 @@ fun soucinPromenneNaRozsahlostiVNasobiteliPoctuLidiKteryTiNastoupiDoBusuNaZastav
 }
 
 
-val Duration.minutes get() = inWholeSeconds / 60.0
+val Duration.milliseconds get() = inWholeMicroseconds / 1_000.0
+val Duration.seconds get() = milliseconds / 1_000.0
+val Duration.minutes get() = seconds / 60.0
 val Duration.hours get() = minutes / 60.0
 
 fun <E> List<E>.mutate(mutator: MutableList<E>.() -> Unit): List<E> = buildList {

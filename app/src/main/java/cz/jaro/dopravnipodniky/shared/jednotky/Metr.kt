@@ -14,4 +14,4 @@ val Double.metru get() = Metr(this)
 val Float.metru get() = Metr(this.toDouble())
 val Long.metru get() = Metr(this.toDouble())
 
-fun Metr.toDp() = Dp((value * 2).toFloat())
+fun Metr.toDp() = Dp((value * 4).toFloat())

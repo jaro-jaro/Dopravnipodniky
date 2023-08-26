@@ -1,10 +1,10 @@
 package cz.jaro.dopravnipodniky.data
 
 import android.util.Log
-import cz.jaro.dopravnipodniky.dopravnipodnik.Barak
-import cz.jaro.dopravnipodniky.dopravnipodnik.DopravniPodnik
-import cz.jaro.dopravnipodniky.dopravnipodnik.TypBaraku
-import cz.jaro.dopravnipodniky.dopravnipodnik.Ulice
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Barak
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypBaraku
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
