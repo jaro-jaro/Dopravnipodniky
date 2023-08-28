@@ -62,6 +62,10 @@ fun CeleMesto(
                 top = ty + size.center.y,
             ) {
 
+                dp.seznamKrizovatek.forEach { krizovatka ->
+                    namalovatKrizovatku(dp, krizovatka)
+                }
+
                 dp.ulicove.forEach { ulice ->
                     ulice.draw()
                 }
@@ -70,10 +74,6 @@ fun CeleMesto(
                     ulice.baraky.forEach { barak ->
                         barak.draw(dp.tema, ulice)
                     }
-                }
-
-                dp.seznamKrizovatek.forEach { krizovatka ->
-                    namalovatKrizovatku(dp, krizovatka)
                 }
 
                 if (priblizeni > oddalenyRezim) dp.busy.forEach { bus ->

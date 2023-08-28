@@ -1,9 +1,12 @@
 package cz.jaro.dopravnipodniky.shared
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import cz.jaro.dopravnipodniky.shared.jednotky.metru
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.penezZaMin
+import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toTiky
 import kotlin.math.PI
 import kotlin.time.Duration.Companion.seconds
@@ -124,38 +127,38 @@ const val maximalniOddaleni = .1F
 val pocatecniPosunutiX = 0.dp //200
 val pocatecniPosunutiY = 0.dp //600
 
-val ulicovyBlok = 320.dp
+val ulicovyBlok = 72.metru.toDp()
 
 val delkaUlice = ulicovyBlok
-val sirkaUlice = 34.dp
+val sirkaUlice = 10.metru.toDp()
 val velikostZastavky = 44.dp
-val odsazeniBaraku = 6.dp
+val odsazeniBaraku = 1.metru.toDp()
 const val barakuVUlici = 5
 val velikostBaraku = (ulicovyBlok - odsazeniBaraku * (barakuVUlici + 1)) / barakuVUlici
-val sirkaObrubniku = 4.dp
+val sirkaChodniku = 1.metru.toDp()
 
 //val sirkaBusu = 10.dp
-val odsazeniBusu = 4.dp
+val odsazeniBusu = sirkaChodniku + .75.metru.toDp()
 
-val sirkaTroleje = 1.dp
+val sirkaTroleje = Dp.Hairline
 val predsazeniTrolejiS = 8.dp
 val predsazeniTrolejiL = 28.dp
-val rozchodTroleji = 5.dp
-val odsazeniTroleje = 6.dp
+val rozchodTroleji = .5.metru.toDp()
+val odsazeniTroleje = sirkaChodniku + 1.5.metru.toDp()
 val odsazeniPrvniTroleje = odsazeniTroleje
 val odsazeniDruheTroleje = odsazeniTroleje + rozchodTroleji
-val odsazeniTretiTroleje = odsazeniDruheTroleje + odsazeniTroleje + odsazeniTroleje
-val odsazeniCtvrteTroleje = odsazeniTretiTroleje + rozchodTroleji
+val odsazeniCtvrteTroleje = sirkaUlice - odsazeniPrvniTroleje
+val odsazeniTretiTroleje = sirkaUlice - odsazeniDruheTroleje
 val odsazeniTroleji = listOf(odsazeniPrvniTroleje, odsazeniDruheTroleje, odsazeniTretiTroleje, odsazeniCtvrteTroleje)
 
-// OOO----BBTBBBBTBB-------BBTBBBBTBB----OOO
+// CCCC|---BBBTB|BTBBB---|---BBBTB|BTBBB---|CCCC
 
 val CERNA = Color(0, 0, 0)
 val BILA = Color(255, 255, 255)
 val sedUlice = Color(135, 135, 135)
 val sedPozadi = Color(16, 16, 16)
 val sedZastavky = Color(200, 200, 200)
-val sedObrubniku = Color(200, 200, 200)
+val sedChodniku = Color(200, 200, 200)
 val sedTroleje = Color(32, 32, 32)
 val sedBaraku = Color(150, 150, 150)
 val ZLUTA = Color(255, 255, 0)

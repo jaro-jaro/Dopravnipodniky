@@ -4,12 +4,12 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.translate
+import cz.jaro.dopravnipodniky.shared.drawRoundRect
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.dpSUlicema
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.ui.main.Offset
-import cz.jaro.dopravnipodniky.ui.malovani.drawRoundRect
 import kotlin.math.sqrt
 
 fun DrawScope.namalovatVybiraniLinky(

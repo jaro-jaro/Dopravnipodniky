@@ -1,8 +1,8 @@
 package cz.jaro.dopravnipodniky.data.dopravnipodnik
 
 import cz.jaro.dopravnipodniky.shared.Orientace
-import cz.jaro.dopravnipodniky.shared.Orientace.SVISLE
-import cz.jaro.dopravnipodniky.shared.Orientace.VODOROVNE
+import cz.jaro.dopravnipodniky.shared.Orientace.Svisle
+import cz.jaro.dopravnipodniky.shared.Orientace.Vodorovne
 import cz.jaro.dopravnipodniky.shared.UliceID
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
@@ -37,9 +37,9 @@ data class Ulice(
     val kapacita get() = baraky.sumOf { it.kapacita }
 
     val orientace: Orientace = when {
-        zacatek.x == konec.x -> SVISLE
-        zacatek.y == konec.y -> VODOROVNE
-        else -> SVISLE
+        zacatek.x == konec.x -> Svisle
+        zacatek.y == konec.y -> Vodorovne
+        else -> Svisle
     }
 
     val zacatekX: SerializableDp
@@ -56,7 +56,7 @@ data class Ulice(
         }
 
         when(orientace) {
-            SVISLE -> {
+            Svisle -> {
                 zacatekX = zacatek.x.dpSUlicema
                 zacatekY = zacatek.y.dpSUlicema + sirkaUlice
                 konecX = konec.x.dpSUlicema + sirkaUlice
@@ -65,7 +65,7 @@ data class Ulice(
                 sirka = konecX - zacatekX
                 delka = konecY - zacatekY
             }
-            VODOROVNE -> {
+            Vodorovne -> {
                 zacatekX = zacatek.x.dpSUlicema + sirkaUlice
                 zacatekY = zacatek.y.dpSUlicema
                 konecX = konec.x.dpSUlicema

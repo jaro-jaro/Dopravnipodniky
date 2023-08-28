@@ -62,7 +62,6 @@ import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
-import cz.jaro.dopravnipodniky.shared.mutate
 import cz.jaro.dopravnipodniky.ui.destinations.ObchodScreenDestination
 import org.koin.androidx.compose.koinViewModel
 import kotlin.reflect.KClass
@@ -81,7 +80,6 @@ fun GarazScreen(
         dp = dp!!,
         vse = vse!!,
         upravitDp = viewModel::zmenitDp,
-        upravitVse = viewModel::zmenitVse,
         navigatate = navigator::navigate,
         navigatateBack = navigator::navigateUp,
         dosahni = viewModel.dosahni
@@ -94,7 +92,6 @@ fun GarazScreen(
     dp: DopravniPodnik,
     vse: Vse,
     upravitDp: ((DopravniPodnik) -> DopravniPodnik) -> Unit,
-    upravitVse: ((Vse) -> Vse) -> Unit,
     navigatate: (Direction) -> Unit,
     navigatateBack: () -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
@@ -226,11 +223,7 @@ fun GarazScreen(
                                             onClick = {
                                                 upravitDp { dopravniPodnik ->
                                                     dopravniPodnik.copy(
-                                                        busy = dopravniPodnik.busy.mutate {
-                                                            this[indexOfFirst { it.id == bus.id }] = bus.copy(
-                                                                linka = null
-                                                            )
-                                                        }
+                                                        busy = (listOf(bus.copy(linka = null)) + dopravniPodnik.busy).distinctBy { it.id }
                                                     )
                                                 }
                                                 vybratLinku = false
@@ -254,11 +247,7 @@ fun GarazScreen(
                                                     Modifier.clickable {
                                                         upravitDp { dopravniPodnik ->
                                                             dopravniPodnik.copy(
-                                                                busy = dopravniPodnik.busy.mutate {
-                                                                    this[indexOfFirst { it.id == bus.id }] = bus.copy(
-                                                                        linka = linka.id
-                                                                    )
-                                                                }
+                                                                busy = (listOf(bus.copy(linka = linka.id)) + dopravniPodnik.busy).distinctBy { it.id }
                                                             )
                                                         }
                                                         dosahni(Dosahlost.BusNaLince::class)

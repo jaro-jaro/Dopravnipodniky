@@ -7,8 +7,8 @@ import cz.jaro.dopravnipodniky.shared.millisPerTik
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -20,44 +20,47 @@ import kotlin.time.Duration
 @Single
 class Hodiny {
 
-    val cas = flow {
+    private val cas = flow {
         while (currentCoroutineContext().isActive) {
             emit(System.currentTimeMillis())
+            delay(10)
         }
     }
+        .flowOn(Dispatchers.IO)
         .distinctUntilChanged()
-        .filter { millis ->
-            millis % millisPerTik == 0L
-        }
         .map { millis ->
-            (millis / millisPerTik).tiku
+            millis / millisPerTik
+        }
+        .distinctUntilChanged()
+        .map { tik ->
+            tik.tiku
         }
         .flowOn(Dispatchers.IO)
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    private val listeners: MutableList<Pair<Tik, suspend CoroutineScope.() -> Unit>> = mutableListOf()
+    private val listeners: MutableList<Pair<Tik, suspend CoroutineScope.(tik: Tik) -> Unit>> = mutableListOf()
 
     fun registerListener(
         every: Duration,
-        listener: suspend CoroutineScope.() -> Unit,
+        listener: suspend CoroutineScope.(tik: Tik) -> Unit,
     ) {
         listeners += every.toTiky() to listener
     }
 
     fun registerListener(
         every: Tik,
-        listener: suspend CoroutineScope.() -> Unit,
+        listener: suspend CoroutineScope.(tik: Tik) -> Unit,
     ) {
         listeners += every to listener
     }
 
     init {
-        scope.launch {
+        scope.launch(Dispatchers.IO) {
             cas.collect { tik ->
                 listeners.forEach { (every, listener) ->
-                    launch {
-                        if (tik % every == 0.tiku) listener()
+                    launch(Dispatchers.IO) {
+                        if (tik % every == 0.tiku) listener(tik)
                     }
                 }
             }

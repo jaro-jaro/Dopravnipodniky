@@ -1,32 +1,29 @@
 package cz.jaro.dopravnipodniky.ui.malovani
 
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.DrawStyle
-import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Barak
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypBaraku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
-import cz.jaro.dopravnipodniky.shared.Orientace.SVISLE
-import cz.jaro.dopravnipodniky.shared.Orientace.VODOROVNE
+import cz.jaro.dopravnipodniky.shared.Orientace.Svisle
+import cz.jaro.dopravnipodniky.shared.Orientace.Vodorovne
+import cz.jaro.dopravnipodniky.shared.delkaUlice
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.dpSUlicema
 import cz.jaro.dopravnipodniky.shared.odsazeniBaraku
-import cz.jaro.dopravnipodniky.shared.sedObrubniku
+import cz.jaro.dopravnipodniky.shared.sedChodniku
 import cz.jaro.dopravnipodniky.shared.sedUlice
-import cz.jaro.dopravnipodniky.shared.sirkaObrubniku
+import cz.jaro.dopravnipodniky.shared.sirkaChodniku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
+import cz.jaro.dopravnipodniky.shared.translate
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
 import cz.jaro.dopravnipodniky.shared.velikostBaraku
+import cz.jaro.dopravnipodniky.ui.main.Offset
 import cz.jaro.dopravnipodniky.ui.theme.Theme
 
 context(DrawScope)
@@ -42,39 +39,41 @@ fun namalovatKrizovatku(
 
     val zacatekX = x.dpSUlicema
     val zacatekY = y.dpSUlicema
-    val konecX = (x.dpSUlicema + sirkaUlice)
-    val konecY = (y.dpSUlicema + sirkaUlice)
 
-    val velikost = sirkaUlice
+    val sirkaUlice = sirkaUlice.toPx()
 
-    drawRect(
-        color = sedUlice,
-        topLeft = Offset(zacatekX.toPx(), zacatekY.toPx()),
-        bottomRight = Offset(konecX.toPx(), konecY.toPx()),
-    )
+    val chodnik = sirkaChodniku.toPx()
 
-    val obrubnik = sirkaObrubniku
+    translate(
+        left = zacatekX.toPx(),
+        top = zacatekY.toPx(),
+    ) {
+        drawRect(
+            color = sedUlice,
+            size = Size(sirkaUlice, sirkaUlice),
+        )
 
-    if (sousedi.none { it.konec == krizovatka && it.orientace == SVISLE }) drawRect(
-        color = sedObrubniku,
-        topLeft = Offset(zacatekX.toPx(), zacatekY.toPx() - obrubnik.toPx()),
-        size = Size(velikost.toPx(), obrubnik.toPx())
-    ) // nahore
-    if (sousedi.none { it.konec == krizovatka && it.orientace == VODOROVNE }) drawRect(
-        color = sedObrubniku,
-        topLeft = Offset(zacatekX.toPx() - obrubnik.toPx(), zacatekY.toPx()),
-        size = Size(obrubnik.toPx(), velikost.toPx())
-    ) // vlevo
-    if (sousedi.none { it.zacatek == krizovatka && it.orientace == SVISLE }) drawRect(
-        color = sedObrubniku,
-        topLeft = Offset(zacatekX.toPx(), konecY.toPx()),
-        size = Size(velikost.toPx(), obrubnik.toPx())
-    ) // dole
-    if (sousedi.none { it.zacatek == krizovatka && it.orientace == VODOROVNE }) drawRect(
-        color = sedObrubniku,
-        topLeft = Offset(konecX.toPx(), zacatekY.toPx()),
-        size = Size(obrubnik.toPx(), velikost.toPx())
-    ) // vpravo
+        if (sousedi.none { it.konec == krizovatka && it.orientace == Svisle }) drawRect(
+            color = sedChodniku,
+            topLeft = Offset(),
+            size = Size(sirkaUlice, chodnik)
+        ) // nahore
+        if (sousedi.none { it.konec == krizovatka && it.orientace == Vodorovne }) drawRect(
+            color = sedChodniku,
+            topLeft = Offset(),
+            size = Size(chodnik, sirkaUlice)
+        ) // vlevo
+        if (sousedi.none { it.zacatek == krizovatka && it.orientace == Svisle }) drawRect(
+            color = sedChodniku,
+            topLeft = Offset(y = sirkaUlice - chodnik),
+            size = Size(sirkaUlice, chodnik)
+        ) // dole
+        if (sousedi.none { it.zacatek == krizovatka && it.orientace == Vodorovne }) drawRect(
+            color = sedChodniku,
+            topLeft = Offset(x = sirkaUlice - chodnik),
+            size = Size(chodnik, sirkaUlice)
+        ) // vpravo
+    }
 }
 
 context (DrawScope)
@@ -102,10 +101,6 @@ fun Barak.draw(
         .plus(if (indexSkoroNoveBarvy < 1) Theme.entries.lastIndex else 0)
     val barvicka = Theme.entries[indexNoveBarvy].barva // todo je to cerny
 
-//    val rohovy = (i == 0 && !barakJeNaDruheStraneUlice) || (i == 3 && barakJeNaDruheStraneUlice)
-
-    val scitanecVysky = 0F
-
     val sirka = velikostBaraku.toPx()
 
     @Suppress("UnnecessaryVariable")
@@ -122,8 +117,8 @@ fun Barak.draw(
             top = zacatekUliceY,
         ) {
             val rohBloku = when (ulice.orientace) {
-                SVISLE -> Offset(x = sirkaUlice.toPx(), y = 0F)
-                VODOROVNE -> Offset(x = 0F, y = sirkaUlice.toPx())
+                Svisle -> Offset(x = sirkaUlice.toPx(), y = 0F)
+                Vodorovne -> Offset(x = 0F, y = sirkaUlice.toPx())
             }
             translate(
                 offset = rohBloku
@@ -145,7 +140,7 @@ fun Barak.draw(
         }
     } else {
         when (ulice.orientace to barakJeNaDruheStraneUlice) {
-            VODOROVNE to true -> drawRoundRect( // dole
+            Vodorovne to true -> drawRoundRect( // dole
                 color = barvicka,
                 topLeft = Offset(
                     x = zacatekUliceX + odsazeni + sirka + odsazeni + i * (sirka + odsazeni),
@@ -153,45 +148,45 @@ fun Barak.draw(
                 ),
                 size = Size(
                     width = sirka,
-                    height = vyska + scitanecVysky,
+                    height = vyska,
                 ),
                 cornerRadius = CornerRadius(5.dp.toPx() * (sirka / vyska))
             )
 
-            VODOROVNE to false -> drawRoundRect( // nahore
+            Vodorovne to false -> drawRoundRect( // nahore
                 color = barvicka,
                 topLeft = Offset(
                     x = zacatekUliceX + odsazeni + i * (sirka + odsazeni),
-                    y = zacatekUliceY - odsazeni - sirka - scitanecVysky,
+                    y = zacatekUliceY - odsazeni - sirka,
                 ),
                 size = Size(
                     width = sirka,
-                    height = vyska + scitanecVysky,
+                    height = vyska,
                 ),
                 cornerRadius = CornerRadius(5.dp.toPx() * (sirka / vyska))
             )
 
-            SVISLE to true -> drawRoundRect( // vlevo
+            Svisle to true -> drawRoundRect( // vlevo
                 color = barvicka,
                 topLeft = Offset(
-                    x = zacatekUliceX - odsazeni - sirka - scitanecVysky,
+                    x = zacatekUliceX - odsazeni - sirka,
                     y = zacatekUliceY + sirka + odsazeni + odsazeni + i * (sirka + odsazeni),
                 ),
                 size = Size(
-                    width = vyska + scitanecVysky,
+                    width = vyska,
                     height = sirka,
                 ),
                 cornerRadius = CornerRadius(5.dp.toPx() * (sirka / vyska))
             )
 
-            SVISLE to false -> drawRoundRect( // vpravo
+            Svisle to false -> drawRoundRect( // vpravo
                 color = barvicka,
                 topLeft = Offset(
                     x = konecUliceX + odsazeni + (sirka - vyska),
                     y = zacatekUliceY + odsazeni + i * (sirka + odsazeni),
                 ),
                 size = Size(
-                    width = vyska + scitanecVysky,
+                    width = vyska,
                     height = sirka,
                 ),
                 cornerRadius = CornerRadius(5.dp.toPx() * (sirka / vyska))
@@ -204,118 +199,53 @@ context(DrawScope)
 fun Ulice.draw() {
 //    zastavka?.draw()
 
-    val zacatekX = zacatekX
-    val zacatekY = zacatekY
-    val konecX = konecX
-    val konecY = konecY
+    val zacatekX = zacatekX.toPx()
+    val zacatekY = zacatekY.toPx()
 
     //fill(BARVICKY[ulice.potencial])
-    //fill(ulice.potencial * 20)
+    //fill(ulice.potencial * 20)obrubnik
 
-    drawRect(
-        color = sedUlice,
-        topLeft = Offset(zacatekX.toPx(), zacatekY.toPx()),
-        bottomRight = Offset(konecX.toPx(), konecY.toPx()),
-    )
+    translate(
+        left = zacatekX,
+        top = zacatekY,
+    ) {
+        val sirkaChodniku = sirkaChodniku.toPx()
+        val sirkaUlice = sirkaUlice.toPx()
+        val delkaUlice = delkaUlice.toPx()
+        when (orientace) {
+            Svisle -> {
+                drawRect(
+                    color = sedUlice,
+                    size = Size(sirkaUlice, delkaUlice)
+                )
+                drawRect(
+                    color = sedChodniku,
+                    topLeft = Offset(),
+                    size = Size(sirkaChodniku, delkaUlice),
+                ) // vlevo
+                drawRect(
+                    color = sedChodniku,
+                    topLeft = Offset(x = sirkaUlice - sirkaChodniku),
+                    size = Size(sirkaChodniku, delkaUlice),
+                ) // vpravo
+            }
 
-    val obrubnik = sirkaObrubniku
-
-    drawRect(
-        color = sedObrubniku,
-        topLeft = Offset(zacatekX.toPx(), zacatekY.toPx() - obrubnik.toPx()),
-        bottomRight = Offset(konecX.toPx(), zacatekY.toPx()),
-    ) // nahore
-    drawRect(
-        color = sedObrubniku,
-        topLeft = Offset(zacatekX.toPx() - obrubnik.toPx(), zacatekY.toPx()),
-        bottomRight = Offset(zacatekX.toPx(), konecY.toPx()),
-    ) // vlevo
-    drawRect(
-        color = sedObrubniku,
-        topLeft = Offset(zacatekX.toPx(), konecY.toPx()),
-        bottomRight = Offset(konecX.toPx(), konecY.toPx() + obrubnik.toPx()),
-    ) // dole
-    drawRect(
-        color = sedObrubniku,
-        topLeft = Offset(konecX.toPx(), zacatekY.toPx()),
-        bottomRight = Offset(konecX.toPx() + obrubnik.toPx(), konecY.toPx()),
-    ) // vpravo
+            Vodorovne -> {
+                drawRect(
+                    color = sedUlice,
+                    size = Size(delkaUlice, sirkaUlice)
+                )
+                drawRect(
+                    color = sedChodniku,
+                    topLeft = Offset(),
+                    size = Size(delkaUlice, sirkaChodniku),
+                ) // nahore
+                drawRect(
+                    color = sedChodniku,
+                    topLeft = Offset(y = sirkaUlice - sirkaChodniku),
+                    size = Size(delkaUlice, sirkaChodniku),
+                ) // dole
+            }
+        }
+    }
 }
-
-fun DrawScope.drawRect(
-    color: Color,
-    topLeft: Offset,
-    bottomRight: Offset,
-    alpha: Float = 1.0f,
-    style: DrawStyle = Fill,
-    colorFilter: ColorFilter? = null,
-    blendMode: BlendMode = DrawScope.DefaultBlendMode
-) = drawRect(
-    color = color,
-    topLeft = topLeft,
-    size = Size(
-        width = bottomRight.x - topLeft.x,
-        height = bottomRight.y - topLeft.y,
-    ),
-    alpha = alpha,
-    style = style,
-    colorFilter = colorFilter,
-    blendMode = blendMode,
-)
-
-fun DrawScope.drawRoundRect(
-    color: Color,
-    topLeft: Offset,
-    bottomRight: Offset,
-    alpha: Float = 1.0f,
-    cornerRadius: CornerRadius = CornerRadius.Zero,
-    style: DrawStyle = Fill,
-    colorFilter: ColorFilter? = null,
-    blendMode: BlendMode = DrawScope.DefaultBlendMode
-) = drawRoundRect(
-    color = color,
-    topLeft = topLeft,
-    size = Size(
-        width = bottomRight.x - topLeft.x,
-        height = bottomRight.y - topLeft.y,
-    ),
-    alpha = alpha,
-    cornerRadius = cornerRadius,
-    style = style,
-    colorFilter = colorFilter,
-    blendMode = blendMode,
-)
-
-@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
-fun DrawScope.drawArc(
-    color: Color,
-    startAngle: Float,
-    sweepAngle: Float,
-    useCenter: Boolean,
-    center: Offset,
-    quadSize: Size,
-    alpha: Float = 1.0f,
-    style: DrawStyle = Fill,
-    colorFilter: ColorFilter? = null,
-    blendMode: BlendMode = DrawScope.DefaultBlendMode
-) = drawArc(
-    color = color,
-    startAngle = startAngle,
-    sweepAngle = sweepAngle,
-    useCenter = useCenter,
-    topLeft = Offset(center.x - quadSize.width, center.y - quadSize.height),
-    size = quadSize * 2F,
-    alpha = alpha,
-    style = style,
-    colorFilter = colorFilter,
-    blendMode = blendMode,
-)
-
-inline fun DrawScope.translate(
-    offset: Offset = Offset.Zero,
-    block: DrawScope.() -> Unit
-) = translate(
-    left = offset.x,
-    top = offset.y,
-    block = block,
-)

@@ -46,8 +46,18 @@ class App : Application() {
         val hodiny = get<Hodiny>()
         val dataSource = get<PreferencesDataSource>()
 
-        hodiny.registerListener(1.tiku) {
-            var dp = dataSource.dp.first()
+
+//        runBlocking {
+//            dataSource.zmenitDp {
+//                it.copy(
+//                    busy = emptyList()
+//                )
+//            }
+//        }
+
+        hodiny.registerListener(1.tiku) { tik ->
+//            println(tik)
+            val dp = dataSource.dp.first()
 
             /*
             // zistovani jestli nejses moc dlouho pryc
@@ -108,28 +118,32 @@ class App : Application() {
 
             var zisk = 0.0.penezZaMin
 
-            dp.busy.forEach { staryBus ->
-
-                var novyBus = staryBus
+            dp.busy.forEach { bus ->
 
                 // pocitani zisku
-                zisk -= novyBus.naklady
-                zisk += novyBus.vydelkuj(dp)
+                zisk -= bus.naklady
+                zisk += bus.vydelkuj(dp)
 
                 // odebrani penez za naklady + starnuti busuu
                 dataSource.zmenitVse {
                     it.copy(
-                        prachy = it.prachy - novyBus.naklady * 1.tiku
+                        prachy = it.prachy - bus.naklady * 1.tiku
                     )
                 }
+            }
+            dataSource.zmenitDp { puvodniDp ->
 
-                novyBus = novyBus.copy(
-                    najeto = novyBus.najeto + 1.tiku.toDuration()
-                )
+                val dpPoOdjetiBusu = puvodniDp.busy.fold(puvodniDp) { dp, bus ->
 
-                if (novyBus.linka != null) {
+                    val najeto = bus.najeto + 1.tiku.toDuration()
+                    var poziceVUlici = bus.poziceVUlici
+                    var poziceNaLince = bus.poziceNaLince
+                    var smerNaLince = bus.smerNaLince
+                    var stavZastavky = bus.stavZastavky
 
-                    val linka = dp.linka(novyBus.linka!!)
+                    if (bus.linka != null) {
+
+                        val linka = dp.linka(bus.linka)
 //                val ulicove = linka.ulice(dp)
 //                val ulice = ulicove[
 //                    when (bus.smerNaLince) {
@@ -152,28 +166,22 @@ class App : Application() {
 //                        }
 //                    }
 
-                    if (novyBus.stavZastavky !is StavZastavky.Na) {
+                        if (bus.stavZastavky !is StavZastavky.Na) {
 
-                        // posouvani busu po mape
-                        novyBus = novyBus.copy(
-                            poziceVUlici = novyBus.poziceVUlici + novyBus.typBusu.rychlost * 1.tiku.toDuration()
-                        )
+                            // posouvani busu po mape
+                            poziceVUlici += bus.typBusu.rychlost * 1.tiku.toDuration()
 
-                        if (novyBus.poziceVUlici >= delkaUlice) {  // odjel mimo ulici
-                            novyBus = novyBus.copy(
-                                poziceVUlici = 0.dp,
-                                stavZastavky = StavZastavky.Pred,
-                                poziceNaLince = novyBus.poziceNaLince + 1
-                            )
+                            if (poziceVUlici >= delkaUlice) {  // odjel mimo ulici
+                                poziceVUlici = 0.dp
+                                stavZastavky = StavZastavky.Pred
+                                poziceNaLince += 1
 
-                            if (novyBus.poziceNaLince >= linka.ulice.size) { // dojel na konec linky
-                                novyBus = novyBus.copy(
-                                    poziceNaLince = 0,
-                                    smerNaLince = novyBus.smerNaLince * Smer.NEGATIVNE
-                                )
+                                if (poziceNaLince >= linka.ulice.size) { // dojel na konec linky
+                                    poziceNaLince = 0
+                                    smerNaLince *= Smer.Negativni
+                                }
                             }
                         }
-                    }
 //                }
 //
 //                // zapocitani projeti zastavky
@@ -213,12 +221,30 @@ class App : Application() {
 //                    }
 //                    Log.i("Přesunuti lidé", (if (celkPocet >= 0) "Na zastávku na ulici přišlo" else "Ze zastávky odešlo") + " ${celkPocet.absoluteValue} lidí.")
 //                }
-                    println(novyBus.poziceNaLince to linka.ulice.size)
-                }
-                dp = dp.copy(
-                    busy = dp.busy.mutate {
-                        this[indexOfFirst { it.id == novyBus.id }] = novyBus
                     }
+                    dp.copy(
+                        busy = dp.busy.mutate {
+                            val i = indexOfFirst { it.id == bus.id }
+                            if (i == -1) {
+                                println("BUS NEBYL NALEZEN!!!!")
+                                return@mutate
+                            }
+//                            println(smerNaLince)
+//                            println(poziceNaLince)
+//                            println(poziceVUlici)
+                            this[i] = this[i].copy(
+                                najeto = najeto,
+                                poziceVUlici = poziceVUlici,
+                                poziceNaLince = poziceNaLince,
+                                smerNaLince = smerNaLince,
+                                stavZastavky = stavZastavky,
+                            )
+                        }
+                    )
+                }
+                dpPoOdjetiBusu.copy(
+                    zisk = zisk,
+                    cas = System.currentTimeMillis()
                 )
             }
             /*
@@ -349,9 +375,6 @@ class App : Application() {
                         prefs.edit {
                             putString("vse", gson.toJson(vse))
                         }*/
-            dataSource.zmenitDp {
-                dp
-            }
         }
     }
 }

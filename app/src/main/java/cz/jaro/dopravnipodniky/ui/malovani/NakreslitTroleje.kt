@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.drawscope.translate
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.Orientace
+import cz.jaro.dopravnipodniky.shared.drawArc
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.dpSUlicema
@@ -35,7 +36,7 @@ fun Ulice.nakreslitTroleje() {
         top = zacatekY.toPx(),
     ) {
         when (orientace) {
-            Orientace.VODOROVNE -> {
+            Orientace.Vodorovne -> {
                 troleje.forEach { trolej ->
                     drawLine(
                         color = sedTroleje,
@@ -46,7 +47,7 @@ fun Ulice.nakreslitTroleje() {
                 }
             }
 
-            Orientace.SVISLE -> {
+            Orientace.Svisle -> {
                 troleje.forEach { trolej ->
                     drawLine(
                         color = sedTroleje,
@@ -68,16 +69,16 @@ fun nakreslitTrolejeNaKrizovatku(
 ) {
 
     val sousedVpravo = dp.ulicove.find {
-        it.orientace == Orientace.VODOROVNE && it.zacatek == krizovatka
+        it.orientace == Orientace.Vodorovne && it.zacatek == krizovatka
     }
     val sousedDole = dp.ulicove.find {
-        it.orientace == Orientace.SVISLE && it.zacatek == krizovatka
+        it.orientace == Orientace.Svisle && it.zacatek == krizovatka
     }
     val sousedVlevo = dp.ulicove.find {
-        it.orientace == Orientace.VODOROVNE && it.konec == krizovatka
+        it.orientace == Orientace.Vodorovne && it.konec == krizovatka
     }
     val sousedNahore = dp.ulicove.find {
-        it.orientace == Orientace.SVISLE && it.konec == krizovatka
+        it.orientace == Orientace.Svisle && it.konec == krizovatka
     }
 
     val ctyrKrizovatka = sousedDole != null && sousedNahore != null && sousedVlevo != null && sousedVpravo != null

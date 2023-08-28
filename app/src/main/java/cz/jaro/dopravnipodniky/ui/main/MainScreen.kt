@@ -1,6 +1,5 @@
 package cz.jaro.dopravnipodniky.ui.main
 
-import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.RestartAlt
@@ -31,12 +29,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -98,10 +96,10 @@ fun MainScreen(
     navigatate: (Direction) -> Unit,
 ) {
     val density = LocalDensity.current
-    val stred = remember { dp.stred.dpSUlicema }
-    val tx = remember { Animatable(with(density) { -stred.x.toPx() * pocatecniPriblizeni }) }
-    val ty = remember { Animatable(with(density) { -stred.y.toPx() * pocatecniPriblizeni }) }
-    val priblizeni = remember { Animatable(pocatecniPriblizeni) }
+    val stred = remember(dp.stred) { dp.stred.dpSUlicema }
+    var tx by remember(stred) { mutableFloatStateOf(with(density) { -stred.x.toPx() * pocatecniPriblizeni }) }
+    var ty by remember(stred) { mutableFloatStateOf(with(density) { -stred.y.toPx() * pocatecniPriblizeni }) }
+    var priblizeni by remember { mutableFloatStateOf(pocatecniPriblizeni) }
     val scope = rememberCoroutineScope()
     Scaffold(
         topBar = {
@@ -110,21 +108,6 @@ fun MainScreen(
                     Text(dp.jmenoMesta)
                 },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            scope.launch {
-                                tx.animateTo(with(density) { -stred.x.toPx() * pocatecniPriblizeni })
-                            }
-                            scope.launch {
-                                ty.animateTo(with(density) { -stred.y.toPx() * pocatecniPriblizeni })
-                            }
-                            scope.launch {
-                                priblizeni.animateTo(pocatecniPriblizeni)
-                            }
-                        }
-                    ) {
-                        Icon(Icons.Default.Home, stringResource(R.string.kalibrovat))
-                    }
                     if (BuildConfig.DEBUG) IconButton(
                         onClick = {
                             upravitVse { Vse(prvniDp = Generator.vygenerujMiPrvniMesto()) }
@@ -219,9 +202,9 @@ fun MainScreen(
         ) {
             CeleMesto(
                 dp = dp,
-                tx = tx.value,
-                ty = ty.value,
-                priblizeni = priblizeni.value,
+                tx = tx,
+                ty = ty,
+                priblizeni = priblizeni,
                 modifier = Modifier
                     .fillMaxSize()
                     .pointerInput(Unit) {
@@ -235,44 +218,36 @@ fun MainScreen(
                                         .minus(ulicovyBlok * 2)
                                         .toPx()
                                         .minus(size.center.toOffset())
-                                        .times(priblizeni.value)
+                                        .times(priblizeni)
                                         .plus(size.center.toOffset())
                                         .plus(
                                             size.center
-                                                .times(priblizeni.value)
+                                                .times(priblizeni)
                                                 .toOffset()
                                         )
                                     val i = stop.dpSUlicema
                                         .plus(ulicovyBlok * 2)
                                         .toPx()
                                         .minus(size.center.toOffset())
-                                        .times(priblizeni.value)
+                                        .times(priblizeni)
                                         .plus(size.center.toOffset())
                                         .plus(
                                             size.center
-                                                .times(priblizeni.value)
+                                                .times(priblizeni)
                                                 .toOffset()
                                         )
                                         .minus(IntOffset(size.width, size.height).toOffset())
                                     val p = (i + m) / 2F
 
-                                    val t = Offset(
-                                        tx.value.plus(pan.x / priblizeni.value),
-                                        ty.value.plus(pan.y / priblizeni.value),
-                                    )
-
-                                    val ti = -i / priblizeni.value
-                                    val tm = -m / priblizeni.value
-                                    val pt = -p / priblizeni.value
-                                    val txc = if (ti.x > tm.x) pt.x else t.x.coerceIn(ti.x, tm.x)
-                                    val tyc = if (ti.y > tm.y) pt.y else t.y.coerceIn(ti.y, tm.y)
-
-                                    tx.snapTo(txc)
-                                    ty.snapTo(tyc)
-                                    priblizeni.snapTo((priblizeni.value * zoom).coerceAtLeast(maximalniOddaleni))
+                                    val ti = -i / priblizeni
+                                    val tm = -m / priblizeni
+                                    val pt = -p / priblizeni
+                                    tx = if (ti.x > tm.x) pt.x else tx.plus(pan.x / priblizeni).coerceIn(ti.x, tm.x)
+                                    ty = if (ti.y > tm.y) pt.y else ty.plus(pan.y / priblizeni).coerceIn(ti.y, tm.y)
+                                    priblizeni = (priblizeni * zoom).coerceAtLeast(maximalniOddaleni)
                                 }
 //                                println("onGesture(centroid=$centroid, pan=$pan, zoom=$zoom, rotation=$rotation)")
-//                                println("tx=${tx.value}, ty=${ty.value}, priblizeni=${priblizeni.value}")
+//                                println("tx=${tx}, ty=${ty}, priblizeni=${priblizeni}")
                             }
                         )
                     },

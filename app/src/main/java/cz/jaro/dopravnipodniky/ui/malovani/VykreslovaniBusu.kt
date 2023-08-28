@@ -20,7 +20,7 @@ fun Bus.draw(dp: DopravniPodnik) {
     if (linka == null) return
     val linka = dp.linka(linka)
 
-    val seznamUlic = if (smerNaLince == Smer.POZITIVNE) {
+    val seznamUlic = if (smerNaLince == Smer.Pozitivni) {
         linka.ulice.toList()
     } else {
         linka.ulice.reversed()
@@ -36,12 +36,12 @@ fun Bus.draw(dp: DopravniPodnik) {
     val smerBusuNaUlici = when {
         poziceNaLince != 0 -> { // existuje ulice pred
             val ulicePred = dp.ulice(seznamUlic[poziceNaLince - 1])
-            if (ulice.zacatek == ulicePred.zacatek || ulice.zacatek == ulicePred.konec) Smer.POZITIVNE else Smer.NEGATIVNE
+            if (ulice.zacatek == ulicePred.zacatek || ulice.zacatek == ulicePred.konec) Smer.Pozitivni else Smer.Negativni
         }
 
         seznamUlic.size != 1 -> { // existuje ulice po
             val ulicePo = dp.ulice(seznamUlic[1])
-            if (ulice.konec == ulicePo.zacatek || ulice.konec == ulicePo.konec) Smer.POZITIVNE else Smer.NEGATIVNE
+            if (ulice.konec == ulicePo.zacatek || ulice.konec == ulicePo.konec) Smer.Pozitivni else Smer.Negativni
         }
 
         else -> smerNaLince
@@ -58,7 +58,7 @@ fun Bus.draw(dp: DopravniPodnik) {
         top = zacatekY,
     ) {
         when {
-            smerBusuNaUlici == Smer.POZITIVNE && ulice.orientace == Orientace.VODOROVNE -> {
+            smerBusuNaUlici == Smer.Pozitivni && ulice.orientace == Orientace.Vodorovne -> {
                 // bus jede doprava
                 drawRoundRect(
                     color = linka.barvicka.barva,
@@ -74,7 +74,7 @@ fun Bus.draw(dp: DopravniPodnik) {
                 )
             }
 
-            smerBusuNaUlici == Smer.POZITIVNE && ulice.orientace == Orientace.SVISLE -> {
+            smerBusuNaUlici == Smer.Pozitivni && ulice.orientace == Orientace.Svisle -> {
                 // bus jede dolu
                 drawRoundRect(
                     color = linka.barvicka.barva,
@@ -91,7 +91,7 @@ fun Bus.draw(dp: DopravniPodnik) {
 //                pozice = zacatekX + odsazeni to zacatekY + posunKonceBusuVUlici
             }
 
-            smerBusuNaUlici == Smer.NEGATIVNE && ulice.orientace == Orientace.VODOROVNE -> {
+            smerBusuNaUlici == Smer.Negativni && ulice.orientace == Orientace.Vodorovne -> {
                 // bus jede doleva
                 drawRoundRect(
                     color = linka.barvicka.barva,
@@ -108,7 +108,7 @@ fun Bus.draw(dp: DopravniPodnik) {
 //                pozice = zacatekX + b - posunKonceBusuVUlici to zacatekY + odsazeni
             }
 
-            smerBusuNaUlici == Smer.NEGATIVNE && ulice.orientace == Orientace.SVISLE -> {
+            smerBusuNaUlici == Smer.Negativni && ulice.orientace == Orientace.Svisle -> {
                 // bus jede nahoru
                 drawRoundRect(
                     color = linka.barvicka.barva,

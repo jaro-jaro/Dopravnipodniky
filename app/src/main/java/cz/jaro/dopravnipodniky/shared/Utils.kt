@@ -1,5 +1,15 @@
 package cz.jaro.dopravnipodniky.shared
 
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.DrawStyle
+import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.graphics.drawscope.translate
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
@@ -146,3 +156,83 @@ fun <E> List<E>.mutate(mutator: MutableList<E>.() -> Unit): List<E> = buildList 
     addAll(this@mutate)
     apply(mutator)
 }
+
+
+fun DrawScope.drawRect(
+    color: Color,
+    topLeft: Offset,
+    bottomRight: Offset,
+    alpha: Float = 1.0f,
+    style: DrawStyle = Fill,
+    colorFilter: ColorFilter? = null,
+    blendMode: BlendMode = DrawScope.DefaultBlendMode
+) = drawRect(
+    color = color,
+    topLeft = topLeft,
+    size = Size(
+        width = bottomRight.x - topLeft.x,
+        height = bottomRight.y - topLeft.y,
+    ),
+    alpha = alpha,
+    style = style,
+    colorFilter = colorFilter,
+    blendMode = blendMode,
+)
+
+fun DrawScope.drawRoundRect(
+    color: Color,
+    topLeft: Offset,
+    bottomRight: Offset,
+    alpha: Float = 1.0f,
+    cornerRadius: CornerRadius = CornerRadius.Zero,
+    style: DrawStyle = Fill,
+    colorFilter: ColorFilter? = null,
+    blendMode: BlendMode = DrawScope.DefaultBlendMode
+) = drawRoundRect(
+    color = color,
+    topLeft = topLeft,
+    size = Size(
+        width = bottomRight.x - topLeft.x,
+        height = bottomRight.y - topLeft.y,
+    ),
+    alpha = alpha,
+    cornerRadius = cornerRadius,
+    style = style,
+    colorFilter = colorFilter,
+    blendMode = blendMode,
+)
+
+fun DrawScope.drawArc(
+    color: Color,
+    center: Offset,
+    startAngle: Float,
+    sweepAngle: Float,
+    useCenter: Boolean,
+    quadSize: Size,
+    alpha: Float = 1.0f,
+    style: DrawStyle = Fill,
+    colorFilter: ColorFilter? = null,
+    blendMode: BlendMode = DrawScope.DefaultBlendMode
+) = drawArc(
+    color = color,
+    startAngle = startAngle,
+    sweepAngle = sweepAngle,
+    useCenter = useCenter,
+    topLeft = Offset(center.x - quadSize.width, center.y - quadSize.height),
+    size = quadSize * 2F,
+    alpha = alpha,
+    style = style,
+    colorFilter = colorFilter,
+    blendMode = blendMode,
+)
+
+inline fun DrawScope.translate(
+    offset: Offset = Offset.Zero,
+    block: DrawScope.() -> Unit
+) = translate(
+    left = offset.x,
+    top = offset.y,
+    block = block,
+)
+
+fun <T, K : Comparable<K>> List<T>.replaceBy(newValue: T, selector: (T) -> K) = (listOf(newValue) + this).distinctBy(selector)

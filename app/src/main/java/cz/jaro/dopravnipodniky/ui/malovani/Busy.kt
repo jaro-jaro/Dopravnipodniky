@@ -63,7 +63,7 @@ fun getNamalovatLinky(
                     top = zacatekY.toPx(),
                 ) {
                     when (ulice.orientace) {
-                        Orientace.SVISLE -> drawLine(
+                        Orientace.Svisle -> drawLine(
                             color = linka.barvicka.barva,
                             start = Offset(
                                 x = odsazeniOdBoku.toPx(),
@@ -77,7 +77,7 @@ fun getNamalovatLinky(
                             cap = StrokeCap.Round,
                         )
 
-                        Orientace.VODOROVNE -> drawLine(
+                        Orientace.Vodorovne -> drawLine(
                             color = linka.barvicka.barva,
                             start = Offset(
                                 x = -odsazeniVMensiUlici.toPx(),

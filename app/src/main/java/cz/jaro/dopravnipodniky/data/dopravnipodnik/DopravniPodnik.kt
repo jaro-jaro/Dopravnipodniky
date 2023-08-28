@@ -1,6 +1,7 @@
 package cz.jaro.dopravnipodniky.data.dopravnipodnik
 
 import cz.jaro.dopravnipodniky.shared.BusID
+import cz.jaro.dopravnipodniky.shared.DPID
 import cz.jaro.dopravnipodniky.shared.LinkaID
 import cz.jaro.dopravnipodniky.shared.UliceID
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
@@ -31,6 +32,7 @@ data class DopravniPodnik(
     val ulicove: List<Ulice>,
     val zisk: PenizZaMinutu,
     val tema: Theme,
+    val id: DPID,
 ) {
     constructor(
         jmenoMesta: String,
@@ -43,6 +45,7 @@ data class DopravniPodnik(
         ulicove = ulicove,
         zisk = 0.penezZaMin,
         tema = Theme.entries.random(),
+        id = DPID.randomUUID(),
     )
 
     override fun toString() =

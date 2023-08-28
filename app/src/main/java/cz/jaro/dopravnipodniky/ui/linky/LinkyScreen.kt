@@ -60,7 +60,6 @@ fun LinkyScreen(
         dp = dp!!,
         vse = vse!!,
         upravitDp = viewModel::zmenitDp,
-        upravitVse = viewModel::zmenitVse,
         navigatate = navigator::navigate,
         navigatateBack = navigator::navigateUp,
         dosahni = viewModel.dosahni
@@ -73,7 +72,6 @@ fun LinkyScreen(
     dp: DopravniPodnik,
     vse: Vse,
     upravitDp: ((DopravniPodnik) -> DopravniPodnik) -> Unit,
-    upravitVse: ((Vse) -> Vse) -> Unit,
     navigatate: (Direction) -> Unit,
     navigatateBack: () -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,

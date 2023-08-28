@@ -1,11 +1,11 @@
 package cz.jaro.dopravnipodniky.shared
 
 enum class Orientace {
-    SVISLE, VODOROVNE,
+    Svisle, Vodorovne,
 }
 
 enum class Smer {
-    POZITIVNE, NEGATIVNE,
+    Pozitivni, Negativni,
 }
 
-operator fun Smer.times(other: Smer) = if (other == this) Smer.POZITIVNE else Smer.NEGATIVNE
+operator fun Smer.times(other: Smer) = if (other == this) Smer.Pozitivni else Smer.Negativni

@@ -4,7 +4,7 @@ import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.shared.BusID
 import cz.jaro.dopravnipodniky.shared.LinkaID
 import cz.jaro.dopravnipodniky.shared.Smer
-import cz.jaro.dopravnipodniky.shared.Smer.POZITIVNE
+import cz.jaro.dopravnipodniky.shared.Smer.Pozitivni
 import cz.jaro.dopravnipodniky.shared.jednotky.PenizZaMinutu
 import cz.jaro.dopravnipodniky.shared.jednotky.dp
 import cz.jaro.dopravnipodniky.shared.jednotky.penezZaMin
@@ -28,7 +28,7 @@ data class Bus(
     /** Index ulice na lince */
     val poziceNaLince: Int = 0,
     val poziceVUlici: SerializableDp = 0.dp,
-    val smerNaLince: Smer = POZITIVNE,
+    val smerNaLince: Smer = Pozitivni,
     val linka: LinkaID? = null,
     val id: BusID = BusID.randomUUID(),
 ) {

@@ -5,6 +5,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.Barak
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypBaraku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
+import cz.jaro.dopravnipodniky.shared.barakuVUlici
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
@@ -78,7 +79,7 @@ class Generator(
                     } else {
                         val i = ulicove.indexOfFirst { it.zacatek == zacatek && it.konec == konec }
                         ulicove[i] = ulicove[i].copy(
-                            potencial = ulicove[i].potencial + 2
+                            potencial = ulicove[i].potencial + 1
                         )
                     }
 
@@ -106,13 +107,13 @@ class Generator(
                     potencial = 100
                 )
             }
-            repeat((ulice.potencial * Random.nextFloat() * 4).roundToInt().coerceAtMost(8)) {
-                val typ = if (ulice.potencial >= 6 && Random.nextBoolean()) TypBaraku.Panelak else TypBaraku.Normalni
+            repeat((ulice.potencial * Random.nextFloat() * 6).roundToInt().coerceAtMost((barakuVUlici - 1) * 2)) {
+                val typ = if (ulice.potencial >= 3 && Random.nextBoolean()) TypBaraku.Panelak else TypBaraku.Normalni
                 ulicove[i] = ulicove[i].copy(
                     baraky = ulicove[i].baraky + Barak(typ, i)
                 )
             }
-            if (Random.nextFloat() >= .25F && ulice.potencial >= 10)
+            if (Random.nextFloat() >= .25F && ulice.potencial >= 5)
                 ulicove[i] = ulicove[i].copy(
                     baraky = ulicove[i].baraky + Barak(TypBaraku.Stredovy, i)
                 )
