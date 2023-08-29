@@ -98,7 +98,7 @@ fun VytvareniLinkyScreen(
     )
 }
 
-var pos = mutableStateOf(Offset.Zero)
+var pos by mutableStateOf(Offset.Zero)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -119,7 +119,7 @@ fun VytvareniLinkyScreen(
 
     fun PointerInputScope.delejNeco(centroid: Offset, listSize: Int, zoom: Float, pan: Offset) {
 
-        pos.value = centroid
+        pos = centroid
 
         if (listSize == 1) run {
             val k = dp.seznamKrizovatek.find { krizovatka ->
@@ -150,7 +150,7 @@ fun VytvareniLinkyScreen(
                 return@run
             }
             if (k in l.sousedi()) {
-                if (dp.ulicove.any { it.zacatek == minOf(k, l) && it.konec == maxOf(k, l) }) {
+                if (dp.ulice.any { it.zacatek == minOf(k, l) && it.konec == maxOf(k, l) }) {
                     if (k !in kliklyKrizovatky/* || BuildConfig.DEBUG*/) {
                         kliklyKrizovatky += k
                     }
@@ -353,7 +353,7 @@ fun VytvareniLinkyScreen(
                                     val linka = Linka(
                                         cislo = cisloLinky.toInt(),
                                         ulice = kliklyKrizovatky.windowed(2).map { (prvni, druha) ->
-                                            dp.ulicove.first { it.zacatek == minOf(prvni, druha) && it.konec == maxOf(prvni, druha) }.id
+                                            dp.ulice.first { it.zacatek == minOf(prvni, druha) && it.konec == maxOf(prvni, druha) }.id
                                         },
                                         barvicka = barva
                                     )

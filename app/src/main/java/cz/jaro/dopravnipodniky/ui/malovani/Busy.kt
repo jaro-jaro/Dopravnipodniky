@@ -1,99 +1,155 @@
 package cz.jaro.dopravnipodniky.ui.malovani
 
-import androidx.compose.ui.graphics.StrokeCap
+import android.graphics.Paint
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.translate
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.contains
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.unit.dp
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.shared.Orientace
+import cz.jaro.dopravnipodniky.shared.Smer
+import cz.jaro.dopravnipodniky.shared.delkaUlice
+import cz.jaro.dopravnipodniky.shared.jednotky.toDp
+import cz.jaro.dopravnipodniky.shared.odsazeniBusu
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
-import cz.jaro.dopravnipodniky.shared.ulicovyBlok
-import cz.jaro.dopravnipodniky.ui.main.Offset
+import cz.jaro.dopravnipodniky.ui.main.DEBUG_TEXT
 
-fun getNamalovatLinky(
-    linky: List<Linka>,
-    ulicove: List<Ulice>,
-): List<DrawScope.() -> Unit> {
-    val sirkaUlice = sirkaUlice
-    val delkaUlice = ulicovyBlok
+context (DrawScope)
+fun Bus.draw(dp: DopravniPodnik) {
+    if (linka == null) return
+    val linka = dp.linka(linka)
 
-    val pocetLinek = linky.size
-    val sirka = sirkaUlice / pocetLinek
-
-    val uliceSLinkama = ulicove.map { ulice ->
-        ulice to linky.sortedBy { it.cislo }.mapIndexed { i, it -> it to i }.filter { ulice.id in it.first.ulice }
+    val seznamUlic = if (smerNaLince == Smer.Pozitivni) {
+        linka.ulice.toList()
+    } else {
+        linka.ulice.reversed()
     }
-    return uliceSLinkama.flatMap { (ulice, linky) ->
-        val zacatekX = ulice.zacatekX
-        val zacatekY = ulice.zacatekY
 
-        linky.map { (linka, index) ->
+    val ulice = dp.ulice(seznamUlic[poziceNaLince])
 
-            println("${linka.cislo} - $index")
+    val zacatekX = ulice.zacatekX.toPx()
+    val zacatekY = ulice.zacatekY.toPx()
 
-            val indexUliceNaLince = linka.ulice.indexOf(ulice.id)
+    val posunKonceBusuVUlici = poziceVUlici.toPx()
 
-            val minulaUlice = linka.ulice.getOrNull(indexUliceNaLince - 1)?.let { ulicove.first { ul -> ul.id == it } }
-            val dalsiUlice = linka.ulice.getOrNull(indexUliceNaLince + 1)?.let { ulicove.first { ul -> ul.id == it } }
-            val mensiUlice = when {
-                minulaUlice != null && ulice.zacatek in minulaUlice -> minulaUlice
-                dalsiUlice != null && ulice.zacatek in dalsiUlice -> dalsiUlice
-                else -> null
+    val smerBusuNaUlici = when {
+        poziceNaLince != 0 -> { // existuje ulice pred
+            val ulicePred = dp.ulice(seznamUlic[poziceNaLince - 1])
+            if (ulice.zacatek == ulicePred.zacatek || ulice.zacatek == ulicePred.konec) Smer.Pozitivni else Smer.Negativni
+        }
+
+        seznamUlic.size != 1 -> { // existuje ulice po
+            val ulicePo = dp.ulice(seznamUlic[1])
+            if (ulice.konec == ulicePo.zacatek || ulice.konec == ulicePo.konec) Smer.Pozitivni else Smer.Negativni
+        }
+
+        else -> smerNaLince
+    }
+
+    val delkaBusu = typBusu.delka.toDp().toPx()
+    val sirkaBusu = typBusu.sirka.toDp().toPx()
+    val odsazeni = odsazeniBusu.toPx()
+    val odsazeni2 = sirkaUlice.toPx() - odsazeni - sirkaBusu
+    val delkaUlice = delkaUlice.toPx()
+
+    translate(
+        left = zacatekX,
+        top = zacatekY,
+    ) {
+
+        if (DEBUG_TEXT) drawIntoCanvas {
+            it.nativeCanvas.drawText(
+                cloveci.toString(),
+                15.dp.toPx(),
+                5.dp.toPx(),
+                Paint()
+            )
+        }
+        when {
+            smerBusuNaUlici == Smer.Pozitivni && ulice.orientace == Orientace.Vodorovne -> {
+                // bus jede doprava
+                drawRoundRect(
+                    color = linka.barvicka.barva,
+                    topLeft = Offset(
+                        x = posunKonceBusuVUlici,
+                        y = odsazeni2,
+                    ),
+                    size = Size(
+                        width = delkaBusu,
+                        height = sirkaBusu,
+                    ),
+                    cornerRadius = CornerRadius(3F.dp.toPx()),
+                )
             }
-            val vetsiUlice = when {
-                minulaUlice != null && ulice.konec in minulaUlice -> minulaUlice
-                dalsiUlice != null && ulice.konec in dalsiUlice -> dalsiUlice
-                else -> null
+
+            smerBusuNaUlici == Smer.Pozitivni && ulice.orientace == Orientace.Svisle -> {
+                // bus jede dolu
+                drawRoundRect(
+                    color = linka.barvicka.barva,
+                    topLeft = Offset(
+                        x = odsazeni,
+                        y = posunKonceBusuVUlici,
+                    ),
+                    size = Size(
+                        width = sirkaBusu,
+                        height = delkaBusu,
+                    ),
+                    cornerRadius = CornerRadius(3F.dp.toPx()),
+                )
+//                pozice = zacatekX + odsazeni to zacatekY + posunKonceBusuVUlici
             }
 
-            val odsazeniOdBoku = sirka * index + sirka / 2
-
-            val odsazeniVMensiUlici =
-                if (mensiUlice?.orientace == ulice.orientace) sirkaUlice
-                else sirkaUlice - odsazeniOdBoku
-
-            val odsazeniVeVetsiUlici =
-                if (vetsiUlice?.orientace == ulice.orientace) sirkaUlice
-                else odsazeniOdBoku
-
-            val maluj: DrawScope.() -> Unit = {
-                translate(
-                    left = zacatekX.toPx(),
-                    top = zacatekY.toPx(),
-                ) {
-                    when (ulice.orientace) {
-                        Orientace.Svisle -> drawLine(
-                            color = linka.barvicka.barva,
-                            start = Offset(
-                                x = odsazeniOdBoku.toPx(),
-                                y = -odsazeniVMensiUlici.toPx(),
-                            ),
-                            end = Offset(
-                                x = odsazeniOdBoku.toPx(),
-                                y = delkaUlice.toPx() + odsazeniVeVetsiUlici.toPx(),
-                            ),
-                            strokeWidth = sirka.toPx(),
-                            cap = StrokeCap.Round,
-                        )
-
-                        Orientace.Vodorovne -> drawLine(
-                            color = linka.barvicka.barva,
-                            start = Offset(
-                                x = -odsazeniVMensiUlici.toPx(),
-                                y = odsazeniOdBoku.toPx(),
-                            ),
-                            end = Offset(
-                                x = delkaUlice.toPx() + odsazeniVeVetsiUlici.toPx(),
-                                y = odsazeniOdBoku.toPx(),
-                            ),
-                            strokeWidth = sirka.toPx(),
-                            cap = StrokeCap.Round,
-                        )
-                    }
-                }
+            smerBusuNaUlici == Smer.Negativni && ulice.orientace == Orientace.Vodorovne -> {
+                // bus jede doleva
+                drawRoundRect(
+                    color = linka.barvicka.barva,
+                    topLeft = Offset(
+                        x = delkaUlice - posunKonceBusuVUlici - delkaBusu,
+                        y = odsazeni,
+                    ),
+                    size = Size(
+                        width = delkaBusu,
+                        height = sirkaBusu,
+                    ),
+                    cornerRadius = CornerRadius(3F.dp.toPx()),
+                )
+//                pozice = zacatekX + b - posunKonceBusuVUlici to zacatekY + odsazeni
             }
-            maluj
+
+            smerBusuNaUlici == Smer.Negativni && ulice.orientace == Orientace.Svisle -> {
+                // bus jede nahoru
+                drawRoundRect(
+                    color = linka.barvicka.barva,
+                    topLeft = Offset(
+                        x = odsazeni2,
+                        y = delkaUlice - posunKonceBusuVUlici - delkaBusu,
+                    ),
+                    size = Size(
+                        width = sirkaBusu,
+                        height = delkaBusu,
+                    ),
+                    cornerRadius = CornerRadius(3F.dp.toPx()),
+                )
+//                pozice = zacatekX + odsazeni + 16F.toPx() to zacatekY + b - posunKonceBusuVUlici
+            }
         }
     }
+
+//        if (dp.sledovanejBus == this@draw) sleduj()
 }
+
+/*
+context (DrawScope)
+fun Bus.sleduj() {
+    tx = -pozice.first + pocatecniPosunutiX
+    ty = -pozice.second + pocatecniPosunutiY
+    if (velikostBloku <= 1.9) {
+        velikostBloku *= (TPS + .1F) / TPS.toFloat()
+    }
+}
+*/

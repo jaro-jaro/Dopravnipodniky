@@ -22,7 +22,7 @@ data class Linka(
 
 fun Linka.busy(dp: DopravniPodnik) = dp.busy.filter { it.linka == id }
 
-fun Linka.ulice(dp: DopravniPodnik) = dp.ulicove.filter { it.id in ulice }.sortedBy { ulice.indexOf(it.id) }
+fun Linka.ulice(dp: DopravniPodnik) = dp.ulice.filter { it.id in ulice }.sortedBy { ulice.indexOf(it.id) }
 
 val Linka.delkaLinky: UlicovyBlok get() = ulice.size.ulicovychBloku
 

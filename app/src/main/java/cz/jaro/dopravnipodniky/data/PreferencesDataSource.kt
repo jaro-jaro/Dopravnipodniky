@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
@@ -44,7 +43,7 @@ class PreferencesDataSource(
 //    }//.stateIn(scope, SharingStarted.WhileSubscribed(5.seconds), DefaultValues.VSE)
 
     suspend fun zmenitVse(update: (Vse) -> Vse) = withContext(Dispatchers.IO) {
-        _vse.update { update(it ?: return@withContext) }
+        _vse.value = update(_vse.value ?: return@withContext)
     }
 
     private val _vse = MutableStateFlow(null as Vse?)
@@ -73,13 +72,11 @@ class PreferencesDataSource(
      * ```
      * ale je mnohem efektivnější. Prosím, prefertujte použití této metody.
      */
-    suspend fun zmenitDp(update: (DopravniPodnik) -> DopravniPodnik) = withContext(Dispatchers.IO) {
-        _vse.update { vse ->
-            vse?.copy(
-                podniky = vse.podniky.replaceBy(update(vse.aktualniDp)) { it.id },
-                indexAktualnihoDp = 0
-            )
-        }
+    suspend fun zmenitDp(update: suspend (DopravniPodnik) -> DopravniPodnik) = withContext(Dispatchers.IO) {
+        _vse.value = _vse.value?.copy(
+            podniky = _vse.value!!.podniky.replaceBy(update(_vse.value!!.aktualniDp)) { it.id },
+            indexAktualnihoDp = 0
+        )
     }
 
     init {

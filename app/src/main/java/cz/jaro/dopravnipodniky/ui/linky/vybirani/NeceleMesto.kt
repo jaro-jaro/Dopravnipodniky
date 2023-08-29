@@ -29,9 +29,9 @@ fun NeceleMesto(
 ) {
 
     val nakreslitLinky = remember(
-        dp.linky, dp.ulicove
+        dp.linky, dp.ulice
     ) {
-        getNamalovatLinky(dp.linky, dp.ulicove)
+        getNamalovatLinky(dp.linky, dp.ulice)
     }
 
     Canvas(
@@ -64,11 +64,11 @@ fun NeceleMesto(
                 top = ty + size.center.y,
             ) {
 
-                dp.ulicove.forEach { ulice ->
+                dp.ulice.forEach { ulice ->
                     ulice.draw()
                 }
 
-                dp.ulicove.forEach { ulice ->
+                dp.ulice.forEach { ulice ->
                     ulice.baraky.forEach { barak ->
                         barak.draw(dp.tema, ulice)
                     }
@@ -88,7 +88,7 @@ fun NeceleMesto(
                 )
 
                 if (priblizeni > oddalenyRezim) {
-                    dp.ulicove.forEach { ulice ->
+                    dp.ulice.forEach { ulice ->
                         if (ulice.maTrolej) ulice.nakreslitTroleje()
                     }
                     dp.seznamKrizovatek.forEach { krizovatka ->

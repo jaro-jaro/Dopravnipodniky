@@ -95,10 +95,10 @@
     <string name="filtrovat">Filtrovat</string>
     <string name="schovat_razeni">Schovat řazení</string>
     <string name="radit">Řadit</string>
-    <string name="vytvorit_zastavku">Vytvořit zastávku za %s €</string>
-    <string name="odstranit_zastavku">Odstranit zastávku za %s €</string>
-    <string name="postavit_troleje">Postavit trolejovou trať za %s €</string>
-    <string name="odstranit_troleje">Odstranit trolejovou trať za %s €</string>
+    <string name="vytvorit_zastavku">Vytvořit zastávku za %s</string>
+    <string name="odstranit_zastavku">Odstranit zastávku za %s</string>
+    <string name="postavit_troleje">Postavit trolejovou trať za %s</string>
+    <string name="odstranit_troleje">Odstranit trolejovou trať za %s</string>
     <string name="zrusit">Zrušit</string>
     <string name="podrobnosti_o_zisku">Podrobnosti o zisku</string>
     <string name="celkove_prijmy">Celkové příjmy: %s €/min</string>

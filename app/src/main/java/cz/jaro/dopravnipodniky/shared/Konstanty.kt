@@ -1,7 +1,6 @@
 package cz.jaro.dopravnipodniky.shared
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.shared.jednotky.metru
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
@@ -131,16 +130,22 @@ val ulicovyBlok = 72.metru.toDp()
 
 val delkaUlice = ulicovyBlok
 val sirkaUlice = 10.metru.toDp()
-val velikostZastavky = 44.dp
 val odsazeniBaraku = 1.metru.toDp()
 const val barakuVUlici = 5
 val velikostBaraku = (ulicovyBlok - odsazeniBaraku * (barakuVUlici + 1)) / barakuVUlici
 val sirkaChodniku = 1.metru.toDp()
 
+val delkaZastavky = 18.metru.toDp()
+val sirkaZastavky = 3.metru.toDp()
+val tloustkaSloupku = .1.metru.toDp()
+val sirkaSloupku = .4.metru.toDp()
+val odsazeniSloupku = sirkaChodniku - .1.metru.toDp() - sirkaSloupku
+val sirkaCary = .2.dp
+
 //val sirkaBusu = 10.dp
 val odsazeniBusu = sirkaChodniku + .75.metru.toDp()
 
-val sirkaTroleje = Dp.Hairline
+val sirkaTroleje = .2.dp
 val predsazeniTrolejiS = 8.dp
 val predsazeniTrolejiL = 28.dp
 val rozchodTroleji = .5.metru.toDp()
@@ -182,19 +187,16 @@ const val nasobitelMaxCloveku = PI / 2
 const val nahodnostVymreniKazdouMinutu = 30
 const val nahodnostVymreniKazdyTik = nahodnostVymreniKazdouMinutu * TPM
 const val nahodnostNarozeniKazdyTik = (1.5 * nahodnostVymreniKazdyTik).toInt()
-val dobaKalibraceS = 1.seconds
-val dobaKalibraceT = dobaKalibraceS.toTiky()
-val dobaPobytuNaZastavceS = 1.seconds
-val dobaPobytuNaZastavceT = dobaPobytuNaZastavceS.toTiky()
+val dobaPobytuNaZastavce = 1.seconds.toTiky()
 val cenaZastavky = 5_000.penez
 val cenaTroleje = 20_000.penez
-val udrzbaZastavky = 100.penez
-val udrzbaTroleje = 1_000.penez
+val udrzbaZastavky = 100.penezZaMin
+val udrzbaTroleje = 1_000.penezZaMin
 val bonusoveVydajeZaNeekologickeBusy = 800.penezZaMin
 val bonusoveVydajeZaPoloekologickeBusy = 400.penezZaMin
 const val nahodnostProjetiZastavky = 200
 const val nahodnostKamionuKazdouMinutu = 45
 const val nahodnostKamionuKazdyTik = nahodnostKamionuKazdouMinutu * TPM
 const val nahodnostSebevrazdyKazdouMinutu = 10
-const val nahodnostSebevrazdyKazdyTik = nahodnostSebevrazdyKazdouMinutu * TPS * 60
+const val nahodnostSebevrazdyKazdyTik = nahodnostSebevrazdyKazdouMinutu * TPM
 val cenaPruzkumuVerejnehoMineni = 50_000.penez

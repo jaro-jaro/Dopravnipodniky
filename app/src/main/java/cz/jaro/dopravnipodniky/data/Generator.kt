@@ -107,17 +107,26 @@ class Generator(
                     potencial = 100
                 )
             }
-            repeat((ulice.potencial * Random.nextFloat() * 6).roundToInt().coerceAtMost((barakuVUlici - 1) * 2)) {
+            repeat(
+                (ulice.potencial * Random.nextFloat() * 6)
+                    .roundToInt()
+                    .coerceAtLeast(1)
+                    .coerceAtMost((barakuVUlici - 1) * 2)
+            ) {
                 val typ = if (ulice.potencial >= 3 && Random.nextBoolean()) TypBaraku.Panelak else TypBaraku.Normalni
                 ulicove[i] = ulicove[i].copy(
-                    baraky = ulicove[i].baraky + Barak(typ, i)
+                    baraky = ulicove[i].baraky + Barak(typ, i),
                 )
             }
             if (Random.nextFloat() >= .25F && ulice.potencial >= 5)
                 ulicove[i] = ulicove[i].copy(
                     baraky = ulicove[i].baraky + Barak(TypBaraku.Stredovy, i)
                 )
-        }
 
+//            println(ulicove[i].baraky)
+            ulicove[i] = ulicove[i].copy(
+                cloveci = Random.nextInt(ulicove[i].kapacita / 2, ulicove[i].kapacita)
+            )
+        }
     }
 }

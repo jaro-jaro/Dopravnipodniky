@@ -90,10 +90,10 @@
     <string name="filtrovat">Filter</string>
     <string name="schovat_razeni">Hide sorting</string>
     <string name="radit">Sort</string>
-    <string name="vytvorit_zastavku">Build bus stop for € %s</string>
-    <string name="odstranit_zastavku">Destroy bus stop for € %s</string>
-    <string name="postavit_troleje">Build overhead contact line for € %s</string>
-    <string name="odstranit_troleje">Uninstall overhead contact line for € %s</string>
+    <string name="vytvorit_zastavku">Build bus stop for %s</string>
+    <string name="odstranit_zastavku">Destroy bus stop for %s</string>
+    <string name="postavit_troleje">Build overhead contact line for %s</string>
+    <string name="odstranit_troleje">Uninstall overhead contact line for %s</string>
     <string name="zrusit">Cancel</string>
     <string name="podrobnosti_o_zisku">Details of gain</string>
     <string name="celkove_prijmy">Total income: € %s per min</string>

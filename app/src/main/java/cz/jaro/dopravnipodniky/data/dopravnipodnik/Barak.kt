@@ -11,7 +11,6 @@ data class Barak(
     val cisloPopisne: Int,
     val barvicka: Int,
     val kapacita: Int,
-    val cloveci: Int,
 ) {
     companion object {
         operator fun invoke(
@@ -24,7 +23,6 @@ data class Barak(
                 cisloPopisne = cisloPopisne,
                 barvicka = barva(),
                 kapacita = kapacita,
-                cloveci = nextInt(kapacita / 2, kapacita)
             )
         }
     }

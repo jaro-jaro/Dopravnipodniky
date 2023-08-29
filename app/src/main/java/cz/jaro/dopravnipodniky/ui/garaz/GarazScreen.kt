@@ -278,8 +278,23 @@ fun GarazScreen(
                                 OutlinedButton(
                                     onClick = {
                                         upravitDp { dp ->
+
+                                            var cloveci = bus.cloveci
+                                            val noveUlice = dp.ulice.map { ulice ->
+                                                var cloveciVUlici = ulice.cloveci
+                                                while (cloveciVUlici <= ulice.kapacita && cloveci > 0) {
+
+                                                    cloveci--
+                                                    cloveciVUlici++
+                                                }
+
+                                                ulice.copy(
+                                                    cloveci = cloveciVUlici
+                                                )
+                                            }
                                             dp.copy(
-                                                busy = dp.busy.filterNot { it.id == bus.id }
+                                                busy = dp.busy.filterNot { it.id == bus.id },
+                                                ulice = noveUlice
                                             )
                                         }
                                     },

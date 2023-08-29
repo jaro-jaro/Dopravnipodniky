@@ -14,6 +14,7 @@ import kotlinx.serialization.Serializable
 value class Peniz(val value: Double) : Comparable<Peniz> {
     operator fun times(other: Double) = Peniz(value * other)
     operator fun times(other: Int) = Peniz(value * other)
+    operator fun div(other: Int) = Peniz(value / other)
     operator fun plus(other: Peniz) = Peniz(value + other.value)
     operator fun minus(other: Peniz) = Peniz(value - other.value)
 

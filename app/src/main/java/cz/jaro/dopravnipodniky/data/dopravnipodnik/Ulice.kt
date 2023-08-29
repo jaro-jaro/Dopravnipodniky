@@ -28,12 +28,12 @@ data class Ulice(
     val potencial: Int = 1,
     val zastavka: Zastavka? = null,
     val maTrolej: Boolean = false,
-    val id: UliceID = UliceID.randomUUID()
+    val id: UliceID = UliceID.randomUUID(),
+    val cloveci: Int = 0,
 ) {
 
     override fun toString() = "Ulice(zacatek=$zacatek,konec=$konec,baraky=List(${baraky.size}),zastavka=$zastavka,maTrolej=$maTrolej)"
 
-    val cloveci get() = baraky.sumOf { it.cloveci }
     val kapacita get() = baraky.sumOf { it.kapacita }
 
     val orientace: Orientace = when {
@@ -79,6 +79,11 @@ data class Ulice(
 
     val kapacitaZastavky = (kapacita * nasobitelMaxCloveku).roundToInt()
 }
+
+fun Ulice.zasebevrazdujZastavku() = copy(
+    cloveci = cloveci + (zastavka?.cloveci ?: 0),
+    zastavka = null,
+)
 
 operator fun Ulice.contains(other: Pozice<UlicovyBlok>) = other == zacatek || other == konec
 

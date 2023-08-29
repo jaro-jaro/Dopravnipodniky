@@ -109,8 +109,8 @@ fun velkomesto(plocha: Int, obyvatel: Int, uroven: Int): Text = when {
 fun nasobitelPoctuLidiKteryTiNastoupiDoBusuNaZastavceKdyzZastaviANakyLidiTamJsouAMaVSobeJesteVolneMisto(dp: DopravniPodnik): Double {
 
     val naRozsahlosti = sqrt(1.0 - (1.0 / (dp.busy.size.coerceAtLeast(1) + 1))) *
-            (dp.ulicove.filter { it.maZastavku }.count { it.pocetLinek(dp) != 0 }.toDouble() /
-                    dp.ulicove.size.toDouble())
+            (dp.ulice.filter { it.maZastavku }.count { it.pocetLinek(dp) != 0 }.toDouble() /
+                    dp.ulice.size.toDouble())
 
     var naJizdnem = 1.0 -
             abs(
@@ -141,8 +141,8 @@ fun soucinPromenneNaRozsahlostiVNasobiteliPoctuLidiKteryTiNastoupiDoBusuNaZastav
 
 
     return sqrt(1.0 - (1.0 / (dp.busy.size.coerceAtLeast(1) + 1))) *
-            (dp.ulicove.filter { it.maZastavku }.count { it.pocetLinek(dp) != 0 }.toDouble() /
-                    dp.ulicove.size.toDouble()) *
+            (dp.ulice.filter { it.maZastavku }.count { it.pocetLinek(dp) != 0 }.toDouble() /
+                    dp.ulice.size.toDouble()) *
             nasobitelRozsahlosti
 }
 

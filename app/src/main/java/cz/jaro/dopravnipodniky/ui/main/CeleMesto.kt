@@ -38,9 +38,9 @@ fun CeleMesto(
 //    println(dp.ulicove.map { "(${it.zacatek.x.value} ${it.zacatek.y.value} - ${it.konec.x.value} ${it.konec.y.value})" })
 
     val nakreslitLinky = remember(
-        dp.linky, dp.ulicove
+        dp.linky, dp.ulice
     ) {
-        getNamalovatLinky(dp.linky, dp.ulicove)
+        getNamalovatLinky(dp.linky, dp.ulice)
     }
 
     Canvas(
@@ -66,11 +66,11 @@ fun CeleMesto(
                     namalovatKrizovatku(dp, krizovatka)
                 }
 
-                dp.ulicove.forEach { ulice ->
+                dp.ulice.forEach { ulice ->
                     ulice.draw()
                 }
 
-                dp.ulicove.forEach { ulice ->
+                dp.ulice.forEach { ulice ->
                     ulice.baraky.forEach { barak ->
                         barak.draw(dp.tema, ulice)
                     }
@@ -85,7 +85,7 @@ fun CeleMesto(
                 }
 
                 if (priblizeni > oddalenyRezim) {
-                    dp.ulicove.forEach { ulice ->
+                    dp.ulice.forEach { ulice ->
                         if (ulice.maTrolej) ulice.nakreslitTroleje()
                     }
                     dp.seznamKrizovatek.forEach { krizovatka ->

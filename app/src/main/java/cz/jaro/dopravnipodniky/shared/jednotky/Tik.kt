@@ -10,8 +10,11 @@ import kotlin.time.Duration.Companion.milliseconds
 @Serializable
 @SerialName("Tik")
 @JvmInline
-value class Tik(val value: Long) {
+value class Tik(val value: Long) : Comparable<Tik> {
     operator fun rem(other: Tik) = Tik(value % other.value)
+    operator fun plus(other: Tik) = Tik(value + other.value)
+
+    override fun compareTo(other: Tik) = value.compareTo(other.value)
 }
 
 val Int.tiku get() = Tik(this.toLong())

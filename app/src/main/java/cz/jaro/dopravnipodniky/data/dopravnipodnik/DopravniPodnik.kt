@@ -29,7 +29,7 @@ data class DopravniPodnik(
     val jmenoMesta: String,
     val linky: List<Linka>,
     val busy: List<Bus>,
-    val ulicove: List<Ulice>,
+    val ulice: List<Ulice>,
     val zisk: PenizZaMinutu,
     val tema: Theme,
     val id: DPID,
@@ -42,26 +42,26 @@ data class DopravniPodnik(
         jmenoMesta = jmenoMesta,
         linky = listOf(),
         busy = listOf(),
-        ulicove = ulicove,
+        ulice = ulicove,
         zisk = 0.penezZaMin,
         tema = Theme.entries.random(),
         id = DPID.randomUUID(),
     )
 
     override fun toString() =
-        "DopravniPodnik(jmenoMesta=$jmenoMesta,linky=List(${linky.size}),busy=List(${busy.size}),ulicove=List(${ulicove.size}))"
+        "DopravniPodnik(jmenoMesta=$jmenoMesta,linky=List(${linky.size}),busy=List(${busy.size}),ulicove=List(${ulice.size}))"
 
-    private val baraky = ulicove.flatMap { it.baraky }
+    private val baraky = ulice.flatMap { it.baraky }
 
-    val cloveci = baraky.sumOf { it.cloveci }
+    val cloveci = ulice.sumOf { it.cloveci } + busy.sumOf { it.cloveci }
 
-    val kapacita = baraky.sumOf { it.kapacita }
+    val kapacita = ulice.sumOf { it.kapacita }
 
     fun bus(id: BusID): Bus = busy.find { bus -> id == bus.id } ?: throw IndexOutOfBoundsException("tentoBusNeexistuje")
 
     fun linka(id: LinkaID): Linka = linky.find { linka -> id == linka.id } ?: throw IndexOutOfBoundsException("tatoLinkaNeexistuje")
 
-    fun ulice(id: UliceID): Ulice = ulicove.find { ulice -> id == ulice.id } ?: throw IndexOutOfBoundsException("tatoUliceNeexistuje")
+    fun ulice(id: UliceID): Ulice = ulice.find { ulice -> id == ulice.id } ?: throw IndexOutOfBoundsException("tatoUliceNeexistuje")
 
     private val dobaOdPoslednihoHrani = (Calendar.getInstance().toInstant().toEpochMilli() - cas).milliseconds
 
@@ -75,10 +75,10 @@ val DopravniPodnik.stred
 
 val DopravniPodnik.velikostMesta: Pair<Pozice<UlicovyBlok>, Pozice<UlicovyBlok>>
     get() {
-        val maxX = ulicove.maxOf { it.konec.x }
-        val maxY = ulicove.maxOf { it.konec.y }
-        val minX = ulicove.minOf { it.zacatek.x }
-        val minY = ulicove.minOf { it.zacatek.y }
+        val maxX = ulice.maxOf { it.konec.x }
+        val maxY = ulice.maxOf { it.konec.y }
+        val minX = ulice.minOf { it.zacatek.x }
+        val minY = ulice.minOf { it.zacatek.y }
 
         return (minX to minY) to (maxX to maxY)
     }
@@ -89,7 +89,7 @@ val DopravniPodnik.seznamKrizovatek
             x to y
         }
     }.filter { (x, y) ->
-        val sousedi = ulicove.filter {
+        val sousedi = ulice.filter {
             it.konec == x to y || it.zacatek == x to y
         }
 
