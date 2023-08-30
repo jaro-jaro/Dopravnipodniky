@@ -10,7 +10,10 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.Smer
 import cz.jaro.dopravnipodniky.shared.delkaUlice
@@ -20,9 +23,9 @@ import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.ui.main.DEBUG_TEXT
 
 context (DrawScope)
-fun Bus.draw(dp: DopravniPodnik) {
+fun Bus.draw(linky: List<Linka>, ulicove: List<Ulice>,) {
     if (linka == null) return
-    val linka = dp.linka(linka)
+    val linka = linky.linka(linka)
 
     val seznamUlic = if (smerNaLince == Smer.Pozitivni) {
         linka.ulice.toList()
@@ -30,7 +33,7 @@ fun Bus.draw(dp: DopravniPodnik) {
         linka.ulice.reversed()
     }
 
-    val ulice = dp.ulice(seznamUlic[poziceNaLince])
+    val ulice = ulicove.ulice(seznamUlic[poziceNaLince])
 
     val zacatekX = ulice.zacatekX.toPx()
     val zacatekY = ulice.zacatekY.toPx()
@@ -39,12 +42,12 @@ fun Bus.draw(dp: DopravniPodnik) {
 
     val smerBusuNaUlici = when {
         poziceNaLince != 0 -> { // existuje ulice pred
-            val ulicePred = dp.ulice(seznamUlic[poziceNaLince - 1])
+            val ulicePred = ulicove.ulice(seznamUlic[poziceNaLince - 1])
             if (ulice.zacatek == ulicePred.zacatek || ulice.zacatek == ulicePred.konec) Smer.Pozitivni else Smer.Negativni
         }
 
         seznamUlic.size != 1 -> { // existuje ulice po
-            val ulicePo = dp.ulice(seznamUlic[1])
+            val ulicePo = ulicove.ulice(seznamUlic[1])
             if (ulice.konec == ulicePo.zacatek || ulice.konec == ulicePo.konec) Smer.Pozitivni else Smer.Negativni
         }
 

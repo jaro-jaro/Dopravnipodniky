@@ -7,7 +7,6 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.drawArc
@@ -64,20 +63,20 @@ fun Ulice.nakreslitTroleje() {
 
 context(DrawScope)
 fun nakreslitTrolejeNaKrizovatku(
-    dp: DopravniPodnik,
+    ulice: List<Ulice>,
     krizovatka: Pozice<UlicovyBlok>,
 ) {
 
-    val sousedVpravo = dp.ulice.find {
+    val sousedVpravo = ulice.find {
         it.orientace == Orientace.Vodorovne && it.zacatek == krizovatka
     }
-    val sousedDole = dp.ulice.find {
+    val sousedDole = ulice.find {
         it.orientace == Orientace.Svisle && it.zacatek == krizovatka
     }
-    val sousedVlevo = dp.ulice.find {
+    val sousedVlevo = ulice.find {
         it.orientace == Orientace.Vodorovne && it.konec == krizovatka
     }
-    val sousedNahore = dp.ulice.find {
+    val sousedNahore = ulice.find {
         it.orientace == Orientace.Svisle && it.konec == krizovatka
     }
 
@@ -188,7 +187,7 @@ fun nakreslitTrolejeNaKrizovatku(
                         sweepAngle = 180F,
                         useCenter = false,
                         center = Offset(sirkaUlice / 2F, sirkaUlice / 2F),
-                        quadSize = Size(trolej, trolej),
+                        quadSize = Size(sirkaUlice / 2 - trolej, sirkaUlice / 2 - trolej),
                         style = Stroke(
                             width = sirka,
                         ),

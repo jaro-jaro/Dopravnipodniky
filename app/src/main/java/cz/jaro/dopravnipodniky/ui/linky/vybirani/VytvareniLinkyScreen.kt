@@ -58,13 +58,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import cz.jaro.dopravnipodniky.R
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.seznamKrizovatek
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.stred
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.velikostMesta
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
+import cz.jaro.dopravnipodniky.shared.StavTutorialu
+import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.dpSUlicema
@@ -88,11 +91,27 @@ fun VytvareniLinkyScreen(
 ) {
     val viewModel = koinViewModel<SharedViewModel>()
 
-    val dp by viewModel.dp.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) {
+        viewModel.zmenitTutorial {
+            if (it je StavTutorialu.Tutorialujeme.Uvod)
+                StavTutorialu.Tutorialujeme.Linky
+            else it
+        }
+    }
 
-    if (dp != null) VytvareniLinkyScreen(
-        dp = dp!!,
-        upravitDp = viewModel::zmenitDp,
+    val dpInfo by viewModel.dpInfo.collectAsStateWithLifecycle()
+    val linky by viewModel.linky.collectAsStateWithLifecycle()
+    val ulicove by viewModel.ulice.collectAsStateWithLifecycle()
+
+    if (
+        dpInfo != null &&
+        linky != null &&
+        ulicove != null
+    ) VytvareniLinkyScreen(
+        dpInfo = dpInfo!!,
+        linky = linky!!,
+        ulicove = ulicove!!,
+        zmenitLinky = viewModel::zmenitLinky,
         navigatateUp = navigator::navigateUp,
         dosahni = viewModel.dosahni,
     )
@@ -103,14 +122,16 @@ var pos by mutableStateOf(Offset.Zero)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VytvareniLinkyScreen(
-    dp: DopravniPodnik,
-    upravitDp: ((DopravniPodnik) -> DopravniPodnik) -> Unit,
+    dpInfo: DPInfo,
+    linky: List<Linka>,
+    ulicove: List<Ulice>,
+    zmenitLinky: (MutableList<Linka>.() -> Unit) -> Unit,
     navigatateUp: () -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
 ) {
     var waitForExit by remember { mutableStateOf(null as UUID?) }
     val density = LocalDensity.current
-    val stred = remember { dp.stred.dpSUlicema }
+    val stred = remember { ulicove.stred.dpSUlicema }
     var tx by remember { mutableFloatStateOf(with(density) { -stred.x.toPx() * pocatecniPriblizeni }) }
     var ty by remember { mutableFloatStateOf(with(density) { -stred.y.toPx() * pocatecniPriblizeni }) }
     var priblizeni by remember { mutableFloatStateOf(pocatecniPriblizeni) }
@@ -122,7 +143,7 @@ fun VytvareniLinkyScreen(
         pos = centroid
 
         if (listSize == 1) run {
-            val k = dp.seznamKrizovatek.find { krizovatka ->
+            val k = ulicove.seznamKrizovatek.find { krizovatka ->
                 Rect(
                     center = (krizovatka.dpSUlicema.toPx() + sirkaUlice.toPx() / 2)
                         .minus(size.center.toOffset())
@@ -150,7 +171,7 @@ fun VytvareniLinkyScreen(
                 return@run
             }
             if (k in l.sousedi()) {
-                if (dp.ulice.any { it.zacatek == minOf(k, l) && it.konec == maxOf(k, l) }) {
+                if (ulicove.any { it.zacatek == minOf(k, l) && it.konec == maxOf(k, l) }) {
                     if (k !in kliklyKrizovatky/* || BuildConfig.DEBUG*/) {
                         kliklyKrizovatky += k
                     }
@@ -163,7 +184,7 @@ fun VytvareniLinkyScreen(
             ) {
                 // t - posunuti, c - coercovaný, p - prostředek, x - max, i - min
 
-                val (start, stop) = dp.velikostMesta
+                val (start, stop) = ulicove.velikostMesta
                 val m = start.dpSUlicema
                     .minus(ulicovyBlok * 2)
                     .toPx()
@@ -207,8 +228,8 @@ fun VytvareniLinkyScreen(
         }
     }
 
-    LaunchedEffect(dp, waitForExit) {
-        if (waitForExit != null && dp.linky.any { it.id == waitForExit }) {
+    LaunchedEffect(linky, waitForExit) {
+        if (waitForExit != null && linky.any { it.id == waitForExit }) {
             navigatateUp()
         }
     }
@@ -246,7 +267,9 @@ fun VytvareniLinkyScreen(
                 .fillMaxSize()
         ) {
             NeceleMesto(
-                dp = dp,
+                ulice = ulicove,
+                linky = linky,
+                dpInfo = dpInfo,
                 tx = tx,
                 ty = ty,
                 priblizeni = priblizeni,
@@ -341,7 +364,7 @@ fun VytvareniLinkyScreen(
                                         Toast.makeText(ctx, R.string.spatne_cislo_linky, Toast.LENGTH_LONG).show()
                                         return@TextButton
                                     }
-                                    if (dp.linky.any { it.cislo == cisloLinky.toInt() }) {
+                                    if (linky.any { it.cislo == cisloLinky.toInt() }) {
                                         Toast.makeText(ctx, R.string.linka_existuje, Toast.LENGTH_LONG).show()
                                         return@TextButton
                                     }
@@ -353,19 +376,17 @@ fun VytvareniLinkyScreen(
                                     val linka = Linka(
                                         cislo = cisloLinky.toInt(),
                                         ulice = kliklyKrizovatky.windowed(2).map { (prvni, druha) ->
-                                            dp.ulice.first { it.zacatek == minOf(prvni, druha) && it.konec == maxOf(prvni, druha) }.id
+                                            ulicove.first { it.zacatek == minOf(prvni, druha) && it.konec == maxOf(prvni, druha) }.id
                                         },
                                         barvicka = barva
                                     )
 
                                     dosahni(Dosahlost.SkupinovaDosahlost.Linka::class)
 
-                                    if (dp.linky.any { it.ulice == linka.ulice }) dosahni(Dosahlost.StejneLinky::class)
+                                    if (linky.any { it.ulice == linka.ulice }) dosahni(Dosahlost.StejneLinky::class)
 
-                                    upravitDp {
-                                        it.copy(
-                                            linky = it.linky + linka
-                                        )
+                                    zmenitLinky {
+                                        add(linka)
                                     }
                                     waitForExit = linka.id
                                 }

@@ -9,7 +9,10 @@ import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.unit.Dp
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.seznamKrizovatek
 import cz.jaro.dopravnipodniky.data.serializers.DpSerializer
 import cz.jaro.dopravnipodniky.shared.oddalenyRezim
@@ -25,10 +28,10 @@ typealias SerializableDp = @Serializable(with = DpSerializer::class) Dp
 
 @Composable
 fun CeleMesto(
-    dp: DopravniPodnik,
-//    vse: Vse,
-//    upravitDp: ((DopravniPodnik) -> DopravniPodnik) -> Unit,
-//    upravitVse: ((Vse) -> Vse) -> Unit,
+    ulice: List<Ulice>,
+    linky: List<Linka>,
+    busy: List<Bus>,
+    dpInfo: DPInfo,
     modifier: Modifier,
     tx: Float,
     ty: Float,
@@ -38,9 +41,9 @@ fun CeleMesto(
 //    println(dp.ulicove.map { "(${it.zacatek.x.value} ${it.zacatek.y.value} - ${it.konec.x.value} ${it.konec.y.value})" })
 
     val nakreslitLinky = remember(
-        dp.linky, dp.ulice
+        linky, ulice
     ) {
-        getNamalovatLinky(dp.linky, dp.ulice)
+        getNamalovatLinky(linky, ulice)
     }
 
     Canvas(
@@ -62,22 +65,22 @@ fun CeleMesto(
                 top = ty + size.center.y,
             ) {
 
-                dp.seznamKrizovatek.forEach { krizovatka ->
-                    namalovatKrizovatku(dp, krizovatka)
+                ulice.seznamKrizovatek.forEach { krizovatka ->
+                    namalovatKrizovatku(ulice, krizovatka)
                 }
 
-                dp.ulice.forEach { ulice ->
+                ulice.forEach { ulice ->
                     ulice.draw()
                 }
 
-                dp.ulice.forEach { ulice ->
+                ulice.forEach { ulice ->
                     ulice.baraky.forEach { barak ->
-                        barak.draw(dp.tema, ulice)
+                        barak.draw(dpInfo.tema, ulice)
                     }
                 }
 
-                if (priblizeni > oddalenyRezim) dp.busy.forEach { bus ->
-                bus.draw(dp)
+                if (priblizeni > oddalenyRezim) busy.forEach { bus ->
+                    bus.draw(linky, ulice)
                 }
 
                 if (priblizeni < oddalenyRezim) nakreslitLinky.forEach { nakreslitKousekLinky ->
@@ -85,11 +88,11 @@ fun CeleMesto(
                 }
 
                 if (priblizeni > oddalenyRezim) {
-                    dp.ulice.forEach { ulice ->
+                    ulice.forEach { ulice ->
                         if (ulice.maTrolej) ulice.nakreslitTroleje()
                     }
-                    dp.seznamKrizovatek.forEach { krizovatka ->
-                        nakreslitTrolejeNaKrizovatku(dp, krizovatka)
+                    ulice.seznamKrizovatek.forEach { krizovatka ->
+                        nakreslitTrolejeNaKrizovatku(ulice, krizovatka)
                     }
                 }
             }

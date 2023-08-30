@@ -34,18 +34,17 @@ class Dosahlovac(
         }
 
         ulozit(dosahlost.kopirovat(Dosahlost.Stav.Splneno(LocalDate.now())))
-        dataSource.zmenitVse {
-            it.copy(
-                prachy = it.prachy + dosahlost.odmena
-            )
+        dataSource.upravitPrachy {
+            it + dosahlost.odmena
         }
     }
 
     private suspend fun ulozit(novaDosahlost: Dosahlost) {
-        dataSource.zmenitVse { vse ->
-            vse.copy(
-                dosahlosti = (listOf(novaDosahlost) + vse.dosahlosti).distinctBy { it::class }
-            )
+        dataSource.upravitDosahlosti {
+            add(0, novaDosahlost)
+            val ruzne = distinct()
+            clear()
+            addAll(ruzne)
         }
     }
 
@@ -74,10 +73,8 @@ class Dosahlovac(
         }
 
         ulozit(dosahlost.kopirovat(Dosahlost.Stav.Splneno(LocalDate.now())))
-        dataSource.zmenitVse {
-            it.copy(
-                prachy = it.prachy + dosahlost.odmena
-            )
+        dataSource.upravitPrachy {
+            it + dosahlost.odmena
         }
     }
 }

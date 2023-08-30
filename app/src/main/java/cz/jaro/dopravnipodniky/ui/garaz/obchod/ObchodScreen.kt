@@ -59,11 +59,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import cz.jaro.dopravnipodniky.R
-import cz.jaro.dopravnipodniky.data.Vse
+import cz.jaro.dopravnipodniky.data.Nastaveni
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Trakce
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypBusu
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ikonka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.jsouVsechnyZatrolejovane
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.nakladyTextem
@@ -71,8 +73,11 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.shared.LinkaID
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
+import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
+import cz.jaro.dopravnipodniky.shared.je
+import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.toText
 import kotlinx.coroutines.launch
@@ -87,16 +92,41 @@ fun ObchodScreen(
 ) {
     val viewModel = koinViewModel<SharedViewModel>()
 
-    val dp by viewModel.dp.collectAsStateWithLifecycle()
-    val vse by viewModel.vse.collectAsStateWithLifecycle()
     val filtrovaneBusy by viewModel.filtrovaneBusy.collectAsStateWithLifecycle()
 
-    if (dp != null && vse != null) ObchodScreen(
+    LaunchedEffect(Unit) {
+        viewModel.zmenitTutorial {
+            if (it je StavTutorialu.Tutorialujeme.Garaz)
+                StavTutorialu.Tutorialujeme.Obchod
+            else it
+        }
+    }
+
+    val dpInfo by viewModel.dpInfo.collectAsStateWithLifecycle()
+    val nastaveni by viewModel.nastaveni.collectAsStateWithLifecycle()
+    val ulicove by viewModel.ulice.collectAsStateWithLifecycle()
+    val linky by viewModel.linky.collectAsStateWithLifecycle()
+    val busy by viewModel.busy.collectAsStateWithLifecycle()
+    val prachy by viewModel.prachy.collectAsStateWithLifecycle()
+
+    if (
+        dpInfo != null &&
+        nastaveni != null &&
+        ulicove != null &&
+        linky != null &&
+        busy != null &&
+        prachy != null
+    ) ObchodScreen(
         filtrovaneBusy = filtrovaneBusy,
-        dp = dp!!,
-        vse = vse!!,
-        upravitDp = viewModel::zmenitDp,
-        upravitVse = viewModel::zmenitVse,
+        dpInfo = dpInfo!!,
+        nastaveni = nastaveni!!,
+        ulicove = ulicove!!,
+        linky = linky!!,
+        busy = busy!!,
+        prachy = prachy!!,
+        zmenitPrachy = viewModel::zmenitPrachy,
+        zmenitNastaveni = viewModel::zmenitNastaveni,
+        zmenitBusy = viewModel::zmenitBusy,
         navigatateBack = navigator::navigateUp,
         dosahni = viewModel.dosahni
     )
@@ -112,10 +142,15 @@ enum class Zobrait {
 @Composable
 fun ObchodScreen(
     filtrovaneBusy: Sequence<TypBusu>,
-    dp: DopravniPodnik,
-    vse: Vse,
-    upravitDp: ((DopravniPodnik) -> DopravniPodnik) -> Unit,
-    upravitVse: ((Vse) -> Vse) -> Unit,
+    dpInfo: DPInfo,
+    nastaveni: Nastaveni,
+    ulicove: List<Ulice>,
+    linky: List<Linka>,
+    busy: List<Bus>,
+    prachy: Peniz,
+    zmenitPrachy: ((Peniz) -> Peniz) -> Unit,
+    zmenitNastaveni: ((Nastaveni) -> Nastaveni) -> Unit,
+    zmenitBusy: (MutableList<Bus>.() -> Unit) -> Unit,
     navigatateBack: () -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
 ) {
@@ -200,11 +235,11 @@ fun ObchodScreen(
                     val filtry = if (skupina is SkupinaFiltru.Cena) SkupinaFiltru.Cena.filtry + SkupinaFiltru.Cena.MamNaTo else skupina.filtry
                     filtry.forEach { filtr ->
                         FilterChip(
-                            selected = filtr in vse.filtry,
+                            selected = filtr in nastaveni.filtry,
                             onClick = {
-                                upravitVse {
+                                zmenitNastaveni {
                                     it.copy(
-                                        filtry = if (filtr in vse.filtry) vse.filtry - filtr else vse.filtry + filtr
+                                        filtry = if (filtr in nastaveni.filtry) nastaveni.filtry - filtr else nastaveni.filtry + filtr
                                     )
                                 }
                             },
@@ -230,11 +265,11 @@ fun ObchodScreen(
                 ) {
                     skupina.forEachIndexed { i, razeni ->
                         FilterChip(
-                            selected = vse.razeni == razeni,
+                            selected = nastaveni.razeni == razeni,
                             onClick = {
-                                upravitVse {
+                                zmenitNastaveni {
                                     it.copy(
-                                        razeni = if (vse.razeni == razeni) Razeni.Zadne else razeni
+                                        razeni = if (nastaveni.razeni == razeni) Razeni.Zadne else razeni
                                     )
                                 }
                             },
@@ -270,7 +305,7 @@ fun ObchodScreen(
                                 Modifier
                                     .width(40.dp)
                                     .height(40.dp),
-                                colorFilter = ColorFilter.tint(color = dp.tema.barva),
+                                colorFilter = ColorFilter.tint(color = dpInfo.tema.barva),
                             )
                         },
                     )
@@ -310,7 +345,7 @@ fun ObchodScreen(
                             val evCExistuje = stringResource(R.string.ev_c_existuje)
 
                             suspend fun koupit(seznamEvC: List<Int>, naLinku: LinkaID?) {
-                                if (typBusu.cena * seznamEvC.size > vse.prachy) {
+                                if (typBusu.cena * seznamEvC.size > prachy) {
 
                                     snackbarHostState.showSnackbar(
                                         message = maloPenez,
@@ -330,15 +365,11 @@ fun ObchodScreen(
                                         linka = naLinku,
                                     )
                                 }
-                                upravitDp { dp ->
-                                    dp.copy(
-                                        busy = dp.busy + novyBusy
-                                    )
+                                zmenitBusy {
+                                    addAll(novyBusy)
                                 }
-                                upravitVse {
-                                    it.copy(
-                                        prachy = it.prachy - typBusu.cena * seznamEvC.size
-                                    )
+                                zmenitPrachy {
+                                    it - typBusu.cena * seznamEvC.size
                                 }
 
 //                                Toast.makeText(ctx, ctx.getString(R.string.uspesne_koupeno_tolik_busuu, seznamEvC.size, trakce), Toast.LENGTH_SHORT).show()
@@ -396,8 +427,8 @@ fun ObchodScreen(
 
                             if (vybratLinku) {
                                 fun dalsikrok(id: LinkaID?) {
-                                    if (vse.automatickyUdelovatEvC) {
-                                        val aktualniEvCisla = dp.busy.map { it.evCislo }
+                                    if (nastaveni.automatickyUdelovatEvC) {
+                                        val aktualniEvCisla = busy.map { it.evCislo }
                                         val neobsazenaEvC = (1..1_000_000).asSequence().filter { it !in aktualniEvCisla }
 
                                         val seznamEvC = neobsazenaEvC.take(pocet.toInt())
@@ -412,17 +443,17 @@ fun ObchodScreen(
                                     vybratLinku = false
                                 }
 
-                                val linky = when (typBusu.trakce) {
-                                    is Trakce.Trolejbus -> dp.linky.filter { it.ulice(dp).jsouVsechnyZatrolejovane() }
-                                    else -> dp.linky
+                                val pouzitelneLinky = when (typBusu.trakce) {
+                                    is Trakce.Trolejbus -> linky.filter { it.ulice(ulicove).jsouVsechnyZatrolejovane() }
+                                    else -> linky
                                 }
-                                LaunchedEffect(linky) {
-                                    if (linky.isEmpty()) {
+                                LaunchedEffect(pouzitelneLinky) {
+                                    if (pouzitelneLinky.isEmpty()) {
                                         dalsikrok(null)
                                     }
                                 }
 
-                                if (linky.isNotEmpty()) AlertDialog(
+                                if (pouzitelneLinky.isNotEmpty()) AlertDialog(
                                     onDismissRequest = {
                                         vybratLinku = false
                                     },
@@ -434,7 +465,7 @@ fun ObchodScreen(
                                         LazyColumn(
                                             Modifier.fillMaxWidth()
                                         ) LazyColumn2@{
-                                            items(linky) {
+                                            items(pouzitelneLinky) {
                                                 ListItem(
                                                     headlineContent = {
                                                         Text(it.cislo.toString())
@@ -457,10 +488,10 @@ fun ObchodScreen(
                                         TextButton(
                                             enabled = evc.isNotEmpty() && evc.toIntOrNull() != null && evc.toInt() >= 1,
                                             onClick = {
-                                                if (vse.vicenasobnyKupovani) {
+                                                if (nastaveni.vicenasobnyKupovani) {
                                                     val cisla = evc.toInt()..<(evc.toInt() + pocet.toInt())
 
-                                                    if (cisla.any { cislo -> dp.busy.any { it.evCislo == cislo } }) {
+                                                    if (cisla.any { cislo -> busy.any { it.evCislo == cislo } }) {
                                                         Toast.makeText(ctx, evCExistuje, Toast.LENGTH_SHORT).show()
                                                         return@TextButton
                                                     }
@@ -468,7 +499,7 @@ fun ObchodScreen(
                                                         koupit(cisla.toList(), linka?.let { UUID.fromString(linka) })
                                                     }
                                                 } else {
-                                                    if (dp.busy.any { it.evCislo == evc.toInt() }) {
+                                                    if (busy.any { it.evCislo == evc.toInt() }) {
                                                         Toast.makeText(ctx, evCExistuje, Toast.LENGTH_SHORT).show()
                                                         return@TextButton
                                                     }
@@ -508,13 +539,13 @@ fun ObchodScreen(
                                 onClick = {
 
                                     when {
-                                        vse.vicenasobnyKupovani -> {
+                                        nastaveni.vicenasobnyKupovani -> {
 
                                             zeptatSeNaPocet = true
                                         }
 
-                                        vse.automatickyUdelovatEvC -> {
-                                            val aktualniEvCisla = dp.busy.map { it.evCislo }
+                                        nastaveni.automatickyUdelovatEvC -> {
+                                            val aktualniEvCisla = busy.map { it.evCislo }
                                             val nejnizsiNoveEvc = (1..10000).toList().first { it !in aktualniEvCisla }
 
                                             scope.launch {

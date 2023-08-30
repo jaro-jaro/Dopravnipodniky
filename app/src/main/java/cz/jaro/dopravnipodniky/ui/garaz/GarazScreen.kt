@@ -51,17 +51,23 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.Direction
 import cz.jaro.dopravnipodniky.R
-import cz.jaro.dopravnipodniky.data.Vse
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Trakce
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ikonka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.jsouVsechnyZatrolejovane
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
+import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
+import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
+import cz.jaro.dopravnipodniky.shared.replaceBy
 import cz.jaro.dopravnipodniky.ui.destinations.ObchodScreenDestination
 import org.koin.androidx.compose.koinViewModel
 import kotlin.reflect.KClass
@@ -73,13 +79,31 @@ fun GarazScreen(
 ) {
     val viewModel = koinViewModel<SharedViewModel>()
 
-    val dp by viewModel.dp.collectAsStateWithLifecycle()
-    val vse by viewModel.vse.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) {
+        viewModel.zmenitTutorial {
+            if (it je StavTutorialu.Tutorialujeme.Obchod)
+                StavTutorialu.Tutorialujeme.Vypraveni
+            else it
+        }
+    }
 
-    if (dp != null && vse != null) GarazScreen(
-        dp = dp!!,
-        vse = vse!!,
-        upravitDp = viewModel::zmenitDp,
+    val dpInfo by viewModel.dpInfo.collectAsStateWithLifecycle()
+    val ulicove by viewModel.ulice.collectAsStateWithLifecycle()
+    val linky by viewModel.linky.collectAsStateWithLifecycle()
+    val busy by viewModel.busy.collectAsStateWithLifecycle()
+
+    if (
+        dpInfo != null &&
+        ulicove != null &&
+        linky != null &&
+        busy != null
+    )  GarazScreen(
+        dpInfo = dpInfo!!,
+        ulicove = ulicove!!,
+        linky = linky!!,
+        busy = busy!!,
+        zmenitBusy = viewModel::zmenitBusy,
+        zmenitUlice = viewModel::zmenitUlice,
         navigatate = navigator::navigate,
         navigatateBack = navigator::navigateUp,
         dosahni = viewModel.dosahni
@@ -89,9 +113,12 @@ fun GarazScreen(
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun GarazScreen(
-    dp: DopravniPodnik,
-    vse: Vse,
-    upravitDp: ((DopravniPodnik) -> DopravniPodnik) -> Unit,
+    dpInfo: DPInfo,
+    ulicove: List<Ulice>,
+    linky: List<Linka>,
+    busy: List<Bus>,
+    zmenitBusy: (MutableList<Bus>.() -> Unit) -> Unit,
+    zmenitUlice: (MutableList<Ulice>.() -> Unit) -> Unit,
     navigatate: (Direction) -> Unit,
     navigatateBack: () -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
@@ -134,10 +161,10 @@ fun GarazScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            if (dp.busy.isEmpty()) item {
+            if (busy.isEmpty()) item {
                 Text(stringResource(R.string.zadny_bus), Modifier.padding(8.dp))
             }
-            items(dp.busy.sortedBy { it.evCislo }, key = { it.evCislo }) { bus ->
+            items(busy.sortedBy { it.evCislo }, key = { it.evCislo }) { bus ->
                 val expanded = otevreno == bus.evCislo
                 Column(
                     Modifier
@@ -152,7 +179,7 @@ fun GarazScreen(
                             Text(buildString {
                                 append(stringResource(R.string.ev_c, bus.evCislo))
                                 append(" ")
-                                if (bus.linka != null) append(stringResource(R.string.linka_tohle, dp.linka(bus.linka).cislo))
+                                if (bus.linka != null) append(stringResource(R.string.linka_tohle, linky.linka(bus.linka).cislo))
                             })
                         },
                         trailingContent = {
@@ -165,7 +192,7 @@ fun GarazScreen(
                                 Modifier
                                     .width(40.dp)
                                     .height(40.dp),
-                                colorFilter = ColorFilter.tint(color = dp.tema.barva),
+                                colorFilter = ColorFilter.tint(color = dpInfo.tema.barva),
                             )
                         },
                     )
@@ -203,17 +230,17 @@ fun GarazScreen(
                             val ctx = LocalContext.current
 
                             if (vybratLinku) {
-                                val linky = when (bus.typBusu.trakce) {
-                                    is Trakce.Trolejbus -> dp.linky.filter { it.ulice(dp).jsouVsechnyZatrolejovane() }
-                                    else -> dp.linky
+                                val pouzitelneLinky = when (bus.typBusu.trakce) {
+                                    is Trakce.Trolejbus -> linky.filter { it.ulice(ulicove).jsouVsechnyZatrolejovane() }
+                                    else -> linky
                                 }
-                                LaunchedEffect(linky) {
-                                    if (linky.isEmpty()) {
+                                LaunchedEffect(pouzitelneLinky) {
+                                    if (pouzitelneLinky.isEmpty()) {
                                         Toast.makeText(ctx, R.string.nejprve_si_vytvorte_linku, Toast.LENGTH_SHORT).show()
                                     }
                                 }
 
-                                if (linky.isNotEmpty()) AlertDialog(
+                                if (pouzitelneLinky.isNotEmpty()) AlertDialog(
                                     onDismissRequest = {
                                         vybratLinku = false
                                     },
@@ -221,10 +248,8 @@ fun GarazScreen(
                                     dismissButton = {
                                         TextButton(
                                             onClick = {
-                                                upravitDp { dopravniPodnik ->
-                                                    dopravniPodnik.copy(
-                                                        busy = (listOf(bus.copy(linka = null)) + dopravniPodnik.busy).distinctBy { it.id }
-                                                    )
+                                                zmenitBusy {
+                                                    replaceBy(bus.copy(linka = null)) { it.id }
                                                 }
                                                 vybratLinku = false
                                             }
@@ -239,16 +264,14 @@ fun GarazScreen(
                                         LazyColumn(
                                             Modifier.fillMaxWidth()
                                         ) LazyColumn2@{
-                                            items(linky) { linka ->
+                                            items(pouzitelneLinky) { linka ->
                                                 ListItem(
                                                     headlineContent = {
                                                         Text(linka.cislo.toString())
                                                     },
                                                     Modifier.clickable {
-                                                        upravitDp { dopravniPodnik ->
-                                                            dopravniPodnik.copy(
-                                                                busy = (listOf(bus.copy(linka = linka.id)) + dopravniPodnik.busy).distinctBy { it.id }
-                                                            )
+                                                        zmenitBusy {
+                                                            replaceBy(bus.copy(linka = linka.id)) { it.id }
                                                         }
                                                         dosahni(Dosahlost.BusNaLince::class)
                                                         vybratLinku = false
@@ -277,10 +300,10 @@ fun GarazScreen(
                                 Spacer(modifier = Modifier.weight(1F))
                                 OutlinedButton(
                                     onClick = {
-                                        upravitDp { dp ->
+                                        zmenitUlice {
 
                                             var cloveci = bus.cloveci
-                                            val noveUlice = dp.ulice.map { ulice ->
+                                            val noveUlice = map { ulice ->
                                                 var cloveciVUlici = ulice.cloveci
                                                 while (cloveciVUlici <= ulice.kapacita && cloveci > 0) {
 
@@ -292,10 +315,13 @@ fun GarazScreen(
                                                     cloveci = cloveciVUlici
                                                 )
                                             }
-                                            dp.copy(
-                                                busy = dp.busy.filterNot { it.id == bus.id },
-                                                ulice = noveUlice
-                                            )
+
+                                            clear()
+                                            addAll(noveUlice)
+                                        }
+                                        zmenitBusy {
+                                            val i = indexOfFirst { it.id == bus.id }
+                                            removeAt(i)
                                         }
                                     },
                                     Modifier

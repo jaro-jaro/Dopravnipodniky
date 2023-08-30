@@ -2,7 +2,6 @@ package cz.jaro.dopravnipodniky.data.dopravnipodnik
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlin.random.Random.Default.nextInt
 
 @Serializable
 @SerialName("Barak")
@@ -21,11 +20,9 @@ data class Barak(
             return Barak(
                 typ = typ,
                 cisloPopisne = cisloPopisne,
-                barvicka = barva(),
+                barvicka = typ.getBarva(),
                 kapacita = kapacita,
             )
         }
     }
 }
-
-private fun barva() = nextInt(-2, 2)

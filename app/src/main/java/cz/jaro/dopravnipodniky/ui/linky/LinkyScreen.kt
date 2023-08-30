@@ -37,8 +37,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.Direction
 import cz.jaro.dopravnipodniky.R
-import cz.jaro.dopravnipodniky.data.Vse
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.ui.destinations.VytvareniLinkyScreenDestination
@@ -53,13 +52,13 @@ fun LinkyScreen(
 ) {
     val viewModel = koinViewModel<SharedViewModel>()
 
-    val dp by viewModel.dp.collectAsStateWithLifecycle()
-    val vse by viewModel.vse.collectAsStateWithLifecycle()
+    val linky by viewModel.linky.collectAsStateWithLifecycle()
 
-    if (dp != null && vse != null) LinkyScreen(
-        dp = dp!!,
-        vse = vse!!,
-        upravitDp = viewModel::zmenitDp,
+    if (
+        linky != null
+    ) LinkyScreen(
+        linky = linky!!,
+        zmenitLinky = viewModel::zmenitLinky,
         navigatate = navigator::navigate,
         navigatateBack = navigator::navigateUp,
         dosahni = viewModel.dosahni
@@ -69,9 +68,8 @@ fun LinkyScreen(
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun LinkyScreen(
-    dp: DopravniPodnik,
-    vse: Vse,
-    upravitDp: ((DopravniPodnik) -> DopravniPodnik) -> Unit,
+    linky: List<Linka>,
+    zmenitLinky: (MutableList<Linka>.() -> Unit) -> Unit,
     navigatate: (Direction) -> Unit,
     navigatateBack: () -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
@@ -113,10 +111,10 @@ fun LinkyScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            if (dp.linky.isEmpty()) item {
+            if (linky.isEmpty()) item {
                 Text(stringResource(R.string.zadna_linka), Modifier.padding(8.dp))
             }
-            items(dp.linky.sortedBy { it.cislo }, key = { it.cislo }) { linka ->
+            items(linky.sortedBy { it.cislo }, key = { it.cislo }) { linka ->
                 Column(
                     Modifier
                         .animateItemPlacement()
@@ -132,10 +130,8 @@ fun LinkyScreen(
                                 Icon(Icons.Default.GridGoldenratio, null)
                                 IconButton(
                                     onClick = {
-                                        upravitDp {
-                                            it.copy(
-                                                linky = it.linky - linka
-                                            )
+                                        zmenitLinky {
+                                            remove(linka)
                                         }
                                     }
                                 ) {

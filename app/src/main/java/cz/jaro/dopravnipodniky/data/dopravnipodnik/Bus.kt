@@ -46,8 +46,8 @@ data class Bus(
     fun vydelkuj(dp: DopravniPodnik): PenizZaMinutu {
         if (linka == null) return 0.penezZaMin
 
-        val linka = dp.linka(linka)
-        val ulice = linka.ulice.map { dp.ulice(it) }
+        val linka = dp.linky.linka(linka)
+        val ulice = linka.ulice.map { dp.ulice.ulice(it) }
 
         if (typBusu.trakce is Trakce.Trolejbus && !ulice.jsouVsechnyZatrolejovane()) return 0.penezZaMin
 
@@ -57,7 +57,7 @@ data class Bus(
         // * ctx.dp.jizdne / uliceSeZastavkama.size
         val nasobitelCloveku =
             nasobitelPoctuLidiKteryTiNastoupiDoBusuNaZastavceKdyzZastaviANakyLidiTamJsouAMaVSobeJesteVolneMisto(dp).coerceIn(.0, 1.0).pow(2)
-        val prumernyVydelekZaZastavku = (dp.jizdne * cloveci * nasobitelCloveku).value.penezZaMin
+        val prumernyVydelekZaZastavku = (dp.info.jizdne * cloveci * nasobitelCloveku).value.penezZaMin
 
         val busUjede = typBusu.rychlost * 1.minutes // za minutu
         val ujetyZlomekLinky = busUjede / linka.delkaLinky.dp // za minutu

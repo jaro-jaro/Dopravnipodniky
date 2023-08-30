@@ -2,17 +2,21 @@ package cz.jaro.dopravnipodniky.shared
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cz.jaro.dopravnipodniky.data.Nastaveni
 import cz.jaro.dopravnipodniky.data.PreferencesDataSource
-import cz.jaro.dopravnipodniky.data.Vse
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlovac
+import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.ui.garaz.obchod.SkupinaFiltru
 import cz.jaro.dopravnipodniky.ui.garaz.obchod.SkupinaFiltru.Companion.filtrovat
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.WhileSubscribed
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
@@ -24,34 +28,83 @@ class SharedViewModel(
     private val preferencesDataSource: PreferencesDataSource,
     private val dosahlovac: Dosahlovac,
 ) : ViewModel() {
-    val dp = preferencesDataSource.dp
+    val busy = preferencesDataSource.busy
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
-    val vse = preferencesDataSource.vse
+    val linky = preferencesDataSource.linky
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
+    val ulice = preferencesDataSource.ulice
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
+    val dpInfo = preferencesDataSource.dpInfo
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
+    val prachy = preferencesDataSource.prachy
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
+    val dosahlosti = preferencesDataSource.dosahlosti
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
+    val tutorial = preferencesDataSource.tutorial
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
+    val nastaveni = preferencesDataSource.nastaveni
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
 
-    fun zmenitDp(update: (DopravniPodnik) -> DopravniPodnik) {
+    fun zmenitBusy(update: MutableList<Bus>.() -> Unit) {
         viewModelScope.launch {
-            preferencesDataSource.zmenitDp(update)
+            preferencesDataSource.upravitBusy(update)
         }
     }
 
-    fun zmenitVse(update: (Vse) -> Vse) {
+    fun zmenitLinky(update: MutableList<Linka>.() -> Unit) {
         viewModelScope.launch {
-            preferencesDataSource.zmenitVse(update)
+            preferencesDataSource.upravitLinky(update)
         }
     }
 
-    val filtrovaneBusy = vse.filterNotNull().map { vse ->
-        var filtrovaneTypy = typyBusu.asSequence()
-        SkupinaFiltru.skupinyFiltru.forEach { skupina ->
-            filtrovaneTypy = filtrovaneTypy.filtrovat(vse.filtry.filter { it in skupina.filtry })
+    fun zmenitUlice(update: MutableList<Ulice>.() -> Unit) {
+        viewModelScope.launch {
+            preferencesDataSource.upravitUlice(update)
         }
-        if (SkupinaFiltru.Cena.MamNaTo in vse.filtry) filtrovaneTypy = filtrovaneTypy.filter {
-            it.cena <= vse.prachy
-        }
-        filtrovaneTypy.sortedWith(vse.razeni.comparator)
     }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), emptySequence())
+
+    fun zmenitDPInfo(update: (DPInfo) -> DPInfo) {
+        viewModelScope.launch {
+            preferencesDataSource.upravitDPInfo(update)
+        }
+    }
+
+    fun zmenitPrachy(update: (Peniz) -> Peniz) {
+        viewModelScope.launch {
+            preferencesDataSource.upravitPrachy(update)
+        }
+    }
+
+    fun zmenitDosahlosti(update: MutableList<Dosahlost>.() -> Unit) {
+        viewModelScope.launch {
+            preferencesDataSource.upravitDosahlosti(update)
+        }
+    }
+
+    fun zmenitTutorial(update: (StavTutorialu) -> StavTutorialu) {
+        viewModelScope.launch {
+            preferencesDataSource.upravitTutorial(update)
+        }
+    }
+
+    fun zmenitNastaveni(update: (Nastaveni) -> Nastaveni) {
+        viewModelScope.launch {
+            preferencesDataSource.upravitNastaveni(update)
+        }
+    }
+
+    val filtrovaneBusy =
+        nastaveni.filterNotNull().combine(prachy.filterNotNull()) { nastaveni, prachy ->
+            var filtrovaneTypy = typyBusu.asSequence()
+            SkupinaFiltru.skupinyFiltru.forEach { skupina ->
+                filtrovaneTypy = filtrovaneTypy.filtrovat(nastaveni.filtry.filter { it in skupina.filtry })
+            }
+            if (SkupinaFiltru.Cena.MamNaTo in nastaveni.filtry) filtrovaneTypy = filtrovaneTypy.filter {
+                it.cena <= prachy
+            }
+            filtrovaneTypy.sortedWith(nastaveni.razeni.comparator)
+        }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), emptySequence())
 
     val dosahni: (KClass<out Dosahlost>) -> Unit = {
         viewModelScope.launch {

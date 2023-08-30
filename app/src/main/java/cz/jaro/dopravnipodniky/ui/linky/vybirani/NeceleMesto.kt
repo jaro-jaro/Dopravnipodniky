@@ -7,7 +7,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.seznamKrizovatek
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
@@ -20,7 +22,9 @@ import cz.jaro.dopravnipodniky.ui.malovani.namalovatKrizovatku
 
 @Composable
 fun NeceleMesto(
-    dp: DopravniPodnik,
+    ulice: List<Ulice>,
+    linky: List<Linka>,
+    dpInfo: DPInfo,
     modifier: Modifier,
     tx: Float,
     ty: Float,
@@ -29,9 +33,9 @@ fun NeceleMesto(
 ) {
 
     val nakreslitLinky = remember(
-        dp.linky, dp.ulice
+        linky, ulice
     ) {
-        getNamalovatLinky(dp.linky, dp.ulice)
+        getNamalovatLinky(linky, ulice)
     }
 
     Canvas(
@@ -63,19 +67,18 @@ fun NeceleMesto(
                 left = tx + size.center.x,
                 top = ty + size.center.y,
             ) {
+                ulice.seznamKrizovatek.forEach { krizovatka ->
+                    namalovatKrizovatku(ulice, krizovatka)
+                }
 
-                dp.ulice.forEach { ulice ->
+                ulice.forEach { ulice ->
                     ulice.draw()
                 }
 
-                dp.ulice.forEach { ulice ->
+                ulice.forEach { ulice ->
                     ulice.baraky.forEach { barak ->
-                        barak.draw(dp.tema, ulice)
+                        barak.draw(dpInfo.tema, ulice)
                     }
-                }
-
-                dp.seznamKrizovatek.forEach { krizovatka ->
-                    namalovatKrizovatku(dp, krizovatka)
                 }
 
                 nakreslitLinky.forEach { nakreslitKousekLinky ->
@@ -84,15 +87,15 @@ fun NeceleMesto(
 
                 namalovatVybiraniLinky(
                     kliklyKrizovatky = kliklyKrizovatky,
-                    barva = dp.tema.barva,
+                    barva = dpInfo.tema.barva,
                 )
 
                 if (priblizeni > oddalenyRezim) {
-                    dp.ulice.forEach { ulice ->
+                    ulice.forEach { ulice ->
                         if (ulice.maTrolej) ulice.nakreslitTroleje()
                     }
-                    dp.seznamKrizovatek.forEach { krizovatka ->
-                        nakreslitTrolejeNaKrizovatku(dp, krizovatka)
+                    ulice.seznamKrizovatek.forEach { krizovatka ->
+                        nakreslitTrolejeNaKrizovatku(ulice, krizovatka)
                     }
                 }
             }

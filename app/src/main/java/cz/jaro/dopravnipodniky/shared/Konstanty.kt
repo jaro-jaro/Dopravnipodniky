@@ -146,8 +146,8 @@ val sirkaCary = .2.dp
 val odsazeniBusu = sirkaChodniku + .75.metru.toDp()
 
 val sirkaTroleje = .2.dp
-val predsazeniTrolejiS = 8.dp
-val predsazeniTrolejiL = 28.dp
+val predsazeniTrolejiS = 1.dp
+val predsazeniTrolejiL = 6.dp
 val rozchodTroleji = .5.metru.toDp()
 val odsazeniTroleje = sirkaChodniku + 1.5.metru.toDp()
 val odsazeniPrvniTroleje = odsazeniTroleje
@@ -178,9 +178,9 @@ const val millisPerTik = 1000L / TPS
 
 const val nasobitelDelkyBusu = 2F
 //val delkaUlice = 100.metru
-val pocatecniObnosPenez = /*Double.POSITIVE_INFINITY.penez*//*150_000.penez*//*5_000_000.penez*/5_000_000_000.penez
+val pocatecniObnosPenez = /*Double.POSITIVE_INFINITY.penez*/150_000.penez/*5_000_000.penez*//*5_000_000_000.penez*/
 const val nasobitelZiskuPoOffline = 1 / 20.0
-const val nasobitelZisku = 1
+const val nasobitelZisku = 5
 const val nasobitelUrovne = 1 / 1.0
 const val nasobitelRozsahlosti = 200.0
 const val nasobitelMaxCloveku = PI / 2

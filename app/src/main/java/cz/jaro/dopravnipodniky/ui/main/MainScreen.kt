@@ -3,6 +3,8 @@ package cz.jaro.dopravnipodniky.ui.main
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +24,6 @@ import androidx.compose.material.icons.filled.EditRoad
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -39,6 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -60,23 +62,29 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.Direction
-import cz.jaro.dopravnipodniky.BuildConfig
 import cz.jaro.dopravnipodniky.R
-import cz.jaro.dopravnipodniky.data.Generator
-import cz.jaro.dopravnipodniky.data.Vse
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
+import cz.jaro.dopravnipodniky.data.Nastaveni
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Zastavka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.stred
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.velikostMesta
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.zasebevrazdujZastavku
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
+import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.UliceID
 import cz.jaro.dopravnipodniky.shared.cenaTroleje
 import cz.jaro.dopravnipodniky.shared.cenaZastavky
+import cz.jaro.dopravnipodniky.shared.je
+import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.jednotky.dpSUlicema
 import cz.jaro.dopravnipodniky.shared.jednotky.minus
+import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.plus
 import cz.jaro.dopravnipodniky.shared.jednotky.to
 import cz.jaro.dopravnipodniky.shared.jednotky.toPx
@@ -96,31 +104,65 @@ fun MainScreen(
 ) {
     val viewModel = koinViewModel<SharedViewModel>()
 
-    val dp by viewModel.dp.collectAsStateWithLifecycle()
-    val vse by viewModel.vse.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) {
+        viewModel.zmenitTutorial {
+            if (it je StavTutorialu.Tutorialujeme.Linky)
+                StavTutorialu.Tutorialujeme.Zastavky
+            else it
+        }
+    }
+    val dpInfo by viewModel.dpInfo.collectAsStateWithLifecycle()
+    val nastaveni by viewModel.nastaveni.collectAsStateWithLifecycle()
+    val tutorial by viewModel.tutorial.collectAsStateWithLifecycle()
+    val ulicove by viewModel.ulice.collectAsStateWithLifecycle()
+    val linky by viewModel.linky.collectAsStateWithLifecycle()
+    val busy by viewModel.busy.collectAsStateWithLifecycle()
+    val prachy by viewModel.prachy.collectAsStateWithLifecycle()
 
-    if (dp != null && vse != null) MainScreen(
-        dp = dp!!,
-        vse = vse!!,
-        upravitDp = viewModel::zmenitDp,
-        upravitVse = viewModel::zmenitVse,
+    if (
+        dpInfo != null &&
+        nastaveni != null &&
+        tutorial != null &&
+        ulicove != null &&
+        linky != null &&
+        busy != null &&
+        prachy != null
+    ) MainScreen(
+        dpInfo = dpInfo!!,
+        nastaveni = nastaveni!!,
+        tutorial = tutorial!!,
+        ulicove = ulicove!!,
+        linky = linky!!,
+        busy = busy!!,
+        prachy = prachy!!,
+        zmenitTutorial = viewModel::zmenitTutorial,
+        zmenitPrachy = viewModel::zmenitPrachy,
+        zmenitNastaveni = viewModel::zmenitNastaveni,
+        zmenitUlice = viewModel::zmenitUlice,
         navigatate = navigator::navigate,
     )
 }
 
 var DEBUG_TEXT by mutableStateOf(false)
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(
-    dp: DopravniPodnik,
-    vse: Vse,
-    upravitDp: ((DopravniPodnik) -> DopravniPodnik) -> Unit,
-    upravitVse: ((Vse) -> Vse) -> Unit,
+    dpInfo: DPInfo,
+    nastaveni: Nastaveni,
+    tutorial: StavTutorialu,
+    ulicove: List<Ulice>,
+    linky: List<Linka>,
+    busy: List<Bus>,
+    prachy: Peniz,
+    zmenitTutorial: ((StavTutorialu) -> StavTutorialu) -> Unit,
+    zmenitPrachy: ((Peniz) -> Peniz) -> Unit,
+    zmenitNastaveni: ((Nastaveni) -> Nastaveni) -> Unit,
+    zmenitUlice: (MutableList<Ulice>.() -> Unit) -> Unit,
     navigatate: (Direction) -> Unit,
 ) {
     val density = LocalDensity.current
-    val stred = remember(dp.stred) { dp.stred.dpSUlicema }
+    val stred = remember(ulicove.stred) { ulicove.stred.dpSUlicema }
     var tx by remember(stred) { mutableFloatStateOf(with(density) { -stred.x.toPx() * pocatecniPriblizeni }) }
     var ty by remember(stred) { mutableFloatStateOf(with(density) { -stred.y.toPx() * pocatecniPriblizeni }) }
     var priblizeni by remember { mutableFloatStateOf(pocatecniPriblizeni) }
@@ -131,16 +173,16 @@ fun MainScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(dp.jmenoMesta)
+                    Text(dpInfo.jmenoMesta)
+                },
+                Modifier.combinedClickable(onLongClick = {
+                    zmenitPrachy {
+                        Double.POSITIVE_INFINITY.penez
+                    }
+                }) {
+                    // todo podniky
                 },
                 actions = {
-                    if (BuildConfig.DEBUG) IconButton(
-                        onClick = {
-                            upravitVse { Vse(prvniDp = Generator.vygenerujMiPrvniMesto()) }
-                        }
-                    ) {
-                        Icon(Icons.Default.RestartAlt, null)
-                    }
                     IconButton(
                         onClick = {
                         }
@@ -155,20 +197,20 @@ fun MainScreen(
                     ) {
                         Icon(Icons.Default.MoreVert, null)
                     }
-                    var nastaveni by remember { mutableStateOf(false) }
-                    if (nastaveni) AlertDialog(
+                    var zobrazitNastaveni by remember { mutableStateOf(false) }
+                    if (zobrazitNastaveni) AlertDialog(
                         onDismissRequest = {
-                            nastaveni = false
+                            zobrazitNastaveni = false
                         }
                     ) {
                         Column {
                             Text("Provizorní nastavení")
                             Text(stringResource(R.string.automaticky_prirazovat_ev_c))
                             Switch(
-                                checked = vse.automatickyUdelovatEvC,
+                                checked = nastaveni.automatickyUdelovatEvC,
                                 onCheckedChange = {
-                                    upravitVse { vse ->
-                                        vse.copy(
+                                    zmenitNastaveni { n ->
+                                        n.copy(
                                             automatickyUdelovatEvC = it
                                         )
                                     }
@@ -176,10 +218,10 @@ fun MainScreen(
                             )
                             Text(stringResource(R.string.vicenasobne_kupovani))
                             Switch(
-                                checked = vse.vicenasobnyKupovani,
+                                checked = nastaveni.vicenasobnyKupovani,
                                 onCheckedChange = {
-                                    upravitVse { vse ->
-                                        vse.copy(
+                                    zmenitNastaveni { n ->
+                                        n.copy(
                                             vicenasobnyKupovani = it
                                         )
                                     }
@@ -205,7 +247,7 @@ fun MainScreen(
                                 Text(stringResource(R.string.nastaveni))
                             },
                             onClick = {
-                                nastaveni = true
+                                zobrazitNastaveni = true
                                 show = false
                             },
                             leadingIcon = {
@@ -234,7 +276,7 @@ fun MainScreen(
                 .fillMaxSize()
         ) {
             if (upravitUlici != null) {
-                val ulice = remember { dp.ulice(upravitUlici!!) }
+                val staraUlice = remember { ulicove.ulice(upravitUlici!!) }
 
                 AlertDialog(
                     onDismissRequest = {
@@ -262,16 +304,14 @@ fun MainScreen(
                         ) {
                             OutlinedButton(
                                 onClick = {
-                                    upravitDp { dp ->
-                                        if (ulice.maZastavku)
-                                            dp.copy(ulice = dp.ulice.replaceBy(ulice.zasebevrazdujZastavku()) { it.id })
+                                    zmenitUlice {
+                                        if (staraUlice.maZastavku)
+                                            replaceBy(staraUlice.zasebevrazdujZastavku()) { it.id }
                                         else
-                                            dp.copy(ulice = dp.ulice.replaceBy(ulice.copy(zastavka = Zastavka())) { it.id })
+                                            replaceBy(staraUlice.copy(zastavka = Zastavka())) { it.id }
                                     }
-                                    upravitVse {
-                                        it.copy(
-                                            prachy = it.prachy - if (!ulice.maZastavku) cenaZastavky else cenaZastavky / 5
-                                        )
+                                    zmenitPrachy {
+                                        it - if (!staraUlice.maZastavku) cenaZastavky else cenaZastavky / 5
                                     }
                                     upravitUlici = null
                                 },
@@ -281,24 +321,28 @@ fun MainScreen(
                             ) {
 
                                 Text(
-                                    text = if (!ulice.maZastavku)
+                                    text = if (!staraUlice.maZastavku)
                                         stringResource(R.string.vytvorit_zastavku, cenaZastavky.asString())
                                     else stringResource(R.string.odstranit_zastavku, (cenaZastavky / 5).asString()),
                                     textAlign = TextAlign.Center
                                 )
                             }
-                            OutlinedButton(
+                            if (
+                                !(tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                                !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                                !(tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
+                                !(tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                                !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
+                            ) OutlinedButton(
                                 onClick = {
-                                    upravitDp { dp ->
-                                        if (ulice.maTrolej)
-                                            dp.copy(ulice = dp.ulice.replaceBy(ulice.copy(maTrolej = false)) { it.id })
+                                    zmenitUlice {
+                                        if (staraUlice.maTrolej)
+                                            replaceBy(staraUlice.copy(maTrolej = false)) { it.id }
                                         else
-                                            dp.copy(ulice = dp.ulice.replaceBy(ulice.copy(maTrolej = true)) { it.id })
+                                            replaceBy(staraUlice.copy(maTrolej = true)) { it.id }
                                     }
-                                    upravitVse {
-                                        it.copy(
-                                            prachy = it.prachy - if (!ulice.maTrolej) cenaTroleje else cenaTroleje / 5
-                                        )
+                                    zmenitPrachy {
+                                        it - if (!staraUlice.maTrolej) cenaTroleje else cenaTroleje / 5
                                     }
                                     upravitUlici = null
                                 },
@@ -307,7 +351,7 @@ fun MainScreen(
                                     .fillMaxWidth(),
                             ) {
                                 Text(
-                                    text = if (!ulice.maTrolej)
+                                    text = if (!staraUlice.maTrolej)
                                         stringResource(R.string.postavit_troleje, cenaTroleje.asString())
                                     else stringResource(R.string.odstranit_troleje, (cenaTroleje / 5).asString()),
                                     textAlign = TextAlign.Justify
@@ -318,16 +362,19 @@ fun MainScreen(
                 )
             }
             CeleMesto(
-                dp = dp,
+                ulice = ulicove,
+                linky = linky,
+                busy = busy,
                 tx = tx,
                 ty = ty,
+                dpInfo = dpInfo,
                 priblizeni = priblizeni,
                 modifier = Modifier
                     .fillMaxSize()
                     .pointerInput(Unit) {
                         detectTapGestures {
                             if (editor) {
-                                val ulice = dp.ulice.find { ulice ->
+                                val ulice = ulicove.find { ulice ->
                                     Rect(
                                         topLeft = (ulice.zacatekX to ulice.zacatekY)
                                             .toPx()
@@ -343,8 +390,8 @@ fun MainScreen(
                                                 size.center
                                                     .times(priblizeni)
                                                     .toOffset()
-                                            )
-                                            /*.also(::println)*/,
+                                            ),
+                                        /*.also(::println)*/
                                         bottomRight = (ulice.konecX to ulice.konecY)
                                             .toPx()
                                             .minus(size.center.toOffset())
@@ -359,8 +406,8 @@ fun MainScreen(
                                                 size.center
                                                     .times(priblizeni)
                                                     .toOffset()
-                                            )
-                                            /*.also(::println)*/,
+                                            ),
+                                        /*.also(::println)*/
                                     ).contains(it)
                                 }
                                 upravitUlici = ulice?.id
@@ -373,7 +420,7 @@ fun MainScreen(
                                 scope.launch {
                                     // t - posunuti, c - coercovaný, p - prostředek, x - max, i - min
 
-                                    val (start, stop) = dp.velikostMesta
+                                    val (start, stop) = ulicove.velikostMesta
                                     val m = start.dpSUlicema
                                         .minus(ulicovyBlok * 2)
                                         .toPx()
@@ -419,25 +466,34 @@ fun MainScreen(
             Column(
                 Modifier.fillMaxSize(),
             ) {
-                Text(
-                    text = vse.prachy.asString(),
+                if (
+                    !(tutorial je StavTutorialu.Tutorialujeme.Uvod)
+                ) Text(
+                    text = prachy.asString(),
                     Modifier
                         .fillMaxWidth()
                         .padding(all = 8.dp),
                     textAlign = TextAlign.Center,
                 )
-                Row(
+
+                if (
+                    !(tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                    !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                    !(tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
+                    !(tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                    !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
+                ) Row(
                     Modifier.fillMaxWidth(),
                 ) {
                     Text(
-                        text = dp.zisk.asString(),
+                        text = dpInfo.zisk.asString(),
                         Modifier
                             .weight(1F)
                             .padding(all = 8.dp),
                         textAlign = TextAlign.Start,
                     )
                     Text(
-                        text = stringResource(R.string.pocet_busu, dp.busy.count { it.linka != null }, dp.busy.size),
+                        text = stringResource(R.string.pocet_busu, busy.count { it.linka != null }, busy.size),
                         Modifier
                             .weight(1F)
                             .padding(all = 8.dp),
@@ -445,13 +501,24 @@ fun MainScreen(
                     )
                 }
                 Spacer(modifier = Modifier.weight(1F))
-                Row(
+                if (
+                    !(tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                    !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                    !(tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                    !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
+                ) Row(
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
                 ) {
                     TextButton(
                         onClick = {
                             editor = !editor
+
+                            if (!editor) zmenitTutorial {
+                                if (it je StavTutorialu.Tutorialujeme.Zastavky)
+                                    StavTutorialu.Tutorialujeme.Garaz
+                                else it
+                            }
                         },
                         Modifier
                             .padding(end = 8.dp)
@@ -486,19 +553,12 @@ fun MainScreen(
                 Row(
                     Modifier.fillMaxWidth(),
                 ) {
-                    TextButton(
-                        onClick = {
-                            navigatate(GarazScreenDestination)
-                        },
-                        Modifier
-                            .weight(1F)
-                            .padding(all = 8.dp),
-                    ) {
-                        Text(
-                            text = stringResource(R.string.garaz)
-                        )
-                    }
-                    TextButton(
+                    if (
+                        !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                        !(tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
+                        !(tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                        !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
+                    ) TextButton(
                         onClick = {
                             navigatate(LinkyScreenDestination)
                         },
@@ -509,7 +569,31 @@ fun MainScreen(
                         Text(
                             text = stringResource(R.string.linky)
                         )
-                    }
+                    } else Spacer(
+                        Modifier
+                            .weight(1F)
+                            .padding(all = 8.dp)
+                    )
+                    if (
+                        !(tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                        !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                        !(tutorial je StavTutorialu.Tutorialujeme.Zastavky)
+                    ) TextButton(
+                        onClick = {
+                            navigatate(GarazScreenDestination)
+                        },
+                        Modifier
+                            .weight(1F)
+                            .padding(all = 8.dp),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.garaz)
+                        )
+                    } else Spacer(
+                        Modifier
+                            .weight(1F)
+                            .padding(all = 8.dp)
+                    )
                 }
             }
         }
