@@ -1,6 +1,5 @@
 package cz.jaro.dopravnipodniky.data
 
-import android.util.Log
 import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.StavZastavky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Trakce
@@ -14,16 +13,20 @@ import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlovac
 import cz.jaro.dopravnipodniky.shared.Smer
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
+import cz.jaro.dopravnipodniky.shared.Text
 import cz.jaro.dopravnipodniky.shared.delkaUlice
 import cz.jaro.dopravnipodniky.shared.delkaZastavky
 import cz.jaro.dopravnipodniky.shared.dobaPobytuNaZastavce
+import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.je
+import cz.jaro.dopravnipodniky.shared.jednotky.Tik
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.penezZaMin
 import cz.jaro.dopravnipodniky.shared.jednotky.tiku
 import cz.jaro.dopravnipodniky.shared.jednotky.times
 import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toDuration
+import cz.jaro.dopravnipodniky.shared.millisPerTik
 import cz.jaro.dopravnipodniky.shared.nahodnostProjetiZastavky
 import cz.jaro.dopravnipodniky.shared.nasobitelPoctuLidiKteryTiNastoupiDoBusuNaZastavceKdyzZastaviANakyLidiTamJsouAMaVSobeJesteVolneMisto
 import cz.jaro.dopravnipodniky.shared.nasobitelZisku
@@ -31,236 +34,259 @@ import cz.jaro.dopravnipodniky.shared.odsazeniBaraku
 import cz.jaro.dopravnipodniky.shared.times
 import cz.jaro.dopravnipodniky.shared.udrzbaTroleje
 import cz.jaro.dopravnipodniky.shared.udrzbaZastavky
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
-import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
-import kotlin.random.Random.Default.nextInt
+import kotlin.random.Random
+import kotlin.time.Duration.Companion.seconds
 
 @Single(createdAtStart = true)
 class Updater(
     hodiny: Hodiny,
-    private val dataSource: PreferencesDataSource,
-    private val dosahlovac: Dosahlovac,
+    dataSource: PreferencesDataSource,
+    dosahlovac: Dosahlovac,
 ) {
     init {
-        hodiny.registerListener(1.tiku) { tik ->
+        update(
+            hodiny,
+            dataSource,
+            dosahlovac
+        )
+    }
+}
 
-            val puvodniDp = dataSource.dp.first()
-            val puvodniVse = dataSource.vse.first()
+private fun update(
+    hodiny: Hodiny,
+    dataSource: PreferencesDataSource,
+    dosahlovac: Dosahlovac,
+) {
+    hodiny.registerListener(10.seconds) { tik ->
+//            Log.i("sekání", "tik: ${tik.hezky()}, čas: ${System.currentTimeMillis().hezky()}; Začátek")
 
-//            println("START $tik")
-            /*
-            // zistovani jestli nejses moc dlouho pryc
+        /*
+        // zistovani jestli nejses moc dlouho pryc
 
-            val pocetSekundOdPoslednihoHrani = (Calendar.getInstance().toInstant().toEpochMilli() - dp.cas) / 1000 // s
+        val pocetSekundOdPoslednihoHrani = (Calendar.getInstance().toInstant().toEpochMilli() - dp.cas) / 1000 // s
 
-            if (pocetSekundOdPoslednihoHrani < 0) {.size}
-                dosahni("citer", binding.toolbar)
+        if (pocetSekundOdPoslednihoHrani < 0) {.size}
+            dosahni("citer", binding.toolbar)
+        }
+
+        if (pocetSekundOdPoslednihoHrani > 10) {
+
+            val puvodniTiky = pocetSekundOdPoslednihoHrani * TPS
+            val pocetTiku = if (puvodniTiky > TPH * 8L) TPH * 8L else puvodniTiky
+
+            for (bus in dp.busy) {
+                bus.najeto += puvodniTiky * (1.0 / TPH)
             }
 
-            if (pocetSekundOdPoslednihoHrani > 10) {
+            vse.prachy += dp.zisk * nasobitelZiskuPoOffline * pocetTiku / TPM
 
-                val puvodniTiky = pocetSekundOdPoslednihoHrani * TPS
-                val pocetTiku = if (puvodniTiky > TPH * 8L) TPH * 8L else puvodniTiky
-
-                for (bus in dp.busy) {
-                    bus.najeto += puvodniTiky * (1.0 / TPH)
-                }
-
-                vse.prachy += dp.zisk * nasobitelZiskuPoOffline * pocetTiku / TPM
-
-                MaterialAlertDialogBuilder(this).apply {
-                    setIcon(R.drawable.ic_baseline_attach_money_24)
+            MaterialAlertDialogBuilder(this).apply {
+                setIcon(R.drawable.ic_baseline_attach_money_24)
 //            setTheme(R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
-                    setTitle(R.string.slovo_vyuctovani)
-                    setMessage(
-                        getString(
-                            R.string.vyuctovani,
-                            if (puvodniTiky / TPH < 2)
-                                resources.getQuantityString(
-                                    R.plurals.min,
-                                    (pocetTiku / TPM).toInt(),
-                                    pocetTiku / TPM
-                                )
-                            else
-                                resources.getQuantityString(
-                                    R.plurals.hod,
-                                    (puvodniTiky / TPH).toInt(),
-                                    puvodniTiky / TPH
-                                ),
-                            (dp.zisk * nasobitelZiskuPoOffline * pocetTiku / TPM).roundToLong()
-                                .formatovat(),
-                            (dp.zisk).roundToLong().formatovat(),
-                            (pocetTiku / TPM).toString(),
-                            nasobitelZiskuPoOffline.toString(),
-                            (dp.zisk * nasobitelZiskuPoOffline * pocetTiku / TPM).roundToLong()
-                                .formatovat(),
-                            if (puvodniTiky != pocetTiku)
-                                getString(R.string.bohuzel_dlouho_neaktivni)
-                            else ""
-                        )
+                setTitle(R.string.slovo_vyuctovani)
+                setMessage(
+                    getString(
+                        R.string.vyuctovani,
+                        if (puvodniTiky / TPH < 2)
+                            resources.getQuantityString(
+                                R.plurals.min,
+                                (pocetTiku / TPM).toInt(),
+                                pocetTiku / TPM
+                            )
+                        else
+                            resources.getQuantityString(
+                                R.plurals.hod,
+                                (puvodniTiky / TPH).toInt(),
+                                puvodniTiky / TPH
+                            ),
+                        (dp.zisk * nasobitelZiskuPoOffline * pocetTiku / TPM).roundToLong()
+                            .formatovat(),
+                        (dp.zisk).roundToLong().formatovat(),
+                        (pocetTiku / TPM).toString(),
+                        nasobitelZiskuPoOffline.toString(),
+                        (dp.zisk * nasobitelZiskuPoOffline * pocetTiku / TPM).roundToLong()
+                            .formatovat(),
+                        if (puvodniTiky != pocetTiku)
+                            getString(R.string.bohuzel_dlouho_neaktivni)
+                        else ""
                     )
-                    show()
-                }
-            }*/
-
-            // pocitani penez a vykreslovani
-
-            var zisk = 0.0.penezZaMin
-            var deltaPrachy = 0.0.penez
-
-            puvodniDp.busy.forEach { bus ->
-
-                // pocitani zisku
-                zisk -= bus.naklady
-                zisk += bus.vydelkuj(puvodniDp)
-
-                // odebrani penez za naklady + starnuti busuu
-                deltaPrachy -= bus.naklady * 1.tiku
-
+                )
+                show()
             }
-            dataSource.upravitBusy {
-                forEachIndexed { i, bus ->
-                    this[i] = bus.copy(
-                        najeto = bus.najeto + 1.tiku.toDuration()
-                    )
-                }
+        }*/
+
+        dataSource.upravitBusy {
+            forEachIndexed { i, bus ->
+                this[i] = bus.copy(
+                    najeto = bus.najeto + 10.seconds
+                )
             }
-            dataSource.upravitBusy {
-                forEachIndexed { i, bus ->
-                    if (bus.linka == null) return@upravitBusy
+        }
+    }
 
-                    var cloveci = bus.cloveci
-                    var smerNaLince = bus.smerNaLince
-                    var poziceNaLince = bus.poziceNaLince
-                    var poziceVUlici = bus.poziceVUlici
-                    var stavZastavky = bus.stavZastavky
 
-                    val linka = puvodniDp.linky.linka(bus.linka)
-                    val ulicove = linka.ulice(puvodniDp.ulice)
-                    val ulice = ulicove[
-                        when (smerNaLince) {
-                            Smer.Pozitivni -> poziceNaLince
-                            Smer.Negativni -> linka.ulice.lastIndex - poziceNaLince
+    hodiny.registerListener(1.tiku) { tik ->
+//            Log.i("sekání", "tik: ${tik.hezky()}, čas: ${System.currentTimeMillis().hezky()}; Začátek")
+
+        val puvodniDp = dataSource.dp.first()
+
+        dataSource.upravitBusy {
+//                    Log.i("sekání", "tik: ${tik.hezky()}, čas: ${System.currentTimeMillis().hezky()}; Začátek posouvání busů")
+            forEachIndexed { i, bus ->
+                if (bus.linka == null) return@upravitBusy
+//                        Log.i("sekání", "tik: ${tik.hezky()}, čas: ${System.currentTimeMillis().hezky()}; Začátek posouvání busu ${bus.evCislo}")
+
+                val linka = puvodniDp.linky.linka(bus.linka)
+                val ulicove = linka.ulice(puvodniDp.ulice)
+
+                if (bus.typBusu.trakce is Trakce.Trolejbus && !ulicove.jsouVsechnyZatrolejovane()) return@upravitBusy
+
+                var smerNaLince = bus.smerNaLince
+                var poziceNaLince = bus.poziceNaLince
+                var poziceVUlici = bus.poziceVUlici
+                var stavZastavky = bus.stavZastavky
+
+                val ulice = ulicove[
+                    when (smerNaLince) {
+                        Smer.Pozitivni -> poziceNaLince
+                        Smer.Negativni -> linka.ulice.lastIndex - poziceNaLince
+                    }
+                ]
+
+                if (bus.stavZastavky !is StavZastavky.Na) {
+                    // posouvani busu po mape
+
+                    poziceVUlici += bus.typBusu.rychlost * 1.tiku.toDuration()
+
+                    if (poziceVUlici >= delkaUlice) {  // odjel mimo ulici
+                        poziceVUlici = 0.dp
+                        stavZastavky = StavZastavky.Pred
+                        poziceNaLince += 1
+
+                        if (poziceNaLince >= linka.ulice.size) { // dojel na konec linky
+                            poziceNaLince = 0
+                            smerNaLince *= Smer.Negativni
                         }
-                    ]
+                    }
+                }
 
-                    if (bus.typBusu.trakce !is Trakce.Trolejbus || ulicove.jsouVsechnyZatrolejovane()) {
-                        if (bus.stavZastavky !is StavZastavky.Na) {
-                            // posouvani busu po mape
+                if (ulice.zastavka != null) {
 
-                            poziceVUlici += bus.typBusu.rychlost * 1.tiku.toDuration()
+                    if (stavZastavky is StavZastavky.Na) {
 
-                            if (poziceVUlici >= delkaUlice) {  // odjel mimo ulici
-                                poziceVUlici = 0.dp
-                                stavZastavky = StavZastavky.Pred
-                                poziceNaLince += 1
+                        stavZastavky = stavZastavky.copy(doba = stavZastavky.doba + 1.tiku)
 
-                                if (poziceNaLince >= linka.ulice.size) { // dojel na konec linky
-                                    poziceNaLince = 0
-                                    smerNaLince *= Smer.Negativni
+                        if (stavZastavky.doba >= dobaPobytuNaZastavce) {
+
+                            stavZastavky = StavZastavky.Po
+
+                            launch(Dispatchers.IO) {
+                                var cloveciNaZastavce = ulice.zastavka.cloveci
+                                var cloveci = bus.cloveci
+
+                                //                                            Log.i(
+                                //                                                "Přesunuti lidé",
+                                //                                                "V busu je $cloveci lidí, na zastávce $cloveciNaZastavce lidí"
+                                //                                            )
+
+                                val vystupujici = if (bus.poziceNaLince == linka.ulice.lastIndex) cloveci
+                                else Random.nextInt(0, cloveci + 1)
+
+                                cloveci -= vystupujici
+                                cloveciNaZastavce += vystupujici
+
+                                //                                            Log.i(
+                                //                                                "Přesunuti lidé",
+                                //                                                "Vystoupilo $vystupujici lidí."
+                                //                                            )
+                                dataSource.upravitPrachy {
+                                    it + puvodniDp.info.jizdne * vystupujici * nasobitelZisku
+                                }
+
+                                val nastupujici =
+                                    if (bus.poziceNaLince == linka.ulice.lastIndex) 0
+                                    else if (ulice.zastavka.kapacita(ulice) == 0) 0
+                                    else Random.nextInt(
+                                        from = (ulice.zastavka.cloveci - ulice.zastavka.kapacita(ulice)).coerceAtLeast(0),
+                                        until = ulice.zastavka.cloveci + 1
+                                    )/*.also(::println)*/
+                                        .times(
+                                            nasobitelPoctuLidiKteryTiNastoupiDoBusuNaZastavceKdyzZastaviANakyLidiTamJsouAMaVSobeJesteVolneMisto(
+                                                puvodniDp
+                                            )
+                                        )/*.also(::println)*/
+                                        .roundToInt()
+                                        .coerceIn(0, bus.typBusu.kapacita - cloveci)
+                                        .coerceAtMost(ulice.zastavka.cloveci)
+
+                                cloveci += nastupujici
+                                cloveciNaZastavce -= nastupujici
+
+                                //                                            Log.i(
+                                //                                                "Přesunuti lidé",
+                                //                                                "Nastoupilo $nastupujici lidí."
+                                //                                            )
+
+                                dataSource.upravitBusy {
+                                    this[i] = this[i].copy(
+                                        cloveci = cloveci,
+                                    )
+                                }
+                                dataSource.upravitUlice {
+                                    val indexUlice = indexOfFirst { it.id == ulice.id }
+                                    this[indexUlice] = ulice.copy(
+                                        zastavka = Zastavka(cloveciNaZastavce)
+                                    )
                                 }
                             }
                         }
+                    }
 
-                        if (ulice.zastavka != null) {
+                    // zapocitani projeti zastavky
 
+                    if (
+                        stavZastavky == StavZastavky.Pred &&
+                        poziceVUlici >= (delkaUlice + delkaZastavky) / 2 - bus.typBusu.delka.toDp() - odsazeniBaraku
+                    ) {
+                        stavZastavky = StavZastavky.Na(
+                            if (Random.nextInt(0, nahodnostProjetiZastavky) == 0) {
+                                dosahlovac.dosahni(Dosahlost.ProjetZastavku::class)
+                                dobaPobytuNaZastavce
+                            } else 0.tiku
+                        )
+
+                        launch(Dispatchers.IO) {
                             var cloveciVUlici = ulice.cloveci
                             var cloveciNaZastavce = ulice.zastavka.cloveci
 
-                            if (stavZastavky is StavZastavky.Na) {
-                                cloveciNaZastavce = ulice.zastavka.cloveci
+                            dosahlovac.dosahni(Dosahlost.BusNaZastavce::class)
 
-                                stavZastavky = stavZastavky.copy(doba = stavZastavky.doba + 1.tiku)
+                            // cloveci musi jit domu a na zastavku a taky na záchod
 
-                                if (stavZastavky.doba >= dobaPobytuNaZastavce) {
+                            //        println(-cloveciNaZastavce / 4)
+                            //        println(cloveciVUlici / 4 + 1)
+                            //        println(cloveciVUlici - ulice.kapacita)
+                            //        println(ulice.zastavka.kapacita(ulice) - cloveciNaZastavce)
 
-                                    stavZastavky = StavZastavky.Po
+                            val lidiCoJdouZDomu = Random.nextInt(
+                                from = -cloveciNaZastavce / 4,
+                                until = cloveciVUlici / 4 + 1,
+                            )
+                                .coerceAtLeast(cloveciVUlici - ulice.kapacita)
+                                .coerceAtMost(ulice.zastavka.kapacita(ulice) - cloveciNaZastavce)
 
-                                    Log.i(
-                                        "Přesunuti lidé",
-                                        "V busu je $cloveci lidí, na zastávce $cloveciNaZastavce lidí"
-                                    )
+                            cloveciVUlici -= lidiCoJdouZDomu
+                            cloveciNaZastavce += lidiCoJdouZDomu
 
-                                    val vystupujici = if (bus.poziceNaLince == linka.ulice.lastIndex) cloveci
-                                    else nextInt(0, cloveci + 1)
-
-                                    cloveci -= vystupujici
-                                    cloveciNaZastavce += vystupujici
-
-                                    Log.i(
-                                        "Přesunuti lidé",
-                                        "Vystoupilo $vystupujici lidí."
-                                    )
-
-                                    deltaPrachy += puvodniDp.info.jizdne * vystupujici * nasobitelZisku
-
-                                    val nastupujici =
-                                        if (bus.poziceNaLince == linka.ulice.lastIndex) 0
-                                        else if (ulice.zastavka.kapacita(ulice) == 0) 0
-                                        else nextInt(
-                                            from = (ulice.zastavka.cloveci - ulice.zastavka.kapacita(ulice)).coerceAtLeast(0),
-                                            until = ulice.zastavka.cloveci + 1
-                                        )/*.also(::println)*/
-                                            .times(
-                                                nasobitelPoctuLidiKteryTiNastoupiDoBusuNaZastavceKdyzZastaviANakyLidiTamJsouAMaVSobeJesteVolneMisto(
-                                                    puvodniDp
-                                                )
-                                            )/*.also(::println)*/
-                                            .roundToInt()
-                                            .coerceIn(0, bus.typBusu.kapacita - cloveci)
-                                            .coerceAtMost(ulice.zastavka.cloveci)
-
-                                    cloveci += nastupujici
-                                    cloveciNaZastavce -= nastupujici
-
-                                    Log.i(
-                                        "Přesunuti lidé",
-                                        "Nastoupilo $nastupujici lidí."
-                                    )
-                                }
-                            }
-
-                            // zapocitani projeti zastavky
-
-                            if (
-                                stavZastavky == StavZastavky.Pred &&
-                                poziceVUlici >= (delkaUlice + delkaZastavky) / 2 - bus.typBusu.delka.toDp() - odsazeniBaraku
-                            ) {
-                                cloveciNaZastavce = ulice.zastavka.cloveci
-
-                                stavZastavky = StavZastavky.Na(
-                                    if (nextInt(0, nahodnostProjetiZastavky) == 0) {
-                                        dosahlovac.dosahni(Dosahlost.ProjetZastavku::class)
-                                        dobaPobytuNaZastavce
-                                    } else 0.tiku
-                                )
-
-                                dosahlovac.dosahni(Dosahlost.BusNaZastavce::class)
-
-                                // cloveci musi jit domu a na zastavku a taky na záchod
-
-//        println(-cloveciNaZastavce / 4)
-//        println(cloveciVUlici / 4 + 1)
-//        println(cloveciVUlici - ulice.kapacita)
-//        println(ulice.zastavka.kapacita(ulice) - cloveciNaZastavce)
-
-                                val lidiCoJdouZDomu = nextInt(
-                                    from = -cloveciNaZastavce / 4,
-                                    until = cloveciVUlici / 4 + 1,
-                                )
-                                    .coerceAtLeast(cloveciVUlici - ulice.kapacita)
-                                    .coerceAtMost(ulice.zastavka.kapacita(ulice) - cloveciNaZastavce)
-
-                                cloveciVUlici -= lidiCoJdouZDomu
-                                cloveciNaZastavce += lidiCoJdouZDomu
-
-                                Log.i(
-                                    "Přesunuti lidé",
-                                    (if (lidiCoJdouZDomu >= 0) "Na zastávku na ulici přišlo" else "Ze zastávky odešlo") + " ${lidiCoJdouZDomu.absoluteValue} lidí."
-                                )
-                            }
+                            //                                        Log.i(
+                            //                                            "Přesunuti lidé",
+                            //                                            (if (lidiCoJdouZDomu >= 0) "Na zastávku na ulici přišlo" else "Ze zastávky odešlo") + " ${lidiCoJdouZDomu.absoluteValue} lidí."
+                            //                                        )
 
                             dataSource.upravitUlice {
                                 val indexUlice = indexOfFirst { it.id == ulice.id }
@@ -271,42 +297,65 @@ class Updater(
                             }
                         }
                     }
-
-                    this[i] = bus.copy(
-                        poziceVUlici = poziceVUlici,
-                        poziceNaLince = poziceNaLince,
-                        smerNaLince = smerNaLince,
-                        stavZastavky = stavZastavky,
-                        cloveci = cloveci,
-                    )
                 }
+
+                this[i] = bus.copy(
+                    poziceVUlici = poziceVUlici,
+                    poziceNaLince = poziceNaLince,
+                    smerNaLince = smerNaLince,
+                    stavZastavky = stavZastavky,
+                )
+//                    Log.i("sekání", "tik: ${tik.hezky()}, čas: ${System.currentTimeMillis().hezky()}; Konec posouvání busů")
             }
+        }
+    }
 
-            // infrastruktura
 
-            val zaZastavky = udrzbaZastavky * puvodniDp.ulice.count { it.maZastavku }
-            val zaTroleje = udrzbaTroleje * puvodniDp.ulice.count { it.maTrolej }
+    hodiny.registerListener(10.seconds) { tik ->
+//            Log.i("sekání", "tik: ${tik.hezky()}, čas: ${System.currentTimeMillis().hezky()}; Začátek")
+
+        val puvodniDp = dataSource.dp.first()
+        val puvodniVse = dataSource.vse.first()
+
+        var zisk = 0.0.penezZaMin
+        var deltaPrachy = 0.0.penez
+
+        puvodniDp.busy.forEach { bus ->
+
+            // pocitani zisku
+            zisk -= bus.naklady
+            zisk += bus.vydelkuj(puvodniDp)
+
+            // odebrani penez za naklady + starnuti busuu
+            deltaPrachy -= bus.naklady * 10.seconds
+
+        }
+
+        // infrastruktura
+
+        val zaZastavky = udrzbaZastavky * puvodniDp.ulice.count { it.maZastavku }
+        val zaTroleje = udrzbaTroleje * puvodniDp.ulice.count { it.maTrolej }
 
 //                println(zaZastavky)
 //                println(zaTroleje)
 
-            deltaPrachy -= zaZastavky * 1.tiku - zaTroleje * 1.tiku
-            zisk -= (zaZastavky + zaTroleje)
+        deltaPrachy -= zaZastavky * 10.seconds - zaTroleje * 10.seconds
+        zisk -= (zaZastavky + zaTroleje)
 
-            // dosahlosti
+        // dosahlosti
 
-            dosahlovac.dosahniPocetniDosahlost(
-                Dosahlost.SkupinovaDosahlost.Penize::class,
-                dataSource.vse.first().prachy.value.roundToInt(),
-            )
+        dosahlovac.dosahniPocetniDosahlost(
+            Dosahlost.SkupinovaDosahlost.Penize::class,
+            dataSource.vse.first().prachy.value.roundToInt(),
+        )
 
-            // tutorial
+        // tutorial
 
-            dataSource.upravitTutorial {
-                if (it je StavTutorialu.Tutorialujeme.Vypraveni && puvodniVse.prachy + deltaPrachy >= 1_500_000.penez)
-                    StavTutorialu.Tutorialujeme.NovejDp
-                else it
-            }
+        dataSource.upravitTutorial {
+            if (it je StavTutorialu.Tutorialujeme.Vypraveni && puvodniVse.prachy + deltaPrachy >= 1_500_000.penez)
+                StavTutorialu.Tutorialujeme.NovejDp
+            else it
+        }
 
 //                 mimoradnosti
 //
@@ -361,7 +410,7 @@ class Updater(
 //                    Log.i("Zemřel člověk", "${clovek.jmeno} zemřel ve ${clovek.vek.roundToInt()} letech")
 //                }
 //
-            // rození
+        // rození
 
 //                if (nextInt(0, dobaZnovuobnoveniPopulace / dp.cloveci + 1) == 0 && dp.baraky.any { it.kapacita != it.cloveci }) {
 //                    val barak = dp.baraky.filter { it.kapacita != it.cloveci }.random()
@@ -371,15 +420,18 @@ class Updater(
 //                    Log.i("Narodil se člověk", clovek.jmeno)
 //                }
 //
-            dataSource.upravitPrachy {
-                it + deltaPrachy
-            }
-            dataSource.upravitDPInfo {
-                it.copy(
-                    casPosledniNavstevy = System.currentTimeMillis(),
-                    zisk = (it.zisk + zisk) / 2
-                )
-            }
+        dataSource.upravitPrachy {
+            it + deltaPrachy
+        }
+        dataSource.upravitDPInfo {
+            it.copy(
+                casPosledniNavstevy = System.currentTimeMillis(),
+                zisk = (it.zisk + zisk) / 2
+            )
         }
     }
 }
+
+private fun Long.hezky() = (div(1_000.0).minus(div(1_000_000).times(1_000)).formatovat() as Text.Plain).value
+
+private fun Tik.hezky() = ((System.currentTimeMillis() / millisPerTik - value).formatovat() as Text.Plain).value

@@ -102,9 +102,13 @@ class PreferencesDataSource(
 
     private var index: Int = 0
 
+    private val json = Json {
+        allowSpecialFloatingPointValues = true
+    }
+
     init {
-        scope.launch {
-            val vse = dataStore.data.first()[PreferenceKeys.VSE]?.let { Json.decodeFromString(it) } ?: DefaultValues.VSE
+        scope.launch(Dispatchers.IO) {
+            val vse = dataStore.data.first()[PreferenceKeys.VSE]?.let { json.decodeFromString(it) } ?: DefaultValues.VSE
             index = vse.indexAktualnihoDp
             _prachy.value = vse.prachy
             _dosahlosti.value = vse.dosahlosti
@@ -121,7 +125,7 @@ class PreferencesDataSource(
     init {
         hodiny.registerListener(2.seconds) {
             dataStore.edit { preferences ->
-                preferences[PreferenceKeys.VSE] = Json.encodeToString(
+                preferences[PreferenceKeys.VSE] = json.encodeToString(
                     Vse(
                         podniky = listOf(
                             DopravniPodnik(

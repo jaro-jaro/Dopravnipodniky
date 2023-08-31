@@ -18,6 +18,7 @@ import cz.jaro.dopravnipodniky.data.serializers.DpSerializer
 import cz.jaro.dopravnipodniky.shared.oddalenyRezim
 import cz.jaro.dopravnipodniky.shared.sedPozadi
 import cz.jaro.dopravnipodniky.ui.malovani.draw
+import cz.jaro.dopravnipodniky.ui.malovani.getNamalovatBus
 import cz.jaro.dopravnipodniky.ui.malovani.getNamalovatLinky
 import cz.jaro.dopravnipodniky.ui.malovani.nakreslitTroleje
 import cz.jaro.dopravnipodniky.ui.malovani.nakreslitTrolejeNaKrizovatku
@@ -41,9 +42,20 @@ fun CeleMesto(
 //    println(dp.ulicove.map { "(${it.zacatek.x.value} ${it.zacatek.y.value} - ${it.konec.x.value} ${it.konec.y.value})" })
 
     val nakreslitLinky = remember(
-        linky, ulice
+        linky,
+        ulice.map { listOf(it.zacatek, it.konec, it.zacatekX, it.zacatekY, it.orientace, it.id) },
     ) {
         getNamalovatLinky(linky, ulice)
+    }
+
+    val nakreslitBusy = remember(
+        busy,
+        ulice,
+        linky,
+    ) {
+        busy.map { bus ->
+            getNamalovatBus(bus, linky, ulice)
+        }
     }
 
     Canvas(
@@ -79,8 +91,8 @@ fun CeleMesto(
                     }
                 }
 
-                if (priblizeni > oddalenyRezim) busy.forEach { bus ->
-                    bus.draw(linky, ulice)
+                if (priblizeni > oddalenyRezim) nakreslitBusy.forEach { nakreslitBus ->
+                    nakreslitBus()
                 }
 
                 if (priblizeni < oddalenyRezim) nakreslitLinky.forEach { nakreslitKousekLinky ->

@@ -23,7 +23,7 @@ class Hodiny {
     private val cas = flow {
         while (currentCoroutineContext().isActive) {
             emit(System.currentTimeMillis())
-            delay(10)
+            delay(0)
         }
     }
         .flowOn(Dispatchers.IO)
