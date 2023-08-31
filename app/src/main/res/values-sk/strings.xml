@@ -329,6 +329,7 @@
     <string name="zmenit_linku">Změnit linku</string>
     <string name="zpet">Zpět</string>
     <string name="moc_filtru">Bohužel, nenašli jsme žádná vozidla, která by odpovídala vašim požadavkům. Zkuste poupravit filtry!</string>
+    <string name="nepridavat">Nevypravovat</string>
 
 
 </resources>

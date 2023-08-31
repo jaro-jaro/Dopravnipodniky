@@ -66,6 +66,7 @@ import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.je
+import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.replaceBy
 import cz.jaro.dopravnipodniky.ui.destinations.ObchodScreenDestination
@@ -87,17 +88,20 @@ fun GarazScreen(
         }
     }
 
+    val prachy by viewModel.prachy.collectAsStateWithLifecycle()
     val dpInfo by viewModel.dpInfo.collectAsStateWithLifecycle()
     val ulicove by viewModel.ulice.collectAsStateWithLifecycle()
     val linky by viewModel.linky.collectAsStateWithLifecycle()
     val busy by viewModel.busy.collectAsStateWithLifecycle()
 
     if (
+        prachy != null &&
         dpInfo != null &&
         ulicove != null &&
         linky != null &&
         busy != null
     )  GarazScreen(
+        prachy = prachy!!,
         dpInfo = dpInfo!!,
         ulicove = ulicove!!,
         linky = linky!!,
@@ -114,6 +118,7 @@ fun GarazScreen(
 @Composable
 fun GarazScreen(
     dpInfo: DPInfo,
+    prachy: Peniz,
     ulicove: List<Ulice>,
     linky: List<Linka>,
     busy: List<Bus>,
@@ -137,6 +142,9 @@ fun GarazScreen(
                     ) {
                         Icon(Icons.Default.ArrowBack, stringResource(R.string.zpet))
                     }
+                },
+                actions = {
+                    Text(prachy.asString())
                 },
             )
         },
@@ -174,12 +182,13 @@ fun GarazScreen(
                             otevreno = if (expanded) null else bus.evCislo
                         },
                 ) {
+                    val linka = bus.linka?.let { linky.linka(it) }
                     ListItem(
                         headlineContent = {
                             Text(buildString {
                                 append(stringResource(R.string.ev_c, bus.evCislo))
                                 append(" ")
-                                if (bus.linka != null) append(stringResource(R.string.linka_tohle, linky.linka(bus.linka).cislo))
+                                if (linka != null) append(stringResource(R.string.linka_tohle, linka.cislo))
                             })
                         },
                         trailingContent = {
@@ -192,7 +201,7 @@ fun GarazScreen(
                                 Modifier
                                     .width(40.dp)
                                     .height(40.dp),
-                                colorFilter = ColorFilter.tint(color = dpInfo.tema.barva),
+                                colorFilter = ColorFilter.tint(color = linka?.barvicka?.barva ?: dpInfo.tema.barva),
                             )
                         },
                     )

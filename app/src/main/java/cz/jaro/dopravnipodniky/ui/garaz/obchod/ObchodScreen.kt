@@ -182,6 +182,9 @@ fun ObchodScreen(
                         Icon(Icons.Default.ArrowBack, stringResource(R.string.zpet))
                     }
                 },
+                actions = {
+                    Text(prachy.asString())
+                },
             )
         },
         snackbarHost = {
@@ -232,7 +235,8 @@ fun ObchodScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp)
                 ) {
-                    val filtry = if (skupina is SkupinaFiltru.Cena) SkupinaFiltru.Cena.filtry + SkupinaFiltru.Cena.MamNaTo else skupina.filtry
+                    val filtry =
+                        if (skupina is SkupinaFiltru.Cena) SkupinaFiltru.Cena.filtry + SkupinaFiltru.Cena.MamNaTo else skupina.filtry
                     filtry.forEach { filtr ->
                         FilterChip(
                             selected = filtr in nastaveni.filtry,
@@ -457,7 +461,16 @@ fun ObchodScreen(
                                     onDismissRequest = {
                                         vybratLinku = false
                                     },
-                                    confirmButton = { },
+                                    confirmButton = {},
+                                    dismissButton = {
+                                        TextButton(
+                                            onClick = {
+                                                dalsikrok(null)
+                                            }
+                                        ) {
+                                            Text(stringResource(R.string.nepridavat))
+                                        }
+                                    },
                                     title = {
                                         Text(stringResource(R.string.vyberte_linku))
                                     },

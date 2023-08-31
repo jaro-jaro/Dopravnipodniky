@@ -324,5 +324,6 @@
     <string name="zmenit_linku">Change line</string>
     <string name="zpet">Back</string>
     <string name="moc_filtru">Sadly, we haven\'t found any vehicles that would satisfy your needs. Try changing the filters!</string>
+    <string name="nepridavat">Don\'t get off to any line</string>
 
 </resources>
