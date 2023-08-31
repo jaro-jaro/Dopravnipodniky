@@ -1,5 +1,6 @@
 package cz.jaro.dopravnipodniky.ui.malovani
 
+import android.graphics.Color
 import android.graphics.Paint
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -65,79 +66,111 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
             top = zacatekY,
         ) {
 
-            if (DEBUG_TEXT) drawIntoCanvas {
-                it.nativeCanvas.drawText(
-                    bus.cloveci.toString(),
-                    15.dp.toPx(),
-                    5.dp.toPx(),
-                    Paint()
-                )
-            }
             when {
-                smerBusuNaUlici == Smer.Pozitivni && ulice.orientace == Orientace.Vodorovne -> {
+                smerBusuNaUlici == Smer.Pozitivni && ulice.orientace == Orientace.Vodorovne -> translate(
+                    left = posunKonceBusuVUlici,
+                    top = odsazeni2,
+                ) {
                     // bus jede doprava
                     drawRoundRect(
                         color = linka.barvicka.barva,
-                        topLeft = Offset(
-                            x = posunKonceBusuVUlici,
-                            y = odsazeni2,
-                        ),
+                        topLeft = Offset.Zero,
                         size = Size(
                             width = delkaBusu,
                             height = sirkaBusu,
                         ),
                         cornerRadius = CornerRadius(3F.dp.toPx()),
                     )
+                    if (DEBUG_TEXT) drawIntoCanvas {
+                        it.nativeCanvas.drawText(
+                            bus.cloveci.toString(),
+                            0F,
+                            5.dp.toPx(),
+                            Paint().apply {
+                                color = Color.WHITE
+                            }
+                        )
+                    }
                 }
 
-                smerBusuNaUlici == Smer.Pozitivni && ulice.orientace == Orientace.Svisle -> {
+                smerBusuNaUlici == Smer.Pozitivni && ulice.orientace == Orientace.Svisle -> translate(
+                    left = odsazeni,
+                    top = posunKonceBusuVUlici,
+                ) {
                     // bus jede dolu
                     drawRoundRect(
                         color = linka.barvicka.barva,
-                        topLeft = Offset(
-                            x = odsazeni,
-                            y = posunKonceBusuVUlici,
-                        ),
+                        topLeft = Offset.Zero,
                         size = Size(
                             width = sirkaBusu,
                             height = delkaBusu,
                         ),
                         cornerRadius = CornerRadius(3F.dp.toPx()),
                     )
+                    if (DEBUG_TEXT) drawIntoCanvas {
+                        it.nativeCanvas.drawText(
+                            bus.cloveci.toString(),
+                            0F,
+                            5.dp.toPx(),
+                            Paint().apply {
+                                color = Color.WHITE
+                            }
+                        )
+                    }
 //                pozice = zacatekX + odsazeni to zacatekY + posunKonceBusuVUlici
                 }
 
-                smerBusuNaUlici == Smer.Negativni && ulice.orientace == Orientace.Vodorovne -> {
+                smerBusuNaUlici == Smer.Negativni && ulice.orientace == Orientace.Vodorovne -> translate(
+                    left = delkaUlice - posunKonceBusuVUlici - delkaBusu,
+                    top = odsazeni,
+                ) {
                     // bus jede doleva
                     drawRoundRect(
                         color = linka.barvicka.barva,
-                        topLeft = Offset(
-                            x = delkaUlice - posunKonceBusuVUlici - delkaBusu,
-                            y = odsazeni,
-                        ),
+                        topLeft = Offset.Zero,
                         size = Size(
                             width = delkaBusu,
                             height = sirkaBusu,
                         ),
                         cornerRadius = CornerRadius(3F.dp.toPx()),
                     )
+                    if (DEBUG_TEXT) drawIntoCanvas {
+                        it.nativeCanvas.drawText(
+                            bus.cloveci.toString(),
+                            0F,
+                            5.dp.toPx(),
+                            Paint().apply {
+                                color = Color.WHITE
+                            }
+                        )
+                    }
 //                pozice = zacatekX + b - posunKonceBusuVUlici to zacatekY + odsazeni
                 }
 
-                smerBusuNaUlici == Smer.Negativni && ulice.orientace == Orientace.Svisle -> {
+                smerBusuNaUlici == Smer.Negativni && ulice.orientace == Orientace.Svisle -> translate(
+                    left = odsazeni2,
+                    top = delkaUlice - posunKonceBusuVUlici - delkaBusu,
+                ) {
                     // bus jede nahoru
                     drawRoundRect(
                         color = linka.barvicka.barva,
-                        topLeft = Offset(
-                            x = odsazeni2,
-                            y = delkaUlice - posunKonceBusuVUlici - delkaBusu,
-                        ),
+                        topLeft = Offset.Zero,
                         size = Size(
                             width = sirkaBusu,
                             height = delkaBusu,
                         ),
                         cornerRadius = CornerRadius(3F.dp.toPx()),
                     )
+                    if (DEBUG_TEXT) drawIntoCanvas {
+                        it.nativeCanvas.drawText(
+                            bus.cloveci.toString(),
+                            0F,
+                            5.dp.toPx(),
+                            Paint().apply {
+                                color = Color.WHITE
+                            }
+                        )
+                    }
 //                pozice = zacatekX + odsazeni + 16F.toPx() to zacatekY + b - posunKonceBusuVUlici
                 }
             }

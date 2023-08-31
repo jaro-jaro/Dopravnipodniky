@@ -67,18 +67,18 @@ fun NeceleMesto(
                 left = tx + size.center.x,
                 top = ty + size.center.y,
             ) {
+                ulice.forEach { ulice ->
+                    ulice.baraky.forEach { barak ->
+                        barak.draw(dpInfo.tema, ulice)
+                    }
+                }
+
                 ulice.seznamKrizovatek.forEach { krizovatka ->
                     namalovatKrizovatku(ulice, krizovatka)
                 }
 
                 ulice.forEach { ulice ->
                     ulice.draw()
-                }
-
-                ulice.forEach { ulice ->
-                    ulice.baraky.forEach { barak ->
-                        barak.draw(dpInfo.tema, ulice)
-                    }
                 }
 
                 nakreslitLinky.forEach { nakreslitKousekLinky ->

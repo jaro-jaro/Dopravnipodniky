@@ -77,7 +77,7 @@ import kotlin.time.Duration.Companion.seconds
  *
  * 2.1 Ceny jízdenek
  *
- * TODO 2.2 Cestující, Kapacity zastávek
+ * 2.2 Cestující, Kapacity zastávek
  *
  * 2.2.1 Kalibrace busu
  *
@@ -120,8 +120,8 @@ val minimumInvestice = 1_000_000L.penez
 
 // vykreslovani
 
-const val pocatecniPriblizeni = .75F/*1F*/
-const val oddalenyRezim = .6F
+const val pocatecniPriblizeni = 1F/*1F*/
+const val oddalenyRezim = 1.2F
 const val maximalniOddaleni = .1F
 val pocatecniPosunutiX = 0.dp //200
 val pocatecniPosunutiY = 0.dp //600

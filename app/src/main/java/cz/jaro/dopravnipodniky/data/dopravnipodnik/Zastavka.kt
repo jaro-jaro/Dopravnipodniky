@@ -23,4 +23,4 @@ value class Zastavka(
 //            Log.i("Vytvořena zastávka", "Byla vytvořena zastávka na ulici ${ulice.id}.")
 //        }
 
-fun Zastavka.kapacita(ulice: Ulice) = (ulice.kapacita * nasobitelMaxCloveku).roundToInt()
+fun Ulice.kapacitaZastavky() = (kapacita * nasobitelMaxCloveku).roundToInt()

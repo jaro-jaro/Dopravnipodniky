@@ -1,5 +1,6 @@
 package cz.jaro.dopravnipodniky.ui.malovani
 
+import android.graphics.Color
 import android.graphics.Paint
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
@@ -9,6 +10,7 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.kapacitaZastavky
 import cz.jaro.dopravnipodniky.shared.Orientace.Svisle
 import cz.jaro.dopravnipodniky.shared.Orientace.Vodorovne
 import cz.jaro.dopravnipodniky.shared.delkaUlice
@@ -75,18 +77,22 @@ fun Ulice.draw() {
         }
         if (DEBUG_TEXT) drawIntoCanvas {
             it.nativeCanvas.drawText(
-                cloveci.toString(),
+                "$cloveci/$kapacita",
                 0F,
                 5.dp.toPx(),
-                Paint()
+                Paint().apply {
+                    color = Color.WHITE
+                }
             )
         }
         if (DEBUG_TEXT) drawIntoCanvas {
             it.nativeCanvas.drawText(
-                zastavka?.cloveci.toString(),
+                "${zastavka?.cloveci}/${kapacitaZastavky()}",
                 0F,
                 10.dp.toPx(),
-                Paint()
+                Paint().apply {
+                    color = Color.WHITE
+                }
             )
         }
     }

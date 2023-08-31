@@ -5,7 +5,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.StavZastavky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Trakce
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Zastavka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.jsouVsechnyZatrolejovane
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.kapacita
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.kapacitaZastavky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
@@ -210,9 +210,9 @@ private fun update(
 
                                 val nastupujici =
                                     if (bus.poziceNaLince == linka.ulice.lastIndex) 0
-                                    else if (ulice.zastavka.kapacita(ulice) == 0) 0
+                                    else if (ulice.kapacitaZastavky() == 0) 0
                                     else Random.nextInt(
-                                        from = (ulice.zastavka.cloveci - ulice.zastavka.kapacita(ulice)).coerceAtLeast(0),
+                                        from = (ulice.zastavka.cloveci - ulice.kapacitaZastavky()).coerceAtLeast(0),
                                         until = ulice.zastavka.cloveci + 1
                                     )/*.also(::println)*/
                                         .times(
@@ -278,7 +278,7 @@ private fun update(
                                 until = cloveciVUlici / 4 + 1,
                             )
                                 .coerceAtLeast(cloveciVUlici - ulice.kapacita)
-                                .coerceAtMost(ulice.zastavka.kapacita(ulice) - cloveciNaZastavce)
+                                .coerceAtMost(ulice.kapacitaZastavky() - cloveciNaZastavce)
 
                             cloveciVUlici -= lidiCoJdouZDomu
                             cloveciNaZastavce += lidiCoJdouZDomu
