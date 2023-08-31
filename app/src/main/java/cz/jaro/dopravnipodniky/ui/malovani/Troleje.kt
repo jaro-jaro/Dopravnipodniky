@@ -68,16 +68,16 @@ fun nakreslitTrolejeNaKrizovatku(
 ) {
 
     val sousedVpravo = ulice.find {
-        it.orientace == Orientace.Vodorovne && it.zacatek == krizovatka
+        it.orientace == Orientace.Vodorovne && it.zacatek == krizovatka && it.maTrolej
     }
     val sousedDole = ulice.find {
-        it.orientace == Orientace.Svisle && it.zacatek == krizovatka
+        it.orientace == Orientace.Svisle && it.zacatek == krizovatka && it.maTrolej
     }
     val sousedVlevo = ulice.find {
-        it.orientace == Orientace.Vodorovne && it.konec == krizovatka
+        it.orientace == Orientace.Vodorovne && it.konec == krizovatka && it.maTrolej
     }
     val sousedNahore = ulice.find {
-        it.orientace == Orientace.Svisle && it.konec == krizovatka
+        it.orientace == Orientace.Svisle && it.konec == krizovatka && it.maTrolej
     }
 
     val ctyrKrizovatka = sousedDole != null && sousedNahore != null && sousedVlevo != null && sousedVpravo != null
@@ -135,7 +135,7 @@ fun nakreslitTrolejeNaKrizovatku(
 
         zatackyUhly
             .filter { (soused1, soused2, _) ->
-                soused1?.maTrolej == true && soused2?.maTrolej == true
+                soused1 != null && soused2 != null
             }
             .forEach { (_, _, uhel) ->
                 rotate(
@@ -160,10 +160,10 @@ fun nakreslitTrolejeNaKrizovatku(
             }
 
         val sousediUhly = listOfNotNull(
-            if (sousedVpravo?.maTrolej == true) 90F else null,
-            if (sousedDole?.maTrolej == true) 180F else null,
-            if (sousedVlevo?.maTrolej == true) 270F else null,
-            if (sousedNahore?.maTrolej == true) 0F else null,
+            if (sousedVpravo != null) 90F else null,
+            if (sousedDole != null) 180F else null,
+            if (sousedVlevo != null) 270F else null,
+            if (sousedNahore != null) 0F else null,
         )
         if (sousediUhly.size == 1) {
             val uhel = sousediUhly.first()

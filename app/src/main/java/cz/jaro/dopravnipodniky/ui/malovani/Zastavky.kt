@@ -7,11 +7,11 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.graphics.nativeCanvas
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.delkaUlice
 import cz.jaro.dopravnipodniky.shared.delkaZastavky
+import cz.jaro.dopravnipodniky.shared.odsazeniBusu
 import cz.jaro.dopravnipodniky.shared.odsazeniSloupku
 import cz.jaro.dopravnipodniky.shared.sirkaCary
 import cz.jaro.dopravnipodniky.shared.sirkaChodniku
@@ -68,7 +68,7 @@ private fun DrawScope.zastavka() {
     }
     translate(
         top = delkaUlice.toPx() / 2 - delkaZastavky.toPx() / 2,
-        left = sirkaChodniku.toPx() + sirkaCary.toPx(),
+        left = sirkaChodniku.toPx() + (odsazeniBusu - sirkaChodniku).toPx() / 2,
     ) {
         drawRect(
             color = Color.Yellow,
