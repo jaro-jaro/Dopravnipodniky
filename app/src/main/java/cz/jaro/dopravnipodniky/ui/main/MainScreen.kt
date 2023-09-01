@@ -89,11 +89,13 @@ import cz.jaro.dopravnipodniky.shared.jednotky.plus
 import cz.jaro.dopravnipodniky.shared.jednotky.to
 import cz.jaro.dopravnipodniky.shared.jednotky.toPx
 import cz.jaro.dopravnipodniky.shared.maximalniOddaleni
+import cz.jaro.dopravnipodniky.shared.oddalenyRezim
 import cz.jaro.dopravnipodniky.shared.pocatecniPriblizeni
 import cz.jaro.dopravnipodniky.shared.replaceBy
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
 import cz.jaro.dopravnipodniky.ui.destinations.GarazScreenDestination
 import cz.jaro.dopravnipodniky.ui.destinations.LinkyScreenDestination
+import cz.jaro.dopravnipodniky.ui.malovani.Mesto
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -361,7 +363,11 @@ fun MainScreen(
                     }
                 )
             }
-            CeleMesto(
+            val malovatBusy = !editor && priblizeni > oddalenyRezim
+            Mesto(
+                malovatBusy = malovatBusy,
+                malovatLinky = !malovatBusy,
+                kliklyKrizovatky = emptyList(),
                 ulice = ulicove,
                 linky = linky,
                 busy = busy,

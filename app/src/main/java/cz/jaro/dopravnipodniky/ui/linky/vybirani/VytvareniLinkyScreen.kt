@@ -79,6 +79,7 @@ import cz.jaro.dopravnipodniky.shared.maximalniOddaleni
 import cz.jaro.dopravnipodniky.shared.pocatecniPriblizeni
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
+import cz.jaro.dopravnipodniky.ui.malovani.Mesto
 import cz.jaro.dopravnipodniky.ui.theme.Barvicka
 import org.koin.androidx.compose.koinViewModel
 import java.util.UUID
@@ -266,9 +267,12 @@ fun VytvareniLinkyScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            NeceleMesto(
+            Mesto(
+                malovatBusy = false,
+                malovatLinky = true,
                 ulice = ulicove,
                 linky = linky,
+                busy = emptyList(),
                 dpInfo = dpInfo,
                 tx = tx,
                 ty = ty,
@@ -326,7 +330,7 @@ fun VytvareniLinkyScreen(
                             } while (!canceled && event.changes.any { it.pressed })
                         }
                     },
-                kliklyKrizovatky = kliklyKrizovatky
+                kliklyKrizovatky = kliklyKrizovatky,
             )
             Column(
                 Modifier.fillMaxSize(),

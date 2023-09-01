@@ -13,7 +13,6 @@ import cz.jaro.dopravnipodniky.shared.sedChodniku
 import cz.jaro.dopravnipodniky.shared.sedUlice
 import cz.jaro.dopravnipodniky.shared.sirkaChodniku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
-import cz.jaro.dopravnipodniky.ui.main.Offset
 
 context(DrawScope)
 fun namalovatKrizovatku(

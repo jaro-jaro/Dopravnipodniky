@@ -33,7 +33,7 @@ import cz.jaro.dopravnipodniky.shared.sedChodniku
 import cz.jaro.dopravnipodniky.shared.sedUlice
 import cz.jaro.dopravnipodniky.shared.sirkaChodniku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
-import cz.jaro.dopravnipodniky.ui.main.Offset
+import cz.jaro.dopravnipodniky.ui.malovani.Offset
 import cz.jaro.dopravnipodniky.ui.theme.Barvicka
 import cz.jaro.dopravnipodniky.ui.theme.DpTheme
 import cz.jaro.dopravnipodniky.ui.theme.Theme

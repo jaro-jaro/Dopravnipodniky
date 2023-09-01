@@ -54,6 +54,7 @@ import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.StavZastavky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Trakce
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ikonka
@@ -62,6 +63,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
+import cz.jaro.dopravnipodniky.shared.Smer
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
@@ -101,7 +103,7 @@ fun GarazScreen(
         ulicove != null &&
         linky != null &&
         busy != null
-    )  GarazScreen(
+    ) GarazScreen(
         prachy = prachy!!,
         dpInfo = dpInfo!!,
         ulicove = ulicove!!,
@@ -281,7 +283,15 @@ fun GarazScreen(
                                                     },
                                                     Modifier.clickable {
                                                         zmenitBusy {
-                                                            replaceBy(bus.copy(linka = linka.id)) { it.id }
+                                                            replaceBy(
+                                                                bus.copy(
+                                                                    linka = linka.id,
+                                                                    poziceNaLince = 0,
+                                                                    poziceVUlici = 0.dp,
+                                                                    smerNaLince = Smer.Pozitivni,
+                                                                    stavZastavky = StavZastavky.Pred
+                                                                )
+                                                            ) { it.id }
                                                         }
                                                         dosahni(Dosahlost.BusNaLince::class)
                                                         vybratLinku = false

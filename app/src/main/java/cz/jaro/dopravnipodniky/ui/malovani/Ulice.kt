@@ -19,7 +19,6 @@ import cz.jaro.dopravnipodniky.shared.sedUlice
 import cz.jaro.dopravnipodniky.shared.sirkaChodniku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.ui.main.DEBUG_TEXT
-import cz.jaro.dopravnipodniky.ui.main.Offset
 
 context(DrawScope)
 fun Ulice.draw() {

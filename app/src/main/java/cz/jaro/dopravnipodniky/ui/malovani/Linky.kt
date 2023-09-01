@@ -9,7 +9,6 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.contains
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
-import cz.jaro.dopravnipodniky.ui.main.Offset
 
 fun getNamalovatLinky(
     linky: List<Linka>,

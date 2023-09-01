@@ -190,6 +190,7 @@ private fun update(
                             stavZastavky = StavZastavky.Po
 
                             launch(Dispatchers.IO) {
+                                var cloveciVUlici = ulice.cloveci
                                 var cloveciNaZastavce = ulice.zastavka.cloveci
                                 var cloveci = bus.cloveci
 
@@ -198,7 +199,7 @@ private fun update(
                                 //                                                "V busu je $cloveci lidí, na zastávce $cloveciNaZastavce lidí"
                                 //                                            )
 
-                                val vystupujici = if (bus.poziceNaLince == linka.ulice.lastIndex) cloveci
+                                val vystupujici = if (bus.poziceNaLince == ulicove.indexOfLast { it.maZastavku }) cloveci
                                 else {
                                     val zbyvajiciKapacitaZastavky = ulice.kapacitaZastavky() - cloveciNaZastavce
                                     val minuleUlice = ulicove.subList(0, indexUliceNaLince)
@@ -235,7 +236,7 @@ private fun update(
                                 //                                            )
 
                                 val nastupujici =
-                                    if (bus.poziceNaLince == linka.ulice.lastIndex) 0
+                                    if (bus.poziceNaLince == ulicove.indexOfLast { it.maZastavku }) 0
                                     else if (ulice.kapacitaZastavky() == 0) 0
                                     else {
                                         val zbyvajiciKapacitaBusu = bus.typBusu.kapacita - cloveci
@@ -287,6 +288,11 @@ private fun update(
                                 //                                                "Nastoupilo $nastupujici lidí."
                                 //                                            )
 
+                                if (cloveciNaZastavce > ulice.kapacitaZastavky())
+                                    cloveciVUlici =
+                                        (cloveciNaZastavce - ulice.kapacitaZastavky()).coerceAtMost(ulice.kapacita - ulice.cloveci)
+
+
                                 dataSource.upravitBusy {
                                     this[i] = this[i].copy(
                                         cloveci = cloveci,
@@ -295,7 +301,8 @@ private fun update(
                                 dataSource.upravitUlice {
                                     val indexUlice = indexOfFirst { it.id == ulice.id }
                                     this[indexUlice] = ulice.copy(
-                                        zastavka = Zastavka(cloveciNaZastavce)
+                                        zastavka = Zastavka(cloveciNaZastavce),
+                                        cloveci = cloveciVUlici
                                     )
                                 }
                             }

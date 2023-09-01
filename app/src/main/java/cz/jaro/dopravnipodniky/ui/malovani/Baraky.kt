@@ -14,7 +14,6 @@ import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.shared.translate
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
 import cz.jaro.dopravnipodniky.shared.velikostBaraku
-import cz.jaro.dopravnipodniky.ui.main.Offset
 import cz.jaro.dopravnipodniky.ui.theme.Theme
 
 context (DrawScope)

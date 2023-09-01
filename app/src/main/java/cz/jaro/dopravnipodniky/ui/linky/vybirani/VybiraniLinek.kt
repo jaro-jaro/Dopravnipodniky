@@ -9,7 +9,7 @@ import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.dpSUlicema
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
-import cz.jaro.dopravnipodniky.ui.main.Offset
+import cz.jaro.dopravnipodniky.ui.malovani.Offset
 import kotlin.math.sqrt
 
 fun DrawScope.namalovatVybiraniLinky(
