@@ -4,10 +4,12 @@ import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.StavZastavky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Trakce
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Zastavka
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.busy
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.jsouVsechnyZatrolejovane
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.kapacitaZastavky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.pocetLinek
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlovac
@@ -18,6 +20,8 @@ import cz.jaro.dopravnipodniky.shared.delkaUlice
 import cz.jaro.dopravnipodniky.shared.delkaZastavky
 import cz.jaro.dopravnipodniky.shared.dobaPobytuNaZastavce
 import cz.jaro.dopravnipodniky.shared.formatovat
+import cz.jaro.dopravnipodniky.shared.hezkaCisla
+import cz.jaro.dopravnipodniky.shared.idealniInterval
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.Tik
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
@@ -28,7 +32,6 @@ import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toDuration
 import cz.jaro.dopravnipodniky.shared.millisPerTik
 import cz.jaro.dopravnipodniky.shared.nahodnostProjetiZastavky
-import cz.jaro.dopravnipodniky.shared.nasobitelPoctuLidiKteryTiNastoupiDoBusuNaZastavceKdyzZastaviANakyLidiTamJsouAMaVSobeJesteVolneMisto
 import cz.jaro.dopravnipodniky.shared.nasobitelZisku
 import cz.jaro.dopravnipodniky.shared.odsazeniBaraku
 import cz.jaro.dopravnipodniky.shared.times
@@ -38,6 +41,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
+import kotlin.math.min
+import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
@@ -151,12 +156,11 @@ private fun update(
                 var poziceVUlici = bus.poziceVUlici
                 var stavZastavky = bus.stavZastavky
 
-                val ulice = ulicove[
-                    when (smerNaLince) {
-                        Smer.Pozitivni -> poziceNaLince
-                        Smer.Negativni -> linka.ulice.lastIndex - poziceNaLince
-                    }
-                ]
+                val indexUliceNaLince = when (smerNaLince) {
+                    Smer.Pozitivni -> poziceNaLince
+                    Smer.Negativni -> linka.ulice.lastIndex - poziceNaLince
+                }
+                val ulice = ulicove[indexUliceNaLince]
 
                 if (bus.stavZastavky !is StavZastavky.Na) {
                     // posouvani busu po mape
@@ -195,7 +199,32 @@ private fun update(
                                 //                                            )
 
                                 val vystupujici = if (bus.poziceNaLince == linka.ulice.lastIndex) cloveci
-                                else Random.nextInt(0, cloveci + 1)
+                                else {
+                                    val zbyvajiciKapacitaZastavky = ulice.kapacitaZastavky() - cloveciNaZastavce
+                                    val minuleUlice = ulicove.subList(0, indexUliceNaLince)
+                                    val pocetLinekVUlici = ulice.pocetLinek(puvodniDp)
+
+                                    val maximumLidiCoMuzeVystoupit = min(cloveci, zbyvajiciKapacitaZastavky)
+
+                                    /**
+                                     * @see <a href="https://www.desmos.com/calculator/7n8wgwxdle">Desmos</a>
+                                     */
+                                    val nasobitelKapacity = 1.25 + (ulice.kapacita - 470.0).pow(3) / 50000000
+                                    val nasobitelPristichZastavek = .05 * minuleUlice.count { it.maZastavku }
+
+                                    /**
+                                     * @see <a href="https://www.desmos.com/calculator/ld49gzvioo">Desmos</a>
+                                     */
+                                    val nasobitelPoctuLinek = 2.0.pow((pocetLinekVUlici - 1) / 2.0) - 1
+
+                                    val nasobitel = 1 + nasobitelKapacity + nasobitelPristichZastavek + nasobitelPoctuLinek
+
+                                    Random.nextInt(0, cloveci + 1)
+                                        .times(nasobitel)
+                                        .roundToInt()
+                                        .coerceAtLeast(0)
+                                        .coerceAtMost(maximumLidiCoMuzeVystoupit)
+                                }
 
                                 cloveci -= vystupujici
                                 cloveciNaZastavce += vystupujici
@@ -204,28 +233,54 @@ private fun update(
                                 //                                                "Přesunuti lidé",
                                 //                                                "Vystoupilo $vystupujici lidí."
                                 //                                            )
-                                dataSource.upravitPrachy {
-                                    it + puvodniDp.info.jizdne * vystupujici * nasobitelZisku
-                                }
 
                                 val nastupujici =
                                     if (bus.poziceNaLince == linka.ulice.lastIndex) 0
                                     else if (ulice.kapacitaZastavky() == 0) 0
-                                    else Random.nextInt(
-                                        from = (ulice.zastavka.cloveci - ulice.kapacitaZastavky()).coerceAtLeast(0),
-                                        until = ulice.zastavka.cloveci + 1
-                                    )/*.also(::println)*/
-                                        .times(
-                                            nasobitelPoctuLidiKteryTiNastoupiDoBusuNaZastavceKdyzZastaviANakyLidiTamJsouAMaVSobeJesteVolneMisto(
-                                                puvodniDp
-                                            )
-                                        )/*.also(::println)*/
-                                        .roundToInt()
-                                        .coerceIn(0, bus.typBusu.kapacita - cloveci)
-                                        .coerceAtMost(ulice.zastavka.cloveci)
+                                    else {
+                                        val zbyvajiciKapacitaBusu = bus.typBusu.kapacita - cloveci
+                                        val zbyvajiciUlice = ulicove.subList(indexUliceNaLince + 1, ulicove.size)
+                                        val pocetLinekVUlici = ulice.pocetLinek(puvodniDp)
+                                        val interval = linka.ulice.size * 2 / linka.busy(this@upravitBusy).size
+
+                                        val maximumLidiCoChtejiNastoupit =
+                                            cloveciNaZastavce / pocetLinekVUlici + Random.nextInt(-5, 5)
+                                        val minimumLidiCoMusiNastoupit =
+                                            if (cloveciNaZastavce > ulice.kapacitaZastavky()) cloveciNaZastavce - ulice.kapacitaZastavky()
+                                            else 0
+                                        val maximumLidiCoMuzeNastoupit = min(zbyvajiciKapacitaBusu, cloveciNaZastavce)
+
+                                        val nasobitelPristichZastavek = .1 * zbyvajiciUlice.count { it.maZastavku }
+                                        val nasobitelHezkehoCisla = if (bus.evCislo in hezkaCisla) 1 - Math.PI / Math.E else .0
+                                        val nasobitelStari = .7 - bus.ponicenost
+
+                                        /**
+                                         * @see <a href="https://www.desmos.com/calculator/6qyvoticme">Desmos</a>
+                                         */
+                                        val nasobitelJizdneho = 1 - puvodniDp.info.jizdne.value / 20.0
+
+                                        /**
+                                         * @see <a href="https://www.desmos.com/calculator/v6hoawdstb">Desmos</a>
+                                         */
+                                        val nasobitelIntervalu =
+                                            (0.5 - (interval - idealniInterval).pow(2) / idealniInterval.pow(2)).coerceAtLeast(-.25)
+
+                                        val nasobitel =
+                                            1 + nasobitelPristichZastavek + nasobitelHezkehoCisla + nasobitelStari + nasobitelJizdneho + nasobitelIntervalu
+
+                                        Random.nextInt(0, maximumLidiCoChtejiNastoupit.coerceAtLeast(1))
+                                            .times(nasobitel)
+                                            .roundToInt()
+                                            .coerceAtLeast(minimumLidiCoMusiNastoupit)
+                                            .coerceAtMost(maximumLidiCoMuzeNastoupit)
+                                    }
 
                                 cloveci += nastupujici
                                 cloveciNaZastavce -= nastupujici
+
+                                dataSource.upravitPrachy {
+                                    it + puvodniDp.info.jizdne * nastupujici * nasobitelZisku
+                                }
 
                                 //                                            Log.i(
                                 //                                                "Přesunuti lidé",
@@ -273,15 +328,23 @@ private fun update(
                             //        println(cloveciVUlici - ulice.kapacita)
                             //        println(ulice.zastavka.kapacita(ulice) - cloveciNaZastavce)
 
-                            val lidiCoJdouZDomu = Random.nextInt(
+                            val prebytekNaZastavce = cloveciNaZastavce - ulice.kapacitaZastavky()
+                            val prebytekDoma = cloveciVUlici - ulice.kapacita
+
+                            val volnoNaZastavce = ulice.kapacitaZastavky() - cloveciNaZastavce
+                            val volnoDoma = ulice.kapacita - cloveciVUlici
+
+                            val lidiCoJdouNaZastavku = Random.nextInt(
                                 from = -cloveciNaZastavce / 4,
                                 until = cloveciVUlici / 4 + 1,
                             )
-                                .coerceAtLeast(cloveciVUlici - ulice.kapacita)
-                                .coerceAtMost(ulice.kapacitaZastavky() - cloveciNaZastavce)
+                                .coerceAtMost(-prebytekNaZastavce)
+                                .coerceAtLeast(prebytekDoma)
+                                .coerceAtMost(volnoNaZastavce)
+                                .coerceAtLeast(-volnoDoma)
 
-                            cloveciVUlici -= lidiCoJdouZDomu
-                            cloveciNaZastavce += lidiCoJdouZDomu
+                            cloveciVUlici -= lidiCoJdouNaZastavku
+                            cloveciNaZastavce += lidiCoJdouNaZastavku
 
                             //                                        Log.i(
                             //                                            "Přesunuti lidé",

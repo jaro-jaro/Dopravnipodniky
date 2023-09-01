@@ -34,8 +34,14 @@ data class Bus(
 ) {
     override fun toString() = "Bus(evCislo=$evCislo,typBusu=$typBusu)"
 
+    /**
+     * @see <a href="https://www.desmos.com/calculator/0ezs54c4kg">Desmos</a>
+     */
     val ponicenost: Double get() = 100.0.pow(x = najeto / typBusu.vydrz) / 100.0
 
+    /**
+     * @see <a href="https://www.desmos.com/calculator/ho8unbvqtr">Desmos</a>
+     */
     val naklady: PenizZaMinutu
         get() = typBusu.maxNaklady * (ponicenost).pow(.5) + typBusu.trakce.bonusoveVydajeZaNeekologicnost()
 
