@@ -289,7 +289,7 @@ private fun update(
                                 //                                            )
 
                                 if (cloveciNaZastavce > ulice.kapacitaZastavky())
-                                    cloveciVUlici =
+                                    cloveciVUlici +=
                                         (cloveciNaZastavce - ulice.kapacitaZastavky()).coerceAtMost(ulice.kapacita - ulice.cloveci)
 
 

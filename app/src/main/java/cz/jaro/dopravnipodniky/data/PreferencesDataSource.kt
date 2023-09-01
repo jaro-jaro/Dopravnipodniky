@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
@@ -37,9 +38,7 @@ class PreferencesDataSource(
         val VSE = stringPreferencesKey("vse")
     }
 
-    object DefaultValues {
-        val VSE = Vse(Generator.vygenerujMiPrvniMesto())
-    }
+    val puvodniVse = flow { emit(Vse(Generator.vygenerujMiPrvniMesto())) }
 
     private val _busy = MutableStateFlow(null as List<Bus>?)
     val busy = _busy.filterNotNull()
@@ -108,7 +107,8 @@ class PreferencesDataSource(
 
     init {
         scope.launch(Dispatchers.IO) {
-            val vse = dataStore.data.first()[PreferenceKeys.VSE]?.let { json.decodeFromString(it) } ?: DefaultValues.VSE
+            val vse = dataStore.data.first()[PreferenceKeys.VSE]?.let { json.decodeFromString<Vse?>(it) } ?: puvodniVse.first()
+
             index = vse.indexAktualnihoDp
             _prachy.value = vse.prachy
             _dosahlosti.value = vse.dosahlosti

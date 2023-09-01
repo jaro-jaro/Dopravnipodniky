@@ -1,6 +1,9 @@
 package cz.jaro.dopravnipodniky.data
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Barak
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypBaraku
@@ -13,16 +16,29 @@ import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.to
 import cz.jaro.dopravnipodniky.shared.jednotky.ulicovychBloku
 import cz.jaro.dopravnipodniky.shared.seznamy.MESTA
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
+var seed: Int? by mutableStateOf(null)
+
 class Generator(
     private val investice: Peniz,
+    val random: Random = Random,
+    jmenoMestaRandom: Random = Random,
 ) {
     companion object {
-        fun vygenerujMiPrvniMesto(): DopravniPodnik = Generator(
-            investice = pocatecniCenaMesta,
-        ).vygenerujMiMestoAToHnedVykricnik()
+        suspend fun vygenerujMiPrvniMesto(): DopravniPodnik = withContext(Dispatchers.IO) {
+
+            while (seed == null) Unit
+
+            Generator(
+                investice = pocatecniCenaMesta,
+                random = Random(seed!!),
+                jmenoMestaRandom = Random(seed!!),
+            ).vygenerujMiMestoAToHnedVykricnik()
+        }
 
         private val pocatecniCenaMesta = 1_200_000L.penez/*3_141_592.penez*//*10_000_000.penez*/
         private const val nasobitelInvestice = 1 / 65536.0
@@ -38,7 +54,7 @@ class Generator(
 
     private val ulicove = mutableListOf<Ulice>()
 
-    private val jmenoMesta = MESTA.trim().lines().random()
+    private val jmenoMesta = MESTA.trim().lines().random(jmenoMestaRandom)
 
     fun vygenerujMiMestoAToHnedVykricnik(): DopravniPodnik {
         // Okej hned to bude, nez bys rekl pi
@@ -68,7 +84,7 @@ class Generator(
                 .filter { pozice ->
                     val uzNekdoOkupujeSouseda = ulicove.any { it.zacatek == pozice || it.konec == pozice }
                     val novaSance = if (uzNekdoOkupujeSouseda) sance * nahodnostStaveniKOkupantum else sance * nahodnostStaveniKNeokupantum
-                    Random.nextFloat() < novaSance
+                    random.nextFloat() < novaSance
                 }
                 .map { soused ->
                     val (zacatek, konec) =
@@ -108,24 +124,24 @@ class Generator(
                 )
             }
             repeat(
-                (ulice.potencial * Random.nextFloat() * 6)
+                (ulice.potencial * random.nextFloat() * 6)
                     .roundToInt()
                     .coerceAtLeast(1)
                     .coerceAtMost((barakuVUlici - 1) * 2)
             ) {
-                val typ = if (ulice.potencial >= 3 && Random.nextBoolean()) TypBaraku.Panelak else TypBaraku.Normalni
+                val typ = if (ulice.potencial >= 3 && random.nextBoolean()) TypBaraku.Panelak else TypBaraku.Normalni
                 ulicove[i] = ulicove[i].copy(
                     baraky = ulicove[i].baraky + Barak(typ, i),
                 )
             }
-            if (Random.nextFloat() >= .25F && ulice.potencial >= 5)
+            if (random.nextFloat() >= .25F && ulice.potencial >= 5)
                 ulicove[i] = ulicove[i].copy(
                     baraky = ulicove[i].baraky + Barak(TypBaraku.Stredovy, i)
                 )
 
 //            println(ulicove[i].baraky)
             ulicove[i] = ulicove[i].copy(
-                cloveci = Random.nextInt(ulicove[i].kapacita / 2, ulicove[i].kapacita)
+                cloveci = random.nextInt(ulicove[i].kapacita / 2, ulicove[i].kapacita)
             )
         }
     }
