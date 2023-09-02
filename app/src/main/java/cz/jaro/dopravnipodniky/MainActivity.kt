@@ -26,9 +26,10 @@ import cz.jaro.dopravnipodniky.ui.NavGraphs
 import cz.jaro.dopravnipodniky.ui.theme.DpTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
+
+private var uzNacteno = false
 
 class MainActivity : ComponentActivity() {
 
@@ -37,7 +38,13 @@ class MainActivity : ComponentActivity() {
 
         val dataSource = get<PreferencesDataSource>()
         val temaFlow = dataSource.dpInfo.map { it.tema }
-        val fakeTemaFlow = temaFlow.onEach { delay(6_000) }
+        val fakeTemaFlow = temaFlow.map {
+            if (!uzNacteno) {
+                uzNacteno = true
+                delay(5_000)
+            }
+            true
+        }
 
         setContent {
             val tema by temaFlow.collectAsStateWithLifecycle(null)

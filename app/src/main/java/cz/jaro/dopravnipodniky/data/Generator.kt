@@ -36,7 +36,7 @@ class Generator(
             Generator(
                 investice = pocatecniCenaMesta,
                 random = Random(seed!!),
-                jmenoMestaRandom = Random(382),
+                jmenoMestaRandom = Random(18),
             ).vygenerujMiMestoAToHnedVykricnik()
         }
 

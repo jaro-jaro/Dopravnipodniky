@@ -58,11 +58,15 @@ class Hodiny {
     init {
         scope.launch(Dispatchers.IO) {
             cas.collect { tik ->
-                listeners.forEach { (every, listener) ->
-                    launch(Dispatchers.IO) {
-                        if (tik % every == 0.tiku) listener(tik)
+                listeners
+                    .filter { (every, _) ->
+                        tik % every == 0.tiku
                     }
-                }
+                    .forEach { (_, listener) ->
+                        launch(Dispatchers.IO) {
+                            listener(tik)
+                        }
+                    }
             }
         }
     }

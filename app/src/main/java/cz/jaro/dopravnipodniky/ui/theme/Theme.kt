@@ -9,11 +9,11 @@ enum class Theme(
     val jmeno: Int,
     val barva: Color,
 ) {
-    Cerne(
-        darkColorScheme = colorsCerne,
-        jmeno = R.string.cerne,
-        barva = t0,
-    ),
+//    Cerne(
+//        darkColorScheme = colorsCerne,
+//        jmeno = R.string.cerne,
+//        barva = t0,
+//    ),
     Cervene(
         darkColorScheme = colorsCervene,
         jmeno = R.string.cervene,

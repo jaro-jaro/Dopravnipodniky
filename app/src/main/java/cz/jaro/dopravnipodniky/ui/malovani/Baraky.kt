@@ -36,12 +36,7 @@ fun Barak.draw(
 
     val indexbarvy = Theme.entries.indexOf(tema)
     val indexSkoroNoveBarvy = indexbarvy + barvicka
-    // Ano, tady je to divný - to je ale jen proto, aby nebyly baráky černý
-    val indexNoveBarvy = indexSkoroNoveBarvy.let {
-        if (indexSkoroNoveBarvy > Theme.entries.lastIndex) it - Theme.entries.size else it
-    }.let {
-        if (indexSkoroNoveBarvy < 1) it + Theme.entries.lastIndex else it
-    }
+    val indexNoveBarvy = (indexSkoroNoveBarvy + Theme.entries.size) % Theme.entries.size
     val barvicka = Theme.entries[indexNoveBarvy].barva
 
     val sirka = velikostBaraku.toPx()
