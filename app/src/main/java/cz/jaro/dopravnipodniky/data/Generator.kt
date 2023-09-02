@@ -36,7 +36,7 @@ class Generator(
             Generator(
                 investice = pocatecniCenaMesta,
                 random = Random(seed!!),
-                jmenoMestaRandom = Random(seed!!),
+                jmenoMestaRandom = Random(382),
             ).vygenerujMiMestoAToHnedVykricnik()
         }
 
@@ -107,7 +107,7 @@ class Generator(
         Log.i("generace", "$hloubka z $velikost -> $procentaz %")
 
         if (noveKrizovatky.isEmpty()) {
-            val zredukovanyKrizovatky = posledniKrizovatky.shuffled().take((posledniKrizovatky.size * nasobitelRedukce).roundToInt())
+            val zredukovanyKrizovatky = posledniKrizovatky.shuffled(random).take((posledniKrizovatky.size * nasobitelRedukce).roundToInt())
             opakovac(hloubka + 1, zredukovanyKrizovatky, nahodnostPoObnoveni)
         } else {
             opakovac(hloubka + 1, noveKrizovatky, sance - rozdilNahodnosti)

@@ -285,13 +285,52 @@
     <string name="preskocit_tutorial">Přeskočit tutoriál</string>
     <string name="tutorial">Tutoriál</string>
     <string name="pojdme_na_to">Pojďme na to!</string>
-    <string name="t1">Kapitola 1.\n\nVítáme Vás v naší hře Dopravní podniky.\n\nV této hře se přenesete do našeho města, kde budeme budovat náš dopravní podnik.\n\nJak tedy začít? Začněte tak, že si vytvoříte Vaši první linku kliknutím na spodní tlačítko Linky. Po kliknutí se Vám otevře obrazovka, kde si můžete prohlédnout Vaše linky, ale protože žádné nemáte, klikněte na tlačítko Nová linka, kde si vytvoříte novou.\n\nVaše RO studios\n</string>
-    <string name="t2">Kapitola 2. Vytváření linky \n\nPro vytvoření nové linky, klikněte kde by měla linka začít a táhněte prstem, dokud nebudete s linkou spokojeni.    Kdyby se vám něco nelíbilo, kdykoliv můžete táhnout po vytvořené trase zpět a tím linku předělat. Alternativně, můžete kliknout na tlačítko Resetovat a začít úplně znovu. Jakmile budete se svou linkou spokojeni, klikněte na tlačítko Hotovo, zadejte číslo linky a vyberte její barvu. Po potvrzení Vás vrátíme zpět na seznam linek, kde již svou novou linku uvidíte! POZOR! Pro posouvání po mapě v editoru linky použijte dva prsty!</string>
-    <string name="t3">Kapitola 3. Zastávky\n\nNyní, když už máme linku, musíme na ni přidat nějaké zastávky.\n\nAbyste tak ale mohli učinit, musíte si zapnout tzv. Editor města, který zapnete kliknutím na ikonku tužky vpravo dole.\n\nNyní jednoduše klikněte na ulice, kde chcete zastávky vytvořit.\n\nAby to bylo ještě snažší, můžete si na horní liště kliknout ikonku linky, abyste vytvářeli zastávky tam, kde potřebujete!\n\nAž budete spokojení, klikněte na tlačítko Hotovo vpravo dole.</string>
-    <string name="t4">Kapitola 4. Nákup vozů (krok 1)\n\nNaše linka je již připravena, tak nám nezbývá nic jiného, než nakoupit něco, co na ní bude jezdit!\n\nDole klikněte na tlačítko Vozový park a následně Koupit vozidlo.</string>
-    <string name="t5">Kapitola 4. Nákup vozů (krok 2)\n\nJelikož se v našem obchodě dá najít opravdu veliké množství vozů, můžete si je vyfiltrovat podle toho, co právě hledáte!\n\nPro začátek Vám nějaké filtry přednastavíme, ať se Vám lépe začíná, ale můžete si je kdykoliv upravit!\n\nVyberte si vůz který chcete, klikněte na tlačítko Koupit a zadejte evidenční číslo podle své libosti.\n\nNásledně se vraťte do garáže kliknutím ikony zpět v horní části obrazovky.\n\nTIP: Nebojte se utratit všechno své jmění, již brzy začnete vydělávat!\n\nTIP: Nezačínejte trolejbusy, jelikož mají dražší infrastrukturu v podobě trolejové tratě.</string>
-    <string name="t6">Kapitola 4. Nákup vozů (krok 3)\n\nA teď konečně přichází ta zajímavá část!\n\nRozklikněte svůj nový bus a pomocí tlačítka Vypravit ho vyšlete na dříve vytvořenou linku.\n\nNyní se stačí vrátit na původní obrazovku s mapou a sledovat jak Váš bus jede po městě a vydělává Vám první peníze.\n\nPOZOR! Možná budete muset kliknout na ikonku autobusu v horní liště, abyste neviděli pouze linku.</string>
-    <string name="t7">Kapitola 5. Rozšiřování pole působnosti\n\nJelikož už máte docela dost peněz, je pravděpodobné, že Vám přestává stačit aktuální město.\n\nTo lze snadno vyřešit, stačí kliknout na název Vašeho města v horní liště a tím se dostanete do nové části s dopravními podniky.\n\nPro zainvestování do nového města stiskněte tlačítko Nový dopravní podnik, zadejte částku, kterou jste ochotni zainvestovat a vyberte si ze tří měst, která jsou Vám ochotna za tuto částku nabídnout své ulice pro zbudování nové dopravní sítě.</string>
+    <string name="t1">Kapitola 1.
+
+Vítáme Vás ve hře Dopravní podniky!
+
+V této hře se přeneseme do Vašeho města, kde budete budovat vlastní dopravní podnik.
+
+My Vás ale slyšíme říkat, „ale já nemám žádné město!” Nevadí! Starosta Křemže byl natolik ochotný, že Vám úplně zadarmo vypůjčí ulice svého města, už dlouho tam potřebuje zavést hromadnou dopravu.
+A proto jste tady Vy. Jak tedy začít? Musíme vytvořit linku, na které budou Vaše busy jezdit. Klikněte na tlačítko „Linky”, otevře se Vám další obrazovka, kde budete moct Vaše linky spravovat, ale protože žádné nemáte, klikněte na tlačítko Nová linka, kde si jednu vytvoříte.
+
+Vaše RO studios</string>
+    <string name="t2">Kapitola 2. Vytváření linky
+
+Pro vytvoření nové linky, klikněte kde by měla linka začít a táhněte prstem přes křižovatky, dokud nebudete s linkou spokojeni. Vidíte támhle na jihozápadě [změnit] dva [změnit] tmavší baráky? To jsou paneláky ve kterých bydlí mnohem více lidí, než v normálních domech. Doporučujeme zavést vaší první linku do jejich ulice! Kdyby se vám něco nelíbilo, kdykoliv můžete táhnout po vytvořené trase zpět a tím linku předělat. Alternativně, můžete kliknout na tlačítko Resetovat, které se nachází vpravo nahoře a začít úplně znovu. Jakmile budete se svou linkou spokojeni, klikněte na tlačítko Hotovo, zadejte číslo linky a vyberte její barvu. Po potvrzení Vás vrátíme zpět na seznam linek, kde již svou novou linku uvidíte! Pro posouvání po mapě použijte dva prsty!</string>
+    <string name="t3">Kapitola 3. Zastávky
+
+Nyní, když už máme linku, tak na ní musíme přidat nějaké zastávky.
+Abyste tak ale mohli učinit, zapněte si tzv. Editor města kliknutím na ikonku tužky vpravo dole.
+Nyní jednoduše klikněte na ulice, kde chcete zastávky vytvořit.
+Až budete spokojení, klikněte na tlačítko Hotovo vpravo dole.
+Pozn.: Postavení zastávky Vás stojí 5 000 Kč. Když byste ji ale chtěli opět zničit, zaplatíte 1 000 Kč. Takže doporučujeme vybírat pečlivě!
+Pozn. 2: Jelikož správa zastávek něco stojí, každou minutu vám bude za každou zastávku strženo 100 Kč! </string>
+    <string name="t4">Kapitola 4. Nákup vozů (krok 1)
+
+Naše linka je již připravena, tak nám nezbývá nic jiného, než nakoupit něco, co na ní bude jezdit!
+Klikněte na tlačítko „Vozový park” a následně Koupit vozidlo.
+</string>
+    <string name="t5">Kapitola 4. Nákup vozů (krok 2)
+
+Jelikož se v našem obchodě dá najít opravdu veliké množství vozů, můžete si je vyfiltrovat podle toho, co právě hledáte! Pro začátek jsme Vám nějaké filtry přednastavili, ať se Vám lépe začíná, ale můžete si je kdykoliv upravit!
+
+Vyberte si vůz který si chcete koupit a klikněte na tlačítko „Koupit”. Následně se vraťte do vozovny kliknutím ikony zpět v horní části obrazovky.
+TIP: Nebojte se utratit všechno své jmění, již brzy začnete vydělávat!
+TIP: Nezačínejte trolejbusy, jelikož mají dražší infrastrukturu v podobě trolejové tratě.
+</string>
+    <string name="t6">Kapitola 4. Nákup vozů (krok 3)
+
+A teď konečně přichází ta zajímavá část!
+Rozklikněte svůj nový bus a pomocí tlačítka „Vypravit” ho vyšlete na dříve vytvořenou linku.
+
+Nyní se stačí vrátit na původní obrazovku s mapou a sledovat jak Váš bus jede po městě a vydělává Vám první peníze.</string>
+    <string name="t7">Kapitola 5. Rozšiřování pole působnosti
+
+Jelikož už máte docela dost peněz, je pravděpodobné, že Vám přestává stačit aktuální město.
+To lze snadno vyřešit, stačí kliknout na název Vašeho města v horní liště a tím se dostanete do nové části s dopravními podniky.
+Pro zainvestování do nového města stiskněte tlačítko Nový dopravní podnik, zadejte částku, kterou jste ochotni investovat a vyberte si ze tří měst, která jsou Vám ochotna za tuto částku nabídnout své ulice pro zbudování nové dopravní sítě.
+</string>
     <string name="jizdne">Jízdné: %s Kč</string>
     <string name="pruzkum_mineni">Průzkum mínění</string>
     <string name="doopravdy_chcete_udelat_pruzkum">Doopravdy chcete udělat rychlý průzkum veřejného mínění o ideální ceně jízdného?</string>
@@ -340,7 +379,7 @@
     <string name="ano_kc">Ano, %s Kč</string>
     <string name="nastavit_jizdne_na">Nastavit jízdné na %s Kč</string>
     <string name="prumer_je">\n\nPrůměr je %s Kč</string>
-    <string name="nic" >" "</string>
+    <string name="nic">" "</string>
     <string name="zmenit_linku">Změnit linku</string>
     <string name="zpet">Zpět</string>
     <string name="moc_filtru">Bohužel, nenašli jsme žádná vozidla, která by odpovídala vašim požadavkům. Zkuste poupravit filtry!</string>
