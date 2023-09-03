@@ -84,5 +84,6 @@ fun Ulice.zasebevrazdujZastavku() = copy(
 operator fun Ulice.contains(other: Pozice<UlicovyBlok>) = other == zacatek || other == konec
 
 fun Ulice.pocetLinek(dp: DopravniPodnik) = dp.linky.count { id in it.ulice }
+fun Ulice.pocetLinek(linky: List<Linka>) = linky.count { id in it.ulice }
 
 val Ulice.maZastavku get() = zastavka != null

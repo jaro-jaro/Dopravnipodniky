@@ -1,10 +1,17 @@
 package cz.jaro.dopravnipodniky.data
 
+import android.util.Log
 import androidx.compose.ui.unit.dp
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.StavZastavky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Trakce
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Zastavka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.busy
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.delkaLinky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.jsouVsechnyZatrolejovane
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.kapacitaZastavky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
@@ -23,7 +30,10 @@ import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.hezkaCisla
 import cz.jaro.dopravnipodniky.shared.idealniInterval
 import cz.jaro.dopravnipodniky.shared.je
+import cz.jaro.dopravnipodniky.shared.jednotky.PenizZaMinutu
 import cz.jaro.dopravnipodniky.shared.jednotky.Tik
+import cz.jaro.dopravnipodniky.shared.jednotky.div
+import cz.jaro.dopravnipodniky.shared.jednotky.dp
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.penezZaMin
 import cz.jaro.dopravnipodniky.shared.jednotky.tiku
@@ -194,105 +204,47 @@ private fun update(
                                 var cloveciNaZastavce = ulice.zastavka.cloveci
                                 var cloveci = bus.cloveci
 
-                                //                                            Log.i(
-                                //                                                "Přesunuti lidé",
-                                //                                                "V busu je $cloveci lidí, na zastávce $cloveciNaZastavce lidí"
-                                //                                            )
-
-                                val vystupujici = if (bus.poziceNaLince == ulicove.indexOfLast { it.maZastavku }) cloveci
-                                else {
-                                    val zbyvajiciKapacitaZastavky = ulice.kapacitaZastavky() - cloveciNaZastavce
-                                    val minuleUlice = ulicove.subList(0, indexUliceNaLince)
-                                    val pocetLinekVUlici = ulice.pocetLinek(puvodniDp)
-
-                                    val maximumLidiCoMuzeVystoupit = min(cloveci, zbyvajiciKapacitaZastavky)
-
-                                    /**
-                                     * @see <a href="https://www.desmos.com/calculator/7n8wgwxdle">Desmos</a>
-                                     */
-                                    val nasobitelKapacity = 1.25 + (ulice.kapacita - 470.0).pow(3) / 50000000
-                                    val nasobitelPristichZastavek = .05 * minuleUlice.count { it.maZastavku }
-
-                                    /**
-                                     * @see <a href="https://www.desmos.com/calculator/ld49gzvioo">Desmos</a>
-                                     */
-                                    val nasobitelPoctuLinek = 2.0.pow((pocetLinekVUlici - 1) / 2.0) - 1
-
-                                    val nasobitel = 1 + nasobitelKapacity + nasobitelPristichZastavek + nasobitelPoctuLinek
-
-                                    Random.nextInt(0, cloveci + 1)
-                                        .times(nasobitel)
-                                        .roundToInt()
-                                        .coerceAtLeast(0)
-                                        .coerceAtMost(maximumLidiCoMuzeVystoupit)
-                                }
+                                val vystupujici = ziskatPocetVystupujicich(
+                                    ulicove = ulicove,
+                                    ulice = ulice,
+                                    poziceNaLince = poziceNaLince,
+                                    indexUliceNaLince = indexUliceNaLince,
+                                    linky = puvodniDp.linky,
+                                    cloveciNaZastavce = cloveciNaZastavce,
+                                    cloveci = cloveci,
+                                )
 
                                 cloveci -= vystupujici
                                 cloveciNaZastavce += vystupujici
 
-                                //                                            Log.i(
-                                //                                                "Přesunuti lidé",
-                                //                                                "Vystoupilo $vystupujici lidí."
-                                //                                            )
-
-                                val nastupujici =
-                                    if (bus.poziceNaLince == ulicove.indexOfLast { it.maZastavku }) 0
-                                    else if (ulice.kapacitaZastavky() == 0) 0
-                                    else {
-                                        val zbyvajiciKapacitaBusu = bus.typBusu.kapacita - cloveci
-                                        val zbyvajiciUlice = ulicove.subList(indexUliceNaLince + 1, ulicove.size)
-                                        val pocetLinekVUlici = ulice.pocetLinek(puvodniDp)
-                                        val interval = linka.ulice.size * 2 / linka.busy(this@upravitBusy).size
-
-                                        val maximumLidiCoChtejiNastoupit =
-                                            cloveciNaZastavce / pocetLinekVUlici + Random.nextInt(-5, 5)
-                                        val minimumLidiCoMusiNastoupit =
-                                            if (cloveciNaZastavce > ulice.kapacitaZastavky()) cloveciNaZastavce - ulice.kapacitaZastavky()
-                                            else 0
-                                        val maximumLidiCoMuzeNastoupit = min(zbyvajiciKapacitaBusu, cloveciNaZastavce)
-
-                                        val nasobitelPristichZastavek = .1 * zbyvajiciUlice.count { it.maZastavku }
-                                        val nasobitelHezkehoCisla = if (bus.evCislo in hezkaCisla) 1 - Math.PI / Math.E else .0
-                                        val nasobitelStari = .7 - bus.ponicenost
-
-                                        /**
-                                         * @see <a href="https://www.desmos.com/calculator/6qyvoticme">Desmos</a>
-                                         */
-                                        val nasobitelJizdneho = 1 - puvodniDp.info.jizdne.value / 20.0
-
-                                        /**
-                                         * @see <a href="https://www.desmos.com/calculator/v6hoawdstb">Desmos</a>
-                                         */
-                                        val nasobitelIntervalu =
-                                            (0.5 - (interval - idealniInterval).pow(2) / idealniInterval.pow(2)).coerceAtLeast(-.25)
-
-                                        val nasobitel =
-                                            1 + nasobitelPristichZastavek + nasobitelHezkehoCisla + nasobitelStari + nasobitelJizdneho + nasobitelIntervalu
-
-                                        Random.nextInt(0, maximumLidiCoChtejiNastoupit.coerceAtLeast(1))
-                                            .times(nasobitel)
-                                            .roundToInt()
-                                            .coerceAtLeast(minimumLidiCoMusiNastoupit)
-                                            .coerceAtMost(maximumLidiCoMuzeNastoupit)
-                                    }
+                                val nastupujici = bus.ziskatPocetNastupujicich(
+                                    ulicove = ulicove,
+                                    ulice = ulice,
+                                    indexUliceNaLince = indexUliceNaLince,
+                                    linky = puvodniDp.linky,
+                                    linka = linka,
+                                    busy = this@upravitBusy,
+                                    cloveciNaZastavce = cloveciNaZastavce,
+                                    dpInfo = puvodniDp.info,
+                                    cloveci = cloveci,
+                                    poziceNaLince = poziceNaLince,
+                                )
 
                                 cloveci += nastupujici
                                 cloveciNaZastavce -= nastupujici
-
-                                dataSource.upravitPrachy {
-                                    it + puvodniDp.info.jizdne * nastupujici * nasobitelZisku
-                                }
-
-                                //                                            Log.i(
-                                //                                                "Přesunuti lidé",
-                                //                                                "Nastoupilo $nastupujici lidí."
-                                //                                            )
 
                                 if (cloveciNaZastavce > ulice.kapacitaZastavky())
                                     cloveciVUlici +=
                                         (cloveciNaZastavce - ulice.kapacitaZastavky()).coerceAtMost(ulice.kapacita - ulice.cloveci)
 
+                                Log.i(
+                                    "Přesunuti lidé",
+                                    "Nastoupilo $nastupujici lidí a vystoupilo $vystupujici lidí."
+                                )
 
+                                dataSource.upravitPrachy {
+                                    it + puvodniDp.info.jizdne * nastupujici * nasobitelZisku
+                                }
                                 dataSource.upravitBusy {
                                     this[i] = this[i].copy(
                                         cloveci = cloveci,
@@ -491,17 +443,215 @@ private fun update(
 //                }
 //
         dataSource.upravitPrachy {
+            println(it + deltaPrachy)
             it + deltaPrachy
         }
-        dataSource.upravitDPInfo {
-            it.copy(
+        dataSource.upravitDPInfo { dpInfo ->
+            dpInfo.copy(
                 casPosledniNavstevy = System.currentTimeMillis(),
-                zisk = (it.zisk + zisk) / 2
+                zisk = zisk.also {
+                    zisky += zisk
+//                    println(zisk)
+                    println(zisky)
+                    println(zisky.map { it.value }.average().penezZaMin)
+                }
             )
         }
     }
 }
 
+var zisky = listOf<PenizZaMinutu>()
+
+private fun ziskatPocetVystupujicich(
+    ulicove: List<Ulice>,
+    ulice: Ulice,
+    poziceNaLince: Int,
+    indexUliceNaLince: Int,
+    linky: List<Linka>,
+    cloveciNaZastavce: Int,
+    cloveci: Int,
+) = if (poziceNaLince == ulicove.indexOfLast { it.maZastavku }) cloveci
+else {
+    val zbyvajiciKapacitaZastavky = ulice.kapacitaZastavky() - cloveciNaZastavce
+    val minuleUlice = ulicove.subList(0, indexUliceNaLince)
+    val pocetLinekVUlici = ulice.pocetLinek(linky)
+
+    val maximumLidiCoMuzeVystoupit = min(cloveci, zbyvajiciKapacitaZastavky)
+
+    /**
+     * @see <a href="https://www.desmos.com/calculator/7n8wgwxdle">Desmos</a>
+     */
+    val nasobitelKapacity = 1.25 + (ulice.kapacita - 470.0).pow(3) / 50000000
+    val nasobitelPristichZastavek = .05 * minuleUlice.count { it.maZastavku }
+
+    /**
+     * @see <a href="https://www.desmos.com/calculator/ld49gzvioo">Desmos</a>
+     */
+    val nasobitelPoctuLinek = 2.0.pow((pocetLinekVUlici - 1) / 2.0) - 1
+
+    val nasobitel = 1 + nasobitelKapacity + nasobitelPristichZastavek + nasobitelPoctuLinek
+
+    Random.nextInt(0, cloveci + 1)
+        .times(nasobitel)
+        .roundToInt()
+        .coerceAtLeast(0)
+        .coerceAtMost(maximumLidiCoMuzeVystoupit)
+}
+
+private fun Bus.ziskatPocetNastupujicich(
+    ulicove: List<Ulice>,
+    ulice: Ulice,
+    indexUliceNaLince: Int,
+    linky: List<Linka>,
+    linka: Linka,
+    busy: List<Bus>,
+    cloveciNaZastavce: Int,
+    cloveci: Int,
+    dpInfo: DPInfo,
+    poziceNaLince: Int,
+) = if (poziceNaLince == ulicove.indexOfLast { it.maZastavku }) 0
+else if (ulice.kapacitaZastavky() == 0) 0
+else {
+    val zbyvajiciKapacitaBusu = typBusu.kapacita - cloveci
+    val zbyvajiciUlice = ulicove.subList(indexUliceNaLince + 1, ulicove.size)
+    val pocetLinekVUlici = ulice.pocetLinek(linky)
+    val interval = linka.ulice.size * 2 / linka.busy(busy).size
+
+    val maximumLidiCoChtejiNastoupit =
+        cloveciNaZastavce / pocetLinekVUlici + Random.nextInt(-5, 5)
+    val minimumLidiCoMusiNastoupit =
+        if (cloveciNaZastavce > ulice.kapacitaZastavky()) cloveciNaZastavce - ulice.kapacitaZastavky()
+        else 0
+    val maximumLidiCoMuzeNastoupit = min(zbyvajiciKapacitaBusu, cloveciNaZastavce)
+
+    val nasobitelPristichZastavek = .1 * zbyvajiciUlice.count { it.maZastavku }
+    val nasobitelHezkehoCisla = if (evCislo in hezkaCisla) 1 - Math.PI / Math.E else .0
+    val nasobitelStari = .7 - ponicenost
+
+    /**
+     * @see <a href="https://www.desmos.com/calculator/6qyvoticme">Desmos</a>
+     */
+    val nasobitelJizdneho = 1 - dpInfo.jizdne.value / 20.0
+
+    /**
+     * @see <a href="https://www.desmos.com/calculator/v6hoawdstb">Desmos</a>
+     */
+    val nasobitelIntervalu =
+        (0.5 - (interval - idealniInterval).pow(2) / idealniInterval.pow(2)).coerceAtLeast(-.25)
+
+    val nasobitel =
+        1 + nasobitelPristichZastavek + nasobitelHezkehoCisla + nasobitelStari + nasobitelJizdneho + nasobitelIntervalu
+
+    Random.nextInt(0, maximumLidiCoChtejiNastoupit.coerceAtLeast(1))
+        .times(nasobitel)
+        .roundToInt()
+        .coerceAtLeast(minimumLidiCoMusiNastoupit)
+        .coerceAtMost(maximumLidiCoMuzeNastoupit)
+}
+
+fun Bus.vydelkuj(
+    puvodniDp: DopravniPodnik
+): PenizZaMinutu {
+    if (linka == null) return 0.penezZaMin
+
+    val linka = puvodniDp.linky.linka(linka)
+    val ulicove = linka.ulice(puvodniDp.ulice)
+
+    if (typBusu.trakce is Trakce.Trolejbus && !ulicove.jsouVsechnyZatrolejovane()) return 0.penezZaMin
+
+    var cloveci = 0
+
+    val nastupujicichZaJizdu = ulicove
+        .filter {
+            it.maZastavku
+        }
+        .sumOfIndexed { indexUliceNaLince, ulice ->
+
+            val vystupujici = ziskatPocetVystupujicich(
+                ulicove = ulicove,
+                ulice = ulice,
+                poziceNaLince = indexUliceNaLince,
+                indexUliceNaLince = indexUliceNaLince,
+                linky = puvodniDp.linky,
+                cloveciNaZastavce = (ulice.kapacitaZastavky() * .8).roundToInt(),
+                cloveci = cloveci,
+            )
+
+            cloveci -= vystupujici
+
+            val nastupujici = ziskatPocetNastupujicich(
+                ulicove = ulicove,
+                ulice = ulice,
+                indexUliceNaLince = indexUliceNaLince,
+                linky = puvodniDp.linky,
+                linka = linka,
+                busy = puvodniDp.busy,
+                cloveciNaZastavce = (ulice.kapacitaZastavky() * .8).roundToInt(),
+                dpInfo = puvodniDp.info,
+                cloveci = cloveci,
+                poziceNaLince = indexUliceNaLince
+            )
+
+            cloveci += nastupujici
+
+            nastupujici
+        }
+
+    val nastupujicichZaJizduZpet = ulicove
+        .filter {
+            it.maZastavku
+        }
+        .reversed()
+        .sumOfIndexed { indexUliceNaLince, ulice ->
+
+            val vystupujici = ziskatPocetVystupujicich(
+                ulicove = ulicove,
+                ulice = ulice,
+                poziceNaLince = ulicove.lastIndex - indexUliceNaLince,
+                indexUliceNaLince = indexUliceNaLince,
+                linky = puvodniDp.linky,
+                cloveciNaZastavce = (ulice.kapacitaZastavky() * .8).roundToInt(),
+                cloveci = cloveci,
+            )
+
+            cloveci -= vystupujici
+
+            val nastupujici = ziskatPocetNastupujicich(
+                ulicove = ulicove,
+                ulice = ulice,
+                indexUliceNaLince = indexUliceNaLince,
+                linky = puvodniDp.linky,
+                linka = linka,
+                busy = puvodniDp.busy,
+                cloveciNaZastavce = (ulice.kapacitaZastavky() * .8).roundToInt(),
+                dpInfo = puvodniDp.info,
+                cloveci = cloveci,
+                poziceNaLince = ulicove.lastIndex - indexUliceNaLince
+            )
+
+            cloveci += nastupujici
+
+            nastupujici
+        }
+
+    val nastupujicichZaKolo = nastupujicichZaJizdu + nastupujicichZaJizduZpet
+
+    val ziskZaKolo = puvodniDp.info.jizdne * nastupujicichZaKolo * nasobitelZisku
+
+    val dobaKola = linka.delkaLinky.dp * 2 / typBusu.rychlost
+
+    return ziskZaKolo / dobaKola
+}
+
 private fun Long.hezky() = (div(1_000.0).minus(div(1_000_000).times(1_000)).formatovat() as Text.Plain).value
 
 private fun Tik.hezky() = ((System.currentTimeMillis() / millisPerTik - value).formatovat() as Text.Plain).value
+
+inline fun <T> Iterable<T>.sumOfIndexed(selector: (Int, T) -> Int): Int {
+    var index = 0
+    var sum = 0
+    for (element in this) {
+        sum += selector(index++, element)
+    }
+    return sum
+}
