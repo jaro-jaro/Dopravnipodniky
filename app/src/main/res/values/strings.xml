@@ -4,13 +4,13 @@
     <string name="linky">Linky</string>
     <string name="garaz">Vozový park</string>
     <string name="obchod">Obchod</string>
-    <string name="kc">%s Kč</string>
-    <string name="zisk_kc">%s Kč/min</string>
+    <string name="kc">%s €</string>
+    <string name="zisk_kc">%s €/min</string>
     <string name="pocet_busu">%1$d z %2$d vozů</string>
     <string name="garaz_koupit_vozidlo">Koupit vozidlo</string>
     <string name="uspechy">Úspěchy</string>
     <string name="nastaveni">Nastavení</string>
-    <string name="linka_tohle">Linka: %d</string>
+    <string name="linka_tohle">Linka: %s</string>
     <string name="ev_c">ev. č. %d</string>
     <string name="ikonka_busiku">Ikonka busíku</string>
     <string name="rozbalit">Rozbalit</string>
@@ -22,7 +22,7 @@
     <string name="elektrobus">elektrobus</string>
     <string name="susbus">susbus</string>
     <string name="prodat_za">Prodat za %s</string>
-    <string name="koupit">Koupit za %s Kč</string>
+    <string name="koupit">Koupit za %s €</string>
     <string name="ev_c_existuje">Toto evidenční číslo již existuej!</string>
     <string name="zadejte_ev_c">Zadejte evidenční číslo nového %su:</string>
     <string name="nova_linka">Nová linka</string>
@@ -47,7 +47,7 @@
     <string name="zadna_linka_vybrana">Žádná linka</string>
     <string name="vyberte_linku">Vyberte linku:</string>
     <string name="vybrat_mesto">Vybrat %s</string>
-    <string name="nevyzvednuto">%s Kč nevyzvednuto</string>
+    <string name="nevyzvednuto">%s € nevyzvednuto</string>
     <string name="uspesne_koupeno">Úspěšně koupeno</string>
     <string name="odebrat_bus_z_linek">Odebrat z linek</string>
     <string name="fakt_chcete_prodat_bus">Opravdu chcete prodat tento bus?</string>
@@ -60,7 +60,7 @@
     <string name="automaticky_prirazovat_ev_c">Automaticky přidělovat evidenční čísla</string>
     <string name="vicenasobne_kupovani">Kupovat více busů najednou</string>
     <string name="bohuzel_dlouho_neaktivni">\n\nBohužel jste byl moc dlouho neaktivní, proto se Vám výdělek snížil tak, aby odpovídal výdělku za 8 hodin.</string>
-    <string name="vyuctovani">Doba neaktivity: %1$s\nZískané peníze: %2$s Kč\n\n%3$s Kč\n* %4$s min\n* %5$s\n_____________\n%6$s Kč%7$s</string>
+    <string name="vyuctovani">Doba neaktivity: %1$s\nZískané peníze: %2$s €\n\n%3$s €\n* %4$s min\n* %5$s\n_____________\n%6$s €%7$s</string>
     <plurals name="min">
         <item quantity="one">%d minuta</item>
         <item quantity="few">%d minuty</item>
@@ -82,7 +82,7 @@
     <string name="zadna_linka">Bohužel nevlastníte žádnou linku, pro vytvoření stiskněte tlačítko Nová linka</string>
     <string name="zadny_bus">Bohužel nevlastníte žádná vozidla, pro koupi stiskněte tlačítko Koupit Vozidlo</string>
     <string name="prodat_vsechna_vozidla">Prodat vybraná vozidla</string>
-    <string name="prodat_vsechna_vozidla_za">Prodat vybraná vozidla za %s Kč?</string>
+    <string name="prodat_vsechna_vozidla_za">Prodat vybraná vozidla za %s €?</string>
     <string name="uspesne_prodano">Úspěšně prodáno</string>
     <string name="slovo_vyuctovani">Vyúčtování</string>
     <string name="kamion">Kamión!</string>
@@ -100,19 +100,19 @@
     <string name="odstranit_troleje">Odstranit trolejovou trať za %s</string>
     <string name="zrusit">Zrušit</string>
     <string name="podrobnosti_o_zisku">Podrobnosti o zisku</string>
-    <string name="celkove_prijmy">Celkové příjmy: %s Kč/min</string>
-    <string name="celkove_vydaje">Celkové výdaje: %s Kč/min</string>
-    <string name="celkovy_zisk">Celkový zisk: %s Kč/min</string>
+    <string name="celkove_prijmy">Celkové příjmy: %s €/min</string>
+    <string name="celkove_vydaje">Celkové výdaje: %s €/min</string>
+    <string name="celkovy_zisk">Celkový zisk: %s €/min</string>
     <string name="vydaje_za_infrastrukturu">Výdaje za infrastrukturu:</string>
-    <string name="vydaje_za_zastavky">Zastávky: %s Kč/min</string>
-    <string name="vydaje_za_troleje">Trolejová síť: %s Kč/min</string>
+    <string name="vydaje_za_zastavky">Zastávky: %s €/min</string>
+    <string name="vydaje_za_troleje">Trolejová síť: %s €/min</string>
     <string name="vydaje_za_ekologii">Výdaje za ekologickou nezodpovědnost:</string>
-    <string name="vydaje_za_neekologicke_vozy">Výdaje za neekologický vozový park: %s Kč/min</string>
+    <string name="vydaje_za_neekologicke_vozy">Výdaje za neekologický vozový park: %s €/min</string>
     <string name="zisk_linek">Zisk jednotlivých linek:</string>
-    <string name="linka_vydelava_tohle">Linka č. %d: %s Kč/min</string>
+    <string name="linka_vydelava_tohle">Linka č. %d: %s €/min</string>
     <string name="zisk_vozidel">Zisk jednotlivých vozidel:</string>
-    <string name="bus_prodelava_tolik">Bus č. %1$d ≫ -%2$s Kč/min</string>
-    <string name="bus_vydelava_tolik">Bus č. %1$d: %2$s Kč - %3$s Kč ≫ %4$s Kč/min</string>
+    <string name="bus_prodelava_tolik">Bus č. %1$d ≫ -%2$s €/min</string>
+    <string name="bus_vydelava_tolik">Bus č. %1$d: %2$s € - %3$s € ≫ %4$s €/min</string>
     <string name="nigdo_nebyl_ochoten">Za zainvestovanou částku Vám nikdo nebyl ochoten nabídnout své město, proto Vám bude odečtena desetina vkladu, ale nové město nezískáte.</string>
     <string name="bus_ma_naklady">náklady: %s</string>
     <string name="neco_mezera_neco_jinyho">%1$s %2$s</string>
@@ -125,9 +125,9 @@
     <string name="vyberte_ev_c">Vyberte evidenční číslo</string>
     <string name="upravit_ulici">Upravit ulici</string>
     <string name="prodat_dp">Prodat dopravní podnik</string>
-    <string name="za_prodej_dp_dostanete">Prodáním dopravního podniku získáte peníze odpovídající hodnotě Vašeho vozového parku, to je %1$s Kč. Navíc získáte %2$s Kč jako přibližnou hodnotu města. Protože je prodej vždy riskantní a ne vždy musí být úplně úspěšný, nevíte jistě, kolik peněz získáte, ale určitě to bude v rozmezí %3$s Kč a %4$s Kč.</string>
+    <string name="za_prodej_dp_dostanete">Prodáním dopravního podniku získáte peníze odpovídající hodnotě Vašeho vozového parku, to je %1$s €. Navíc získáte %2$s € jako přibližnou hodnotu města. Protože je prodej vždy riskantní a ne vždy musí být úplně úspěšný, nevíte jistě, kolik peněz získáte, ale určitě to bude v rozmezí %3$s € a %4$s €.</string>
     <string name="prodat">Prodat</string>
-    <string name="prodali_jste">Úspěšně jste prodali %1$s za %2$s Kč</string>
+    <string name="prodali_jste">Úspěšně jste prodali %1$s za %2$s €</string>
     <string name="vytvorit_linku">Vytvořit linku</string>
     <string name="nekonecne_mnoho">Nekonečně mnoho</string>
     <string name="nekonecne_malo">Nekonečně málo</string>
@@ -158,7 +158,7 @@
     <string name="jazyk">Jazyk: %s</string>
     <string name="porouchany">Porouchaný %s!</string>
     <string name="vas_bus_se_porouchal">Váš %1$s ev. č. %2$d se porouchal! Zaplaťe za jeho opravu!</string>
-    <string name="zaplatit">Zaplatit: %s Kč</string>
+    <string name="zaplatit">Zaplatit: %s €</string>
     <string name="logaritmus_vyse_investice">Logaritmus výše investice</string>
     <string name="velke_mnozstvi_penez_za_dp">Zadali jste vysoké množství peněz a proto ne jen tak ledajaké město je schopno se nabídnout na dostatečné úrovni, proto musíte potvrdit, že chcete doopravdy investovat takto vysokou částku a vzít na vědomí, že nejspíš bude chvíli trvat, než se nějaké město přihlásí.</string>
     <string name="generuje_se_nove_mesto">"Generuje se město, prosíme o chvíli strpení"</string>
@@ -168,7 +168,7 @@
     <string name="vyse_jizdneho">Výše jízdného</string>
     <string name="ahoj_joste">Ahoj jošte</string>
     <string name="pridat_troleje_linka">Přidat troleje na celou linku</string>
-    <string name="pridat_troleje_nebo_zastavky_linka_dialog">Chcete doopravdy přidat %4$s na celou linku?\n\nAktuální počet peněz: %1$s Kč\nCena: %2$s Kč\nZůstatek: %3$s Kč</string>
+    <string name="pridat_troleje_nebo_zastavky_linka_dialog">Chcete doopravdy přidat %4$s na celou linku?\n\nAktuální počet peněz: %1$s €\nCena: %2$s €\nZůstatek: %3$s €</string>
     <string name="uspesne_pridany_troleje">Úspěšně přidány troleje</string>
     <string name="uspesne_rozmisteno">Úspěšně rozmístěno</string>
     <string name="bohuzel_ne_vic_nez_500">Bohužel si nemůžete koupit více než 500 vozidel najednou</string>
@@ -202,7 +202,7 @@
     <string name="ekova" translatable="false">Škoda Ekova</string>
     <string name="hess" translatable="false">Carrosserie HESS AG</string>
     <string name="bogdan" translatable="false">Bogdan</string>
-    <string name="bus_zastavil">Bus ev. č. %1$s zastavil. Vystoupilo %2$s lidí a nastoupilo %3$s lidí. Aktuálně je v busu %4$s lidí a na zastávce je %5$s lidí. Vydělali jste %6$s Kč.</string>
+    <string name="bus_zastavil">Bus ev. č. %1$s zastavil. Vystoupilo %2$s lidí a nastoupilo %3$s lidí. Aktuálně je v busu %4$s lidí a na zastávce je %5$s lidí. Vydělali jste %6$s €.</string>
     <string name="sebevrazda">Sebevražda</string>
     <string name="kalibrovat">Kalibrovat</string>
     <string name="zobrazit_linky">Zobrazit linky</string>
@@ -258,15 +258,15 @@
     <string name="d_p_bus60">Kopa je ještě víc, ale do budoucna to stejně stačit určitě nebude. Tak neváhej, kupuj, kupuj a kupuj!</string>
     <string name="d_n_bus1024">Kupte deset bitů busů</string>
     <string name="d_p_bus1024">Deset bitů je opravdu nejvíc, tedy do budoucna to stačí</string>
-    <string name="d_n_penize200000">Vydělejte 200 000 Kč</string>
-    <string name="d_p_penize200000">200 000 Kč není moc, ale na většinu vozidel to stačí</string>
-    <string name="d_n_penize500000">Vydělejte 500 000 Kč</string>
-    <string name="d_p_penize500000">500 000 Kč není málo</string>
-    <string name="d_n_penize1000000">Vydělejte 1 000 000 Kč</string>
+    <string name="d_n_penize200000">Vydělejte 200 000 €</string>
+    <string name="d_p_penize200000">200 000 € není moc, ale na většinu vozidel to stačí</string>
+    <string name="d_n_penize500000">Vydělejte 500 000 €</string>
+    <string name="d_p_penize500000">500 000 € není málo</string>
+    <string name="d_n_penize1000000">Vydělejte 1 000 000 €</string>
     <string name="d_p_penize1000000">Milion je dost, vyzkoušej si koupit nové město</string>
-    <string name="d_n_penize2000000">Vydělějte 2 000 000 Kč</string>
+    <string name="d_n_penize2000000">Vydělějte 2 000 000 €</string>
     <string name="d_p_penize2000000">Za dva miliony by bylo ještě větší město</string>
-    <string name="d_n_penize10000000">Vydělějte 10 000 000 Kč</string>
+    <string name="d_n_penize10000000">Vydělějte 10 000 000 €</string>
     <string name="d_p_penize10000000">Za deset milionů by bylo ještě větší město</string>
     <string name="uspesne_splnen_uspech">Úspěšně splněn úspěch %s</string>
     <string name="d_n_projet_zastavku">Zastávka na znamení</string>
@@ -287,17 +287,17 @@
     <string name="pojdme_na_to">Pojďme na to!</string>
     <string name="t1">Kapitola 1.\n\nVítáme Vás ve hře Dopravní podniky!\n\nV této hře se přeneseme do Vašeho města, kde budete budovat vlastní dopravní podnik.\n\nMy Vás ale slyšíme říkat, „ale já nemám žádné město!” Nevadí! Starosta Křemže byl natolik ochotný, že Vám úplně zadarmo vypůjčí ulice svého města, už dlouho tam potřebuje zavést hromadnou dopravu.\nA proto jste tady Vy. Jak tedy začít? Musíme vytvořit linku, na které budou Vaše busy jezdit. Klikněte na tlačítko „Linky”, otevře se Vám další obrazovka, kde budete moct Vaše linky spravovat, ale protože žádné nemáte, klikněte na tlačítko Nová linka, kde si jednu vytvoříte.\n\nVaše RO studios</string>
     <string name="t2">Kapitola 2. Vytváření linky\n\nPro vytvoření nové linky, klikněte kde by měla linka začít a táhněte prstem přes křižovatky, dokud nebudete s linkou spokojeni. Vidíte támhle na jihozápadě [změnit] dva [změnit] tmavší baráky? To jsou paneláky ve kterých bydlí mnohem více lidí, než v normálních domech. Doporučujeme zavést vaší první linku do jejich ulice! Kdyby se vám něco nelíbilo, kdykoliv můžete táhnout po vytvořené trase zpět a tím linku předělat. Alternativně, můžete kliknout na tlačítko Resetovat, které se nachází vpravo nahoře a začít úplně znovu. Jakmile budete se svou linkou spokojeni, klikněte na tlačítko Hotovo, zadejte číslo linky a vyberte její barvu. Po potvrzení Vás vrátíme zpět na seznam linek, kde již svou novou linku uvidíte! Pro posouvání po mapě použijte dva prsty!</string>
-    <string name="t3">Kapitola 3. Zastávky\n\nNyní, když už máme linku, tak na ní musíme přidat nějaké zastávky.\nAbyste tak ale mohli učinit, zapněte si tzv. Editor města kliknutím na ikonku tužky vpravo dole.\nNyní jednoduše klikněte na ulice, kde chcete zastávky vytvořit.\nAž budete spokojení, klikněte na tlačítko Hotovo vpravo dole.\nPozn.: Postavení zastávky Vás stojí 5 000 Kč. Když byste ji ale chtěli opět zničit, zaplatíte 1 000 Kč. Takže doporučujeme vybírat pečlivě!\nPozn. 2: Jelikož správa zastávek něco stojí, každou minutu vám bude za každou zastávku strženo 100 Kč! </string>
+    <string name="t3">Kapitola 3. Zastávky\n\nNyní, když už máme linku, tak na ní musíme přidat nějaké zastávky.\nAbyste tak ale mohli učinit, zapněte si tzv. Editor města kliknutím na ikonku tužky vpravo dole.\nNyní jednoduše klikněte na ulice, kde chcete zastávky vytvořit.\nAž budete spokojení, klikněte na tlačítko Hotovo vpravo dole.\nPozn.: Postavení zastávky Vás stojí 5 000 €. Když byste ji ale chtěli opět zničit, zaplatíte 1 000 €. Takže doporučujeme vybírat pečlivě!\nPozn. 2: Jelikož správa zastávek něco stojí, každou minutu vám bude za každou zastávku strženo 100 €! </string>
     <string name="t4">Kapitola 4. Nákup vozů (krok 1)\n\nNaše linka je již připravena, tak nám nezbývá nic jiného, než nakoupit něco, co na ní bude jezdit!\nKlikněte na tlačítko „Vozový park” a následně Koupit vozidlo.\n</string>
     <string name="t5">Kapitola 4. Nákup vozů (krok 2)\n\nJelikož se v našem obchodě dá najít opravdu veliké množství vozů, můžete si je vyfiltrovat podle toho, co právě hledáte! Pro začátek jsme Vám nějaké filtry přednastavili, ať se Vám lépe začíná, ale můžete si je kdykoliv upravit!\n\nVyberte si vůz který si chcete koupit a klikněte na tlačítko „Koupit”. Následně se vraťte do vozovny kliknutím ikony zpět v horní části obrazovky.\nTIP: Nebojte se utratit všechno své jmění, již brzy začnete vydělávat!\nTIP: Nezačínejte trolejbusy, jelikož mají dražší infrastrukturu v podobě trolejové tratě.\n</string>
     <string name="t6">Kapitola 4. Nákup vozů (krok 3)\n\nA teď konečně přichází ta zajímavá část!\nRozklikněte svůj nový bus a pomocí tlačítka „Vypravit” ho vyšlete na dříve vytvořenou linku.\n\nNyní se stačí vrátit na původní obrazovku s mapou a sledovat jak Váš bus jede po městě a vydělává Vám první peníze.</string>
     <string name="t7">Kapitola 5. Rozšiřování pole působnosti\n\nJelikož už máte docela dost peněz, je pravděpodobné, že Vám přestává stačit aktuální město.\nTo lze snadno vyřešit, stačí kliknout na název Vašeho města v horní liště a tím se dostanete do nové části s dopravními podniky.\nPro zainvestování do nového města stiskněte tlačítko Nový dopravní podnik, zadejte částku, kterou jste ochotni investovat a vyberte si ze tří měst, která jsou Vám ochotna za tuto částku nabídnout své ulice pro zbudování nové dopravní sítě.\n</string>
-    <string name="jizdne">Jízdné: %s Kč</string>
+    <string name="jizdne">Jízdné: %s €</string>
     <string name="pruzkum_mineni">Průzkum mínění</string>
     <string name="doopravdy_chcete_udelat_pruzkum">Doopravdy chcete udělat rychlý průzkum veřejného mínění o ideální ceně jízdného?</string>
     <string name="vysledky">Výsledky</string>
     <string name="vysledky_hlasovani">Zeptali jste se 25ti obyvatel města na otázku, kolik by byli ochotni zaplatiti za jednu jízdenku a toto jsou výsledky:\n</string>
-    <string name="pro_cenu_hlasovalo_lidi">\n\tPro %1$s Kč hlasovalo %2$s lidí</string>
+    <string name="pro_cenu_hlasovalo_lidi">\n\tPro %1$s € hlasovalo %2$s lidí</string>
     <string name="cerne">ČERNÉ</string>
     <string name="cervene">ČERVENÉ</string>
     <string name="ruzove">RŮŽOVÉ</string>
@@ -337,13 +337,14 @@
     <string name="ruzova">RŮŽOVÁ</string>
     <string name="oranzova">ORANŽOVÁ</string>
     <string name="hneda">HNĚDÁ</string>
-    <string name="ano_kc">Ano, %s Kč</string>
-    <string name="nastavit_jizdne_na">Nastavit jízdné na %s Kč</string>
-    <string name="prumer_je">\n\nPrůměr je %s Kč</string>
+    <string name="ano_kc">Ano, %s €</string>
+    <string name="nastavit_jizdne_na">Nastavit jízdné na %s €</string>
+    <string name="prumer_je">\n\nPrůměr je %s €</string>
     <string name="nic">" "</string>
     <string name="zmenit_linku">Změnit linku</string>
     <string name="zpet">Zpět</string>
     <string name="moc_filtru">Bohužel, nenašli jsme žádná vozidla, která by odpovídala vašim požadavkům. Zkuste poupravit filtry!</string>
     <string name="nepridavat">Nevypravovat</string>
+    <string name="zobrazeno">zobrazeno %d položek</string>
 
 </resources>

@@ -82,17 +82,17 @@ sealed interface Dosahlost {
     @SerialName("StavDosahlost")
     sealed interface Stav {
         @Serializable
-        @SerialName("SplnenoDosahlost")
+        @SerialName("SplnenoDosahlostStav")
         data class Splneno(
             @Serializable(with = LocalDateSerializer::class) val kdy: LocalDate,
         ) : Stav
 
         @Serializable
-        @SerialName("NesplnenoDosahlost")
+        @SerialName("NesplnenoDosahlostStav")
         data object Nesplneno : Stav
 
         @Serializable
-        @SerialName("PocetniDosahlost")
+        @SerialName("PocetniDosahlostStav")
         data class Pocetni(
             val pocet: Int,
         ) : Stav

@@ -34,8 +34,8 @@ fun Pozice<UlicovyBlok>.sousedi() = listOf(
     x to y + 1.ulicovychBloku,
 )
 
-val Pozice<UlicovyBlok>.dp get() = Pozice(x.dp, y.dp)
-val Pozice<UlicovyBlok>.dpSUlicema get() = Pozice(x.dpSUlicema, y.dpSUlicema)
+fun Pozice<UlicovyBlok>.toDp() = Pozice(x.toDp(), y.toDp())
+fun Pozice<UlicovyBlok>.toDpSUlicema() = Pozice(x.toDpSUlicema(), y.toDpSUlicema())
 context(Density)
 fun Pozice<Dp>.toPx() = Offset(x.toPx(), y.toPx())
 

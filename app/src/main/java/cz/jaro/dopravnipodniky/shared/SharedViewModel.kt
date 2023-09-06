@@ -95,14 +95,12 @@ class SharedViewModel(
 
     val filtrovaneBusy =
         nastaveni.filterNotNull().combine(prachy.filterNotNull()) { nastaveni, prachy ->
-            var filtrovaneTypy = typyBusu.asSequence()
-            SkupinaFiltru.skupinyFiltru.forEach { skupina ->
-                filtrovaneTypy = filtrovaneTypy.filtrovat(nastaveni.filtry.filter { it in skupina.filtry })
-            }
-            if (SkupinaFiltru.Cena.MamNaTo in nastaveni.filtry) filtrovaneTypy = filtrovaneTypy.filter {
-                it.cena <= prachy
-            }
-            filtrovaneTypy.sortedWith(nastaveni.razeni.comparator)
+            SkupinaFiltru.skupinyFiltru.fold(typyBusu.asSequence()) { filtrovaneTypy, skupina ->
+                filtrovaneTypy.filtrovat(nastaveni.filtry.filter { it in skupina.filtry })
+            }.filter {
+                if (SkupinaFiltru.Cena.MamNaTo in nastaveni.filtry) it.cena <= prachy
+                else true
+            }.sortedWith(nastaveni.razeni.comparator)
         }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), emptySequence())
 

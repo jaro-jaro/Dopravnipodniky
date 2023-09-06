@@ -1,5 +1,6 @@
 package cz.jaro.dopravnipodniky.ui.garaz.obchod
 
+import androidx.annotation.StringRes
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypBusu
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.getNakladyTextem
@@ -67,7 +68,7 @@ sealed interface SkupinaFiltru<T : SkupinaFiltru.Filtr> {
         }
 
         override val nazev = R.string.dle_trakce.toText()
-        override val filtry = cz.jaro.dopravnipodniky.data.dopravnipodnik.Trakce.vse.map {
+        override val filtry = BusTrakce.vse.map {
             TrakceFiltr(trakce = it)
         }
     }
@@ -139,7 +140,7 @@ sealed interface SkupinaFiltru<T : SkupinaFiltru.Filtr> {
         @Serializable
         @SerialName("NakladyFiltr")
         data class NakladyFiltr(
-            private val naklady: Int,
+            @StringRes private val naklady: Int,
         ) : Filtr {
             override val nazevFiltru = naklady.toText()
             override fun filtrovat(typBusu: TypBusu) = typBusu.nakladyTextem == naklady

@@ -8,7 +8,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
-import cz.jaro.dopravnipodniky.shared.jednotky.dpSUlicema
+import cz.jaro.dopravnipodniky.shared.jednotky.toDpSUlicema
 import cz.jaro.dopravnipodniky.shared.sedChodniku
 import cz.jaro.dopravnipodniky.shared.sedUlice
 import cz.jaro.dopravnipodniky.shared.sirkaChodniku
@@ -25,8 +25,8 @@ fun namalovatKrizovatku(
         it.konec == krizovatka || it.zacatek == krizovatka
     }
 
-    val zacatekX = x.dpSUlicema
-    val zacatekY = y.dpSUlicema
+    val zacatekX = x.toDpSUlicema()
+    val zacatekY = y.toDpSUlicema()
 
     val sirkaUlice = sirkaUlice.toPx()
 

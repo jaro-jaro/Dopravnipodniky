@@ -14,7 +14,7 @@ sealed interface StavTutorialu {
     @Serializable
     @SerialName("StavTutorialu.Odkliknuto")
     data class Odkliknuto(
-        val co: StavTutorialu,
+        val co: Tutorialujeme,
     ) : StavTutorialu
 
     @Serializable

@@ -39,8 +39,8 @@ class UlicovyBlokRange(
     }
 }
 
-val UlicovyBlok.dp get() = ulicovyBlok * value
-val UlicovyBlok.dpSUlicema get() = ulicovyBlok * value + sirkaUlice * value
+fun UlicovyBlok.toDp() = ulicovyBlok * value
+fun UlicovyBlok.toDpSUlicema() = ulicovyBlok * value + sirkaUlice * value
 
 val Int.ulicovychBloku get() = UlicovyBlok(this)
 val Long.ulicovychBloku get() = UlicovyBlok(this.toInt())

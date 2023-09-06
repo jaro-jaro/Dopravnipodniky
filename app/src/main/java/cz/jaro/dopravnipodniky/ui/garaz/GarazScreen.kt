@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
@@ -96,15 +97,18 @@ fun GarazScreen(
     val ulicove by viewModel.ulice.collectAsStateWithLifecycle()
     val linky by viewModel.linky.collectAsStateWithLifecycle()
     val busy by viewModel.busy.collectAsStateWithLifecycle()
+    val tutorial by viewModel.tutorial.collectAsStateWithLifecycle()
 
     if (
         prachy != null &&
         dpInfo != null &&
         ulicove != null &&
+        tutorial != null &&
         linky != null &&
         busy != null
     ) GarazScreen(
         prachy = prachy!!,
+        tutorial = tutorial!!,
         dpInfo = dpInfo!!,
         ulicove = ulicove!!,
         linky = linky!!,
@@ -122,6 +126,7 @@ fun GarazScreen(
 fun GarazScreen(
     dpInfo: DPInfo,
     prachy: Peniz,
+    tutorial: StavTutorialu,
     ulicove: List<Ulice>,
     linky: List<Linka>,
     busy: List<Bus>,
@@ -146,9 +151,6 @@ fun GarazScreen(
                         Icon(Icons.Default.ArrowBack, stringResource(R.string.zpet))
                     }
                 },
-                actions = {
-                    Text(prachy.asString())
-                },
             )
         },
         floatingActionButton = {
@@ -167,194 +169,225 @@ fun GarazScreen(
         floatingActionButtonPosition = FabPosition.Center,
     ) { paddingValues ->
         var otevreno by rememberSaveable { mutableStateOf(null as Int?) }
-        LazyColumn(
+        Column(
             Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            if (busy.isEmpty()) item {
-                Text(stringResource(R.string.zadny_bus), Modifier.padding(8.dp))
-            }
-            items(busy.sortedBy { it.evCislo }, key = { it.evCislo }) { bus ->
-                val expanded = otevreno == bus.evCislo
-                Column(
+            Row(
+                Modifier.fillMaxWidth(),
+            ) {
+                if (
+                    !(tutorial je StavTutorialu.Tutorialujeme.Uvod)
+                ) Text(
+                    text = prachy.asString(),
                     Modifier
-                        .animateItemPlacement()
-                        .animateContentSize()
-                        .clickable {
-                            otevreno = if (expanded) null else bus.evCislo
-                        },
-                ) {
-                    val linka = bus.linka?.let { linky.linka(it) }
-                    ListItem(
-                        headlineContent = {
-                            Text(buildString {
-                                append(stringResource(R.string.ev_c, bus.evCislo))
-                                append(" ")
-                                if (linka != null) append(stringResource(R.string.linka_tohle, linka.cislo))
-                            })
-                        },
-                        trailingContent = {
-                            Icon(Icons.Default.LocationSearching, null)
-                        },
-                        leadingContent = {
-                            Image(
-                                painterResource(bus.typBusu.trakce.ikonka),
-                                stringResource(R.string.ikonka_busiku),
-                                Modifier
-                                    .width(40.dp)
-                                    .height(40.dp),
-                                colorFilter = ColorFilter.tint(color = linka?.barvicka?.barva ?: sedNepouzivanehoBusu),
-                            )
-                        },
-                    )
-                    AnimatedVisibility(expanded) {
-                        Column(
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        ) {
-                            Text(
-                                text = stringResource(bus.typBusu.trakce.jmeno),
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(all = 8.dp),
-                            )
-                            Text(
-                                text = bus.typBusu.model,
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(all = 8.dp),
-                            )
-                            Text(
-                                text = stringResource(R.string.ponicenost, bus.ponicenost.times(100).formatovat().composeString()),
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(all = 8.dp),
-                            )
-                            Text(
-                                text = stringResource(R.string.naklady, bus.naklady.asString()),
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(all = 8.dp),
-                            )
-                            var vybratLinku by rememberSaveable { mutableStateOf(false) }
-                            val ctx = LocalContext.current
+                        .weight(1F)
+                        .padding(all = 16.dp),
+                    textAlign = TextAlign.Start,
+                )
 
-                            if (vybratLinku) {
-                                val pouzitelneLinky = when (bus.typBusu.trakce) {
-                                    is Trakce.Trolejbus -> linky.filter { it.ulice(ulicove).jsouVsechnyZatrolejovane() }
-                                    else -> linky
-                                }
-                                LaunchedEffect(pouzitelneLinky) {
-                                    if (pouzitelneLinky.isEmpty()) {
-                                        Toast.makeText(ctx, R.string.nejprve_si_vytvorte_linku, Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-
-                                if (pouzitelneLinky.isNotEmpty()) AlertDialog(
-                                    onDismissRequest = {
-                                        vybratLinku = false
-                                    },
-                                    confirmButton = { },
-                                    dismissButton = {
-                                        TextButton(
-                                            onClick = {
-                                                zmenitBusy {
-                                                    replaceBy(bus.copy(linka = null)) { it.id }
-                                                }
-                                                vybratLinku = false
-                                            }
-                                        ) {
-                                            Text(stringResource(R.string.odebrat_bus_z_linek))
-                                        }
-                                    },
-                                    title = {
-                                        Text(stringResource(R.string.vyberte_linku))
-                                    },
-                                    text = {
-                                        LazyColumn(
-                                            Modifier.fillMaxWidth()
-                                        ) LazyColumn2@{
-                                            items(pouzitelneLinky) { linka ->
-                                                ListItem(
-                                                    headlineContent = {
-                                                        Text(linka.cislo.toString())
-                                                    },
-                                                    Modifier.clickable {
-                                                        zmenitBusy {
-                                                            replaceBy(
-                                                                bus.copy(
-                                                                    linka = linka.id,
-                                                                    poziceNaLince = 0,
-                                                                    poziceVUlici = 0.dp,
-                                                                    smerNaLince = Smer.Pozitivni,
-                                                                    stavZastavky = StavZastavky.Pred
-                                                                )
-                                                            ) { it.id }
-                                                        }
-                                                        dosahni(Dosahlost.BusNaLince::class)
-                                                        vybratLinku = false
-                                                    },
-                                                )
-                                            }
-                                        }
-                                    },
+                if (
+                    !(tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                    !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                    !(tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
+                    !(tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                    !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
+                ) Text(
+                    text = stringResource(R.string.pocet_busu, busy.count { it.linka != null }, busy.size),
+                    Modifier
+                        .weight(1F)
+                        .padding(all = 16.dp),
+                    textAlign = TextAlign.End,
+                )
+            }
+            LazyColumn(
+                Modifier.weight(1F)
+            ) {
+                if (busy.isEmpty()) item {
+                    Text(stringResource(R.string.zadny_bus), Modifier.padding(8.dp))
+                }
+                items(busy.sortedBy { it.evCislo }, key = { it.evCislo }) { bus ->
+                    val expanded = otevreno == bus.evCislo
+                    Column(
+                        Modifier
+                            .animateItemPlacement()
+                            .animateContentSize()
+                            .clickable {
+                                otevreno = if (expanded) null else bus.evCislo
+                            },
+                    ) {
+                        val linka = bus.linka?.let { linky.linka(it) }
+                        ListItem(
+                            headlineContent = {
+                                Text(buildString {
+                                    append(stringResource(R.string.ev_c, bus.evCislo))
+                                    append(" ")
+                                    if (linka != null) append(stringResource(R.string.linka_tohle, linka.cislo))
+                                })
+                            },
+                            trailingContent = {
+                                Icon(Icons.Default.LocationSearching, null)
+                            },
+                            leadingContent = {
+                                Image(
+                                    painterResource(bus.typBusu.trakce.ikonka),
+                                    stringResource(R.string.ikonka_busiku),
+                                    Modifier
+                                        .width(40.dp)
+                                        .height(40.dp),
+                                    colorFilter = ColorFilter.tint(color = linka?.barvicka?.barva ?: sedNepouzivanehoBusu),
                                 )
-                            }
-
-                            Row(
-                                Modifier.fillMaxWidth(),
+                            },
+                        )
+                        AnimatedVisibility(expanded) {
+                            Column(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
                             ) {
-                                Button(
-                                    onClick = {
-                                        vybratLinku = true
-                                    },
+                                Text(
+                                    text = stringResource(bus.typBusu.trakce.jmeno),
                                     Modifier
+                                        .fillMaxWidth()
                                         .padding(all = 8.dp),
-                                ) {
-                                    Text(
-                                        text = stringResource(if (bus.linka == null) R.string.vypravit else R.string.zmenit_linku)
+                                )
+                                Text(
+                                    text = bus.typBusu.model,
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(all = 8.dp),
+                                )
+                                Text(
+                                    text = stringResource(R.string.ponicenost, bus.ponicenost.times(100).formatovat().composeString()),
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(all = 8.dp),
+                                )
+                                Text(
+                                    text = stringResource(R.string.naklady, bus.naklady.asString()),
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(all = 8.dp),
+                                )
+                                var vybratLinku by rememberSaveable { mutableStateOf(false) }
+                                val ctx = LocalContext.current
+
+                                if (vybratLinku) {
+                                    val pouzitelneLinky = when (bus.typBusu.trakce) {
+                                        is Trakce.Trolejbus -> linky.filter { it.ulice(ulicove).jsouVsechnyZatrolejovane() }
+                                        else -> linky
+                                    }
+                                    LaunchedEffect(pouzitelneLinky) {
+                                        if (pouzitelneLinky.isEmpty()) {
+                                            Toast.makeText(ctx, R.string.nejprve_si_vytvorte_linku, Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+
+                                    if (pouzitelneLinky.isNotEmpty()) AlertDialog(
+                                        onDismissRequest = {
+                                            vybratLinku = false
+                                        },
+                                        confirmButton = { },
+                                        dismissButton = {
+                                            TextButton(
+                                                onClick = {
+                                                    zmenitBusy {
+                                                        replaceBy(bus.copy(linka = null)) { it.id }
+                                                    }
+                                                    vybratLinku = false
+                                                }
+                                            ) {
+                                                Text(stringResource(R.string.odebrat_bus_z_linek))
+                                            }
+                                        },
+                                        title = {
+                                            Text(stringResource(R.string.vyberte_linku))
+                                        },
+                                        text = {
+                                            LazyColumn(
+                                                Modifier.fillMaxWidth()
+                                            ) LazyColumn2@{
+                                                items(pouzitelneLinky) { linka ->
+                                                    ListItem(
+                                                        headlineContent = {
+                                                            Text(linka.cislo.toString())
+                                                        },
+                                                        Modifier.clickable {
+                                                            zmenitBusy {
+                                                                replaceBy(
+                                                                    bus.copy(
+                                                                        linka = linka.id,
+                                                                        poziceNaLince = 0,
+                                                                        poziceVUlici = 0.dp,
+                                                                        smerNaLince = Smer.Pozitivni,
+                                                                        stavZastavky = StavZastavky.Pred
+                                                                    )
+                                                                ) { it.id }
+                                                            }
+                                                            dosahni(Dosahlost.BusNaLince::class)
+                                                            vybratLinku = false
+                                                        },
+                                                    )
+                                                }
+                                            }
+                                        },
                                     )
                                 }
-                                Spacer(modifier = Modifier.weight(1F))
-                                OutlinedButton(
-                                    onClick = {
-                                        zmenitUlice {
 
-                                            var cloveci = bus.cloveci
-                                            val noveUlice = map { ulice ->
-                                                var cloveciVUlici = ulice.cloveci
-                                                while (cloveciVUlici <= ulice.kapacita && cloveci > 0) {
+                                Row(
+                                    Modifier.fillMaxWidth(),
+                                ) {
+                                    Button(
+                                        onClick = {
+                                            vybratLinku = true
+                                        },
+                                        Modifier
+                                            .padding(all = 8.dp),
+                                    ) {
+                                        Text(
+                                            text = stringResource(if (bus.linka == null) R.string.vypravit else R.string.zmenit_linku)
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.weight(1F))
+                                    OutlinedButton(
+                                        onClick = {
+                                            zmenitUlice {
 
-                                                    cloveci--
-                                                    cloveciVUlici++
+                                                var cloveci = bus.cloveci
+                                                val noveUlice = shuffled().map { ulice ->
+                                                    var cloveciVUlici = ulice.cloveci
+                                                    while (cloveciVUlici < ulice.kapacita && cloveci > 0) {
+
+                                                        cloveci--
+                                                        cloveciVUlici++
+                                                    }
+
+                                                    ulice.copy(
+                                                        cloveci = cloveciVUlici
+                                                    )
                                                 }
 
-                                                ulice.copy(
-                                                    cloveci = cloveciVUlici
-                                                )
+                                                clear()
+                                                addAll(noveUlice)
                                             }
-
-                                            clear()
-                                            addAll(noveUlice)
-                                        }
-                                        zmenitBusy {
-                                            val i = indexOfFirst { it.id == bus.id }
-                                            removeAt(i)
-                                        }
-                                    },
-                                    Modifier
-                                        .padding(all = 8.dp),
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.prodat_za, bus.prodejniCena.asString())
-                                    )
+                                            zmenitBusy {
+                                                val i = indexOfFirst { it.id == bus.id }
+                                                removeAt(i)
+                                            }
+                                        },
+                                        Modifier
+                                            .padding(all = 8.dp),
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.prodat_za, bus.prodejniCena.asString())
+                                        )
+                                    }
                                 }
                             }
                         }
+                        HorizontalDivider()
                     }
-                    HorizontalDivider()
                 }
             }
         }

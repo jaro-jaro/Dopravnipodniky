@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 data class Barak(
     val typ: TypBaraku,
     val cisloPopisne: Int,
+    val cisloOrientacni: Int,
     val barvicka: Int,
     val kapacita: Int,
 ) {
@@ -15,11 +16,13 @@ data class Barak(
         operator fun invoke(
             typ: TypBaraku,
             cisloPopisne: Int,
+            cisloOrientacni: Int,
         ): Barak {
             val kapacita = typ.getKapacita()
             return Barak(
                 typ = typ,
                 cisloPopisne = cisloPopisne,
+                cisloOrientacni = cisloOrientacni,
                 barvicka = typ.getBarva(),
                 kapacita = kapacita,
             )

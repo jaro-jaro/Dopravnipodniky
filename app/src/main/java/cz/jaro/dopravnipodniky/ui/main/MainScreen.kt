@@ -82,11 +82,11 @@ import cz.jaro.dopravnipodniky.shared.cenaZastavky
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
-import cz.jaro.dopravnipodniky.shared.jednotky.dpSUlicema
 import cz.jaro.dopravnipodniky.shared.jednotky.minus
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.plus
 import cz.jaro.dopravnipodniky.shared.jednotky.to
+import cz.jaro.dopravnipodniky.shared.jednotky.toDpSUlicema
 import cz.jaro.dopravnipodniky.shared.jednotky.toPx
 import cz.jaro.dopravnipodniky.shared.maximalniOddaleni
 import cz.jaro.dopravnipodniky.shared.oddalenyRezim
@@ -98,6 +98,7 @@ import cz.jaro.dopravnipodniky.ui.destinations.LinkyScreenDestination
 import cz.jaro.dopravnipodniky.ui.malovani.Mesto
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import kotlin.math.pow
 
 @Composable
 @Destination(start = true)
@@ -164,7 +165,7 @@ fun MainScreen(
     navigatate: (Direction) -> Unit,
 ) {
     val density = LocalDensity.current
-    val stred = remember(ulicove.stred) { ulicove.stred.dpSUlicema }
+    val stred = remember(ulicove.stred) { ulicove.stred.toDpSUlicema() }
     var tx by remember(stred) { mutableFloatStateOf(with(density) { -stred.x.toPx() * pocatecniPriblizeni }) }
     var ty by remember(stred) { mutableFloatStateOf(with(density) { -stred.y.toPx() * pocatecniPriblizeni }) }
     var priblizeni by remember { mutableFloatStateOf(pocatecniPriblizeni) }
@@ -179,7 +180,10 @@ fun MainScreen(
                 },
                 Modifier.combinedClickable(onLongClick = {
                     zmenitPrachy {
-                        Double.POSITIVE_INFINITY.penez
+                        if (it < Double.POSITIVE_INFINITY.penez)
+                            Double.POSITIVE_INFINITY.penez
+                        else
+                            12.0.pow(6).penez
                     }
                 }) {
                     // todo podniky
@@ -427,7 +431,7 @@ fun MainScreen(
                                     // t - posunuti, c - coercovaný, p - prostředek, x - max, i - min
 
                                     val (start, stop) = ulicove.velikostMesta
-                                    val m = start.dpSUlicema
+                                    val m = start.toDpSUlicema()
                                         .minus(ulicovyBlok * 2)
                                         .toPx()
                                         .minus(size.center.toOffset())
@@ -438,7 +442,7 @@ fun MainScreen(
                                                 .times(priblizeni)
                                                 .toOffset()
                                         )
-                                    val i = stop.dpSUlicema
+                                    val i = stop.toDpSUlicema()
                                         .plus(ulicovyBlok * 2)
                                         .toPx()
                                         .minus(size.center.toOffset())
@@ -472,37 +476,30 @@ fun MainScreen(
             Column(
                 Modifier.fillMaxSize(),
             ) {
-                if (
-                    !(tutorial je StavTutorialu.Tutorialujeme.Uvod)
-                ) Text(
-                    text = prachy.asString(),
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(all = 8.dp),
-                    textAlign = TextAlign.Center,
-                )
-
-                if (
-                    !(tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
-                    !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
-                    !(tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
-                    !(tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
-                    !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
-                ) Row(
+                Row(
                     Modifier.fillMaxWidth(),
                 ) {
-                    Text(
+                    if (
+                        !(tutorial je StavTutorialu.Tutorialujeme.Uvod)
+                    ) Text(
+                        text = prachy.asString(),
+                        Modifier
+                            .weight(1F)
+                            .padding(all = 16.dp),
+                        textAlign = TextAlign.Start,
+                    )
+
+                    if (
+                        !(tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                        !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                        !(tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
+                        !(tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                        !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
+                    ) Text(
                         text = dpInfo.zisk.asString(),
                         Modifier
                             .weight(1F)
-                            .padding(all = 8.dp),
-                        textAlign = TextAlign.Start,
-                    )
-                    Text(
-                        text = stringResource(R.string.pocet_busu, busy.count { it.linka != null }, busy.size),
-                        Modifier
-                            .weight(1F)
-                            .padding(all = 8.dp),
+                            .padding(all = 16.dp),
                         textAlign = TextAlign.End,
                     )
                 }

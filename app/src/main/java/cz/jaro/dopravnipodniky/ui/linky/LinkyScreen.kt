@@ -114,7 +114,7 @@ fun LinkyScreen(
             if (linky.isEmpty()) item {
                 Text(stringResource(R.string.zadna_linka), Modifier.padding(8.dp))
             }
-            items(linky.sortedBy { it.cislo }, key = { it.cislo }) { linka ->
+            items(linky, key = { it.cislo }) { linka ->
                 Column(
                     Modifier
                         .animateItemPlacement()
@@ -122,7 +122,7 @@ fun LinkyScreen(
                 ) {
                     ListItem(
                         headlineContent = {
-                            Text(linka.cislo.toString())
+                            Text(linka.cislo)
                         },
                         trailingContent = {
                             Row {

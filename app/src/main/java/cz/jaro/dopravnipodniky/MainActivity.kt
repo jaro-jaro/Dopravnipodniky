@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val tema by temaFlow.collectAsStateWithLifecycle(null)
-            val fakeTema by fakeTemaFlow.collectAsStateWithLifecycle(null)
+            val fakeTema by fakeTemaFlow.collectAsStateWithLifecycle(false)
             val tutorial by dataSource.tutorial.collectAsStateWithLifecycle(null)
 
             if (tema != null) DpTheme(
@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
                         onDismissRequest = {
                             scope.launch {
                                 dataSource.upravitTutorial {
-                                    StavTutorialu.Odkliknuto(tutorial!!)
+                                    StavTutorialu.Odkliknuto(tutorial as StavTutorialu.Tutorialujeme)
                                 }
                             }
                         },
@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
                                 onClick = {
                                     scope.launch {
                                         dataSource.upravitTutorial {
-                                            StavTutorialu.Odkliknuto(tutorial!!)
+                                            StavTutorialu.Odkliknuto(tutorial as StavTutorialu.Tutorialujeme)
                                         }
                                     }
                                 },
@@ -109,7 +109,7 @@ class MainActivity : ComponentActivity() {
                 DestinationsNavHost(navGraph = NavGraphs.root)
             }
             AnimatedVisibility(
-                fakeTema == null,
+                !fakeTema,
                 enter = slideInVertically(animationSpec = snap(), initialOffsetY = { it }),
                 exit = slideOutVertically(animationSpec = tween(300), targetOffsetY = { it }),
             ) {

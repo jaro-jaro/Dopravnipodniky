@@ -65,7 +65,6 @@ fun Mesto(
 //            color = dp.tema.darkColorScheme.surface,
 //            color = dp.tema.darkColorScheme.surfaceVariant,
             color = sedPozadi,
-            topLeft = Offset(),
             size = size
         )
 

@@ -13,6 +13,7 @@ import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
+import cz.jaro.dopravnipodniky.shared.jednotky.sousedi
 import cz.jaro.dopravnipodniky.shared.jednotky.to
 import cz.jaro.dopravnipodniky.shared.jednotky.ulicovychBloku
 import cz.jaro.dopravnipodniky.shared.seznamy.MESTA
@@ -58,7 +59,6 @@ class Generator(
 
     fun vygenerujMiMestoAToHnedVykricnik(): DopravniPodnik {
         // Okej hned to bude, nez bys rekl pi
-        ulicove.clear()
 
         opakovac(1, listOf(0.ulicovychBloku to 0.ulicovychBloku), nahodnostNaZacatku)
 
@@ -71,24 +71,19 @@ class Generator(
 
         if (hloubka > velikost) return
 
-        val noveKrizovatky = posledniKrizovatky.flatMap { krivovatka ->
+        val noveKrizovatky = posledniKrizovatky.flatMap { krizovatka ->
 
-            val sousedi = mutableListOf(
-                krivovatka.x - 1.ulicovychBloku to krivovatka.y,
-                krivovatka.x to krivovatka.y - 1.ulicovychBloku,
-                krivovatka.x + 1.ulicovychBloku to krivovatka.y,
-                krivovatka.x to krivovatka.y + 1.ulicovychBloku,
-            )
+            val sousedi = krizovatka.sousedi()
 
             sousedi
-                .filter { pozice ->
-                    val uzNekdoOkupujeSouseda = ulicove.any { it.zacatek == pozice || it.konec == pozice }
+                .filter { soused ->
+                    val uzNekdoOkupujeSouseda = ulicove.any { it.zacatek == soused || it.konec == soused }
                     val novaSance = if (uzNekdoOkupujeSouseda) sance * nahodnostStaveniKOkupantum else sance * nahodnostStaveniKNeokupantum
                     random.nextFloat() < novaSance
                 }
                 .map { soused ->
                     val (zacatek, konec) =
-                        if (krivovatka.x < soused.x || krivovatka.y < soused.y) krivovatka to soused else soused to krivovatka
+                        if (krizovatka.x < soused.x || krizovatka.y < soused.y) krizovatka to soused else soused to krizovatka
 
                     if (ulicove.none { it.zacatek == zacatek && it.konec == konec }) {
                         ulicove += Ulice(zacatek, konec)
@@ -116,6 +111,8 @@ class Generator(
 
     private fun zbarakuj() {
 
+        var baraku = 0
+
         ulicove.forEachIndexed { i, ulice ->
 
             if ("3141592" in investice.toString()) {
@@ -131,12 +128,12 @@ class Generator(
             ) {
                 val typ = if (ulice.potencial >= 3 && random.nextBoolean()) TypBaraku.Panelak else TypBaraku.Normalni
                 ulicove[i] = ulicove[i].copy(
-                    baraky = ulicove[i].baraky + Barak(typ, i),
+                    baraky = ulicove[i].baraky + Barak(typ, ++baraku, it),
                 )
             }
             if (random.nextFloat() >= .25F && ulice.potencial >= 5)
                 ulicove[i] = ulicove[i].copy(
-                    baraky = ulicove[i].baraky + Barak(TypBaraku.Stredovy, i)
+                    baraky = ulicove[i].baraky + Barak(TypBaraku.Stredovy, ++baraku, (barakuVUlici - 1) * 2 + 1)
                 )
 
 //            println(ulicove[i].baraky)

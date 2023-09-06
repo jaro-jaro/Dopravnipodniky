@@ -25,6 +25,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.data.seed
+import cz.jaro.dopravnipodniky.shared.TPS
 import cz.jaro.dopravnipodniky.shared.jednotky.kilometruZaHodinu
 import cz.jaro.dopravnipodniky.shared.jednotky.metru
 import cz.jaro.dopravnipodniky.shared.jednotky.tiku
@@ -49,6 +50,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 @Composable
 fun Loading() = DpTheme(
@@ -84,7 +86,10 @@ fun Loading() = DpTheme(
             val sirkaBusu = remember { 2.5.metru }
             var poloha by remember { mutableStateOf(-delkaBusu.toDp()) }
             var poloha2 by remember { mutableStateOf(-delkaBusu.toDp()) }
-            val rychlostBusu = remember { 200.kilometruZaHodinu }
+            val rychlostBusu = remember { 200 }
+            val rychlostBusu2 = remember { 200 }
+            var r1 = remember { 200 }
+            var r2 = remember { 200 }
             LaunchedEffect(Unit) {
                 launch(Dispatchers.IO) {
                     flow {
@@ -100,11 +105,15 @@ fun Loading() = DpTheme(
                         }
                         .distinctUntilChanged()
                         .collect {
-                            poloha += rychlostBusu * 1.tiku.toDuration()
+                            if (it % TPS == 0L) {
+                                r1 = Random.nextInt(rychlostBusu - 80, rychlostBusu + 80)
+                                r2 = Random.nextInt(rychlostBusu2 - 80, rychlostBusu2 + 80)
+                            }
+                            poloha += r2.kilometruZaHodinu * 1.tiku.toDuration()
                             if (poloha > sirka) {
                                 poloha = -delkaBusu.toDp()
                             }
-                            poloha2 += rychlostBusu * 1.tiku.toDuration()
+                            poloha2 += r1.kilometruZaHodinu * 1.tiku.toDuration()
                             if (poloha2 > sirka) {
                                 poloha2 = -delkaBusu.toDp()
                             }

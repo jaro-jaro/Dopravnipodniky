@@ -27,4 +27,4 @@ val Float.penez get() = Peniz(this.toDouble())
 val Long.penez get() = Peniz(this.toDouble())
 
 @Composable
-fun Peniz.asString() = stringResource(R.string.kc, value.formatovat().composeString())
+fun Peniz.asString() = stringResource(R.string.kc, value.formatovat(0).composeString())

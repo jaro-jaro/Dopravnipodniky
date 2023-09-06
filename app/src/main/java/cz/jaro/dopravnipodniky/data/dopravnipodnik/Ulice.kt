@@ -6,7 +6,7 @@ import cz.jaro.dopravnipodniky.shared.Orientace.Vodorovne
 import cz.jaro.dopravnipodniky.shared.UliceID
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
-import cz.jaro.dopravnipodniky.shared.jednotky.dpSUlicema
+import cz.jaro.dopravnipodniky.shared.jednotky.toDpSUlicema
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.ui.malovani.SerializableDp
 import kotlinx.serialization.SerialName
@@ -55,19 +55,19 @@ data class Ulice(
 
         when(orientace) {
             Svisle -> {
-                zacatekX = zacatek.x.dpSUlicema
-                zacatekY = zacatek.y.dpSUlicema + sirkaUlice
-                konecX = konec.x.dpSUlicema + sirkaUlice
-                konecY = konec.y.dpSUlicema
+                zacatekX = zacatek.x.toDpSUlicema()
+                zacatekY = zacatek.y.toDpSUlicema() + sirkaUlice
+                konecX = konec.x.toDpSUlicema() + sirkaUlice
+                konecY = konec.y.toDpSUlicema()
 
                 sirka = konecX - zacatekX
                 delka = konecY - zacatekY
             }
             Vodorovne -> {
-                zacatekX = zacatek.x.dpSUlicema + sirkaUlice
-                zacatekY = zacatek.y.dpSUlicema
-                konecX = konec.x.dpSUlicema
-                konecY = konec.y.dpSUlicema + sirkaUlice
+                zacatekX = zacatek.x.toDpSUlicema() + sirkaUlice
+                zacatekY = zacatek.y.toDpSUlicema()
+                konecX = konec.x.toDpSUlicema()
+                konecY = konec.y.toDpSUlicema() + sirkaUlice
 
                 sirka = konecY - zacatekY
                 delka = konecX - zacatekX

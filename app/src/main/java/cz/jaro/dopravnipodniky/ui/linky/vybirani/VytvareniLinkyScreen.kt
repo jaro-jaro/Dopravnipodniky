@@ -70,10 +70,10 @@ import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
-import cz.jaro.dopravnipodniky.shared.jednotky.dpSUlicema
 import cz.jaro.dopravnipodniky.shared.jednotky.minus
 import cz.jaro.dopravnipodniky.shared.jednotky.plus
 import cz.jaro.dopravnipodniky.shared.jednotky.sousedi
+import cz.jaro.dopravnipodniky.shared.jednotky.toDpSUlicema
 import cz.jaro.dopravnipodniky.shared.jednotky.toPx
 import cz.jaro.dopravnipodniky.shared.maximalniOddaleni
 import cz.jaro.dopravnipodniky.shared.pocatecniPriblizeni
@@ -132,7 +132,7 @@ fun VytvareniLinkyScreen(
 ) {
     var waitForExit by remember { mutableStateOf(null as UUID?) }
     val density = LocalDensity.current
-    val stred = remember { ulicove.stred.dpSUlicema }
+    val stred = remember { ulicove.stred.toDpSUlicema() }
     var tx by remember { mutableFloatStateOf(with(density) { -stred.x.toPx() * pocatecniPriblizeni }) }
     var ty by remember { mutableFloatStateOf(with(density) { -stred.y.toPx() * pocatecniPriblizeni }) }
     var priblizeni by remember { mutableFloatStateOf(pocatecniPriblizeni) }
@@ -146,7 +146,7 @@ fun VytvareniLinkyScreen(
         if (listSize == 1) run {
             val k = ulicove.seznamKrizovatek.find { krizovatka ->
                 Rect(
-                    center = (krizovatka.dpSUlicema.toPx() + sirkaUlice.toPx() / 2)
+                    center = (krizovatka.toDpSUlicema().toPx() + sirkaUlice.toPx() / 2)
                         .minus(size.center.toOffset())
                         .times(priblizeni)
                         .plus(size.center.toOffset())
@@ -186,7 +186,7 @@ fun VytvareniLinkyScreen(
                 // t - posunuti, c - coercovaný, p - prostředek, x - max, i - min
 
                 val (start, stop) = ulicove.velikostMesta
-                val m = start.dpSUlicema
+                val m = start.toDpSUlicema()
                     .minus(ulicovyBlok * 2)
                     .toPx()
                     .minus(size.center.toOffset())
@@ -197,7 +197,7 @@ fun VytvareniLinkyScreen(
                             .times(priblizeni)
                             .toOffset()
                     )
-                val i = stop.dpSUlicema
+                val i = stop.toDpSUlicema()
                     .plus(ulicovyBlok * 2)
                     .toPx()
                     .minus(size.center.toOffset())
@@ -364,11 +364,11 @@ fun VytvareniLinkyScreen(
                         confirmButton = {
                             TextButton(
                                 onClick = {
-                                    if (cisloLinky.toIntOrNull() == null || cisloLinky.isEmpty()) {
+                                    if (cisloLinky.isEmpty()) {
                                         Toast.makeText(ctx, R.string.spatne_cislo_linky, Toast.LENGTH_LONG).show()
                                         return@TextButton
                                     }
-                                    if (linky.any { it.cislo == cisloLinky.toInt() }) {
+                                    if (linky.any { it.cislo == cisloLinky }) {
                                         Toast.makeText(ctx, R.string.linka_existuje, Toast.LENGTH_LONG).show()
                                         return@TextButton
                                     }
@@ -378,7 +378,7 @@ fun VytvareniLinkyScreen(
                                     }
 
                                     val linka = Linka(
-                                        cislo = cisloLinky.toInt(),
+                                        cislo = cisloLinky,
                                         ulice = kliklyKrizovatky.windowed(2).map { (prvni, druha) ->
                                             ulicove.first { it.zacatek == minOf(prvni, druha) && it.konec == maxOf(prvni, druha) }.id
                                         },

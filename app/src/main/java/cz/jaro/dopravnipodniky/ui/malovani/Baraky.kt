@@ -39,13 +39,7 @@ fun Barak.draw(
     val indexNoveBarvy = (indexSkoroNoveBarvy + Theme.entries.size) % Theme.entries.size
     val barvicka = Theme.entries[indexNoveBarvy].barva
 
-    val sirka = velikostBaraku.toPx()
-
-    @Suppress("UnnecessaryVariable", "RedundantSuppression")
-    val vyska = /*if (ulice.maZastavku && !rohovy) {
-        scitanecVysky = .3F * sirka
-        sirka * .65F
-    } else*/ sirka
+    val velikost = velikostBaraku.toPx()
 
     if (typ == TypBaraku.Stredovy) {
 
@@ -66,11 +60,11 @@ fun Barak.draw(
                     y = pulUlicovyhoBloku
                 )
                 translate(
-                    offset = stredBloku - Offset(x = sirka, y = sirka)
+                    offset = stredBloku - Offset(x = velikost, y = velikost)
                 ) {
                     drawRoundRect(
                         color = barvicka,
-                        size = Size(sirka, sirka) * 2F,
+                        size = Size(velikost, velikost) * 2F,
                         cornerRadius = CornerRadius(20.dp.toPx())
                     )
                 }
@@ -81,53 +75,53 @@ fun Barak.draw(
             Orientace.Vodorovne to true -> drawRoundRect( // dole
                 color = barvicka,
                 topLeft = Offset(
-                    x = zacatekUliceX + odsazeni + sirka + odsazeni + i * (sirka + odsazeni),
-                    y = konecUliceY + odsazeni + (sirka - vyska),
+                    x = zacatekUliceX + odsazeni + (i + 1) * (velikost + odsazeni),
+                    y = konecUliceY + odsazeni,
                 ),
                 size = Size(
-                    width = sirka,
-                    height = vyska,
+                    width = velikost,
+                    height = velikost,
                 ),
-                cornerRadius = CornerRadius(5.dp.toPx() * (sirka / vyska))
+                cornerRadius = CornerRadius(5.dp.toPx())
             )
 
             Orientace.Vodorovne to false -> drawRoundRect( // nahore
                 color = barvicka,
                 topLeft = Offset(
-                    x = zacatekUliceX + odsazeni + i * (sirka + odsazeni),
-                    y = zacatekUliceY - odsazeni - sirka,
+                    x = zacatekUliceX + odsazeni + i * (velikost + odsazeni),
+                    y = zacatekUliceY - odsazeni - velikost,
                 ),
                 size = Size(
-                    width = sirka,
-                    height = vyska,
+                    width = velikost,
+                    height = velikost,
                 ),
-                cornerRadius = CornerRadius(5.dp.toPx() * (sirka / vyska))
+                cornerRadius = CornerRadius(5.dp.toPx())
             )
 
             Orientace.Svisle to true -> drawRoundRect( // vlevo
                 color = barvicka,
                 topLeft = Offset(
-                    x = zacatekUliceX - odsazeni - sirka,
-                    y = zacatekUliceY + sirka + odsazeni + odsazeni + i * (sirka + odsazeni),
+                    x = zacatekUliceX - odsazeni - velikost,
+                    y = zacatekUliceY + odsazeni + (i + 1) * (velikost + odsazeni),
                 ),
                 size = Size(
-                    width = vyska,
-                    height = sirka,
+                    width = velikost,
+                    height = velikost,
                 ),
-                cornerRadius = CornerRadius(5.dp.toPx() * (sirka / vyska))
+                cornerRadius = CornerRadius(5.dp.toPx())
             )
 
             Orientace.Svisle to false -> drawRoundRect( // vpravo
                 color = barvicka,
                 topLeft = Offset(
-                    x = konecUliceX + odsazeni + (sirka - vyska),
-                    y = zacatekUliceY + odsazeni + i * (sirka + odsazeni),
+                    x = konecUliceX + odsazeni,
+                    y = zacatekUliceY + odsazeni + i * (velikost + odsazeni),
                 ),
                 size = Size(
-                    width = vyska,
-                    height = sirka,
+                    width = velikost,
+                    height = velikost,
                 ),
-                cornerRadius = CornerRadius(5.dp.toPx() * (sirka / vyska))
+                cornerRadius = CornerRadius(5.dp.toPx())
             )
         }
     }

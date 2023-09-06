@@ -33,4 +33,4 @@ val Float.penezZaMin get() = PenizZaMinutu(this.toDouble())
 val Long.penezZaMin get() = PenizZaMinutu(this.toDouble())
 
 @Composable
-fun PenizZaMinutu.asString() = stringResource(R.string.zisk_kc, value.formatovat().composeString())
+fun PenizZaMinutu.asString() = stringResource(R.string.zisk_kc, value.formatovat(if (value >= 10_000) 0 else 2).composeString())

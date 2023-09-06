@@ -33,7 +33,6 @@ import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.PenizZaMinutu
 import cz.jaro.dopravnipodniky.shared.jednotky.Tik
 import cz.jaro.dopravnipodniky.shared.jednotky.div
-import cz.jaro.dopravnipodniky.shared.jednotky.dp
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.penezZaMin
 import cz.jaro.dopravnipodniky.shared.jednotky.tiku
@@ -361,14 +360,14 @@ private fun update(
 //                println(zaZastavky)
 //                println(zaTroleje)
 
-        deltaPrachy -= zaZastavky * 10.seconds - zaTroleje * 10.seconds
+        deltaPrachy -= (zaZastavky * 10.seconds + zaTroleje * 10.seconds)
         zisk -= (zaZastavky + zaTroleje)
 
         // dosahlosti
 
         dosahlovac.dosahniPocetniDosahlost(
             Dosahlost.SkupinovaDosahlost.Penize::class,
-            dataSource.vse.first().prachy.value.roundToInt(),
+            dataSource.vse.first().prachy.plus(deltaPrachy).value.roundToInt(),
         )
 
         // tutorial
@@ -573,7 +572,7 @@ fun Bus.vydelkuj(
                 poziceNaLince = indexUliceNaLince,
                 indexUliceNaLince = indexUliceNaLince,
                 linky = puvodniDp.linky,
-                cloveciNaZastavce = (ulice.kapacitaZastavky() * .8).roundToInt(),
+                cloveciNaZastavce = (ulice.kapacitaZastavky() * .6).roundToInt(),
                 cloveci = cloveci,
             )
 
@@ -586,7 +585,7 @@ fun Bus.vydelkuj(
                 linky = puvodniDp.linky,
                 linka = linka,
                 busy = puvodniDp.busy,
-                cloveciNaZastavce = (ulice.kapacitaZastavky() * .8).roundToInt(),
+                cloveciNaZastavce = (ulice.kapacitaZastavky() * .6).roundToInt(),
                 dpInfo = puvodniDp.info,
                 cloveci = cloveci,
                 poziceNaLince = indexUliceNaLince
@@ -638,7 +637,7 @@ fun Bus.vydelkuj(
 
     val ziskZaKolo = puvodniDp.info.jizdne * nastupujicichZaKolo * nasobitelZisku
 
-    val dobaKola = linka.delkaLinky.dp * 2 / typBusu.rychlost
+    val dobaKola = linka.delkaLinky.toDp() * 2 / typBusu.rychlost
 
     return ziskZaKolo / dobaKola
 }

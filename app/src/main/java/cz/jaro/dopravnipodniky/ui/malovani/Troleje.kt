@@ -12,7 +12,7 @@ import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.drawArc
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
-import cz.jaro.dopravnipodniky.shared.jednotky.dpSUlicema
+import cz.jaro.dopravnipodniky.shared.jednotky.toDpSUlicema
 import cz.jaro.dopravnipodniky.shared.odsazeniTroleji
 import cz.jaro.dopravnipodniky.shared.predsazeniTrolejiL
 import cz.jaro.dopravnipodniky.shared.predsazeniTrolejiS
@@ -82,8 +82,8 @@ fun nakreslitTrolejeNaKrizovatku(
 
     val ctyrKrizovatka = sousedDole != null && sousedNahore != null && sousedVlevo != null && sousedVpravo != null
 
-    val zacatekX = krizovatka.x.dpSUlicema.toPx()
-    val zacatekY = krizovatka.y.dpSUlicema.toPx()
+    val zacatekX = krizovatka.x.toDpSUlicema().toPx()
+    val zacatekY = krizovatka.y.toDpSUlicema().toPx()
 
     val sirka = sirkaTroleje.toPx()
     val sirkaUlice = sirkaUlice.toPx()

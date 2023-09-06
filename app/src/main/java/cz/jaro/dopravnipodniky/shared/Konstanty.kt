@@ -121,7 +121,7 @@ val minimumInvestice = 1_000_000L.penez
 
 // vykreslovani
 
-const val pocatecniPriblizeni = 1F/*1F*/
+const val pocatecniPriblizeni = 1F
 const val oddalenyRezim = 1.2F
 const val maximalniOddaleni = .1F
 val pocatecniPosunutiX = 0.dp //200

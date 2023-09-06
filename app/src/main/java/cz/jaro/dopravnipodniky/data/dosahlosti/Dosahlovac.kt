@@ -14,12 +14,12 @@ class Dosahlovac(
         dosahlostKlass: KClass<out Dosahlost>,
         hodnota: Int,
     ) {
-        val dosahlost = dataSource.vse.first().dosahlosti.find { it::class == dosahlostKlass }
+        val dosahlost = dataSource.dosahlosti.first().find { it::class == dosahlostKlass }
             ?: dosahlostKlass.objectInstance ?: dosahlostKlass.constructors.minBy { it.parameters.size }.call(Dosahlost.Stav.Nesplneno)
 
         if (dosahlost is Dosahlost.SkupinovaDosahlost) {
             dosahlost.dosahlosti.forEach {
-                dosahni(it)
+                dosahniPocetniDosahlost(it, hodnota)
             }
             return
         }
@@ -27,8 +27,10 @@ class Dosahlovac(
 
         if (dosahlost.stav is Dosahlost.Stav.Splneno) return
 
-        val stav = dosahlost.stav as Dosahlost.Stav.Pocetni
-        if (hodnota != dosahlost.cil) {
+        val stav =
+            if (dosahlost.stav is Dosahlost.Stav.Pocetni) dosahlost.stav as Dosahlost.Stav.Pocetni else Dosahlost.Stav.Pocetni(0)
+
+        if (hodnota < dosahlost.cil) {
             ulozit(dosahlost.kopirovat(stav.copy(pocet = hodnota)))
             return
         }
@@ -42,7 +44,7 @@ class Dosahlovac(
     private suspend fun ulozit(novaDosahlost: Dosahlost) {
         dataSource.upravitDosahlosti {
             add(0, novaDosahlost)
-            val ruzne = distinct()
+            val ruzne = distinctBy { it::class }
             clear()
             addAll(ruzne)
         }
@@ -50,7 +52,7 @@ class Dosahlovac(
 
     suspend fun dosahni(dosahlostKlass: KClass<out Dosahlost>) {
 
-        val dosahlost = dataSource.vse.first().dosahlosti.find { it::class == dosahlostKlass }
+        val dosahlost = dataSource.dosahlosti.first().find { it::class == dosahlostKlass }
             ?: dosahlostKlass.objectInstance ?: dosahlostKlass.constructors.minBy { it.parameters.size }.call(Dosahlost.Stav.Nesplneno)
 
         if (dosahlost is Dosahlost.SkupinovaDosahlost) {

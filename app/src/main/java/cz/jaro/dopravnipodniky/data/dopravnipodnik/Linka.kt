@@ -12,7 +12,7 @@ import java.util.UUID
 @Serializable
 @SerialName("Linka")
 data class Linka(
-    val cislo: Int,
+    val cislo: String,
     val ulice: List<UliceID> = listOf(),
     val barvicka: Barvicka,
     val id: LinkaID = UUID.randomUUID(),
