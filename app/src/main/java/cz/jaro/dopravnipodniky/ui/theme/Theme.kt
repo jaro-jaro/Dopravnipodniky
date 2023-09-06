@@ -19,11 +19,11 @@ enum class Theme(
         jmeno = R.string.cervene,
         barva = t1,
     ),
-    Ruzove(
-        darkColorScheme = colorsRuzove,
-        jmeno = R.string.ruzove,
-        barva = t2,
-    ),
+//    Ruzove(
+//        darkColorScheme = colorsRuzove,
+//        jmeno = R.string.ruzove,
+//        barva = t2,
+//    ),
     Fialove(
         darkColorScheme = colorsFialove,
         jmeno = R.string.fialove,
@@ -39,11 +39,11 @@ enum class Theme(
         jmeno = R.string.indigove,
         barva = t5,
     ),
-    Modre(
-        darkColorScheme = colorsModre,
-        jmeno = R.string.modre,
-        barva = t6,
-    ),
+//    Modre(
+//        darkColorScheme = colorsModre,
+//        jmeno = R.string.modre,
+//        barva = t6,
+//    ),
     SvetleModre(
         darkColorScheme = colorsSvetleModre,
         jmeno = R.string.svetle_modre,
@@ -54,11 +54,11 @@ enum class Theme(
         jmeno = R.string.tyrkysove,
         barva = t8,
     ),
-    Modrozelene(
-        darkColorScheme = colorsModrozelene,
-        jmeno = R.string.modrozelene,
-        barva = t9,
-    ),
+//    Modrozelene(
+//        darkColorScheme = colorsModrozelene,
+//        jmeno = R.string.modrozelene,
+//        barva = t9,
+//    ),
     Zelene(
         darkColorScheme = colorsZelene,
         jmeno = R.string.zelene,

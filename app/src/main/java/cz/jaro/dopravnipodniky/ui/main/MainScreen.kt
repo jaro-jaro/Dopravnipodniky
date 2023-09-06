@@ -41,6 +41,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -281,6 +282,12 @@ fun MainScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
+            SideEffect {
+//                println("SAVE")
+            }
+            LaunchedEffect(Unit) {
+//                println("LOAD")
+            }
             if (upravitUlici != null) {
                 val staraUlice = remember { ulicove.ulice(upravitUlici!!) }
 

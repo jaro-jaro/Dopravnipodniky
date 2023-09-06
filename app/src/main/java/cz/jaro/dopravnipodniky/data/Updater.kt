@@ -46,6 +46,7 @@ import cz.jaro.dopravnipodniky.shared.odsazeniBaraku
 import cz.jaro.dopravnipodniky.shared.times
 import cz.jaro.dopravnipodniky.shared.udrzbaTroleje
 import cz.jaro.dopravnipodniky.shared.udrzbaZastavky
+import cz.jaro.dopravnipodniky.ui.theme.Theme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -78,61 +79,6 @@ private fun update(
 ) {
     hodiny.registerListener(10.seconds) { tik ->
 //            Log.i("sekání", "tik: ${tik.hezky()}, čas: ${System.currentTimeMillis().hezky()}; Začátek")
-
-        /*
-        // zistovani jestli nejses moc dlouho pryc
-
-        val pocetSekundOdPoslednihoHrani = (Calendar.getInstance().toInstant().toEpochMilli() - dp.cas) / 1000 // s
-
-        if (pocetSekundOdPoslednihoHrani < 0) {.size}
-            dosahni("citer", binding.toolbar)
-        }
-
-        if (pocetSekundOdPoslednihoHrani > 10) {
-
-            val puvodniTiky = pocetSekundOdPoslednihoHrani * TPS
-            val pocetTiku = if (puvodniTiky > TPH * 8L) TPH * 8L else puvodniTiky
-
-            for (bus in dp.busy) {
-                bus.najeto += puvodniTiky * (1.0 / TPH)
-            }
-
-            vse.prachy += dp.zisk * nasobitelZiskuPoOffline * pocetTiku / TPM
-
-            MaterialAlertDialogBuilder(this).apply {
-                setIcon(R.drawable.ic_baseline_attach_money_24)
-//            setTheme(R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
-                setTitle(R.string.slovo_vyuctovani)
-                setMessage(
-                    getString(
-                        R.string.vyuctovani,
-                        if (puvodniTiky / TPH < 2)
-                            resources.getQuantityString(
-                                R.plurals.min,
-                                (pocetTiku / TPM).toInt(),
-                                pocetTiku / TPM
-                            )
-                        else
-                            resources.getQuantityString(
-                                R.plurals.hod,
-                                (puvodniTiky / TPH).toInt(),
-                                puvodniTiky / TPH
-                            ),
-                        (dp.zisk * nasobitelZiskuPoOffline * pocetTiku / TPM).roundToLong()
-                            .formatovat(),
-                        (dp.zisk).roundToLong().formatovat(),
-                        (pocetTiku / TPM).toString(),
-                        nasobitelZiskuPoOffline.toString(),
-                        (dp.zisk * nasobitelZiskuPoOffline * pocetTiku / TPM).roundToLong()
-                            .formatovat(),
-                        if (puvodniTiky != pocetTiku)
-                            getString(R.string.bohuzel_dlouho_neaktivni)
-                        else ""
-                    )
-                )
-                show()
-            }
-        }*/
 
         dataSource.upravitBusy {
             forEachIndexed { i, bus ->
@@ -442,18 +388,20 @@ private fun update(
 //                }
 //
         dataSource.upravitPrachy {
-            println(it + deltaPrachy)
+//            println(it + deltaPrachy)
             it + deltaPrachy
         }
         dataSource.upravitDPInfo { dpInfo ->
             dpInfo.copy(
-                casPosledniNavstevy = System.currentTimeMillis(),
+//                casPosledniNavstevy = System.currentTimeMillis(),
                 zisk = zisk.also {
                     zisky += zisk
+//                    println("UPDATE")
 //                    println(zisk)
-                    println(zisky)
-                    println(zisky.map { it.value }.average().penezZaMin)
-                }
+//                    println(zisky)
+//                    println(zisky.map { it.value }.average().penezZaMin)
+                },
+                tema = Theme.entries.random()
             )
         }
     }

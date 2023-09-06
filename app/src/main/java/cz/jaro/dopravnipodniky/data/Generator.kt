@@ -26,8 +26,13 @@ var seed: Int? by mutableStateOf(null)
 
 class Generator(
     private val investice: Peniz,
-    val random: Random = Random,
-    jmenoMestaRandom: Random = Random,
+    val michaniRandom: Random,
+    val sanceRandom: Random,
+    val barakyRandom: Random,
+    val panelakyRandom: Random,
+    val stredovyRandom: Random,
+    val kapacitaRandom: Random,
+    jmenoMestaRandom: Random,
 ) {
     companion object {
         suspend fun vygenerujMiPrvniMesto(): DopravniPodnik = withContext(Dispatchers.IO) {
@@ -36,7 +41,12 @@ class Generator(
 
             Generator(
                 investice = pocatecniCenaMesta,
-                random = Random(seed!!),
+                michaniRandom = Random(seed!!),
+                sanceRandom = Random(seed!!),
+                barakyRandom = Random(seed!!),
+                panelakyRandom = Random(seed!!),
+                stredovyRandom = Random(seed!!),
+                kapacitaRandom = Random(seed!!),
                 jmenoMestaRandom = Random(18),
             ).vygenerujMiMestoAToHnedVykricnik()
         }
@@ -50,6 +60,26 @@ class Generator(
         private const val rozdilNahodnosti = .05F
         private const val nasobitelRedukce = .75F
     }
+
+    constructor(
+        investice: Peniz,
+        seed: Int,
+    ) : this(
+        investice,
+        Random(seed),
+        Random(seed),
+        Random(seed),
+        Random(seed),
+        Random(seed),
+        Random(seed),
+        Random(seed),
+    )
+    constructor(
+        investice: Peniz,
+    ) : this(
+        investice,
+        Random.nextInt()
+    )
 
     private val velikost: Int = (investice * nasobitelInvestice).value.roundToInt()
 
@@ -79,7 +109,7 @@ class Generator(
                 .filter { soused ->
                     val uzNekdoOkupujeSouseda = ulicove.any { it.zacatek == soused || it.konec == soused }
                     val novaSance = if (uzNekdoOkupujeSouseda) sance * nahodnostStaveniKOkupantum else sance * nahodnostStaveniKNeokupantum
-                    random.nextFloat() < novaSance
+                    sanceRandom.nextFloat() < novaSance
                 }
                 .map { soused ->
                     val (zacatek, konec) =
@@ -102,7 +132,7 @@ class Generator(
         Log.i("generace", "$hloubka z $velikost -> $procentaz %")
 
         if (noveKrizovatky.isEmpty()) {
-            val zredukovanyKrizovatky = posledniKrizovatky.shuffled(random).take((posledniKrizovatky.size * nasobitelRedukce).roundToInt())
+            val zredukovanyKrizovatky = posledniKrizovatky.shuffled(michaniRandom).take((posledniKrizovatky.size * nasobitelRedukce).roundToInt())
             opakovac(hloubka + 1, zredukovanyKrizovatky, nahodnostPoObnoveni)
         } else {
             opakovac(hloubka + 1, noveKrizovatky, sance - rozdilNahodnosti)
@@ -121,24 +151,24 @@ class Generator(
                 )
             }
             repeat(
-                (ulice.potencial * random.nextFloat() * 6)
+                (ulice.potencial * barakyRandom.nextFloat() * 6)
                     .roundToInt()
                     .coerceAtLeast(1)
                     .coerceAtMost((barakuVUlici - 1) * 2)
             ) {
-                val typ = if (ulice.potencial >= 3 && random.nextBoolean()) TypBaraku.Panelak else TypBaraku.Normalni
+                val typ = if (ulice.potencial >= 3 && panelakyRandom.nextBoolean()) TypBaraku.Panelak else TypBaraku.Normalni
                 ulicove[i] = ulicove[i].copy(
                     baraky = ulicove[i].baraky + Barak(typ, ++baraku, it),
                 )
             }
-            if (random.nextFloat() >= .25F && ulice.potencial >= 5)
+            if (stredovyRandom.nextFloat() >= .25F && ulice.potencial >= 5)
                 ulicove[i] = ulicove[i].copy(
                     baraky = ulicove[i].baraky + Barak(TypBaraku.Stredovy, ++baraku, (barakuVUlici - 1) * 2 + 1)
                 )
 
 //            println(ulicove[i].baraky)
             ulicove[i] = ulicove[i].copy(
-                cloveci = random.nextInt(ulicove[i].kapacita / 2, ulicove[i].kapacita)
+                cloveci = kapacitaRandom.nextInt(ulicove[i].kapacita / 2, ulicove[i].kapacita)
             )
         }
     }
