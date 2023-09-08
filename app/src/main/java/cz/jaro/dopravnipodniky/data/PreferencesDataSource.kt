@@ -50,7 +50,7 @@ class PreferencesDataSource(
     val dpInfo = _dpInfo.filterNotNull()
     private val _prachy = MutableStateFlow(null as Peniz?)
     val prachy = _prachy.filterNotNull()
-    private val _dosahlosti = MutableStateFlow(null as List<Dosahlost>?)
+    private val _dosahlosti = MutableStateFlow(null as List<Dosahlost.NormalniDosahlost>?)
     val dosahlosti = _dosahlosti.filterNotNull()
     private val _tutorial = MutableStateFlow(null as StavTutorialu?)
     val tutorial = _tutorial.filterNotNull()
@@ -85,7 +85,7 @@ class PreferencesDataSource(
     ) {
             dp: DopravniPodnik,
             prachy: Peniz,
-            dosahlosti: List<Dosahlost>,
+            dosahlosti: List<Dosahlost.NormalniDosahlost>,
             tutorial: StavTutorialu,
             nastaveni: Nastaveni,
         ->
@@ -166,7 +166,7 @@ class PreferencesDataSource(
         _prachy.value = update(_prachy.value ?: return@withContext)
     }
 
-    suspend fun upravitDosahlosti(update: suspend MutableList<Dosahlost>.() -> Unit) = withContext(Dispatchers.IO) {
+    suspend fun upravitDosahlosti(update: suspend MutableList<Dosahlost.NormalniDosahlost>.() -> Unit) = withContext(Dispatchers.IO) {
         _dosahlosti.value = (_dosahlosti.value ?: return@withContext).mutate(update)
     }
 

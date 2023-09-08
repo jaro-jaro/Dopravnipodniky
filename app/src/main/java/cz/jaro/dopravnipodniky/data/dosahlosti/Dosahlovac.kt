@@ -3,13 +3,18 @@ package cz.jaro.dopravnipodniky.data.dosahlosti
 import cz.jaro.dopravnipodniky.data.PreferencesDataSource
 import kotlinx.coroutines.flow.first
 import org.koin.core.annotation.Single
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.time.LocalDate
 import kotlin.reflect.KClass
 
 @Single
 class Dosahlovac(
     private val dataSource: PreferencesDataSource,
-) {
+) : KoinComponent {
+
+    private val dosahlostCallback by inject<DosahlostCallback>()
+
     suspend fun dosahniPocetniDosahlost(
         dosahlostKlass: KClass<out Dosahlost>,
         hodnota: Int,
@@ -41,7 +46,7 @@ class Dosahlovac(
         }
     }
 
-    private suspend fun ulozit(novaDosahlost: Dosahlost) {
+    private suspend fun ulozit(novaDosahlost: Dosahlost.NormalniDosahlost) {
         dataSource.upravitDosahlosti {
             add(0, novaDosahlost)
             val ruzne = distinctBy { it::class }
@@ -74,9 +79,12 @@ class Dosahlovac(
             }
         }
 
-        ulozit(dosahlost.kopirovat(Dosahlost.Stav.Splneno(LocalDate.now())))
+        val novaDosahlost = dosahlost.kopirovat(Dosahlost.Stav.Splneno(LocalDate.now()))
+        ulozit(novaDosahlost)
         dataSource.upravitPrachy {
             it + dosahlost.odmena
         }
+
+        dosahlostCallback.zobrazitSnackbar(novaDosahlost)
     }
 }

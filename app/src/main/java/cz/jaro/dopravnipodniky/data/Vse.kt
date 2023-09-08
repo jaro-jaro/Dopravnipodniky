@@ -15,7 +15,7 @@ data class Vse(
     val indexAktualnihoDp: Int = 0,
     val prachy: Peniz = pocatecniObnosPenez,
     val tutorial: StavTutorialu = StavTutorialu.Tutorialujeme.Uvod,
-    val dosahlosti: List<Dosahlost> = listOf(),
+    val dosahlosti: List<Dosahlost.NormalniDosahlost> = listOf(),
     val nastaveni: Nastaveni = Nastaveni(),
 ) {
 

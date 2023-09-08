@@ -75,7 +75,7 @@ class SharedViewModel(
         }
     }
 
-    fun zmenitDosahlosti(update: MutableList<Dosahlost>.() -> Unit) {
+    fun zmenitDosahlosti(update: MutableList<Dosahlost.NormalniDosahlost>.() -> Unit) {
         viewModelScope.launch {
             preferencesDataSource.upravitDosahlosti(update)
         }

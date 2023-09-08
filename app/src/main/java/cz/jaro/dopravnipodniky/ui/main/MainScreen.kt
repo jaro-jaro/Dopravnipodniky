@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
@@ -32,8 +34,11 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -41,7 +46,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +56,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -75,6 +80,8 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.stred
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.velikostMesta
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.zasebevrazdujZastavku
+import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
+import cz.jaro.dopravnipodniky.data.dosahlosti.DosahlostCallback
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.UliceID
@@ -94,11 +101,16 @@ import cz.jaro.dopravnipodniky.shared.oddalenyRezim
 import cz.jaro.dopravnipodniky.shared.pocatecniPriblizeni
 import cz.jaro.dopravnipodniky.shared.replaceBy
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
+import cz.jaro.dopravnipodniky.snackbarHostState
 import cz.jaro.dopravnipodniky.ui.destinations.GarazScreenDestination
 import cz.jaro.dopravnipodniky.ui.destinations.LinkyScreenDestination
+import cz.jaro.dopravnipodniky.ui.destinations.MainScreenDestination
 import cz.jaro.dopravnipodniky.ui.malovani.Mesto
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import org.koin.core.context.loadKoinModules
+import org.koin.dsl.module
 import kotlin.math.pow
 
 @Composable
@@ -118,6 +130,7 @@ fun MainScreen(
     val dpInfo by viewModel.dpInfo.collectAsStateWithLifecycle()
     val nastaveni by viewModel.nastaveni.collectAsStateWithLifecycle()
     val tutorial by viewModel.tutorial.collectAsStateWithLifecycle()
+    val dosahlosti: List<Dosahlost.NormalniDosahlost>? by viewModel.dosahlosti.collectAsStateWithLifecycle()
     val ulicove by viewModel.ulice.collectAsStateWithLifecycle()
     val linky by viewModel.linky.collectAsStateWithLifecycle()
     val busy by viewModel.busy.collectAsStateWithLifecycle()
@@ -127,6 +140,7 @@ fun MainScreen(
         dpInfo != null &&
         nastaveni != null &&
         tutorial != null &&
+        dosahlosti != null &&
         ulicove != null &&
         linky != null &&
         busy != null &&
@@ -135,6 +149,7 @@ fun MainScreen(
         dpInfo = dpInfo!!,
         nastaveni = nastaveni!!,
         tutorial = tutorial!!,
+        dosahlosti = dosahlosti!!,
         ulicove = ulicove!!,
         linky = linky!!,
         busy = busy!!,
@@ -148,6 +163,7 @@ fun MainScreen(
 }
 
 var DEBUG_TEXT by mutableStateOf(false)
+var ukazatDosahlosti by mutableStateOf(false)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -155,6 +171,7 @@ fun MainScreen(
     dpInfo: DPInfo,
     nastaveni: Nastaveni,
     tutorial: StavTutorialu,
+    dosahlosti: List<Dosahlost.NormalniDosahlost>,
     ulicove: List<Ulice>,
     linky: List<Linka>,
     busy: List<Bus>,
@@ -173,6 +190,27 @@ fun MainScreen(
     var editor by remember { mutableStateOf(false) }
     var upravitUlici by remember { mutableStateOf(null as UliceID?) }
     val scope = rememberCoroutineScope()
+    val res = LocalContext.current.resources
+
+    LaunchedEffect(Unit) {
+        loadKoinModules(module {
+            single {
+                DosahlostCallback {
+                    MainScope().launch {
+                        val result = snackbarHostState.showSnackbar(
+                            message = "Splněno ${res.getString(it.jmeno)}",
+                            actionLabel = "Zobrazit",
+                            duration = SnackbarDuration.Long,
+                        )
+                        if (result == SnackbarResult.ActionPerformed) {
+                            navigatate(MainScreenDestination)
+                            ukazatDosahlosti = true
+                        }
+                    }
+                }
+            }
+        })
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -192,9 +230,10 @@ fun MainScreen(
                 actions = {
                     IconButton(
                         onClick = {
+                            ukazatDosahlosti = true
                         }
                     ) {
-                        Icon(Icons.Default.EmojiEvents, stringResource(R.string.kalibrovat))
+                        Icon(Icons.Default.EmojiEvents, stringResource(R.string.uspechy))
                     }
                     var show by remember { mutableStateOf(false) }
                     IconButton(
@@ -282,12 +321,40 @@ fun MainScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            SideEffect {
-//                println("SAVE")
-            }
-            LaunchedEffect(Unit) {
-//                println("LOAD")
-            }
+            if (ukazatDosahlosti) AlertDialog(
+                onDismissRequest = {
+                    ukazatDosahlosti = false
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            ukazatDosahlosti = false
+                        }
+                    ) {
+                            Text(stringResource(android.R.string.ok))
+                        }
+                },
+                title = {
+                    Text(stringResource(R.string.uspechy))
+                },
+                icon = {
+                    Icon(Icons.Default.EmojiEvents, null)
+                },
+                text = {
+                    LazyColumn {
+                        items(dosahlosti) { dosahlost ->
+                            ListItem(
+                                headlineContent = {
+                                    Text(stringResource(dosahlost.jmeno))
+                                },
+                                supportingContent = {
+                                    Text(stringResource(dosahlost.popis))
+                                }
+                            )
+                        }
+                    }
+                }
+            )
             if (upravitUlici != null) {
                 val staraUlice = remember { ulicove.ulice(upravitUlici!!) }
 
@@ -438,7 +505,8 @@ fun MainScreen(
                                     // t - posunuti, c - coercovaný, p - prostředek, x - max, i - min
 
                                     val (start, stop) = ulicove.velikostMesta
-                                    val m = start.toDpSUlicema()
+                                    val m = start
+                                        .toDpSUlicema()
                                         .minus(ulicovyBlok * 2)
                                         .toPx()
                                         .minus(size.center.toOffset())
@@ -449,7 +517,8 @@ fun MainScreen(
                                                 .times(priblizeni)
                                                 .toOffset()
                                         )
-                                    val i = stop.toDpSUlicema()
+                                    val i = stop
+                                        .toDpSUlicema()
                                         .plus(ulicovyBlok * 2)
                                         .toPx()
                                         .minus(size.center.toOffset())

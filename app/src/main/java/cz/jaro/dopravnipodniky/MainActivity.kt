@@ -8,6 +8,7 @@ import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -15,6 +16,9 @@ import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
@@ -51,6 +55,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 private var uzNacteno = false
+var snackbarHostState = SnackbarHostState()
 
 class MainActivity : ComponentActivity() {
 
@@ -218,7 +223,13 @@ class MainActivity : ComponentActivity() {
                     }
                 )
 
-                DestinationsNavHost(navGraph = NavGraphs.root)
+                Scaffold(
+                    snackbarHost = {
+                        SnackbarHost(snackbarHostState)
+                    }
+                ) { paddingValues ->
+                    DestinationsNavHost(navGraph = NavGraphs.root, Modifier.padding(paddingValues))
+                }
             }
             AnimatedVisibility(
                 !fakeTema,

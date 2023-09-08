@@ -89,9 +89,9 @@ enum class Theme(
         jmeno = R.string.oranzove,
         barva = t15,
     ),
-    SyteOranzove(
-        darkColorScheme = colorsSyteOranzove,
-        jmeno = R.string.syte_cervene,
-        barva = t16,
-    ),
+//    SyteOranzove(
+//        darkColorScheme = colorsSyteOranzove,
+//        jmeno = R.string.syte_cervene,
+//        barva = t16,
+//    ),
 }

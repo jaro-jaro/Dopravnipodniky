@@ -46,6 +46,8 @@ import cz.jaro.dopravnipodniky.shared.odsazeniBaraku
 import cz.jaro.dopravnipodniky.shared.times
 import cz.jaro.dopravnipodniky.shared.udrzbaTroleje
 import cz.jaro.dopravnipodniky.shared.udrzbaZastavky
+import cz.jaro.dopravnipodniky.shared.vecne
+import cz.jaro.dopravnipodniky.shared.vecneLinky
 import cz.jaro.dopravnipodniky.ui.theme.Theme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -315,6 +317,12 @@ private fun update(
             Dosahlost.SkupinovaDosahlost.Penize::class,
             dataSource.vse.first().prachy.plus(deltaPrachy).value.roundToInt(),
         )
+
+        if (puvodniDp.info.jmenoMesta == vecne) {
+            dosahlovac.dosahni(Dosahlost.Vecne1::class)
+            if (puvodniDp.linky.map { it.cislo.toIntOrNull() }.toSet() == vecneLinky)
+                dosahlovac.dosahni(Dosahlost.Vecne2::class)
+        }
 
         // tutorial
 
