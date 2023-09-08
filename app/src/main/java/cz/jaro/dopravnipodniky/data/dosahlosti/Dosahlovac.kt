@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.first
 import org.koin.core.annotation.Single
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.time.LocalDate
+import java.time.LocalDateTime
 import kotlin.reflect.KClass
 
 @Single
@@ -40,10 +40,13 @@ class Dosahlovac(
             return
         }
 
-        ulozit(dosahlost.kopirovat(Dosahlost.Stav.Splneno(LocalDate.now())))
+        val novaDosahlost = dosahlost.kopirovat(Dosahlost.Stav.Splneno(LocalDateTime.now()))
+        ulozit(novaDosahlost)
         dataSource.upravitPrachy {
             it + dosahlost.odmena
         }
+
+        dosahlostCallback.zobrazitSnackbar(novaDosahlost)
     }
 
     private suspend fun ulozit(novaDosahlost: Dosahlost.NormalniDosahlost) {
@@ -79,7 +82,7 @@ class Dosahlovac(
             }
         }
 
-        val novaDosahlost = dosahlost.kopirovat(Dosahlost.Stav.Splneno(LocalDate.now()))
+        val novaDosahlost = dosahlost.kopirovat(Dosahlost.Stav.Splneno(LocalDateTime.now()))
         ulozit(novaDosahlost)
         dataSource.upravitPrachy {
             it + dosahlost.odmena

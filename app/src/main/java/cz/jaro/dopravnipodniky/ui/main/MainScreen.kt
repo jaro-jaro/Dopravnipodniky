@@ -29,13 +29,14 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
@@ -55,6 +56,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -87,6 +89,8 @@ import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.UliceID
 import cz.jaro.dopravnipodniky.shared.cenaTroleje
 import cz.jaro.dopravnipodniky.shared.cenaZastavky
+import cz.jaro.dopravnipodniky.shared.composeString
+import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
@@ -106,6 +110,8 @@ import cz.jaro.dopravnipodniky.ui.destinations.GarazScreenDestination
 import cz.jaro.dopravnipodniky.ui.destinations.LinkyScreenDestination
 import cz.jaro.dopravnipodniky.ui.destinations.MainScreenDestination
 import cz.jaro.dopravnipodniky.ui.malovani.Mesto
+import cz.jaro.dopravnipodniky.ui.theme.green_800
+import cz.jaro.dopravnipodniky.ui.theme.tmavaBarva
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -196,7 +202,13 @@ fun MainScreen(
         loadKoinModules(module {
             single {
                 DosahlostCallback {
-                    MainScope().launch {
+                    if (
+                        !(tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                        !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                        !(tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
+                        !(tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                        !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
+                    ) MainScope().launch {
                         val result = snackbarHostState.showSnackbar(
                             message = "Splněno ${res.getString(it.jmeno)}",
                             actionLabel = "Zobrazit",
@@ -228,7 +240,13 @@ fun MainScreen(
                     // todo podniky
                 },
                 actions = {
-                    IconButton(
+                    if (
+                        !(tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                        !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                        !(tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
+                        !(tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                        !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
+                    ) IconButton(
                         onClick = {
                             ukazatDosahlosti = true
                         }
@@ -288,7 +306,13 @@ fun MainScreen(
                             show = false
                         }
                     ) {
-                        DropdownMenuItem(
+                        if (
+                            !(tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                            !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                            !(tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
+                            !(tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                            !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
+                        ) DropdownMenuItem(
                             text = {
                                 Text(stringResource(R.string.nastaveni))
                             },
@@ -331,8 +355,8 @@ fun MainScreen(
                             ukazatDosahlosti = false
                         }
                     ) {
-                            Text(stringResource(android.R.string.ok))
-                        }
+                        Text(stringResource(android.R.string.ok))
+                    }
                 },
                 title = {
                     Text(stringResource(R.string.uspechy))
@@ -341,18 +365,7 @@ fun MainScreen(
                     Icon(Icons.Default.EmojiEvents, null)
                 },
                 text = {
-                    LazyColumn {
-                        items(dosahlosti) { dosahlost ->
-                            ListItem(
-                                headlineContent = {
-                                    Text(stringResource(dosahlost.jmeno))
-                                },
-                                supportingContent = {
-                                    Text(stringResource(dosahlost.popis))
-                                }
-                            )
-                        }
-                    }
+                    Dosahlosti(dosahlosti)
                 }
             )
             if (upravitUlici != null) {
@@ -673,6 +686,84 @@ fun MainScreen(
                             .weight(1F)
                             .padding(all = 8.dp)
                     )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Dosahlosti(
+    dosahlosti: List<Dosahlost.NormalniDosahlost>
+) {
+    val razeneDosahlosti = remember(dosahlosti) {
+        Dosahlost.dosahlosti().map { baseDosahlost ->
+            dosahlosti.find { it::class == baseDosahlost::class } ?: baseDosahlost
+        }.sortedByDescending {
+            (it.stav as? Dosahlost.Stav.Splneno)?.kdy
+        }.sortedBy {
+            when {
+                it.stav is Dosahlost.Stav.Splneno -> 0
+                it is Dosahlost.Secret -> 2
+                else -> 1
+            }
+        }
+    }
+    LazyColumn {
+        items(razeneDosahlosti) { dosahlost ->
+            OutlinedCard(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                colors = when {
+                    dosahlost.stav is Dosahlost.Stav.Splneno -> CardDefaults.outlinedCardColors(
+                        containerColor = green_800,
+                        contentColor = Color.White,
+                    )
+
+                    dosahlost is Dosahlost.Secret -> CardDefaults.outlinedCardColors(
+                        containerColor = tmavaBarva,
+                        contentColor = Color.White,
+                    )
+
+                    else -> CardDefaults.outlinedCardColors()
+                }
+            ) {
+                Column(
+                    Modifier.fillMaxWidth()
+                ) {
+                    val jmeno = when {
+                        dosahlost is Dosahlost.Secret && dosahlost.napoveda == null && dosahlost.stav !is Dosahlost.Stav.Splneno -> "???"
+                        else -> stringResource(dosahlost.jmeno)
+                    }
+                    Text(jmeno, Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp))
+                    val popis = when {
+                        dosahlost is Dosahlost.Secret && dosahlost.napoveda == null && dosahlost.stav !is Dosahlost.Stav.Splneno -> "?????????"
+                        dosahlost is Dosahlost.Secret && dosahlost.stav !is Dosahlost.Stav.Splneno -> stringResource(dosahlost.napoveda!!)
+                        else -> stringResource(dosahlost.popis)
+                    }
+                    Text(popis, Modifier.padding(top = 8.dp, start = 16.dp, end = 16.dp))
+                    if (dosahlost !is Dosahlost.Secret || dosahlost.stav is Dosahlost.Stav.Splneno) Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp, start = 16.dp, end = 16.dp)
+                    ) {
+                        Text(dosahlost.odmena.asString())
+                        Spacer(Modifier.weight(1F))
+                        if (dosahlost !is Dosahlost.Pocetni) Unit
+                        else {
+                            val splneno = when (dosahlost.stav) {
+                                is Dosahlost.Stav.Nesplneno -> 0
+                                is Dosahlost.Stav.Pocetni -> (dosahlost.stav as Dosahlost.Stav.Pocetni).pocet
+                                is Dosahlost.Stav.Splneno -> dosahlost.cil
+                            }
+                            Text(
+                                "${splneno.formatovat(0).composeString()}/${dosahlost.cil.formatovat(0).composeString()}",
+                                textAlign = TextAlign.End
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
                 }
             }
         }

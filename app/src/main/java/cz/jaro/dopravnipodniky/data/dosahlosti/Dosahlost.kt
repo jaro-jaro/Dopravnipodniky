@@ -1,17 +1,41 @@
 package cz.jaro.dopravnipodniky.data.dosahlosti
 
 import cz.jaro.dopravnipodniky.R
-import cz.jaro.dopravnipodniky.data.serializers.LocalDateSerializer
+import cz.jaro.dopravnipodniky.data.serializers.LocalDateTimeSerializer
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import java.time.LocalDate
+import java.time.LocalDateTime
 import kotlin.reflect.KClass
 
 @Serializable
 @SerialName("Dosahlost")
 sealed interface Dosahlost {
+    companion object {
+        fun dosahlosti() = listOf(
+            Linka1(),
+            Kocka(),
+            BusNaLince(),
+            BusNaZastavce(),
+            Bus1(),
+            Bus2(),
+            Bus12(),
+            Bus60(),
+            Bus1024(),
+            Penize200000(),
+            Penize500000(),
+            Penize1000000(),
+            Penize2000000(),
+            Penize10000000(),
+            ProjetZastavku(),
+            StejneLinky(),
+            Vecne1(),
+            Vecne2(),
+            JostoMesto(),
+            Citer(),
+        )
+    }
 
     @Serializable
     @SerialName("NormalniDosahlost")
@@ -84,7 +108,7 @@ sealed interface Dosahlost {
         @Serializable
         @SerialName("SplnenoDosahlostStav")
         data class Splneno(
-            @Serializable(with = LocalDateSerializer::class) val kdy: LocalDate,
+            @Serializable(with = LocalDateTimeSerializer::class) val kdy: LocalDateTime,
         ) : Stav
 
         @Serializable
@@ -334,10 +358,10 @@ sealed interface Dosahlost {
         override val stav: Stav = Stav.Nesplneno,
     ) : Secret {
         override fun kopirovat(stav: Stav) = copy(stav = stav)
-        override val jmeno get() = R.string.d_n_stejne_linky
+        override val napoveda get() = R.string.d_n_stejne_linky
         override val popis get() = R.string.d_p_stejne_linky
         override val odmena get() = 100_000.0.penez
-        override val napoveda get() = R.string.d_nap_stejne_linky
+        override val jmeno get() = R.string.d_nap_stejne_linky
     }
 
     @Serializable
@@ -384,106 +408,6 @@ sealed interface Dosahlost {
         override val odmena get() = Double.NEGATIVE_INFINITY.penez
     }
     // tady to končí doopravdy
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

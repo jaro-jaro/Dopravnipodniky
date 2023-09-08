@@ -40,6 +40,8 @@ import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
+import cz.jaro.dopravnipodniky.shared.StavTutorialu
+import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.ui.destinations.VytvareniLinkyScreenDestination
 import org.koin.androidx.compose.koinViewModel
 import kotlin.reflect.KClass
@@ -53,11 +55,14 @@ fun LinkyScreen(
     val viewModel = koinViewModel<SharedViewModel>()
 
     val linky by viewModel.linky.collectAsStateWithLifecycle()
+    val tutorial by viewModel.tutorial.collectAsStateWithLifecycle()
 
     if (
-        linky != null
+        linky != null &&
+        tutorial != null
     ) LinkyScreen(
         linky = linky!!,
+        tutorial = tutorial!!,
         zmenitLinky = viewModel::zmenitLinky,
         navigatate = navigator::navigate,
         navigatateBack = navigator::navigateUp,
@@ -69,6 +74,7 @@ fun LinkyScreen(
 @Composable
 fun LinkyScreen(
     linky: List<Linka>,
+    tutorial: StavTutorialu,
     zmenitLinky: (MutableList<Linka>.() -> Unit) -> Unit,
     navigatate: (Direction) -> Unit,
     navigatateBack: () -> Unit,
@@ -125,7 +131,13 @@ fun LinkyScreen(
                             Text(linka.cislo)
                         },
                         trailingContent = {
-                            Row {
+                            if (
+                                !(tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                                !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                                !(tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
+                                !(tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                                !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
+                            ) Row {
                                 Icon(Icons.Default.FormatLineSpacing, null)
                                 Icon(Icons.Default.GridGoldenratio, null)
                                 IconButton(

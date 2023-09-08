@@ -39,6 +39,7 @@ import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlovac
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
+import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.jednotky.times
 import cz.jaro.dopravnipodniky.shared.nasobitelZiskuPoOffline
@@ -86,60 +87,7 @@ class MainActivity : ComponentActivity() {
                 theme = tema!!
             ) {
                 val scope = rememberCoroutineScope()
-                if (tutorial is StavTutorialu.Tutorialujeme) {
-                    AlertDialog(
-                        onDismissRequest = {
-                            scope.launch {
-                                dataSource.upravitTutorial {
-                                    StavTutorialu.Odkliknuto(tutorial as StavTutorialu.Tutorialujeme)
-                                }
-                            }
-                        },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    scope.launch {
-                                        dataSource.upravitTutorial {
-                                            StavTutorialu.Odkliknuto(tutorial as StavTutorialu.Tutorialujeme)
-                                        }
-                                    }
-                                },
-                            ) {
-                                if (tutorial == StavTutorialu.Tutorialujeme.Uvod)
-                                    Text(stringResource(R.string.pojdme_na_to))
-                                else
-                                    Text(stringResource(android.R.string.ok))
-                            }
-                        },
-                        dismissButton = {
-                            if (tutorial == StavTutorialu.Tutorialujeme.Uvod) TextButton(
-                                onClick = {
-                                    scope.launch {
-                                        dataSource.upravitTutorial {
-                                            StavTutorialu.Nic
-                                        }
-                                    }
-                                },
-                            ) {
-                                Text(stringResource(R.string.preskocit_tutorial))
-                            }
-                        },
-                        icon = {
-                            Icon(Icons.Default.Help, null)
-                        },
-                        title = {
-                            Text(stringResource(R.string.tutorial))
-                        },
-                        text = {
-                            Text(
-                                stringResource((tutorial as StavTutorialu.Tutorialujeme).text),
-                                Modifier.verticalScroll(rememberScrollState())
-                            )
-                        },
-                    )
-                }
                 var vyuctovani by remember { mutableStateOf(null as Duration?) }
-
                 LaunchedEffect(Unit) {
                     hodiny.registerListener(1.seconds) {
                         // zistovani jestli nejses moc dlouho pryc
@@ -165,7 +113,14 @@ class MainActivity : ComponentActivity() {
                                 it + dpInfo!!.zisk * dobaOdPosledniNavstevy
                             }
 
-                            vyuctovani = dobaOdPosledniNavstevy
+                            if (
+                                tutorial != null &&
+                                !(tutorial!! je StavTutorialu.Tutorialujeme.Uvod) &&
+                                !(tutorial!! je StavTutorialu.Tutorialujeme.Linky) &&
+                                !(tutorial!! je StavTutorialu.Tutorialujeme.Zastavky) &&
+                                !(tutorial!! je StavTutorialu.Tutorialujeme.Garaz) &&
+                                !(tutorial!! je StavTutorialu.Tutorialujeme.Obchod)
+                            ) vyuctovani = dobaOdPosledniNavstevy
                         }
                         dataSource.upravitDPInfo {
                             it.copy(
@@ -175,7 +130,58 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                if (vyuctovani != null) AlertDialog(
+                if (tutorial is StavTutorialu.Tutorialujeme && fakeTema) AlertDialog(
+                    onDismissRequest = {
+                        scope.launch {
+                            dataSource.upravitTutorial {
+                                StavTutorialu.Odkliknuto(tutorial as StavTutorialu.Tutorialujeme)
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                scope.launch {
+                                    dataSource.upravitTutorial {
+                                        StavTutorialu.Odkliknuto(tutorial as StavTutorialu.Tutorialujeme)
+                                    }
+                                }
+                            },
+                        ) {
+                            if (tutorial == StavTutorialu.Tutorialujeme.Uvod)
+                                Text(stringResource(R.string.pojdme_na_to))
+                            else
+                                Text(stringResource(android.R.string.ok))
+                        }
+                    },
+                    dismissButton = {
+                        if (tutorial == StavTutorialu.Tutorialujeme.Uvod) TextButton(
+                            onClick = {
+                                scope.launch {
+                                    dataSource.upravitTutorial {
+                                        StavTutorialu.Nic
+                                    }
+                                }
+                            },
+                        ) {
+                            Text(stringResource(R.string.preskocit_tutorial))
+                        }
+                    },
+                    icon = {
+                        Icon(Icons.Default.Help, null)
+                    },
+                    title = {
+                        Text(stringResource(R.string.tutorial))
+                    },
+                    text = {
+                        Text(
+                            stringResource((tutorial as StavTutorialu.Tutorialujeme).text),
+                            Modifier.verticalScroll(rememberScrollState())
+                        )
+                    },
+                )
+
+                if (vyuctovani != null && fakeTema) AlertDialog(
                     onDismissRequest = {
                         vyuctovani = null
                     },
