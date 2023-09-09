@@ -55,13 +55,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
@@ -90,6 +90,7 @@ import cz.jaro.dopravnipodniky.shared.UliceID
 import cz.jaro.dopravnipodniky.shared.cenaTroleje
 import cz.jaro.dopravnipodniky.shared.cenaZastavky
 import cz.jaro.dopravnipodniky.shared.composeString
+import cz.jaro.dopravnipodniky.shared.contains
 import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
@@ -97,7 +98,7 @@ import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.jednotky.minus
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.plus
-import cz.jaro.dopravnipodniky.shared.jednotky.to
+import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSUlicema
 import cz.jaro.dopravnipodniky.shared.jednotky.toPx
 import cz.jaro.dopravnipodniky.shared.maximalniOddaleni
@@ -471,42 +472,31 @@ fun MainScreen(
                     .pointerInput(Unit) {
                         detectTapGestures {
                             if (editor) {
+                                val pozice = it
+                                    .minus(
+                                        size.center
+                                            .times(priblizeni)
+                                            .toOffset()
+                                    )
+                                    .minus(
+                                        androidx.compose.ui.geometry
+                                            .Offset(tx, ty)
+                                            .times(priblizeni)
+                                    )
+                                    .minus(size.center.toOffset())
+                                    .div(priblizeni)
+                                    .plus(size.center.toOffset())
+                                    .toDp()
+
                                 val ulice = ulicove.find { ulice ->
-                                    Rect(
-                                        topLeft = (ulice.zacatekX to ulice.zacatekY)
-                                            .toPx()
-                                            .minus(size.center.toOffset())
-                                            .times(priblizeni)
-                                            .plus(size.center.toOffset())
-                                            .plus(
-                                                androidx.compose.ui.geometry
-                                                    .Offset(tx, ty)
-                                                    .times(priblizeni)
-                                            )
-                                            .plus(
-                                                size.center
-                                                    .times(priblizeni)
-                                                    .toOffset()
-                                            ),
-                                        /*.also(::println)*/
-                                        bottomRight = (ulice.konecX to ulice.konecY)
-                                            .toPx()
-                                            .minus(size.center.toOffset())
-                                            .times(priblizeni)
-                                            .plus(size.center.toOffset())
-                                            .plus(
-                                                androidx.compose.ui.geometry
-                                                    .Offset(tx, ty)
-                                                    .times(priblizeni)
-                                            )
-                                            .plus(
-                                                size.center
-                                                    .times(priblizeni)
-                                                    .toOffset()
-                                            ),
-                                        /*.also(::println)*/
-                                    ).contains(it)
+                                    DpRect(
+                                        left = ulice.zacatekX,
+                                        top = ulice.zacatekY,
+                                        right = ulice.konecX,
+                                        bottom = ulice.konecY,
+                                    ).contains(pozice)
                                 }
+
                                 upravitUlici = ulice?.id
                             }
                         }

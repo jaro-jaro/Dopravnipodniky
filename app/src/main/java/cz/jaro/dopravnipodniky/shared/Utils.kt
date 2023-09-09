@@ -10,10 +10,13 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpRect
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.pocetLinek
+import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import kotlinx.coroutines.flow.Flow
 import kotlin.math.abs
 import kotlin.math.pow
@@ -162,6 +165,10 @@ val Duration.milliseconds get() = inWholeMicroseconds / 1_000.0
 val Duration.seconds get() = milliseconds / 1_000.0
 val Duration.minutes get() = seconds / 60.0
 val Duration.hours get() = minutes / 60.0
+
+fun DpRect.contains(pozice: Pozice<Dp>): Boolean {
+    return pozice.x >= left && pozice.x < right && pozice.y >= top && pozice.y < bottom
+}
 
 inline fun <E> List<E>.mutate(crossinline mutator: MutableList<E>.() -> Unit): List<E> = buildList {
     addAll(this@mutate)

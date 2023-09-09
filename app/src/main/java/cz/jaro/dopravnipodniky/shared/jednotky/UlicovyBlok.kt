@@ -1,5 +1,6 @@
 package cz.jaro.dopravnipodniky.shared.jednotky
 
+import androidx.compose.ui.unit.times
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
 import kotlinx.serialization.SerialName
@@ -39,8 +40,8 @@ class UlicovyBlokRange(
     }
 }
 
-fun UlicovyBlok.toDp() = ulicovyBlok * value
-fun UlicovyBlok.toDpSUlicema() = ulicovyBlok * value + sirkaUlice * value
+fun UlicovyBlok.toDp() = value * ulicovyBlok
+fun UlicovyBlok.toDpSUlicema() = value * (ulicovyBlok + sirkaUlice)
 
 val Int.ulicovychBloku get() = UlicovyBlok(this)
 val Long.ulicovychBloku get() = UlicovyBlok(this.toInt())

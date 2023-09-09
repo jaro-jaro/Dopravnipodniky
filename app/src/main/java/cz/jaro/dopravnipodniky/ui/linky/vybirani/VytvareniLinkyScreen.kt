@@ -42,7 +42,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
@@ -50,9 +49,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.DpRect
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.times
 import androidx.compose.ui.unit.toOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
@@ -67,12 +69,15 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.velikostMesta
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
+import cz.jaro.dopravnipodniky.shared.contains
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.minus
 import cz.jaro.dopravnipodniky.shared.jednotky.plus
 import cz.jaro.dopravnipodniky.shared.jednotky.sousedi
+import cz.jaro.dopravnipodniky.shared.jednotky.toDp
+import cz.jaro.dopravnipodniky.shared.jednotky.toDpOffset
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSUlicema
 import cz.jaro.dopravnipodniky.shared.jednotky.toPx
 import cz.jaro.dopravnipodniky.shared.maximalniOddaleni
@@ -144,23 +149,26 @@ fun VytvareniLinkyScreen(
         pos = centroid
 
         if (listSize == 1) run {
-            val k = ulicove.seznamKrizovatek.find { krizovatka ->
-                Rect(
-                    center = (krizovatka.toDpSUlicema().toPx() + sirkaUlice.toPx() / 2)
-                        .minus(size.center.toOffset())
+            val pozice = centroid
+                .minus(
+                    size.center
                         .times(priblizeni)
-                        .plus(size.center.toOffset())
-                        .plus(Offset(tx, ty).times(priblizeni))
-                        .plus(
-                            size.center
-                                .times(priblizeni)
-                                .toOffset()
-                        ),
-                    radius = sirkaUlice
-                        .toPx()
-                        .times(2F)
-                        .times(priblizeni),
-                ).contains(centroid)
+                        .toOffset()
+                )
+                .minus(
+                    Offset(tx, ty)
+                        .times(priblizeni)
+                )
+                .minus(size.center.toOffset())
+                .div(priblizeni)
+                .plus(size.center.toOffset())
+                .toDp()
+
+            val k = ulicove.seznamKrizovatek.find { krizovatka ->
+                DpRect(
+                    origin = krizovatka.toDpSUlicema().minus(sirkaUlice / 2).toDpOffset(),
+                    size = DpSize(2 * sirkaUlice, 2 * sirkaUlice)
+                ).contains(pozice)
             } ?: return@run
             if (kliklyKrizovatky.isEmpty()) {
                 kliklyKrizovatky += k

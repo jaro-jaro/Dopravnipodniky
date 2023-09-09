@@ -3,6 +3,7 @@ package cz.jaro.dopravnipodniky.shared.jednotky
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -36,8 +37,14 @@ fun Pozice<UlicovyBlok>.sousedi() = listOf(
 
 fun Pozice<UlicovyBlok>.toDp() = Pozice(x.toDp(), y.toDp())
 fun Pozice<UlicovyBlok>.toDpSUlicema() = Pozice(x.toDpSUlicema(), y.toDpSUlicema())
+
+fun Pozice<Dp>.toDpOffset() = DpOffset(x, y)
+
 context(Density)
 fun Pozice<Dp>.toPx() = Offset(x.toPx(), y.toPx())
+
+context(Density)
+fun Offset.toDp() = Pozice(x.toDp(), y.toDp())
 
 infix fun UlicovyBlok.to(other: UlicovyBlok) = Pozice(this, other)
 infix fun Dp.to(other: Dp) = Pozice(this, other)
