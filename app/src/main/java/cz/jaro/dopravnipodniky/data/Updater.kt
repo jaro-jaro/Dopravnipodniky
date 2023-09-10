@@ -425,6 +425,7 @@ private fun ziskatPocetVystupujicich(
     linky: List<Linka>,
     cloveciNaZastavce: Int,
     cloveci: Int,
+    nextInt: (Int, Int) -> Int = Random.Default::nextInt,
 ) = if (poziceNaLince == ulicove.indexOfLast { it.maZastavku }) cloveci
 else {
     val zbyvajiciKapacitaZastavky = ulice.kapacitaZastavky() - cloveciNaZastavce
@@ -432,7 +433,6 @@ else {
     val pocetLinekVUlici = ulice.pocetLinek(linky)
 
     val maximumLidiCoMuzeVystoupit = min(cloveci, zbyvajiciKapacitaZastavky)
-
     /**
      * @see <a href="https://www.desmos.com/calculator/7n8wgwxdle">Desmos</a>
      */
@@ -446,7 +446,7 @@ else {
 
     val nasobitel = 1 + nasobitelKapacity + nasobitelPristichZastavek + nasobitelPoctuLinek
 
-    Random.nextInt(0, cloveci + 1)
+    nextInt(0, cloveci + 1)
         .times(nasobitel)
         .roundToInt()
         .coerceAtLeast(0)
@@ -464,6 +464,7 @@ private fun Bus.ziskatPocetNastupujicich(
     cloveci: Int,
     dpInfo: DPInfo,
     poziceNaLince: Int,
+    nextInt: (Int, Int) -> Int = Random.Default::nextInt,
 ) = if (poziceNaLince == ulicove.indexOfLast { it.maZastavku }) 0
 else if (ulice.kapacitaZastavky() == 0) 0
 else {
@@ -497,7 +498,7 @@ else {
     val nasobitel =
         1 + nasobitelPristichZastavek + nasobitelHezkehoCisla + nasobitelStari + nasobitelJizdneho + nasobitelIntervalu
 
-    Random.nextInt(0, maximumLidiCoChtejiNastoupit.coerceAtLeast(1))
+    nextInt(0, maximumLidiCoChtejiNastoupit.coerceAtLeast(1))
         .times(nasobitel)
         .roundToInt()
         .coerceAtLeast(minimumLidiCoMusiNastoupit)
@@ -530,7 +531,11 @@ fun Bus.vydelkuj(
                 linky = puvodniDp.linky,
                 cloveciNaZastavce = (ulice.kapacitaZastavky() * .6).roundToInt(),
                 cloveci = cloveci,
+                nextInt = { a, b ->
+                    (a + b) / 2
+                },
             )
+            println((ulice.zacatek to ulice.konec) to vystupujici)
 
             cloveci -= vystupujici
 
@@ -544,7 +549,10 @@ fun Bus.vydelkuj(
                 cloveciNaZastavce = (ulice.kapacitaZastavky() * .6).roundToInt(),
                 dpInfo = puvodniDp.info,
                 cloveci = cloveci,
-                poziceNaLince = indexUliceNaLince
+                poziceNaLince = indexUliceNaLince,
+                nextInt = { a, b ->
+                    (a + b) / 2
+                },
             )
 
             cloveci += nastupujici
@@ -567,6 +575,9 @@ fun Bus.vydelkuj(
                 linky = puvodniDp.linky,
                 cloveciNaZastavce = (ulice.kapacitaZastavky() * .8).roundToInt(),
                 cloveci = cloveci,
+                nextInt = { a, b ->
+                    (a + b) / 2
+                },
             )
 
             cloveci -= vystupujici
@@ -581,7 +592,10 @@ fun Bus.vydelkuj(
                 cloveciNaZastavce = (ulice.kapacitaZastavky() * .8).roundToInt(),
                 dpInfo = puvodniDp.info,
                 cloveci = cloveci,
-                poziceNaLince = ulicove.lastIndex - indexUliceNaLince
+                poziceNaLince = ulicove.lastIndex - indexUliceNaLince,
+                nextInt = { a, b ->
+                    (a + b) / 2
+                },
             )
 
             cloveci += nastupujici

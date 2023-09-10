@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.EditRoad
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -55,7 +56,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -70,10 +73,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.Direction
+import cz.jaro.dopravnipodniky.BuildConfig
 import cz.jaro.dopravnipodniky.R
+import cz.jaro.dopravnipodniky.data.Generator
 import cz.jaro.dopravnipodniky.data.Nastaveni
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Zastavka
@@ -84,6 +90,8 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.velikostMesta
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.zasebevrazdujZastavku
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.dosahlosti.DosahlostCallback
+import cz.jaro.dopravnipodniky.data.seed
+import cz.jaro.dopravnipodniky.shared.DPID
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.UliceID
@@ -113,12 +121,14 @@ import cz.jaro.dopravnipodniky.ui.destinations.MainScreenDestination
 import cz.jaro.dopravnipodniky.ui.malovani.Mesto
 import cz.jaro.dopravnipodniky.ui.theme.green_800
 import cz.jaro.dopravnipodniky.ui.theme.tmavaBarva
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
 import kotlin.math.pow
+import kotlin.random.Random
 
 @Composable
 @Destination(start = true)
@@ -153,6 +163,8 @@ fun MainScreen(
         busy != null &&
         prachy != null
     ) MainScreen(
+        zmenitPodniky = viewModel::zmenitOstatniDopravnikyPodniky,
+        zmenitDP = viewModel::zmenitDopravnikyPodnik,
         dpInfo = dpInfo!!,
         nastaveni = nastaveni!!,
         tutorial = tutorial!!,
@@ -166,6 +178,9 @@ fun MainScreen(
         zmenitNastaveni = viewModel::zmenitNastaveni,
         zmenitUlice = viewModel::zmenitUlice,
         navigatate = navigator::navigate,
+        ziskatUlice = {
+            ulicove!!
+        }
     )
 }
 
@@ -175,6 +190,8 @@ var ukazatDosahlosti by mutableStateOf(false)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(
+    zmenitPodniky: (suspend MutableList<DopravniPodnik>.() -> Unit) -> Unit,
+    zmenitDP: (DPID) -> Unit,
     dpInfo: DPInfo,
     nastaveni: Nastaveni,
     tutorial: StavTutorialu,
@@ -188,6 +205,7 @@ fun MainScreen(
     zmenitNastaveni: ((Nastaveni) -> Nastaveni) -> Unit,
     zmenitUlice: (MutableList<Ulice>.() -> Unit) -> Unit,
     navigatate: (Direction) -> Unit,
+    ziskatUlice: () -> List<Ulice>,
 ) {
     val density = LocalDensity.current
     val stred = remember(ulicove.stred) { ulicove.stred.toDpSUlicema() }
@@ -228,7 +246,7 @@ fun MainScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(dpInfo.jmenoMesta)
+                    Text("${dpInfo.jmenoMesta} — $seed")
                 },
                 Modifier.combinedClickable(onLongClick = {
                     zmenitPrachy {
@@ -253,6 +271,20 @@ fun MainScreen(
                         }
                     ) {
                         Icon(Icons.Default.EmojiEvents, stringResource(R.string.uspechy))
+                    }
+                    if (BuildConfig.DEBUG) IconButton(
+                        onClick = {
+                            scope.launch(Dispatchers.IO) {
+                                seed = Random.nextInt()
+                                val novyDP = Generator.vygenerujMiPrvniMesto()
+                                zmenitPodniky {
+                                    add(novyDP)
+                                }
+                                zmenitDP(novyDP.info.id)
+                            }
+                        }
+                    ) {
+                        Icon(Icons.Default.Refresh, stringResource(R.string.uspechy))
                     }
                     var show by remember { mutableStateOf(false) }
                     IconButton(
@@ -455,6 +487,88 @@ fun MainScreen(
                     }
                 )
             }
+
+            fun PointerInputScope.onClick(it: Offset) {
+                val pitomyUlice = ziskatUlice()
+                if (editor) {
+                    val pozice = it
+                        .minus(
+                            size.center
+                                .times(priblizeni)
+                                .toOffset()
+                        )
+                        .minus(
+                            Offset(tx, ty)
+                                .times(priblizeni)
+                        )
+                        .minus(size.center.toOffset())
+                        .div(priblizeni)
+                        .plus(size.center.toOffset())
+                        .toDp()
+
+                    val ulice = pitomyUlice.find { ulice ->
+                        DpRect(
+                            left = ulice.zacatekX,
+                            top = ulice.zacatekY,
+                            right = ulice.konecX,
+                            bottom = ulice.konecY,
+                        ).contains(pozice)
+                    }
+
+                    upravitUlici = ulice?.id
+                }
+            }
+            println(ulicove.size to 0) //                                       <------ TADY
+            @Suppress("UNUSED_PARAMETER")
+            fun PointerInputScope.onTransform(p0: Offset, pan: Offset, zoom: Float, p3: Float) {
+                val pitomyUlice = ziskatUlice()
+                println(pitomyUlice.size to 1) //                                       <------ TADY
+                scope.launch {
+                    // t - posunuti, c - coercovaný, p - prostředek, x - max, i - min
+
+                    val (start, stop) = pitomyUlice/*.also { println(it.size) }*/.velikostMesta/*.also(::println)*/
+                    val m = start
+                        .toDpSUlicema()
+                        .minus(ulicovyBlok * 2)
+                        .toPx()
+                        .minus(size.center.toOffset())
+                        .times(priblizeni)
+                        .plus(size.center.toOffset())
+                        .plus(
+                            size.center
+                                .times(priblizeni)
+                                .toOffset()
+                        )
+                    val i = stop
+                        .toDpSUlicema()
+                        .plus(ulicovyBlok * 2)
+                        .toPx()
+                        .minus(size.center.toOffset())
+                        .times(priblizeni)
+                        .plus(size.center.toOffset())
+                        .plus(
+                            size.center
+                                .times(priblizeni)
+                                .toOffset()
+                        )
+                        .minus(IntOffset(size.width, size.height).toOffset())
+                    val p = (i + m) / 2F
+
+                    val ti = -i / priblizeni
+                    val tm = -m / priblizeni
+                    val pt = -p / priblizeni
+                    tx = if (ti.x > tm.x) pt.x else tx
+                        .plus(pan.x / priblizeni)
+                        .coerceIn(ti.x, tm.x)
+                    ty = if (ti.y > tm.y) pt.y else ty
+                        .plus(pan.y / priblizeni)
+                        .coerceIn(ti.y, tm.y)
+                    priblizeni = (priblizeni * zoom).coerceAtLeast(maximalniOddaleni)
+                }
+//                                println("onGesture(centroid=$centroid, pan=$pan, zoom=$zoom, rotation=$rotation)")
+//                                println("tx=${tx}, ty=${ty}, priblizeni=${priblizeni}")
+            }
+
             val malovatBusy = !editor && priblizeni > oddalenyRezim
             Mesto(
                 malovatBusy = malovatBusy,
@@ -470,86 +584,10 @@ fun MainScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .pointerInput(Unit) {
-                        detectTapGestures {
-                            if (editor) {
-                                val pozice = it
-                                    .minus(
-                                        size.center
-                                            .times(priblizeni)
-                                            .toOffset()
-                                    )
-                                    .minus(
-                                        androidx.compose.ui.geometry
-                                            .Offset(tx, ty)
-                                            .times(priblizeni)
-                                    )
-                                    .minus(size.center.toOffset())
-                                    .div(priblizeni)
-                                    .plus(size.center.toOffset())
-                                    .toDp()
-
-                                val ulice = ulicove.find { ulice ->
-                                    DpRect(
-                                        left = ulice.zacatekX,
-                                        top = ulice.zacatekY,
-                                        right = ulice.konecX,
-                                        bottom = ulice.konecY,
-                                    ).contains(pozice)
-                                }
-
-                                upravitUlici = ulice?.id
-                            }
-                        }
+                        detectTapGestures(::onClick)
                     }
                     .pointerInput(Unit) {
-                        detectTransformGestures(
-                            onGesture = { _, pan, zoom, _ ->
-                                scope.launch {
-                                    // t - posunuti, c - coercovaný, p - prostředek, x - max, i - min
-
-                                    val (start, stop) = ulicove.velikostMesta
-                                    val m = start
-                                        .toDpSUlicema()
-                                        .minus(ulicovyBlok * 2)
-                                        .toPx()
-                                        .minus(size.center.toOffset())
-                                        .times(priblizeni)
-                                        .plus(size.center.toOffset())
-                                        .plus(
-                                            size.center
-                                                .times(priblizeni)
-                                                .toOffset()
-                                        )
-                                    val i = stop
-                                        .toDpSUlicema()
-                                        .plus(ulicovyBlok * 2)
-                                        .toPx()
-                                        .minus(size.center.toOffset())
-                                        .times(priblizeni)
-                                        .plus(size.center.toOffset())
-                                        .plus(
-                                            size.center
-                                                .times(priblizeni)
-                                                .toOffset()
-                                        )
-                                        .minus(IntOffset(size.width, size.height).toOffset())
-                                    val p = (i + m) / 2F
-
-                                    val ti = -i / priblizeni
-                                    val tm = -m / priblizeni
-                                    val pt = -p / priblizeni
-                                    tx = if (ti.x > tm.x) pt.x else tx
-                                        .plus(pan.x / priblizeni)
-                                        .coerceIn(ti.x, tm.x)
-                                    ty = if (ti.y > tm.y) pt.y else ty
-                                        .plus(pan.y / priblizeni)
-                                        .coerceIn(ti.y, tm.y)
-                                    priblizeni = (priblizeni * zoom).coerceAtLeast(maximalniOddaleni)
-                                }
-//                                println("onGesture(centroid=$centroid, pan=$pan, zoom=$zoom, rotation=$rotation)")
-//                                println("tx=${tx}, ty=${ty}, priblizeni=${priblizeni}")
-                            }
-                        )
+                        detectTransformGestures(onGesture = ::onTransform)
                     },
             )
             Column(

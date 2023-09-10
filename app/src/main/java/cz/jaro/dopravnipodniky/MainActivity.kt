@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -55,7 +54,8 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-private var uzNacteno = false
+var zobrazitLoading by mutableStateOf(true)
+var uplnePoprve = true
 var snackbarHostState = SnackbarHostState()
 
 class MainActivity : ComponentActivity() {
@@ -68,18 +68,18 @@ class MainActivity : ComponentActivity() {
         val dataSource = get<PreferencesDataSource>()
         val dpInfoFlow = dataSource.dpInfo
         val temaFlow = dpInfoFlow.map { it.tema }
-        val fakeTemaFlow = temaFlow.map {
-            if (!uzNacteno) {
-                uzNacteno = true
-                delay(5_000)
+        val loading = temaFlow.map {
+            if (zobrazitLoading) {
+                delay(if (uplnePoprve) 5.seconds else 1.seconds)
+                uplnePoprve = false
+                zobrazitLoading = false
             }
-            true
         }
 
         setContent {
             val dpInfo by dpInfoFlow.collectAsStateWithLifecycle(null)
             val tema by temaFlow.collectAsStateWithLifecycle(null)
-            val fakeTema by fakeTemaFlow.collectAsStateWithLifecycle(false)
+            loading.collectAsStateWithLifecycle(Unit)
             val tutorial by dataSource.tutorial.collectAsStateWithLifecycle(null)
 
             if (tema != null && dpInfo != null) DpTheme(
@@ -130,7 +130,7 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                if (tutorial is StavTutorialu.Tutorialujeme && fakeTema) AlertDialog(
+                if (tutorial is StavTutorialu.Tutorialujeme && !zobrazitLoading) AlertDialog(
                     onDismissRequest = {
                         scope.launch {
                             dataSource.upravitTutorial {
@@ -181,7 +181,7 @@ class MainActivity : ComponentActivity() {
                     },
                 )
 
-                if (vyuctovani != null && fakeTema) AlertDialog(
+                if (vyuctovani != null && !zobrazitLoading) AlertDialog(
                     onDismissRequest = {
                         vyuctovani = null
                     },
@@ -238,8 +238,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
             AnimatedVisibility(
-                !fakeTema,
-                enter = slideInVertically(animationSpec = snap(), initialOffsetY = { it }),
+                zobrazitLoading,
+                enter = slideInVertically(animationSpec = tween(300), initialOffsetY = { it }),
                 exit = slideOutVertically(animationSpec = tween(300), targetOffsetY = { it }),
             ) {
                 Loading()

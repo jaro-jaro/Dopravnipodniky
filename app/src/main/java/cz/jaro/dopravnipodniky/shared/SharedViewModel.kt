@@ -6,6 +6,7 @@ import cz.jaro.dopravnipodniky.data.Nastaveni
 import cz.jaro.dopravnipodniky.data.PreferencesDataSource
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
@@ -43,6 +44,8 @@ class SharedViewModel(
     val tutorial = preferencesDataSource.tutorial
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
     val nastaveni = preferencesDataSource.nastaveni
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
+    val podniky = preferencesDataSource.podniky
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
 
     fun zmenitBusy(update: MutableList<Bus>.() -> Unit) {
@@ -90,6 +93,18 @@ class SharedViewModel(
     fun zmenitNastaveni(update: (Nastaveni) -> Nastaveni) {
         viewModelScope.launch {
             preferencesDataSource.upravitNastaveni(update)
+        }
+    }
+
+    fun zmenitOstatniDopravnikyPodniky(update: suspend MutableList<DopravniPodnik>.() -> Unit) {
+        viewModelScope.launch {
+            preferencesDataSource.upravitOstatniDopravniPodniky(update)
+        }
+    }
+
+    fun zmenitDopravnikyPodnik(dpID: DPID) {
+        viewModelScope.launch {
+            preferencesDataSource.zmenitDopravniPodnik(dpID)
         }
     }
 
