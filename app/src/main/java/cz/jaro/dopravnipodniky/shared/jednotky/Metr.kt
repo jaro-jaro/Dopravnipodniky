@@ -15,3 +15,4 @@ val Float.metru get() = Metr(this.toDouble())
 val Long.metru get() = Metr(this.toDouble())
 
 fun Metr.toDp() = Dp((value * 1).toFloat())
+fun Dp.toMetr() = Metr(value / 1.0)

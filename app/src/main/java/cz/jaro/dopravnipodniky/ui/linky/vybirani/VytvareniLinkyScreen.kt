@@ -17,6 +17,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -63,9 +64,9 @@ import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.rohyMesta
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.seznamKrizovatek
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.stred
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.velikostMesta
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
@@ -108,15 +109,19 @@ fun VytvareniLinkyScreen(
     val dpInfo by viewModel.dpInfo.collectAsStateWithLifecycle()
     val linky by viewModel.linky.collectAsStateWithLifecycle()
     val ulicove by viewModel.ulice.collectAsStateWithLifecycle()
+    val tutorial by viewModel.tutorial.collectAsStateWithLifecycle()
 
     if (
         dpInfo != null &&
         linky != null &&
-        ulicove != null
+        ulicove != null &&
+        tutorial != null
     ) VytvareniLinkyScreen(
         dpInfo = dpInfo!!,
         linky = linky!!,
         ulicove = ulicove!!,
+        tutorial = tutorial!!,
+        zmenitTutorial = viewModel::zmenitTutorial,
         zmenitLinky = viewModel::zmenitLinky,
         navigatateUp = navigator::navigateUp,
         dosahni = viewModel.dosahni,
@@ -129,6 +134,8 @@ var pos by mutableStateOf(Offset.Zero)
 @Composable
 fun VytvareniLinkyScreen(
     dpInfo: DPInfo,
+    tutorial: StavTutorialu,
+    zmenitTutorial: ((StavTutorialu) -> StavTutorialu) -> Unit,
     linky: List<Linka>,
     ulicove: List<Ulice>,
     zmenitLinky: (MutableList<Linka>.() -> Unit) -> Unit,
@@ -193,7 +200,7 @@ fun VytvareniLinkyScreen(
             ) {
                 // t - posunuti, c - coercovaný, p - prostředek, x - max, i - min
 
-                val (start, stop) = ulicove.velikostMesta
+                val (start, stop) = ulicove.rohyMesta
                 val m = start.toDpSUlicema()
                     .minus(ulicovyBlok * 2)
                     .toPx()
@@ -250,6 +257,15 @@ fun VytvareniLinkyScreen(
                     Text(stringResource(R.string.nova_linka))
                 },
                 actions = {
+                    if (tutorial je StavTutorialu.Tutorialujeme.Linky) IconButton(
+                        onClick = {
+                            zmenitTutorial {
+                                StavTutorialu.Tutorialujeme.Linky
+                            }
+                        }
+                    ) {
+                        Icon(Icons.Default.Help, stringResource(R.string.tutorial))
+                    }
                     IconButton(
                         onClick = {
                             kliklyKrizovatky = emptyList()

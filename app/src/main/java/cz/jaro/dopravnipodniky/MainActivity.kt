@@ -33,6 +33,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.DestinationsNavHost
 import cz.jaro.dopravnipodniky.data.Hodiny
 import cz.jaro.dopravnipodniky.data.PreferencesDataSource
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.dobaOdPoslednihoHrani
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.nevyzvednuto
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlovac
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
@@ -70,7 +72,7 @@ class MainActivity : ComponentActivity() {
         val temaFlow = dpInfoFlow.map { it.tema }
         val loading = temaFlow.map {
             if (zobrazitLoading) {
-                delay(if (uplnePoprve) 5.seconds else 1.seconds)
+                delay(if (uplnePoprve) 5.seconds else 0.hours)
                 uplnePoprve = false
                 zobrazitLoading = false
             }
@@ -91,9 +93,9 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(Unit) {
                     hodiny.registerListener(1.seconds) {
                         // zistovani jestli nejses moc dlouho pryc
+                        val posledniId = dpInfo!!.id
 
-                        val dobaOdPosledniNavstevy =
-                            (System.currentTimeMillis() - dpInfo!!.casPosledniNavstevy).milliseconds.coerceAtMost(8.hours)
+                        val dobaOdPosledniNavstevy = dpInfo!!.dobaOdPoslednihoHrani
 
                         if (dobaOdPosledniNavstevy < 0.milliseconds) {
                             dosahlovac.dosahni(Dosahlost.Citer::class)
@@ -110,7 +112,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             dataSource.upravitPrachy {
-                                it + dpInfo!!.zisk * dobaOdPosledniNavstevy
+                                it + dpInfo!!.nevyzvednuto
                             }
 
                             if (
@@ -120,10 +122,11 @@ class MainActivity : ComponentActivity() {
                                 !(tutorial!! je StavTutorialu.Tutorialujeme.Zastavky) &&
                                 !(tutorial!! je StavTutorialu.Tutorialujeme.Garaz) &&
                                 !(tutorial!! je StavTutorialu.Tutorialujeme.Obchod)
-                            ) vyuctovani = dobaOdPosledniNavstevy
+                            ) vyuctovani = dobaOdPosledniNavstevy.coerceAtMost(8.hours)
                         }
                         dataSource.upravitDPInfo {
-                            it.copy(
+                            if (posledniId != it.id) it
+                            else it.copy(
                                 casPosledniNavstevy = System.currentTimeMillis()
                             )
                         }

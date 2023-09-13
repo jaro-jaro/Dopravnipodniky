@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EditRoad
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
@@ -84,9 +85,9 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Zastavka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.rohyMesta
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.stred
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.velikostMesta
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.zasebevrazdujZastavku
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.dosahlosti.DosahlostCallback
@@ -115,6 +116,7 @@ import cz.jaro.dopravnipodniky.shared.pocatecniPriblizeni
 import cz.jaro.dopravnipodniky.shared.replaceBy
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
 import cz.jaro.dopravnipodniky.snackbarHostState
+import cz.jaro.dopravnipodniky.ui.destinations.DopravniPodnikyScreenDestination
 import cz.jaro.dopravnipodniky.ui.destinations.GarazScreenDestination
 import cz.jaro.dopravnipodniky.ui.destinations.LinkyScreenDestination
 import cz.jaro.dopravnipodniky.ui.destinations.MainScreenDestination
@@ -191,7 +193,7 @@ var ukazatDosahlosti by mutableStateOf(false)
 @Composable
 fun MainScreen(
     zmenitPodniky: (suspend MutableList<DopravniPodnik>.() -> Unit) -> Unit,
-    zmenitDP: (DPID) -> Unit,
+    zmenitDP: suspend (DPID) -> Unit,
     dpInfo: DPInfo,
     nastaveni: Nastaveni,
     tutorial: StavTutorialu,
@@ -209,13 +211,18 @@ fun MainScreen(
 ) {
     val density = LocalDensity.current
     val stred = remember(ulicove.stred) { ulicove.stred.toDpSUlicema() }
-    var tx by remember(stred) { mutableFloatStateOf(with(density) { -stred.x.toPx() * pocatecniPriblizeni }) }
-    var ty by remember(stred) { mutableFloatStateOf(with(density) { -stred.y.toPx() * pocatecniPriblizeni }) }
+    var tx by remember { mutableFloatStateOf(0F) }
+    var ty by remember { mutableFloatStateOf(0F) }
     var priblizeni by remember { mutableFloatStateOf(pocatecniPriblizeni) }
     var editor by remember { mutableStateOf(false) }
     var upravitUlici by remember { mutableStateOf(null as UliceID?) }
     val scope = rememberCoroutineScope()
     val res = LocalContext.current.resources
+
+    LaunchedEffect(stred) {
+        tx = with(density) { -stred.x.toPx() * pocatecniPriblizeni }
+        ty = with(density) { -stred.y.toPx() * pocatecniPriblizeni }
+    }
 
     LaunchedEffect(Unit) {
         loadKoinModules(module {
@@ -232,6 +239,7 @@ fun MainScreen(
                             message = "Splněno ${res.getString(it.jmeno)}",
                             actionLabel = "Zobrazit",
                             duration = SnackbarDuration.Long,
+                            withDismissAction = true,
                         )
                         if (result == SnackbarResult.ActionPerformed) {
                             navigatate(MainScreenDestination)
@@ -256,7 +264,7 @@ fun MainScreen(
                             12.0.pow(6).penez
                     }
                 }) {
-                    // todo podniky
+                    navigatate(DopravniPodnikyScreenDestination)
                 },
                 actions = {
                     if (
@@ -285,6 +293,33 @@ fun MainScreen(
                         }
                     ) {
                         Icon(Icons.Default.Refresh, stringResource(R.string.uspechy))
+                    }
+                    if (tutorial je StavTutorialu.Tutorialujeme.Uvod) IconButton(
+                        onClick = {
+                            zmenitTutorial {
+                                StavTutorialu.Tutorialujeme.Uvod
+                            }
+                        }
+                    ) {
+                        Icon(Icons.Default.Help, stringResource(R.string.tutorial))
+                    }
+                    if (tutorial je StavTutorialu.Tutorialujeme.Zastavky) IconButton(
+                        onClick = {
+                            zmenitTutorial {
+                                StavTutorialu.Tutorialujeme.Zastavky
+                            }
+                        }
+                    ) {
+                        Icon(Icons.Default.Help, stringResource(R.string.tutorial))
+                    }
+                    if (tutorial je StavTutorialu.Tutorialujeme.Garaz) IconButton(
+                        onClick = {
+                            zmenitTutorial {
+                                StavTutorialu.Tutorialujeme.Garaz
+                            }
+                        }
+                    ) {
+                        Icon(Icons.Default.Help, stringResource(R.string.tutorial))
                     }
                     var show by remember { mutableStateOf(false) }
                     IconButton(
@@ -518,15 +553,13 @@ fun MainScreen(
                     upravitUlici = ulice?.id
                 }
             }
-            println(ulicove.size to 0) //                                       <------ TADY
             @Suppress("UNUSED_PARAMETER")
             fun PointerInputScope.onTransform(p0: Offset, pan: Offset, zoom: Float, p3: Float) {
                 val pitomyUlice = ziskatUlice()
-                println(pitomyUlice.size to 1) //                                       <------ TADY
                 scope.launch {
                     // t - posunuti, c - coercovaný, p - prostředek, x - max, i - min
 
-                    val (start, stop) = pitomyUlice/*.also { println(it.size) }*/.velikostMesta/*.also(::println)*/
+                    val (start, stop) = pitomyUlice.rohyMesta
                     val m = start
                         .toDpSUlicema()
                         .minus(ulicovyBlok * 2)
@@ -584,7 +617,7 @@ fun MainScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .pointerInput(Unit) {
-                        detectTapGestures(::onClick)
+                        detectTapGestures(onTap = ::onClick)
                     }
                     .pointerInput(Unit) {
                         detectTransformGestures(onGesture = ::onTransform)

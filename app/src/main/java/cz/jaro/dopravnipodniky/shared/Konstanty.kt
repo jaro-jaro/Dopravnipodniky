@@ -177,12 +177,20 @@ const val TPH = TPM * 60
 
 const val millisPerTik = 1000L / TPS
 
+val pocatecniCenaMesta = 1_200_000L.penez/*3_141_592.penez*//*10_000_000.penez*/
+const val nasobitelInvestice = 1 / 65536.0
+const val nahodnostStaveniKOkupantum = .6F
+const val nahodnostStaveniKNeokupantum = 1.1F
+const val nahodnostPoObnoveni = .35F
+const val nahodnostNaZacatku = .5F
+const val rozdilNahodnosti = .05F
+const val nasobitelRedukce = .75F
+
 const val nasobitelDelkyBusu = 2F
 //val delkaUlice = 100.metru
 val pocatecniObnosPenez = /*Double.POSITIVE_INFINITY.penez*/150_000.penez/*5_000_000.penez*//*5_000_000_000.penez*/
-const val nasobitelZiskuPoOffline = 1 / 20.0
+const val nasobitelZiskuPoOffline = 1 / 5.0
 const val nasobitelZisku = 5
-const val nasobitelUrovne = 1 / 1.0
 const val nasobitelRozsahlosti = 200.0
 const val nasobitelMaxCloveku = PI / 2
 const val nahodnostVymreniKazdouMinutu = 30
@@ -201,6 +209,7 @@ const val nahodnostKamionuKazdyTik = nahodnostKamionuKazdouMinutu * TPM
 const val nahodnostSebevrazdyKazdouMinutu = 10
 const val nahodnostSebevrazdyKazdyTik = nahodnostSebevrazdyKazdouMinutu * TPM
 val cenaPruzkumuVerejnehoMineni = 50_000.penez
+const val nasobitelProdejniCastiMesta = 256
 
 val hezkaCisla =
     Json.decodeFromString<List<Int>>("[1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30,32,36,40,45,48,50,54,60,64,72,75,80,81,90,96,100,108,120,125,128,135,144,150,160,162,180,192,200,216,225,240,243,250,256,270,288,300,320,324,360,375,384,400,405]")

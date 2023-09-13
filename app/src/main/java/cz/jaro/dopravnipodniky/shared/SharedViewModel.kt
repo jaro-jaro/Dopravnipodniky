@@ -102,10 +102,8 @@ class SharedViewModel(
         }
     }
 
-    fun zmenitDopravnikyPodnik(dpID: DPID) {
-        viewModelScope.launch {
-            preferencesDataSource.zmenitDopravniPodnik(dpID)
-        }
+    suspend fun zmenitDopravnikyPodnik(dpID: DPID) {
+        preferencesDataSource.zmenitDopravniPodnik(dpID)
     }
 
     val filtrovaneBusy =

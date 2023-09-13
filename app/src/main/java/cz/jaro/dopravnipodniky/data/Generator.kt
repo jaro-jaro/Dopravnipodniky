@@ -12,10 +12,17 @@ import cz.jaro.dopravnipodniky.shared.barakuVUlici
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
-import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.sousedi
 import cz.jaro.dopravnipodniky.shared.jednotky.to
 import cz.jaro.dopravnipodniky.shared.jednotky.ulicovychBloku
+import cz.jaro.dopravnipodniky.shared.nahodnostNaZacatku
+import cz.jaro.dopravnipodniky.shared.nahodnostPoObnoveni
+import cz.jaro.dopravnipodniky.shared.nahodnostStaveniKNeokupantum
+import cz.jaro.dopravnipodniky.shared.nahodnostStaveniKOkupantum
+import cz.jaro.dopravnipodniky.shared.nasobitelInvestice
+import cz.jaro.dopravnipodniky.shared.nasobitelRedukce
+import cz.jaro.dopravnipodniky.shared.pocatecniCenaMesta
+import cz.jaro.dopravnipodniky.shared.rozdilNahodnosti
 import cz.jaro.dopravnipodniky.shared.seznamy.MESTA
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -50,15 +57,6 @@ class Generator(
                 jmenoMestaRandom = Random(18),
             ).vygenerujMiMestoAToHnedVykricnik()
         }
-
-        private val pocatecniCenaMesta = 1_200_000L.penez/*3_141_592.penez*//*10_000_000.penez*/
-        private const val nasobitelInvestice = 1 / 65536.0
-        private const val nahodnostStaveniKOkupantum = .6F
-        private const val nahodnostStaveniKNeokupantum = 1.1F
-        private const val nahodnostPoObnoveni = .35F
-        private const val nahodnostNaZacatku = .5F
-        private const val rozdilNahodnosti = .05F
-        private const val nasobitelRedukce = .75F
     }
 
     constructor(

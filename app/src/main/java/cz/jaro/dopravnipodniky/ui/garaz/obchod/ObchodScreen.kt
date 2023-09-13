@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Help
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -109,6 +110,7 @@ fun ObchodScreen(
     val linky by viewModel.linky.collectAsStateWithLifecycle()
     val busy by viewModel.busy.collectAsStateWithLifecycle()
     val prachy by viewModel.prachy.collectAsStateWithLifecycle()
+    val tutorial by viewModel.tutorial.collectAsStateWithLifecycle()
 
     if (
         dpInfo != null &&
@@ -129,7 +131,9 @@ fun ObchodScreen(
         zmenitNastaveni = viewModel::zmenitNastaveni,
         zmenitBusy = viewModel::zmenitBusy,
         navigatateBack = navigator::navigateUp,
-        dosahni = viewModel.dosahni
+        dosahni = viewModel.dosahni,
+        tutorial = tutorial!!,
+        zmenitTutorial = viewModel::zmenitTutorial,
     )
 }
 
@@ -154,6 +158,8 @@ fun ObchodScreen(
     zmenitBusy: (MutableList<Bus>.() -> Unit) -> Unit,
     navigatateBack: () -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
+    tutorial: StavTutorialu,
+    zmenitTutorial: ((StavTutorialu) -> StavTutorialu) -> Unit,
 ) {
     var stav by rememberSaveable { mutableStateOf(Zobrait.Vysledky) }
     BackHandler {
@@ -169,6 +175,17 @@ fun ObchodScreen(
             TopAppBar(
                 title = {
                     Text(stringResource(R.string.obchod))
+                },
+                actions = {
+                    if (tutorial je StavTutorialu.Tutorialujeme.Obchod) IconButton(
+                        onClick = {
+                            zmenitTutorial {
+                                StavTutorialu.Tutorialujeme.Obchod
+                            }
+                        }
+                    ) {
+                        Icon(Icons.Default.Help, stringResource(R.string.tutorial))
+                    }
                 },
                 navigationIcon = {
                     IconButton(

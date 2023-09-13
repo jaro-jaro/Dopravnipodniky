@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material3.AlertDialog
@@ -159,7 +159,7 @@ fun GarazScreen(
                     Text(stringResource(R.string.garaz_koupit_vozidlo))
                 },
                 icon = {
-                    Icon(Icons.Default.Add, null)
+                    Icon(Icons.Default.AddShoppingCart, null)
                 },
                 onClick = {
                     navigatate(ObchodScreenDestination)

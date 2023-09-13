@@ -13,16 +13,10 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpRect
 import cz.jaro.dopravnipodniky.R
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.pocetLinek
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import kotlinx.coroutines.flow.Flow
-import kotlin.math.abs
 import kotlin.math.pow
-import kotlin.math.roundToInt
 import kotlin.math.roundToLong
-import kotlin.math.sqrt
 import kotlin.time.Duration
 
 
@@ -69,28 +63,6 @@ fun Float.formatovat(decimalPlaces: Int = 2) = toDouble().formatovat(decimalPlac
 fun Long.formatovat(decimalPlaces: Int = 2) = toDouble().formatovat(decimalPlaces)
 fun Int.formatovat(decimalPlaces: Int = 2) = toDouble().formatovat(decimalPlaces)
 
-/**
- * Vrátí úroveň města na základě jeho počtu obyvatel, počtu potenciálů, počtu ulic a nepřímo i plochy
- */
-
-fun uroven(plocha: Int, obyv: Int, ulice: Int, potencialy: Int): Int =
-    (obyv / plocha.toDouble() * potencialy * ulice * nasobitelUrovne).roundToInt()
-
-/**
- * Vrátí velikost města na základě jeho plochy, počtu obyvatel a úrovně
- */
-
-fun velkomesto(plocha: Int, obyvatel: Int, uroven: Int): Text = when {
-    plocha >= 500_000_000 && obyvatel >= 5_000_000 && uroven >= 10_000_000 -> R.string.mesto_jostless
-    plocha >= 25_000_000 && obyvatel >= 500_000 && uroven >= 500_000 -> R.string.super_mesto
-    plocha >= 15_000_000 && obyvatel >= 250_000 && uroven >= 100_000 -> R.string.ultra_velkomesto
-    plocha >= 5_000_000 && obyvatel >= 150_000 && uroven >= 25_000 -> R.string.velkomesto
-    plocha >= 2_500_000 && obyvatel >= 40_000 && uroven >= 600 -> R.string.velke_mesto
-    plocha >= 1_500_000 && obyvatel >= 10_000 && uroven >= 300 -> R.string.mesto
-    plocha >= 500_000 && obyvatel >= 4_000 && uroven >= 40 -> R.string.mestecko
-    else -> R.string.vesnice
-}.toText()
-
 
 /**
  * Udělá ideální barvu pozadí cardviewu za daných kritérií
@@ -105,61 +77,6 @@ fun velkomesto(plocha: Int, obyvatel: Int, uroven: Int): Text = when {
 //fun pozadi(delitel: Int): Int {
 //    return Color.rgb(vse.barva.red / delitel, vse.barva.green / delitel, vse.barva.blue / delitel)
 //}
-
-/**
- * Vrátí násobitel náhodnosti, vytvořené z kapacity busu a kapacity zastávky, udávající, kolik lidí je ochotno nastoupit do busu závisle na ceně jízdenky a rozsáhlosti dopravního podniku
- */
-
-fun nasobitelPoctuLidiKteryTiNastoupiDoBusuNaZastavceKdyzZastaviANakyLidiTamJsouAMaVSobeJesteVolneMisto(dp: DopravniPodnik): Double {
-
-    val naRozsahlosti = sqrt(
-        1.0 - 1.0 / (dp.busy.size.coerceAtLeast(1) + 1)
-    ).times(
-        dp.ulice
-            .count { it.maZastavku && it.pocetLinek(dp) != 0 }
-            .toDouble()
-    ).div(
-        dp.ulice
-            .count()
-            .toDouble()
-    )
-
-    var naJizdnem = 1.0 - abs(
-        .6 - abs(
-            .5 - dp.info.jizdne.value
-                .minus(
-                    nasobitelRozsahlosti * naRozsahlosti
-                )
-                .div(
-                    nasobitelRozsahlosti * naRozsahlosti / 2.0
-                )
-                .pow(2)
-        )
-    )
-
-    if (dp.info.jizdne.value <= nasobitelRozsahlosti * naRozsahlosti * 2 / 5.0) {
-        naJizdnem = 4 / 9.0
-    }
-
-    //Log.d("funguj", "---${dp.jizdne}/${(naRozsahlosti * nasobitelRozsahlosti).roundToInt()}---")
-    //Log.d("funguj", naJizdnem.toString())
-    //Log.d("funguj", naRozsahlosti.toString())
-    //Log.d("funguj", sqrt(naJizdnem.coerceAtLeast(.0)).toString())
-
-    return sqrt(naJizdnem.coerceAtLeast(.0))
-}
-
-fun soucinPromenneNaRozsahlostiVNasobiteliPoctuLidiKteryTiNastoupiDoBusuNaZastavceKdyzZastaviANakyLidiTamJsouAMaVSobeJesteVolneMistoANasobiteleRozsahlosti(
-    dp: DopravniPodnik
-): Double {
-
-
-    return sqrt(1.0 - (1.0 / (dp.busy.size.coerceAtLeast(1) + 1))) *
-            (dp.ulice.filter { it.maZastavku }.count { it.pocetLinek(dp) != 0 }.toDouble() /
-                    dp.ulice.size.toDouble()) *
-            nasobitelRozsahlosti
-}
-
 
 val Duration.milliseconds get() = inWholeMicroseconds / 1_000.0
 val Duration.seconds get() = milliseconds / 1_000.0

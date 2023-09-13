@@ -6,6 +6,7 @@
     <string name="obchod">Obchod</string>
     <string name="kc">%s €</string>
     <string name="zisk_kc">%s €/min</string>
+    <string name="zisk">Zisk: %s</string>
     <string name="pocet_busu">%1$d z %2$d vozů</string>
     <string name="garaz_koupit_vozidlo">Koupit vozidlo</string>
     <string name="uspechy">Úspěchy</string>
@@ -36,9 +37,9 @@
     <string name="zvolte_barvu">Zvolte barvu:</string>
     <string name="zvolte_tema">Zvolte téma dopravního podniku:</string>
     <string name="malo_penez">Nemáte dostatek peněz!!!</string>
-    <string name="pocet_ulic">%1$d ulic z toho %2$d má troleje</string>
-    <string name="pocet_domu">%s domů</string>
-    <string name="pocet_zastavek">%s zastávek</string>
+    <string name="pocet_ulic">Počet ulic: %1$S, z toho %2$s má troleje</string>
+    <string name="pocet_domu">Počet domů: %s</string>
+    <string name="pocet_zastavek">Počet zastávek: %s</string>
     <string name="barva_linky">"Barva linky</string>
     <string name="barva_temata">"Barva témata: %s</string>
     <string name="linka_existuje">Linka s tímto číslem již existuje!</string>
@@ -47,7 +48,7 @@
     <string name="zadna_linka_vybrana">Žádná linka</string>
     <string name="vyberte_linku">Vyberte linku:</string>
     <string name="vybrat_mesto">Vybrat %s</string>
-    <string name="nevyzvednuto">%s € nevyzvednuto</string>
+    <string name="nevyzvednuto">Nevyzvednuto: %s</string>
     <string name="uspesne_koupeno">Úspěšně koupeno</string>
     <string name="odebrat_bus_z_linek">Odebrat z linek</string>
     <string name="fakt_chcete_prodat_bus">Opravdu chcete prodat tento bus?</string>
@@ -76,7 +77,7 @@
     <string name="vytvorit">Vytvořit</string>
     <string name="potvrdit">Potvrdit</string>
     <string name="o_aplikaci">O aplikaci</string>
-    <string name="doba_od_posledniho_otevreni">%d min od posledního otevření</string>
+    <string name="doba_od_posledniho_otevreni">Od posledního otevření: %s min</string>
     <string name="m_ctverecnych">%s m²</string>
     <string name="obyvatel">%s obyvatel</string>
     <string name="zadna_linka">Bohužel nevlastníte žádnou linku, pro vytvoření stiskněte tlačítko Nová linka</string>
@@ -209,7 +210,7 @@
     <string name="dalsi">Další</string>
     <string name="vybrat_vse">Vybrat vše</string>
     <string name="odebrat_z_linky">Odebrat z linky</string>
-    <string name="novy_dopravni_podnik">Nový dopravní podnik</string>
+    <string name="najit_nove_mesto">Najít nové město</string>
     <string name="mezera_hotovo"> Hotovo</string>
     <string name="dle_trakce">Dle trakce:</string>
     <string name="dle_typu">Dle typu:</string>
@@ -346,5 +347,10 @@
     <string name="moc_filtru">Bohužel, nenašli jsme žádná vozidla, která by odpovídala vašim požadavkům. Zkuste poupravit filtry!</string>
     <string name="nepridavat">Nevypravovat</string>
     <string name="zobrazeno">zobrazeno %d položek</string>
+    <string name="typ_mesta">Typ města: %s</string>
+    <string name="uroven_mesta">Úroveň města: %s.</string>
+    <string name="jedoucich_vozidel">Jedoucích vozidel: %1$s z %2$s</string>
+    <string name="rozloha">Rozloha: %s m²</string>
+    <string name="pocet_cloveku">Počet obyvatel: %s</string>
 
 </resources>
