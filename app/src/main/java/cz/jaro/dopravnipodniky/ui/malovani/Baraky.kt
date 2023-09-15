@@ -4,7 +4,6 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Barak
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypBaraku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
@@ -14,6 +13,7 @@ import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.shared.translate
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
 import cz.jaro.dopravnipodniky.shared.velikostBaraku
+import cz.jaro.dopravnipodniky.shared.zaobleniBaraku
 import cz.jaro.dopravnipodniky.ui.theme.Theme
 
 context (DrawScope)
@@ -65,7 +65,7 @@ fun Barak.draw(
                     drawRoundRect(
                         color = barvicka,
                         size = Size(velikost, velikost) * 2F,
-                        cornerRadius = CornerRadius(20.dp.toPx())
+                        cornerRadius = CornerRadius(zaobleniBaraku.toPx() * 4)
                     )
                 }
             }
@@ -82,7 +82,7 @@ fun Barak.draw(
                     width = velikost,
                     height = velikost,
                 ),
-                cornerRadius = CornerRadius(5.dp.toPx())
+                cornerRadius = CornerRadius(zaobleniBaraku.toPx())
             )
 
             Orientace.Vodorovne to false -> drawRoundRect( // nahore
@@ -95,7 +95,7 @@ fun Barak.draw(
                     width = velikost,
                     height = velikost,
                 ),
-                cornerRadius = CornerRadius(5.dp.toPx())
+                cornerRadius = CornerRadius(zaobleniBaraku.toPx())
             )
 
             Orientace.Svisle to true -> drawRoundRect( // vlevo
@@ -108,7 +108,7 @@ fun Barak.draw(
                     width = velikost,
                     height = velikost,
                 ),
-                cornerRadius = CornerRadius(5.dp.toPx())
+                cornerRadius = CornerRadius(zaobleniBaraku.toPx())
             )
 
             Orientace.Svisle to false -> drawRoundRect( // vpravo
@@ -121,7 +121,7 @@ fun Barak.draw(
                     width = velikost,
                     height = velikost,
                 ),
-                cornerRadius = CornerRadius(5.dp.toPx())
+                cornerRadius = CornerRadius(zaobleniBaraku.toPx())
             )
         }
     }

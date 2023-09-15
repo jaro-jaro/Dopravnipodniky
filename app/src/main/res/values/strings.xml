@@ -126,9 +126,10 @@
     <string name="vyberte_ev_c">Vyberte evidenční číslo</string>
     <string name="upravit_ulici">Upravit ulici</string>
     <string name="prodat_dp">Prodat dopravní podnik</string>
-    <string name="za_prodej_dp_dostanete">Prodáním dopravního podniku získáte peníze odpovídající hodnotě Vašeho vozového parku, to je %1$s €. Navíc získáte %2$s € jako přibližnou hodnotu města. Protože je prodej vždy riskantní a ne vždy musí být úplně úspěšný, nevíte jistě, kolik peněz získáte, ale určitě to bude v rozmezí %3$s € a %4$s €.</string>
+    <string name="za_prodej_dp_dostanete">Prodáním dopravního podniku získáte peníze odpovídající hodnotě Vašeho vozového parku a přibližnou hodnotu města. Protože je prodej vždy riskantní, ne vždy musí být úplně úspěšný. Nevíte jistě, kolik peněz získáte, očekávaná částka je %s, což se ale může lišit až o 50 %%!.</string>
     <string name="prodat">Prodat</string>
-    <string name="prodali_jste">Úspěšně jste prodali %1$s za %2$s €</string>
+    <string name="prodali_jste">Úspěšně jste prodali %1$s za %2$s</string>
+    <string name="prodali_jste_dp">Úspěšně jste prodali dopravní podnik města %1$s za %2$s</string>
     <string name="vytvorit_linku">Vytvořit linku</string>
     <string name="nekonecne_mnoho">Nekonečně mnoho</string>
     <string name="nekonecne_malo">Nekonečně málo</string>

@@ -72,7 +72,7 @@ import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.replaceBy
-import cz.jaro.dopravnipodniky.shared.sedNepouzivanehoBusu
+import cz.jaro.dopravnipodniky.shared.barvaNepouzivanehoBusu
 import cz.jaro.dopravnipodniky.ui.destinations.ObchodScreenDestination
 import org.koin.androidx.compose.koinViewModel
 import kotlin.reflect.KClass
@@ -236,7 +236,7 @@ fun GarazScreen(
                                     Modifier
                                         .width(40.dp)
                                         .height(40.dp),
-                                    colorFilter = ColorFilter.tint(color = linka?.barvicka?.barva ?: sedNepouzivanehoBusu),
+                                    colorFilter = ColorFilter.tint(color = linka?.barvicka?.barva ?: barvaNepouzivanehoBusu),
                                 )
                             },
                         )

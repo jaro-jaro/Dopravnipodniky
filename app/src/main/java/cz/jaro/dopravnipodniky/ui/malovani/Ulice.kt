@@ -2,7 +2,6 @@ package cz.jaro.dopravnipodniky.ui.malovani
 
 import android.graphics.Color
 import android.graphics.Paint
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
@@ -13,9 +12,10 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.kapacitaZastavky
 import cz.jaro.dopravnipodniky.shared.Orientace.Svisle
 import cz.jaro.dopravnipodniky.shared.Orientace.Vodorovne
+import cz.jaro.dopravnipodniky.shared.barvaChodniku
+import cz.jaro.dopravnipodniky.shared.barvaUlice
 import cz.jaro.dopravnipodniky.shared.delkaUlice
-import cz.jaro.dopravnipodniky.shared.sedChodniku
-import cz.jaro.dopravnipodniky.shared.sedUlice
+import cz.jaro.dopravnipodniky.shared.predsazeniKrizovatky
 import cz.jaro.dopravnipodniky.shared.sirkaChodniku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.ui.main.DEBUG_TEXT
@@ -33,44 +33,41 @@ fun Ulice.draw() {
         val sirkaChodniku = sirkaChodniku.toPx()
         val sirkaUlice = sirkaUlice.toPx()
         val delkaUlice = delkaUlice.toPx()
+        val predsazeniKrizovatky = predsazeniKrizovatky.toPx()
         when (orientace) {
             Svisle -> {
                 drawRect(
-                    color = sedUlice,
-                    topLeft = Offset(y = -1F),
-                    size = Size(sirkaUlice, delkaUlice + 2F)
+                    color = barvaUlice,
+                    topLeft = Offset(y = predsazeniKrizovatky),
+                    size = Size(sirkaUlice, delkaUlice - predsazeniKrizovatky * 2)
                 )
                 drawRoundRect(
-                    color = sedChodniku,
-                    topLeft = Offset(y = -sirkaChodniku),
-                    size = Size(sirkaChodniku, delkaUlice + sirkaChodniku * 2),
-                    cornerRadius = CornerRadius(sirkaChodniku),
+                    color = barvaChodniku,
+                    topLeft = Offset(y = predsazeniKrizovatky - 1),
+                    size = Size(sirkaChodniku, delkaUlice - predsazeniKrizovatky * 2 + 2),
                 ) // vlevo
                 drawRoundRect(
-                    color = sedChodniku,
-                    topLeft = Offset(x = sirkaUlice - sirkaChodniku, y = -sirkaChodniku),
-                    size = Size(sirkaChodniku, delkaUlice + sirkaChodniku * 2),
-                    cornerRadius = CornerRadius(sirkaChodniku),
+                    color = barvaChodniku,
+                    topLeft = Offset(x = sirkaUlice - sirkaChodniku, y = predsazeniKrizovatky - 1),
+                    size = Size(sirkaChodniku, delkaUlice - predsazeniKrizovatky * 2 + 2),
                 ) // vpravo
             }
 
             Vodorovne -> {
                 drawRect(
-                    color = sedUlice,
-                    topLeft = Offset(x = -1F),
-                    size = Size(delkaUlice + 2F, sirkaUlice)
+                    color = barvaUlice,
+                    topLeft = Offset(x = predsazeniKrizovatky),
+                    size = Size(delkaUlice - predsazeniKrizovatky * 2, sirkaUlice)
                 )
                 drawRoundRect(
-                    color = sedChodniku,
-                    topLeft = Offset(x = -sirkaChodniku),
-                    size = Size(delkaUlice + sirkaChodniku * 2, sirkaChodniku),
-                    cornerRadius = CornerRadius(sirkaChodniku),
+                    color = barvaChodniku,
+                    topLeft = Offset(x = predsazeniKrizovatky - 1),
+                    size = Size(delkaUlice - predsazeniKrizovatky * 2 + 2, sirkaChodniku),
                 ) // nahore
                 drawRoundRect(
-                    color = sedChodniku,
-                    topLeft = Offset(x = -sirkaChodniku, y = sirkaUlice - sirkaChodniku),
-                    size = Size(delkaUlice + sirkaChodniku * 2, sirkaChodniku),
-                    cornerRadius = CornerRadius(sirkaChodniku),
+                    color = barvaChodniku,
+                    topLeft = Offset(x = predsazeniKrizovatky - 1, y = sirkaUlice - sirkaChodniku),
+                    size = Size(delkaUlice - predsazeniKrizovatky * 2 + 2, sirkaChodniku),
                 ) // dole
             }
         }

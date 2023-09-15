@@ -15,10 +15,10 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.seznamKrizovatek
 import cz.jaro.dopravnipodniky.data.serializers.DpSerializer
+import cz.jaro.dopravnipodniky.shared.barvaPozadi
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.oddalenyRezim
-import cz.jaro.dopravnipodniky.shared.sedPozadi
 import cz.jaro.dopravnipodniky.ui.linky.vybirani.namalovatVybiraniLinky
 import kotlinx.serialization.Serializable
 
@@ -64,7 +64,7 @@ fun Mesto(
         drawRect(
 //            color = dp.tema.darkColorScheme.surface,
 //            color = dp.tema.darkColorScheme.surfaceVariant,
-            color = sedPozadi,
+            color = barvaPozadi,
             size = size
         )
 
@@ -75,15 +75,14 @@ fun Mesto(
                 left = tx + size.center.x,
                 top = ty + size.center.y,
             ) {
+                ulice.seznamKrizovatek.forEach { krizovatka ->
+                    namalovatKrizovatku(ulice, krizovatka)
+                }
 
                 ulice.forEach { ulice ->
                     ulice.baraky.forEach { barak ->
                         barak.draw(dpInfo.tema, ulice)
                     }
-                }
-
-                ulice.seznamKrizovatek.forEach { krizovatka ->
-                    namalovatKrizovatku(ulice, krizovatka)
                 }
 
                 ulice.forEach { ulice ->

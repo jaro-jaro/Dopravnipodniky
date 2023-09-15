@@ -1,5 +1,6 @@
 package cz.jaro.dopravnipodniky.ui.dopravnipodniky
 
+import android.widget.NumberPicker
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -28,11 +29,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -42,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -70,10 +75,13 @@ import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
+import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.minutes
-import cz.jaro.dopravnipodniky.shared.nasobitelProdejniCastiMesta
+import cz.jaro.dopravnipodniky.shared.prodejniCenaCloveka
+import cz.jaro.dopravnipodniky.snackbarHostState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import kotlin.random.Random
@@ -106,6 +114,7 @@ fun DopravniPodnikyScreen(
         prachy = prachy!!,
         zmenitPodniky = viewModel::zmenitOstatniDopravnikyPodniky,
         zmenitDP = viewModel::zmenitDopravnikyPodnik,
+        zmenitPrachy = viewModel::zmenitPrachy,
         tutorial = tutorial!!,
         dpInfo = dpInfo!!,
         podniky = podniky!!,
@@ -126,6 +135,7 @@ fun DopravniPodnikyScreen(
     podniky: List<DopravniPodnik>,
     zmenitPodniky: (suspend MutableList<DopravniPodnik>.() -> Unit) -> Unit,
     zmenitDP: suspend (DPID) -> Unit,
+    zmenitPrachy: ((Peniz) -> Peniz) -> Unit,
     dpInfo: DPInfo,
     prachy: Peniz,
     tutorial: StavTutorialu,
@@ -200,7 +210,6 @@ fun DopravniPodnikyScreen(
                                 otevreno = if (expanded) null else dp.info.id.toString()
                             },
                     ) {
-                        val scope = rememberCoroutineScope()
                         ListItem(
                             headlineContent = {
                                 Text(dp.info.jmenoMesta)
@@ -336,8 +345,8 @@ fun DopravniPodnikyScreen(
                                 var novejDPLogaritmicky by rememberSaveable { mutableStateOf(false) }
                                 var oddelatDP by rememberSaveable { mutableStateOf(false) }
                                 var smenitJizdne by rememberSaveable { mutableStateOf(false) }
-                                var smenitJizdneTextove by rememberSaveable { mutableStateOf(false) }
-                                val ctx = LocalContext.current
+                                val res = LocalContext.current.resources
+                                val scope = rememberCoroutineScope()
 
                                 if (novejDp) AlertDialog(
                                     onDismissRequest = {
@@ -382,69 +391,114 @@ fun DopravniPodnikyScreen(
                                     },
                                 )
 
-                                val oddelavaciCena = dp.cloveci * nasobitelProdejniCastiMesta
+                                val oddelavaciCena = prodejniCenaCloveka * dp.cloveci + dp.busy.sumOf { it.prodejniCena.value }.penez
 
                                 if (oddelatDP) AlertDialog(
                                     onDismissRequest = {
                                         oddelatDP = false
                                     },
-                                    confirmButton = { },
+                                    confirmButton = {
+                                        TextButton(
+                                            onClick = {
+                                                val actualCena = oddelavaciCena * Random.nextDouble(.5, 1.5)
+
+                                                zmenitPodniky {
+                                                    removeAt(indexOfFirst { it.info.id == dp.info.id })
+                                                }
+
+                                                zmenitPrachy {
+                                                    it + actualCena
+                                                }
+
+                                                MainScope().launch {
+                                                    with(res) {
+                                                        snackbarHostState.showSnackbar(
+                                                            message = getString(
+                                                                R.string.prodali_jste_dp,
+                                                                dp.info.jmenoMesta,
+                                                                getString(R.string.kc, actualCena.value.formatovat(0).asString())
+                                                            ),
+                                                            duration = SnackbarDuration.Indefinite,
+                                                            withDismissAction = true,
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        ) {
+                                            Text(stringResource(R.string.prodat_dp))
+                                        }
+                                    },
                                     dismissButton = {
                                         TextButton(
                                             onClick = {
                                                 oddelatDP = false
                                             }
                                         ) {
-                                            Text(stringResource(R.string.odebrat_bus_z_linek))
+                                            Text(stringResource(R.string.zrusit))
                                         }
                                     },
                                     title = {
                                         Text(stringResource(R.string.prodat_dp))
                                     },
                                     text = {
-
+                                        Text(stringResource(R.string.za_prodej_dp_dostanete, oddelavaciCena.asString()))
                                     },
                                 )
-                                if (smenitJizdneTextove) AlertDialog(
-                                    onDismissRequest = {
-                                        smenitJizdneTextove = false
-                                    },
-                                    confirmButton = { },
-                                    dismissButton = {
-                                        TextButton(
-                                            onClick = {
-                                                smenitJizdneTextove = false
-                                            }
-                                        ) {
-                                            Text(stringResource(R.string.odebrat_bus_z_linek))
-                                        }
-                                    },
-                                    title = {
-                                        Text(stringResource(R.string.vyberte_linku))
-                                    },
-                                    text = {
+                                var vybraneJizdne by rememberSaveable { mutableIntStateOf(0) }
 
-                                    },
-                                )
+                                LaunchedEffect(dp.info.jizdne) {
+                                    vybraneJizdne = dp.info.jizdne.value.toInt()
+                                }
+
                                 if (smenitJizdne) AlertDialog(
                                     onDismissRequest = {
                                         smenitJizdne = false
                                     },
-                                    confirmButton = { },
-                                    dismissButton = {
+                                    confirmButton = {
                                         TextButton(
                                             onClick = {
+                                                zmenitPodniky {
+                                                    val i = indexOfFirst { it.info.id == dp.info.id }
+                                                    this[i] = this[i].copy(
+                                                        info = this[i].info.copy(
+                                                            jizdne = vybraneJizdne.penez,
+                                                        )
+                                                    )
+                                                }
                                                 smenitJizdne = false
                                             }
                                         ) {
-                                            Text(stringResource(R.string.odebrat_bus_z_linek))
+                                            Text(stringResource(R.string.potvrdit))
+                                        }
+                                    },
+                                    dismissButton = {
+                                        TextButton(
+                                            onClick = {
+
+                                            }
+                                        ) {
+                                            Text(stringResource(R.string.pruzkum_mineni))
                                         }
                                     },
                                     title = {
                                         Text(stringResource(R.string.vyberte_linku))
                                     },
                                     text = {
-
+                                        AndroidView(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            factory = { context ->
+                                                NumberPicker(context).apply {
+                                                    minValue = 0
+                                                    maxValue = 100
+                                                    setOnValueChangedListener { _, _, noveJizdne ->
+                                                        vybraneJizdne = noveJizdne
+                                                    }
+                                                }
+                                            },
+                                            update = {
+                                                it.value = vybraneJizdne
+                                            }
+                                        )
                                     },
                                 )
 
@@ -452,9 +506,9 @@ fun DopravniPodnikyScreen(
                                 Row(
                                     Modifier.fillMaxWidth(),
                                 ) {
-                                    Button(
+                                    if (dpInfo.id != dp.info.id) Button(
                                         onClick = {
-//                                            vybratLinku = true
+                                            oddelatDP = true
                                         },
                                         Modifier
                                             .padding(all = 8.dp),
@@ -466,36 +520,14 @@ fun DopravniPodnikyScreen(
                                     Spacer(modifier = Modifier.weight(1F))
                                     OutlinedButton(
                                         onClick = {
-                                            zmenitUlice {
-
-                                                var cloveci = dp.cloveci
-                                                val noveUlice = shuffled().map { ulice ->
-                                                    var cloveciVUlici = ulice.cloveci
-                                                    while (cloveciVUlici < ulice.kapacita && cloveci > 0) {
-
-                                                        cloveci--
-                                                        cloveciVUlici++
-                                                    }
-
-                                                    ulice.copy(
-                                                        cloveci = cloveciVUlici
-                                                    )
-                                                }
-
-                                                clear()
-                                                addAll(noveUlice)
-                                            }
-                                            zmenitBusy {
-//                                                val i = indexOfFirst { it.id == dp.id }
-//                                                removeAt(i)
-                                            }
+                                            smenitJizdne = true
                                         },
                                         Modifier
                                             .padding(all = 8.dp),
                                     ) {
-//                                        Text(
-//                                            text = stringResource(R.string.prodat_za, dp.prodejniCena.asString())
-//                                        )
+                                        Text(
+                                            text = stringResource(R.string.zmenit_jizdne)
+                                        )
                                     }
                                 }
                             }

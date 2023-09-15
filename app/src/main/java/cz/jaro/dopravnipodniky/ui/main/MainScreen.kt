@@ -96,6 +96,8 @@ import cz.jaro.dopravnipodniky.shared.DPID
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.UliceID
+import cz.jaro.dopravnipodniky.shared.barvaDosahnuteDosahlosti
+import cz.jaro.dopravnipodniky.shared.barvaSecretDosahlosti
 import cz.jaro.dopravnipodniky.shared.cenaTroleje
 import cz.jaro.dopravnipodniky.shared.cenaZastavky
 import cz.jaro.dopravnipodniky.shared.composeString
@@ -121,8 +123,6 @@ import cz.jaro.dopravnipodniky.ui.destinations.GarazScreenDestination
 import cz.jaro.dopravnipodniky.ui.destinations.LinkyScreenDestination
 import cz.jaro.dopravnipodniky.ui.destinations.MainScreenDestination
 import cz.jaro.dopravnipodniky.ui.malovani.Mesto
-import cz.jaro.dopravnipodniky.ui.theme.green_800
-import cz.jaro.dopravnipodniky.ui.theme.tmavaBarva
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -778,12 +778,12 @@ fun Dosahlosti(
                     .padding(vertical = 4.dp),
                 colors = when {
                     dosahlost.stav is Dosahlost.Stav.Splneno -> CardDefaults.outlinedCardColors(
-                        containerColor = green_800,
+                        containerColor = barvaDosahnuteDosahlosti,
                         contentColor = Color.White,
                     )
 
                     dosahlost is Dosahlost.Secret -> CardDefaults.outlinedCardColors(
-                        containerColor = tmavaBarva,
+                        containerColor = barvaSecretDosahlosti,
                         contentColor = Color.White,
                     )
 

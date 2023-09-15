@@ -19,11 +19,11 @@ enum class Theme(
         jmeno = R.string.cervene,
         barva = t1,
     ),
-//    Ruzove(
-//        darkColorScheme = colorsRuzove,
-//        jmeno = R.string.ruzove,
-//        barva = t2,
-//    ),
+    Ruzove(
+        darkColorScheme = colorsRuzove,
+        jmeno = R.string.ruzove,
+        barva = t2,
+    ),
     Fialove(
         darkColorScheme = colorsFialove,
         jmeno = R.string.fialove,

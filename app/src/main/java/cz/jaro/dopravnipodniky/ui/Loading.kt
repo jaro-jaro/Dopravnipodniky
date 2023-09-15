@@ -26,6 +26,8 @@ import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.data.seed
 import cz.jaro.dopravnipodniky.shared.TPS
+import cz.jaro.dopravnipodniky.shared.barvaChodniku
+import cz.jaro.dopravnipodniky.shared.barvaUlice
 import cz.jaro.dopravnipodniky.shared.jednotky.kilometruZaHodinu
 import cz.jaro.dopravnipodniky.shared.jednotky.metru
 import cz.jaro.dopravnipodniky.shared.jednotky.tiku
@@ -33,8 +35,6 @@ import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toDuration
 import cz.jaro.dopravnipodniky.shared.millisPerTik
 import cz.jaro.dopravnipodniky.shared.odsazeniBusu
-import cz.jaro.dopravnipodniky.shared.sedChodniku
-import cz.jaro.dopravnipodniky.shared.sedUlice
 import cz.jaro.dopravnipodniky.shared.sirkaChodniku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.ui.malovani.Offset
@@ -138,16 +138,16 @@ fun Loading() = DpTheme(
                 scale(
                     2F
                 ) {
-                    drawRect(color = sedUlice)
+                    drawRect(color = barvaUlice)
                     drawRect(
-                        color = sedChodniku,
+                        color = barvaChodniku,
                         size = Size(
                             width = size.width,
                             height = sirkaChodniku.toPx()
                         )
                     )
                     drawRect(
-                        color = sedChodniku,
+                        color = barvaChodniku,
                         topLeft = Offset(
                             y = sirkaUlice.toPx() - sirkaChodniku.toPx()
                         ),

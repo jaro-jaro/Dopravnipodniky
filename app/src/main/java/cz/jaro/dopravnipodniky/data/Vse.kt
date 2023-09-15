@@ -27,4 +27,4 @@ data class Vse(
     )
 }
 
-val Vse.aktualniDp get() = podniky.first { it.info.id == aktualniDPID }
+val Vse.aktualniDp get() = podniky.singleOrNull { it.info.id == aktualniDPID } ?: podniky.first()

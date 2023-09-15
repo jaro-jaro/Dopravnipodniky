@@ -7,6 +7,7 @@ import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.penezZaMin
 import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toTiky
+import cz.jaro.dopravnipodniky.ui.theme.green800
 import kotlinx.serialization.json.Json
 import kotlin.math.PI
 import kotlin.time.Duration.Companion.seconds
@@ -135,6 +136,8 @@ val odsazeniBaraku = 1.metru.toDp()
 const val barakuVUlici = 5
 val velikostBaraku = (ulicovyBlok - odsazeniBaraku * (barakuVUlici + 1)) / barakuVUlici
 val sirkaChodniku = 1.metru.toDp()
+val zaobleniBaraku = 5.dp
+val predsazeniKrizovatky = zaobleniBaraku
 
 val delkaZastavky = 18.metru.toDp()
 val sirkaZastavky = 3.metru.toDp()
@@ -159,15 +162,13 @@ val odsazeniTroleji = listOf(odsazeniPrvniTroleje, odsazeniDruheTroleje, odsazen
 
 // CCCC|---BBBTB|BTBBB---|---BBBTB|BTBBB---|CCCC
 
-val CERNA = Color(0, 0, 0)
-val BILA = Color(255, 255, 255)
-val sedUlice = Color(135, 135, 135)
-val sedPozadi = Color(16, 16, 16)
-val sedNepouzivanehoBusu = Color(100, 100, 100)
-val sedChodniku = Color(200, 200, 200)
-val sedTroleje = Color(32, 32, 32)
-val sedBaraku = Color(150, 150, 150)
-val ZLUTA = Color(255, 255, 0)
+val barvaSecretDosahlosti = Color(0xFF101010)
+val barvaDosahnuteDosahlosti = green800
+val barvaUlice = Color(135, 135, 135)
+val barvaPozadi = Color(16, 16, 16)
+val barvaNepouzivanehoBusu = Color(100, 100, 100)
+val barvaChodniku = Color(200, 200, 200)
+val barvaTroleje = Color(32, 32, 32)
 
 // další konstanty
 
@@ -209,7 +210,7 @@ const val nahodnostKamionuKazdyTik = nahodnostKamionuKazdouMinutu * TPM
 const val nahodnostSebevrazdyKazdouMinutu = 10
 const val nahodnostSebevrazdyKazdyTik = nahodnostSebevrazdyKazdouMinutu * TPM
 val cenaPruzkumuVerejnehoMineni = 50_000.penez
-const val nasobitelProdejniCastiMesta = 256
+val prodejniCenaCloveka = 256.penez // Ano, jsou to otroci
 
 val hezkaCisla =
     Json.decodeFromString<List<Int>>("[1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30,32,36,40,45,48,50,54,60,64,72,75,80,81,90,96,100,108,120,125,128,135,144,150,160,162,180,192,200,216,225,240,243,250,256,270,288,300,320,324,360,375,384,400,405]")
