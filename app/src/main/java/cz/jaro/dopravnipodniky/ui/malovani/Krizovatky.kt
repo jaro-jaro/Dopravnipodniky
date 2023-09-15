@@ -3,6 +3,7 @@ package cz.jaro.dopravnipodniky.ui.malovani
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -38,16 +39,16 @@ fun namalovatKrizovatku(
 
     val sousedVpravo = ulice.find {
         it.orientace == Orientace.Vodorovne && it.zacatek == krizovatka
-    }
+    } != null
     val sousedDole = ulice.find {
         it.orientace == Orientace.Svisle && it.zacatek == krizovatka
-    }
+    } != null
     val sousedVlevo = ulice.find {
         it.orientace == Orientace.Vodorovne && it.konec == krizovatka
-    }
+    } != null
     val sousedNahore = ulice.find {
         it.orientace == Orientace.Svisle && it.konec == krizovatka
-    }
+    } != null
 
     translate(
         left = zacatekX.toPx(),
@@ -68,7 +69,7 @@ fun namalovatKrizovatku(
         )
 
         sousediUhly.filter { (soused1, _, _, _, _) ->
-            soused1 != null
+            soused1
         }.forEach { (_, _, _, _, uhel) ->
             rotate(
                 degrees = uhel,
@@ -82,8 +83,8 @@ fun namalovatKrizovatku(
             }
         }
 
-        sousediUhly.filter { (soused1, _, _, _, _) ->
-            soused1 == null
+        sousediUhly.filter { (soused1, soused2, soused3, soused4, _) ->
+            !soused1 && !soused3 || !soused1 && soused2 == soused4
         }.forEach { (_, soused2, _, soused4, uhel) ->
             rotate(
                 degrees = uhel,
@@ -95,12 +96,12 @@ fun namalovatKrizovatku(
                     size = Size(sirkaUlice, sirkaChodniku),
                     cornerRadius = CornerRadius(sirkaChodniku),
                 )
-                if (soused4 != null) drawRoundRect(
+                if (soused4) drawRoundRect(
                     color = barvaChodniku,
                     topLeft = Offset(x = -predsazeniKrizovatky),
                     size = Size(predsazeniKrizovatky + sirkaChodniku, sirkaChodniku),
                 )
-                if (soused2 != null) drawRoundRect(
+                if (soused2) drawRoundRect(
                     color = barvaChodniku,
                     topLeft = Offset(x = sirkaUlice - sirkaChodniku),
                     size = Size(predsazeniKrizovatky + sirkaChodniku, sirkaChodniku),
@@ -109,25 +110,29 @@ fun namalovatKrizovatku(
         }
 
         sousediUhly
-            .filter { (soused1, soused2, soused3, soused4, uhel) ->
-                soused1 != null && soused4 != null && soused2 == null && soused3 == null
+            .filter { (soused1, soused2, soused3, soused4, _) ->
+                soused4 && soused1 && !soused2 && !soused3
             }
             .forEach { (_, _, _, _, uhel) ->
                 rotate(
                     degrees = uhel,
                     pivot = Offset(sirkaUlice / 2F, sirkaUlice / 2F),
                 ) {
-                    drawRoundRect(
+                    drawRect(
+                        topLeft = Offset(x = -predsazeniKrizovatky + 1F, y = -predsazeniKrizovatky + 1F),
+                        size = Size(predsazeniKrizovatky + sirkaUlice, predsazeniKrizovatky + sirkaUlice),
                         color = barvaPozadi,
-                        topLeft = Offset(-predsazeniKrizovatky, -predsazeniKrizovatky),
-                        size = Size(predsazeniKrizovatky + sirkaUlice + 1, predsazeniKrizovatky + sirkaUlice + 1),
+                        style = Fill,
                     )
                     drawArc(
                         useCenter = true,
                         style = Fill,
                         color = barvaUlice,
-                        center = Offset(x = -predsazeniKrizovatky, y = -predsazeniKrizovatky),
-                        quadSize = Size(width = predsazeniKrizovatky + sirkaUlice, height = predsazeniKrizovatky + sirkaUlice),
+                        center = Offset(x = -predsazeniKrizovatky + 0.5F, y = -predsazeniKrizovatky + 0.5F),
+                        quadSize = Size(
+                            width = predsazeniKrizovatky + sirkaUlice - 0.5F,
+                            height = predsazeniKrizovatky + sirkaUlice - 0.5F
+                        ),
                         startAngle = 0F,
                         sweepAngle = 90F,
                     )
@@ -140,7 +145,7 @@ fun namalovatKrizovatku(
                         center = Offset(x = -predsazeniKrizovatky, y = -predsazeniKrizovatky),
                         quadSize = Size(
                             width = predsazeniKrizovatky + sirkaUlice - sirkaChodniku / 2,
-                            height = predsazeniKrizovatky + sirkaUlice - sirkaChodniku / 2
+                            height = predsazeniKrizovatky + sirkaUlice - sirkaChodniku / 2,
                         ),
                         startAngle = 0F,
                         sweepAngle = 90F,
@@ -150,7 +155,7 @@ fun namalovatKrizovatku(
 
         sousediUhly
             .filter { (soused1, _, _, soused4, _) ->
-                soused1 != null && soused4 != null
+                soused1 && soused4
             }
             .forEach { (_, _, _, _, uhel) ->
                 rotate(
@@ -159,7 +164,7 @@ fun namalovatKrizovatku(
                 ) {
                     drawRoundRect(
                         color = barvaUlice,
-                        topLeft = Offset(-predsazeniKrizovatky + 1, -predsazeniKrizovatky + 1),
+                        topLeft = Offset(-predsazeniKrizovatky + 2, -predsazeniKrizovatky + 2),
                         size = Size(predsazeniKrizovatky, predsazeniKrizovatky),
                     )
                     drawArc(
@@ -187,6 +192,27 @@ fun namalovatKrizovatku(
                     )
                 }
             }
-
     }
+}
+
+@Suppress("FunctionName")
+fun Triangle(
+    a: Offset,
+    b: Offset,
+    c: Offset,
+) = Polygon(listOf(a, b, c))
+
+@Suppress("FunctionName")
+fun Polygon(
+    nodes: List<Offset>,
+): Path {
+    require(nodes.size >= 3)
+    val path = Path()
+    path.moveTo(nodes.first().x, nodes.first().y)
+    nodes.drop(1).forEach {
+        path.lineTo(it.x, it.y)
+        path.moveTo(it.x, it.y)
+    }
+    path.lineTo(nodes.first().x, nodes.first().y)
+    return path
 }

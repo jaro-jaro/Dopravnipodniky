@@ -2,6 +2,7 @@ package cz.jaro.dopravnipodniky.ui.malovani
 
 import android.graphics.Color
 import android.graphics.Paint
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
@@ -63,11 +64,13 @@ fun Ulice.draw() {
                     color = barvaChodniku,
                     topLeft = Offset(x = predsazeniKrizovatky - 1),
                     size = Size(delkaUlice - predsazeniKrizovatky * 2 + 2, sirkaChodniku),
+                    cornerRadius = CornerRadius(1F),
                 ) // nahore
                 drawRoundRect(
                     color = barvaChodniku,
                     topLeft = Offset(x = predsazeniKrizovatky - 1, y = sirkaUlice - sirkaChodniku),
                     size = Size(delkaUlice - predsazeniKrizovatky * 2 + 2, sirkaChodniku),
+                    cornerRadius = CornerRadius(1F),
                 ) // dole
             }
         }
