@@ -5,6 +5,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.Interaction
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +23,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCartCheckout
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
@@ -30,6 +34,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -76,12 +81,15 @@ import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
+import cz.jaro.dopravnipodniky.shared.kremze
 import cz.jaro.dopravnipodniky.shared.minutes
 import cz.jaro.dopravnipodniky.shared.prodejniCenaCloveka
+import cz.jaro.dopravnipodniky.shared.vecne
 import cz.jaro.dopravnipodniky.snackbarHostState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import kotlin.random.Random
@@ -506,16 +514,46 @@ fun DopravniPodnikyScreen(
                                 Row(
                                     Modifier.fillMaxWidth(),
                                 ) {
-                                    if (dpInfo.id != dp.info.id) Button(
-                                        onClick = {
-                                            oddelatDP = true
-                                        },
+                                    if (dpInfo.id != dp.info.id) Surface(
                                         Modifier
-                                            .padding(all = 8.dp),
+                                            .combinedClickable(
+                                                onLongClick = {
+                                                    if (dp.info.jmenoMesta == kremze)
+                                                        zmenitPodniky {
+                                                            val i = indexOfFirst { it.info.id == dp.info.id }
+                                                            this[i] = this[i].copy(
+                                                                info = this[i].info.copy(
+                                                                    jmenoMesta = vecne
+                                                                )
+                                                            )
+                                                        }
+                                                },
+                                                onClick = {
+                                                    oddelatDP = true
+                                                }
+                                            ),
                                     ) {
-                                        Text(
-                                            text = stringResource(R.string.prodat)
-                                        )
+                                        Button(
+                                            onClick = {
+                                                oddelatDP = true
+                                            },
+                                            Modifier
+                                                .padding(all = 8.dp),
+                                            enabled = false,
+                                            colors = ButtonDefaults.buttonColors(
+                                                disabledContainerColor = ButtonDefaults.buttonColors().containerColor,
+                                                disabledContentColor = ButtonDefaults.buttonColors().contentColor,
+                                            ),
+                                            interactionSource = object : MutableInteractionSource {
+                                                override val interactions = emptyFlow<Interaction>()
+                                                override suspend fun emit(interaction: Interaction) = Unit
+                                                override fun tryEmit(interaction: Interaction) = false
+                                            }
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.prodat)
+                                            )
+                                        }
                                     }
                                     Spacer(modifier = Modifier.weight(1F))
                                     OutlinedButton(

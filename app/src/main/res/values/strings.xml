@@ -37,7 +37,7 @@
     <string name="zvolte_barvu">Zvolte barvu:</string>
     <string name="zvolte_tema">Zvolte téma dopravního podniku:</string>
     <string name="malo_penez">Nemáte dostatek peněz!!!</string>
-    <string name="pocet_ulic">Počet ulic: %1$S, z toho %2$s má troleje</string>
+    <string name="pocet_ulic">Počet ulic: %1$S; Z toho má troleje: %2$s</string>
     <string name="pocet_domu">Počet domů: %s</string>
     <string name="pocet_zastavek">Počet zastávek: %s</string>
     <string name="barva_linky">"Barva linky</string>

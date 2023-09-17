@@ -10,7 +10,9 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.DpRect
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
@@ -204,3 +206,6 @@ fun <T1, T2, T3, T4, T5, T6, T7, T8, R> combine(
         args[7] as T8,
     )
 }
+
+context(Density)
+fun DpOffset.toOffset() = Offset(x.toPx(), y.toPx())

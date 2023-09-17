@@ -125,6 +125,7 @@ import cz.jaro.dopravnipodniky.ui.destinations.MainScreenDestination
 import cz.jaro.dopravnipodniky.ui.malovani.Mesto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.context.loadKoinModules
@@ -285,9 +286,13 @@ fun MainScreen(
                             scope.launch(Dispatchers.IO) {
                                 seed = Random.nextInt()
                                 val novyDP = Generator.vygenerujMiPrvniMesto()
+                                println(novyDP)
                                 zmenitPodniky {
+                                    println(this)
                                     add(novyDP)
+                                    println(this)
                                 }
+                                delay(500)
                                 zmenitDP(novyDP.info.id)
                             }
                         }

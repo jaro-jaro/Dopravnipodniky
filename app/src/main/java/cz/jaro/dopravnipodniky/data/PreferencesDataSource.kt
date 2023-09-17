@@ -207,6 +207,7 @@ class PreferencesDataSource(
         LOCK = true
         zobrazitLoading = true
         delay(1.seconds)
+        println(aktualniVse.podniky)
         println(aktualniVse.aktualniDPID to aktualniVse.podniky.map { it.info.id })
         println("MĚNĚNÍ DOPRAVNÍHO PODNIKU!!! AKTUÁLNÍ DP: ${aktualniVse.aktualniDp.info.id}, NOVÉ DP: $dpID")
         val millis = measureDuration {

@@ -9,16 +9,22 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.Orientace
+import cz.jaro.dopravnipodniky.shared.Quintuple
 import cz.jaro.dopravnipodniky.shared.barvaTroleje
 import cz.jaro.dopravnipodniky.shared.drawArc
+import cz.jaro.dopravnipodniky.shared.existuje
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSUlicema
+import cz.jaro.dopravnipodniky.shared.maTrolej
+import cz.jaro.dopravnipodniky.shared.neexistuje
+import cz.jaro.dopravnipodniky.shared.nemaTrolej
 import cz.jaro.dopravnipodniky.shared.odsazeniTroleji
 import cz.jaro.dopravnipodniky.shared.predsazeniTrolejiL
 import cz.jaro.dopravnipodniky.shared.predsazeniTrolejiS
 import cz.jaro.dopravnipodniky.shared.sirkaTroleje
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
+import cz.jaro.dopravnipodniky.shared.stavTroleje
 
 private const val DEBUG_BARVY = false
 
@@ -68,19 +74,17 @@ fun nakreslitTrolejeNaKrizovatku(
 ) {
 
     val sousedVpravo = ulice.find {
-        it.orientace == Orientace.Vodorovne && it.zacatek == krizovatka && it.maTrolej
-    }
+        it.orientace == Orientace.Vodorovne && it.zacatek == krizovatka
+    }.stavTroleje
     val sousedDole = ulice.find {
-        it.orientace == Orientace.Svisle && it.zacatek == krizovatka && it.maTrolej
-    }
+        it.orientace == Orientace.Svisle && it.zacatek == krizovatka
+    }.stavTroleje
     val sousedVlevo = ulice.find {
-        it.orientace == Orientace.Vodorovne && it.konec == krizovatka && it.maTrolej
-    }
+        it.orientace == Orientace.Vodorovne && it.konec == krizovatka
+    }.stavTroleje
     val sousedNahore = ulice.find {
-        it.orientace == Orientace.Svisle && it.konec == krizovatka && it.maTrolej
-    }
-
-    val ctyrKrizovatka = sousedDole != null && sousedNahore != null && sousedVlevo != null && sousedVpravo != null
+        it.orientace == Orientace.Svisle && it.konec == krizovatka
+    }.stavTroleje
 
     val zacatekX = krizovatka.x.toDpSUlicema().toPx()
     val zacatekY = krizovatka.y.toDpSUlicema().toPx()
@@ -101,16 +105,18 @@ fun nakreslitTrolejeNaKrizovatku(
             size = Size(sirkaUlice, sirkaUlice)
         )
 
-        val rovinkyUhly = listOf(
-            Triple(sousedNahore, sousedDole, 0F), // ║
-            Triple(sousedVpravo, sousedVlevo, 90F), // ═
+        val sousediUhly = listOf(
+            Quintuple(sousedNahore, sousedVpravo, sousedDole, sousedVlevo, 0F),
+            Quintuple(sousedVpravo, sousedDole, sousedVlevo, sousedNahore, 90F),
+            Quintuple(sousedDole, sousedVlevo, sousedNahore, sousedVpravo, 180F),
+            Quintuple(sousedVlevo, sousedNahore, sousedVpravo, sousedDole, 270F),
         )
 
-        rovinkyUhly
-            .filter { (soused1, soused2, _) ->
-                soused1 != null && soused2 != null
+        sousediUhly
+            .filter { (soused1, _, soused3, _, _) ->
+                soused1.maTrolej && soused3.maTrolej
             }
-            .forEach { (_, _, uhel) ->
+            .forEach { (_, _, _, _, uhel) ->
                 rotate(
                     degrees = uhel,
                     pivot = Offset(sirkaUlice / 2F, sirkaUlice / 2F),
@@ -126,23 +132,17 @@ fun nakreslitTrolejeNaKrizovatku(
                 }
             }
 
-        val zatackyUhly = listOf(
-            Triple(sousedDole, sousedVpravo, 180F), // ╔
-            Triple(sousedDole, sousedVlevo, 270F), // ╗
-            Triple(sousedNahore, sousedVlevo, 0F), // ╝
-            Triple(sousedNahore, sousedVpravo, 90F), // ╚
-        )
-
-        zatackyUhly
-            .filter { (soused1, soused2, _) ->
-                soused1 != null && soused2 != null
+        sousediUhly
+            .filter { (soused1, _, _, soused4, _) ->
+                soused1.maTrolej && soused4.maTrolej
             }
-            .forEach { (_, _, uhel) ->
+            .forEach { (_, soused2, soused3, _, uhel) ->
+                val zatacka = soused2.nemaTrolej && soused3.nemaTrolej
                 rotate(
                     degrees = uhel,
                     pivot = Offset(sirkaUlice / 2F, sirkaUlice / 2F),
                 ) {
-                    val predsazeniM = if (ctyrKrizovatka) predsazeniL else predsazeniS
+                    val predsazeniM = if (zatacka) predsazeniS else predsazeniL
                     troleje.zip(listOf(predsazeniS, predsazeniS, predsazeniM, predsazeniM)).forEach { (trolej, predsazeni) ->
                         drawArc(
                             useCenter = false,
@@ -159,14 +159,10 @@ fun nakreslitTrolejeNaKrizovatku(
                 }
             }
 
-        val sousediUhly = listOfNotNull(
-            if (sousedVpravo != null) 90F else null,
-            if (sousedDole != null) 180F else null,
-            if (sousedVlevo != null) 270F else null,
-            if (sousedNahore != null) 0F else null,
-        )
-        if (sousediUhly.size == 1) {
-            val uhel = sousediUhly.first()
+        sousediUhly.singleOrNull { (soused1, _, _, _, _) ->
+            soused1.maTrolej
+        }?.let { (_, soused2, soused3, soused4, uhel) ->
+            val posunuti = if (soused3.neexistuje && soused2.existuje == soused4.neexistuje) -predsazeniS else sirkaUlice / 2
 
             rotate(
                 degrees = uhel,
@@ -176,7 +172,7 @@ fun nakreslitTrolejeNaKrizovatku(
                     drawLine(
                         color = if (DEBUG_BARVY) Color.Yellow else barvaTroleje,
                         start = Offset(x = trolej, y = -predsazeniS),
-                        end = Offset(x = trolej, y = sirkaUlice / 2F),
+                        end = Offset(x = trolej, y = posunuti),
                         strokeWidth = sirka,
                     )
                 }
@@ -186,7 +182,7 @@ fun nakreslitTrolejeNaKrizovatku(
                         startAngle = 0F,
                         sweepAngle = 180F,
                         useCenter = false,
-                        center = Offset(sirkaUlice / 2F, sirkaUlice / 2F),
+                        center = Offset(sirkaUlice / 2, posunuti),
                         quadSize = Size(sirkaUlice / 2 - trolej, sirkaUlice / 2 - trolej),
                         style = Stroke(
                             width = sirka,

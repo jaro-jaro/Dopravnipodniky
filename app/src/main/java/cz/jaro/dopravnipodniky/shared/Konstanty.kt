@@ -150,8 +150,8 @@ val sirkaCary = .2.dp
 val odsazeniBusu = sirkaChodniku + .75.metru.toDp()
 
 val sirkaTroleje = .2.dp
-val predsazeniTrolejiS = 1.dp
-val predsazeniTrolejiL = 6.dp
+val predsazeniTrolejiS = predsazeniKrizovatky - 1.dp//1.dp
+val predsazeniTrolejiL = predsazeniKrizovatky + 1.dp//6.dp
 val rozchodTroleji = .5.metru.toDp()
 val odsazeniTroleje = sirkaChodniku + 1.5.metru.toDp()
 val odsazeniPrvniTroleje = odsazeniTroleje
@@ -172,7 +172,7 @@ val barvaTroleje = Color(32, 32, 32)
 
 // další konstanty
 
-const val TPS = 30
+const val TPS = 90
 const val TPM = TPS * 60
 const val TPH = TPM * 60
 
@@ -216,5 +216,6 @@ val hezkaCisla =
     Json.decodeFromString<List<Int>>("[1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30,32,36,40,45,48,50,54,60,64,72,75,80,81,90,96,100,108,120,125,128,135,144,150,160,162,180,192,200,216,225,240,243,250,256,270,288,300,320,324,360,375,384,400,405]")
 const val idealniInterval = 3.5
 
+const val kremze = "Křemže"
 const val vecne = "Věčné"
 val vecneLinky = setOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 21, 34, 44, 71, 72, 73)
