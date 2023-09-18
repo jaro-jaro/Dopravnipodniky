@@ -404,7 +404,7 @@ Břidličná
 Třemošnice
 Hanušovice
 Podivín
-Miroslav
+Glum
 Volyně
 Hodkovice nad Mohelkou
 Rtyně v Podkrkonoší

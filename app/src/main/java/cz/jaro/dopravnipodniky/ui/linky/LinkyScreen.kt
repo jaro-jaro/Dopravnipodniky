@@ -64,8 +64,8 @@ fun LinkyScreen(
         linky = linky!!,
         tutorial = tutorial!!,
         zmenitLinky = viewModel::zmenitLinky,
-        navigatate = navigator::navigate,
-        navigatateBack = navigator::navigateUp,
+        navigate = navigator::navigate,
+        navigateBack = navigator::navigateUp,
         dosahni = viewModel.dosahni
     )
 }
@@ -76,8 +76,8 @@ fun LinkyScreen(
     linky: List<Linka>,
     tutorial: StavTutorialu,
     zmenitLinky: (MutableList<Linka>.() -> Unit) -> Unit,
-    navigatate: (Direction) -> Unit,
-    navigatateBack: () -> Unit,
+    navigate: (Direction) -> Unit,
+    navigateBack: () -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
 ) {
     Scaffold(
@@ -89,7 +89,7 @@ fun LinkyScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            navigatateBack()
+                            navigateBack()
                         }
                     ) {
                         Icon(Icons.Default.ArrowBack, stringResource(R.string.zpet))
@@ -106,7 +106,7 @@ fun LinkyScreen(
                     Icon(Icons.Default.Add, null)
                 },
                 onClick = {
-                    navigatate(VytvareniLinkyScreenDestination)
+                    navigate(VytvareniLinkyScreenDestination)
                 },
             )
         },

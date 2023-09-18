@@ -2,6 +2,7 @@ package cz.jaro.dopravnipodniky.data
 
 import android.util.Log
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Barak
@@ -29,55 +30,23 @@ import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
-var seed: Int? by mutableStateOf(null)
+var seed: Int by mutableIntStateOf(Random.nextInt())
 
 class Generator(
     private val investice: Peniz,
-    val michaniRandom: Random,
-    val sanceRandom: Random,
-    val barakyRandom: Random,
-    val panelakyRandom: Random,
-    val stredovyRandom: Random,
-    val kapacitaRandom: Random,
-    jmenoMestaRandom: Random,
+    jmenoMestaRandom: Random = Random,
 ) {
     companion object {
         suspend fun vygenerujMiPrvniMesto(): DopravniPodnik = withContext(Dispatchers.IO) {
 
-            while (seed == null) Unit
-
             Generator(
                 investice = pocatecniCenaMesta,
-                michaniRandom = Random(seed!!),
-                sanceRandom = Random(seed!!),
-                barakyRandom = Random(seed!!),
-                panelakyRandom = Random(seed!!),
-                stredovyRandom = Random(seed!!),
-                kapacitaRandom = Random(seed!!),
                 jmenoMestaRandom = Random(18),
-            ).vygenerujMiMestoAToHnedVykricnik()
+            ).vygenerujMiMestoAToHnedVykricnik(
+                Random(seed),
+            ) {}
         }
     }
-
-    constructor(
-        investice: Peniz,
-        seed: Int,
-    ) : this(
-        investice,
-        Random(seed),
-        Random(seed),
-        Random(seed),
-        Random(seed),
-        Random(seed),
-        Random(seed),
-        Random(seed),
-    )
-    constructor(
-        investice: Peniz,
-    ) : this(
-        investice,
-        Random.nextInt()
-    )
 
     private val velikost: Int = (investice * nasobitelInvestice).value.roundToInt()
 
@@ -85,17 +54,38 @@ class Generator(
 
     private val jmenoMesta = MESTA.trim().lines().random(jmenoMestaRandom)
 
-    fun vygenerujMiMestoAToHnedVykricnik(): DopravniPodnik {
+    private lateinit var michaniRandom: Random
+    private lateinit var sanceRandom: Random
+    private lateinit var barakyRandom: Random
+    private lateinit var panelakyRandom: Random
+    private lateinit var stredovyRandom: Random
+    private lateinit var kapacitaRandom: Random
+
+    suspend fun vygenerujMiMestoAToHnedVykricnik(
+        michaniRandom: Random = Random,
+        sanceRandom: Random = Random,
+        barakyRandom: Random = Random,
+        panelakyRandom: Random = Random,
+        stredovyRandom: Random = Random,
+        kapacitaRandom: Random = Random,
+        step: (Float) -> Unit,
+    ) = withContext(Dispatchers.IO) {
         // Okej hned to bude, nez bys rekl pi
+        this@Generator.michaniRandom = michaniRandom
+        this@Generator.sanceRandom = sanceRandom
+        this@Generator.barakyRandom = barakyRandom
+        this@Generator.panelakyRandom = panelakyRandom
+        this@Generator.stredovyRandom = stredovyRandom
+        this@Generator.kapacitaRandom = kapacitaRandom
 
         opakovac(1, listOf(0.ulicovychBloku to 0.ulicovychBloku), nahodnostNaZacatku)
 
         zbarakuj()
 
-        return DopravniPodnik(jmenoMesta = jmenoMesta, ulicove = ulicove)
+        DopravniPodnik(jmenoMesta = jmenoMesta, ulicove = ulicove)
     }
 
-    private fun opakovac(hloubka: Int, posledniKrizovatky: List<Pozice<UlicovyBlok>>, sance: Float) {
+    private tailrec fun opakovac(hloubka: Int, posledniKrizovatky: List<Pozice<UlicovyBlok>>, sance: Float) {
 
         if (hloubka > velikost) return
 
@@ -166,8 +156,14 @@ class Generator(
 
 //            println(ulicove[i].baraky)
             ulicove[i] = ulicove[i].copy(
+                baraky = ulicove[i].baraky.take((barakuVUlici - 1) * 2)
+            )
+
+            ulicove[i] = ulicove[i].copy(
                 cloveci = kapacitaRandom.nextInt(ulicove[i].kapacita / 2, ulicove[i].kapacita)
             )
+
+            println(ulice.baraky.size)
         }
     }
 }

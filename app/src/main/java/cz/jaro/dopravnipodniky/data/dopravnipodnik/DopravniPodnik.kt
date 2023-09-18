@@ -12,7 +12,7 @@ import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.penezZaMin
 import cz.jaro.dopravnipodniky.shared.jednotky.times
 import cz.jaro.dopravnipodniky.shared.jednotky.to
-import cz.jaro.dopravnipodniky.shared.jednotky.toDpSUlicema
+import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
 import cz.jaro.dopravnipodniky.shared.nasobitelZiskuPoOffline
 import cz.jaro.dopravnipodniky.shared.toText
 import cz.jaro.dopravnipodniky.shared.vecne
@@ -52,7 +52,7 @@ data class DopravniPodnik(
 
     private val baraky = ulice.flatMap { it.baraky }
 
-    val cloveci = ulice.sumOf { it.cloveci } + busy.sumOf { it.cloveci }
+    val cloveci = ulice.sumOf { it.cloveci + (it.zastavka?.cloveci ?: 0) } + busy.sumOf { it.cloveci }
 
     val kapacita = ulice.sumOf { it.kapacita }
 }
@@ -69,7 +69,7 @@ val DopravniPodnik.velikostMesta
         ulice.rohyMesta.second.y - ulice.rohyMesta.first.y
     )
 
-val DopravniPodnik.plocha get() = velikostMesta.first.toDpSUlicema() * velikostMesta.second.toDpSUlicema()
+val DopravniPodnik.plocha get() = velikostMesta.first.toDpSKrizovatkama() * velikostMesta.second.toDpSKrizovatkama()
 
 val DopravniPodnik.hustotaZalidneni get() = cloveci / plocha.value
 

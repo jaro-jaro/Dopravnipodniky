@@ -18,7 +18,6 @@ import cz.jaro.dopravnipodniky.data.serializers.DpSerializer
 import cz.jaro.dopravnipodniky.shared.barvaPozadi
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
-import cz.jaro.dopravnipodniky.shared.oddalenyRezim
 import cz.jaro.dopravnipodniky.ui.linky.vybirani.namalovatVybiraniLinky
 import kotlinx.serialization.Serializable
 
@@ -28,6 +27,7 @@ typealias SerializableDp = @Serializable(with = DpSerializer::class) Dp
 fun Mesto(
     malovatBusy: Boolean,
     malovatLinky: Boolean,
+    malovatTroleje: Boolean,
     kliklyKrizovatky: List<Pozice<UlicovyBlok>>,
     ulice: List<Ulice>,
     linky: List<Linka>,
@@ -102,7 +102,7 @@ fun Mesto(
                     barva = dpInfo.tema.barva,
                 )
 
-                if (priblizeni > oddalenyRezim) {
+                if (malovatTroleje) {
                     ulice.forEach { ulice ->
                         if (ulice.maTrolej) ulice.nakreslitTroleje()
                     }

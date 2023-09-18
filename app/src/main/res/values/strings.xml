@@ -47,7 +47,7 @@
     <string name="spatne_cislo_linky">Neplatné číslo linky</string>
     <string name="zadna_linka_vybrana">Žádná linka</string>
     <string name="vyberte_linku">Vyberte linku:</string>
-    <string name="vybrat_mesto">Vybrat %s</string>
+    <string name="vybrat_mesto">Vybrat město</string>
     <string name="nevyzvednuto">Nevyzvednuto: %s</string>
     <string name="uspesne_koupeno">Úspěšně koupeno</string>
     <string name="odebrat_bus_z_linek">Odebrat z linek</string>
@@ -173,7 +173,7 @@
     <string name="pridat_troleje_nebo_zastavky_linka_dialog">Chcete doopravdy přidat %4$s na celou linku?\n\nAktuální počet peněz: %1$s €\nCena: %2$s €\nZůstatek: %3$s €</string>
     <string name="uspesne_pridany_troleje">Úspěšně přidány troleje</string>
     <string name="uspesne_rozmisteno">Úspěšně rozmístěno</string>
-    <string name="bohuzel_ne_vic_nez_500">Bohužel si nemůžete koupit více než 500 vozidel najednou</string>
+    <string name="bohuzel_ne_vic_nez_50">Bohužel si nemůžete koupit více než 50 vozidel najednou</string>
     <string name="pridat_zastavky_linka">Přidat zastávky na celou linku</string>
     <string name="troleje">troleje</string>
     <string name="zastavky">zastávky</string>

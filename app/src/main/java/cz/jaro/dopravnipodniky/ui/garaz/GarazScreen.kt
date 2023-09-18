@@ -115,8 +115,8 @@ fun GarazScreen(
         busy = busy!!,
         zmenitBusy = viewModel::zmenitBusy,
         zmenitUlice = viewModel::zmenitUlice,
-        navigatate = navigator::navigate,
-        navigatateBack = navigator::navigateUp,
+        navigate = navigator::navigate,
+        navigateBack = navigator::navigateUp,
         dosahni = viewModel.dosahni
     )
 }
@@ -132,8 +132,8 @@ fun GarazScreen(
     busy: List<Bus>,
     zmenitBusy: (MutableList<Bus>.() -> Unit) -> Unit,
     zmenitUlice: (MutableList<Ulice>.() -> Unit) -> Unit,
-    navigatate: (Direction) -> Unit,
-    navigatateBack: () -> Unit,
+    navigate: (Direction) -> Unit,
+    navigateBack: () -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
 ) {
     Scaffold(
@@ -145,7 +145,7 @@ fun GarazScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            navigatateBack()
+                            navigateBack()
                         }
                     ) {
                         Icon(Icons.Default.ArrowBack, stringResource(R.string.zpet))
@@ -162,7 +162,7 @@ fun GarazScreen(
                     Icon(Icons.Default.AddShoppingCart, null)
                 },
                 onClick = {
-                    navigatate(ObchodScreenDestination)
+                    navigate(ObchodScreenDestination)
                 }
             )
         },

@@ -36,7 +36,7 @@ fun Pozice<UlicovyBlok>.sousedi() = listOf(
 )
 
 fun Pozice<UlicovyBlok>.toDp() = Pozice(x.toDp(), y.toDp())
-fun Pozice<UlicovyBlok>.toDpSUlicema() = Pozice(x.toDpSUlicema(), y.toDpSUlicema())
+fun Pozice<UlicovyBlok>.toDpSKrizovatkama() = Pozice(x.toDpSKrizovatkama(), y.toDpSKrizovatkama())
 
 fun Pozice<Dp>.toDpOffset() = DpOffset(x, y)
 

@@ -7,7 +7,7 @@ import androidx.compose.ui.graphics.drawscope.translate
 import cz.jaro.dopravnipodniky.shared.drawRoundRect
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
-import cz.jaro.dopravnipodniky.shared.jednotky.toDpSUlicema
+import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.ui.malovani.Offset
 import kotlin.math.sqrt
@@ -23,8 +23,8 @@ fun DrawScope.namalovatVybiraniLinky(
     val posledniKrizovatka = kliklyKrizovatky.last()
 
     translate(
-        left = posledniKrizovatka.x.toDpSUlicema().toPx(),
-        top = posledniKrizovatka.y.toDpSUlicema().toPx(),
+        left = posledniKrizovatka.x.toDpSKrizovatkama().toPx(),
+        top = posledniKrizovatka.y.toDpSKrizovatkama().toPx(),
     ) {
         drawCircle(
             color = fill,
@@ -38,15 +38,15 @@ fun DrawScope.namalovatVybiraniLinky(
 
     kliklyKrizovatky.windowed(2).forEach { (prvniKrizovatka, druhaKrizovatka) ->
 
-        val zacatekXPrvni = prvniKrizovatka.x.toDpSUlicema().toPx()
-        val zacatekYPrvni = prvniKrizovatka.y.toDpSUlicema().toPx()
-        val konecXPrvni = (prvniKrizovatka.x.toDpSUlicema() + sirkaUlice).toPx()
-        val konecYPrvni = (prvniKrizovatka.y.toDpSUlicema() + sirkaUlice).toPx()
+        val zacatekXPrvni = prvniKrizovatka.x.toDpSKrizovatkama().toPx()
+        val zacatekYPrvni = prvniKrizovatka.y.toDpSKrizovatkama().toPx()
+        val konecXPrvni = (prvniKrizovatka.x.toDpSKrizovatkama() + sirkaUlice).toPx()
+        val konecYPrvni = (prvniKrizovatka.y.toDpSKrizovatkama() + sirkaUlice).toPx()
 
-        val zacatekXDruhy = druhaKrizovatka.x.toDpSUlicema().toPx()
-        val zacatekYDruhy = druhaKrizovatka.y.toDpSUlicema().toPx()
-        val konecXDruhy = (druhaKrizovatka.x.toDpSUlicema() + sirkaUlice).toPx()
-        val konecYDruhy = (druhaKrizovatka.y.toDpSUlicema() + sirkaUlice).toPx()
+        val zacatekXDruhy = druhaKrizovatka.x.toDpSKrizovatkama().toPx()
+        val zacatekYDruhy = druhaKrizovatka.y.toDpSKrizovatkama().toPx()
+        val konecXDruhy = (druhaKrizovatka.x.toDpSKrizovatkama() + sirkaUlice).toPx()
+        val konecYDruhy = (druhaKrizovatka.y.toDpSKrizovatkama() + sirkaUlice).toPx()
 
         if (zacatekXPrvni < zacatekXDruhy || zacatekYPrvni < zacatekYDruhy) {
             drawRoundRect(

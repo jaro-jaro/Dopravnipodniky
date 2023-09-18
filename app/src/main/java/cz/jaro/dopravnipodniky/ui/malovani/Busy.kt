@@ -118,8 +118,6 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
 
     val natoceniBusu = if (poziceVKrizovatce < 0.dp) 0F else (poziceVKrizovatce / delkaKrizovatky) * uhelZatoceni
 
-    if (poziceVKrizovatce > 0.dp) println(listOf(poziceVKrizovatce, bus.poziceVUlici, natoceniBusu, delkaKrizovatky, uhelZatoceni))
-
     return {
         val zacatekX = ulice.zacatekX.toPx()
         val zacatekY = ulice.zacatekY.toPx()

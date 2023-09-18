@@ -1,6 +1,7 @@
 package cz.jaro.dopravnipodniky.ui.dopravnipodniky
 
 import android.widget.NumberPicker
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -37,6 +38,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,12 +59,9 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.Direction
 import cz.jaro.dopravnipodniky.R
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Trakce
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.dobaOdPoslednihoHrani
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.jsouVsechnyZatrolejovane
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
@@ -75,17 +74,18 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.urovenMesta
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.shared.DPID
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
-import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.kremze
+import cz.jaro.dopravnipodniky.shared.minimumInvestice
 import cz.jaro.dopravnipodniky.shared.minutes
 import cz.jaro.dopravnipodniky.shared.prodejniCenaCloveka
 import cz.jaro.dopravnipodniky.shared.vecne
 import cz.jaro.dopravnipodniky.snackbarHostState
+import cz.jaro.dopravnipodniky.ui.destinations.NovyDopravniPodnikScreenDestination
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -94,6 +94,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import kotlin.random.Random
 import kotlin.reflect.KClass
+import kotlin.reflect.KSuspendFunction1
 
 @Composable
 @Destination
@@ -104,36 +105,23 @@ fun DopravniPodnikyScreen(
 
     val prachy by viewModel.prachy.collectAsStateWithLifecycle()
     val dpInfo by viewModel.dpInfo.collectAsStateWithLifecycle()
-    val ulicove by viewModel.ulice.collectAsStateWithLifecycle()
-    val linky by viewModel.linky.collectAsStateWithLifecycle()
-    val busy by viewModel.busy.collectAsStateWithLifecycle()
-    val tutorial by viewModel.tutorial.collectAsStateWithLifecycle()
     val podniky by viewModel.podniky.collectAsStateWithLifecycle()
 
     if (
         prachy != null &&
         dpInfo != null &&
-        ulicove != null &&
-        podniky != null &&
-        tutorial != null &&
-        linky != null &&
-        busy != null
+        podniky != null
     ) DopravniPodnikyScreen(
-        prachy = prachy!!,
+        podniky = podniky!!,
         zmenitPodniky = viewModel::zmenitOstatniDopravnikyPodniky,
         zmenitDP = viewModel::zmenitDopravnikyPodnik,
         zmenitPrachy = viewModel::zmenitPrachy,
-        tutorial = tutorial!!,
         dpInfo = dpInfo!!,
-        podniky = podniky!!,
-        ulicove = ulicove!!,
-        linky = linky!!,
-        busy = busy!!,
-        zmenitBusy = viewModel::zmenitBusy,
-        zmenitUlice = viewModel::zmenitUlice,
-        navigatate = navigator::navigate,
-        navigatateBack = navigator::navigateUp,
-        dosahni = viewModel.dosahni
+        prachy = prachy!!,
+        novaMesta = viewModel::najit3NovaMesta,
+        navigate = navigator::navigate,
+        navigateBack = navigator::navigateUp,
+        dosahni = viewModel.dosahni,
     )
 }
 
@@ -141,21 +129,18 @@ fun DopravniPodnikyScreen(
 @Composable
 fun DopravniPodnikyScreen(
     podniky: List<DopravniPodnik>,
-    zmenitPodniky: (suspend MutableList<DopravniPodnik>.() -> Unit) -> Unit,
+    zmenitPodniky: KSuspendFunction1<suspend MutableList<DopravniPodnik>.() -> Unit, Unit>,
     zmenitDP: suspend (DPID) -> Unit,
     zmenitPrachy: ((Peniz) -> Peniz) -> Unit,
     dpInfo: DPInfo,
     prachy: Peniz,
-    tutorial: StavTutorialu,
-    ulicove: List<Ulice>,
-    linky: List<Linka>,
-    busy: List<Bus>,
-    zmenitBusy: (MutableList<Bus>.() -> Unit) -> Unit,
-    zmenitUlice: (MutableList<Ulice>.() -> Unit) -> Unit,
-    navigatate: (Direction) -> Unit,
-    navigatateBack: () -> Unit,
+    navigate: (Direction) -> Unit,
+    novaMesta: (Peniz, () -> Unit) -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
+    navigateBack: () -> Unit,
 ) {
+    var novejDp by rememberSaveable { mutableStateOf(false) }
+    var novejDPLogaritmicky by rememberSaveable { mutableStateOf(false) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -165,7 +150,7 @@ fun DopravniPodnikyScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            navigatateBack()
+                            navigateBack()
                         }
                     ) {
                         Icon(Icons.Default.ArrowBack, stringResource(R.string.zpet))
@@ -182,12 +167,118 @@ fun DopravniPodnikyScreen(
                     Icon(Icons.Default.Search, null)
                 },
                 onClick = {
-//                    navigatate(ObchodScreenDestination) TODO novej dp
+                    novejDp = true
                 }
             )
         },
         floatingActionButtonPosition = FabPosition.Center,
     ) { paddingValues ->
+
+        val res = LocalContext.current.resources
+        val ctx = LocalContext.current
+        val scope = rememberCoroutineScope()
+
+        var investice by rememberSaveable { mutableStateOf("") }
+        if (novejDp) AlertDialog(
+            onDismissRequest = {
+                novejDp = false
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val i = investice.toLongOrNull()?.penez ?: run {
+                            Toast.makeText(ctx, R.string.zadejte_validni_pocet, Toast.LENGTH_LONG).show()
+                            return@TextButton
+                        }
+
+                        if (i > prachy) {
+                            Toast.makeText(ctx, R.string.malo_penez, Toast.LENGTH_LONG).show()
+                            return@TextButton
+                        }
+
+                        if (i < minimumInvestice && i != 69_420.penez) {
+
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = res.getString(R.string.nigdo_nebyl_ochoten),
+                                    duration = SnackbarDuration.Indefinite
+                                )
+                            }
+
+                            zmenitPrachy {
+                                it - i / 10
+                            }
+
+                            novejDp = false
+                            return@TextButton
+                        }
+
+                        zmenitPrachy {
+                            it - i
+                        }
+
+                        if (i == 69_420.penez) {
+                            dosahni(Dosahlost.JostoMesto::class)
+
+                            novaMesta(
+                                i * 100
+                            ) {
+                                novejDp = false
+                                navigate(NovyDopravniPodnikScreenDestination)
+                            }
+
+                        } else {
+                            novaMesta(
+                                i
+                            ) {
+                                novejDp = false
+                                navigate(NovyDopravniPodnikScreenDestination)
+                            }
+                        }
+                    }
+                ) {
+                    Text(stringResource(android.R.string.ok))
+                }
+            },
+            dismissButton = { },
+            title = {
+                Text(stringResource(R.string.novy_dp))
+            },
+            text = {
+                TextField(
+                    value = investice,
+                    onValueChange = {
+                        investice = it
+                    },
+                    Modifier.fillMaxWidth(),
+                    label = {
+                        Text(stringResource(R.string.vyse_investice))
+                    }
+                )
+            },
+        )
+        if (novejDPLogaritmicky) AlertDialog(
+            onDismissRequest = {
+                novejDPLogaritmicky = false
+            },
+            confirmButton = { },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        novejDPLogaritmicky = false
+                    }
+                ) {
+                    Text(stringResource(R.string.odebrat_bus_z_linek))
+                }
+            },
+            title = {
+                Text(stringResource(R.string.vyberte_linku))
+            },
+            text = {
+
+            },
+        )
+
         var otevreno by rememberSaveable { mutableStateOf(null as String?) }
         Column(
             Modifier
@@ -208,7 +299,7 @@ fun DopravniPodnikyScreen(
             LazyColumn(
                 Modifier.weight(1F)
             ) {
-                items(podniky, key = { it.info.id }) { dp ->
+                items(podniky.distinctBy { it.info.id }, key = { it.info.id }) { dp ->
                     val expanded = otevreno == dp.info.id.toString()
                     Column(
                         Modifier
@@ -227,7 +318,7 @@ fun DopravniPodnikyScreen(
                                     onClick = {
                                         CoroutineScope(Dispatchers.Main).launch {
                                             zmenitDP(dp.info.id)
-                                            navigatateBack()
+                                            navigateBack()
                                         }
                                     }
                                 ) {
@@ -349,55 +440,8 @@ fun DopravniPodnikyScreen(
                                         .padding(all = 8.dp),
                                 )
 
-                                var novejDp by rememberSaveable { mutableStateOf(false) }
-                                var novejDPLogaritmicky by rememberSaveable { mutableStateOf(false) }
                                 var oddelatDP by rememberSaveable { mutableStateOf(false) }
                                 var smenitJizdne by rememberSaveable { mutableStateOf(false) }
-                                val res = LocalContext.current.resources
-                                val scope = rememberCoroutineScope()
-
-                                if (novejDp) AlertDialog(
-                                    onDismissRequest = {
-                                        novejDp = false
-                                    },
-                                    confirmButton = { },
-                                    dismissButton = {
-                                        TextButton(
-                                            onClick = {
-                                                novejDp = false
-                                            }
-                                        ) {
-                                            Text(stringResource(R.string.odebrat_bus_z_linek))
-                                        }
-                                    },
-                                    title = {
-                                        Text(stringResource(R.string.vyberte_linku))
-                                    },
-                                    text = {
-
-                                    },
-                                )
-                                if (novejDPLogaritmicky) AlertDialog(
-                                    onDismissRequest = {
-                                        novejDPLogaritmicky = false
-                                    },
-                                    confirmButton = { },
-                                    dismissButton = {
-                                        TextButton(
-                                            onClick = {
-                                                novejDPLogaritmicky = false
-                                            }
-                                        ) {
-                                            Text(stringResource(R.string.odebrat_bus_z_linek))
-                                        }
-                                    },
-                                    title = {
-                                        Text(stringResource(R.string.vyberte_linku))
-                                    },
-                                    text = {
-
-                                    },
-                                )
 
                                 val oddelavaciCena = prodejniCenaCloveka * dp.cloveci + dp.busy.sumOf { it.prodejniCena.value }.penez
 
@@ -409,16 +453,16 @@ fun DopravniPodnikyScreen(
                                         TextButton(
                                             onClick = {
                                                 val actualCena = oddelavaciCena * Random.nextDouble(.5, 1.5)
-
-                                                zmenitPodniky {
-                                                    removeAt(indexOfFirst { it.info.id == dp.info.id })
-                                                }
-
-                                                zmenitPrachy {
-                                                    it + actualCena
-                                                }
-
                                                 MainScope().launch {
+
+                                                    zmenitPodniky {
+                                                        removeAt(indexOfFirst { it.info.id == dp.info.id })
+                                                    }
+
+                                                    zmenitPrachy {
+                                                        it + actualCena
+                                                    }
+
                                                     with(res) {
                                                         snackbarHostState.showSnackbar(
                                                             message = getString(
@@ -465,13 +509,15 @@ fun DopravniPodnikyScreen(
                                     confirmButton = {
                                         TextButton(
                                             onClick = {
-                                                zmenitPodniky {
-                                                    val i = indexOfFirst { it.info.id == dp.info.id }
-                                                    this[i] = this[i].copy(
-                                                        info = this[i].info.copy(
-                                                            jizdne = vybraneJizdne.penez,
+                                                scope.launch {
+                                                    zmenitPodniky {
+                                                        val i = indexOfFirst { it.info.id == dp.info.id }
+                                                        this[i] = this[i].copy(
+                                                            info = this[i].info.copy(
+                                                                jizdne = vybraneJizdne.penez,
+                                                            )
                                                         )
-                                                    )
+                                                    }
                                                 }
                                                 smenitJizdne = false
                                             }
@@ -518,15 +564,17 @@ fun DopravniPodnikyScreen(
                                         Modifier
                                             .combinedClickable(
                                                 onLongClick = {
-                                                    if (dp.info.jmenoMesta == kremze)
-                                                        zmenitPodniky {
-                                                            val i = indexOfFirst { it.info.id == dp.info.id }
-                                                            this[i] = this[i].copy(
-                                                                info = this[i].info.copy(
-                                                                    jmenoMesta = vecne
+                                                    scope.launch {
+                                                        if (dp.info.jmenoMesta == kremze)
+                                                            zmenitPodniky {
+                                                                val i = indexOfFirst { it.info.id == dp.info.id }
+                                                                this[i] = this[i].copy(
+                                                                    info = this[i].info.copy(
+                                                                        jmenoMesta = vecne
+                                                                    )
                                                                 )
-                                                            )
-                                                        }
+                                                            }
+                                                    }
                                                 },
                                                 onClick = {
                                                     oddelatDP = true

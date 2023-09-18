@@ -394,7 +394,7 @@ sealed interface Dosahlost {
         override fun kopirovat(stav: Stav) = copy(stav = stav)
         override val jmeno get() = R.string.d_n_jostomesto
         override val popis get() = R.string.d_p_jostomesto
-        override val odmena get() = Double.NEGATIVE_INFINITY.penez
+        override val odmena get() = (-100_000).penez
     }
 
     @Serializable

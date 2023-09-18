@@ -44,7 +44,7 @@ import cz.jaro.dopravnipodniky.shared.jednotky.toDuration
 import cz.jaro.dopravnipodniky.shared.millisPerTik
 import cz.jaro.dopravnipodniky.shared.nahodnostProjetiZastavky
 import cz.jaro.dopravnipodniky.shared.nasobitelZisku
-import cz.jaro.dopravnipodniky.shared.odsazeniBaraku
+import cz.jaro.dopravnipodniky.shared.odsazeniBarakuAZastavky
 import cz.jaro.dopravnipodniky.shared.odsazeniBusu
 import cz.jaro.dopravnipodniky.shared.predsazeniKrizovatky
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
@@ -255,7 +255,7 @@ private fun update(
 
                     if (
                         stavZastavky == StavZastavky.Pred &&
-                        poziceVUlici >= (delkaUlice + delkaZastavky) / 2 - bus.typBusu.delka.toDp() - odsazeniBaraku
+                        poziceVUlici >= (delkaUlice + delkaZastavky) / 2 - bus.typBusu.delka.toDp() / 2 - odsazeniBarakuAZastavky
                     ) {
                         stavZastavky = StavZastavky.Na(
                             if (Random.nextInt(0, nahodnostProjetiZastavky) == 0) {

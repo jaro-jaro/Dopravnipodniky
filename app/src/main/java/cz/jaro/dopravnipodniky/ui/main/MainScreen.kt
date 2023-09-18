@@ -110,7 +110,7 @@ import cz.jaro.dopravnipodniky.shared.jednotky.minus
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.plus
 import cz.jaro.dopravnipodniky.shared.jednotky.toDp
-import cz.jaro.dopravnipodniky.shared.jednotky.toDpSUlicema
+import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
 import cz.jaro.dopravnipodniky.shared.jednotky.toPx
 import cz.jaro.dopravnipodniky.shared.maximalniOddaleni
 import cz.jaro.dopravnipodniky.shared.oddalenyRezim
@@ -180,7 +180,7 @@ fun MainScreen(
         zmenitPrachy = viewModel::zmenitPrachy,
         zmenitNastaveni = viewModel::zmenitNastaveni,
         zmenitUlice = viewModel::zmenitUlice,
-        navigatate = navigator::navigate,
+        navigate = navigator::navigate,
         ziskatUlice = {
             ulicove!!
         }
@@ -193,7 +193,7 @@ var ukazatDosahlosti by mutableStateOf(false)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(
-    zmenitPodniky: (suspend MutableList<DopravniPodnik>.() -> Unit) -> Unit,
+    zmenitPodniky: suspend (suspend MutableList<DopravniPodnik>.() -> Unit) -> Unit,
     zmenitDP: suspend (DPID) -> Unit,
     dpInfo: DPInfo,
     nastaveni: Nastaveni,
@@ -207,11 +207,11 @@ fun MainScreen(
     zmenitPrachy: ((Peniz) -> Peniz) -> Unit,
     zmenitNastaveni: ((Nastaveni) -> Nastaveni) -> Unit,
     zmenitUlice: (MutableList<Ulice>.() -> Unit) -> Unit,
-    navigatate: (Direction) -> Unit,
+    navigate: (Direction) -> Unit,
     ziskatUlice: () -> List<Ulice>,
 ) {
     val density = LocalDensity.current
-    val stred = remember(ulicove.stred) { ulicove.stred.toDpSUlicema() }
+    val stred = remember(ulicove.stred) { ulicove.stred.toDpSKrizovatkama() }
     var tx by remember { mutableFloatStateOf(0F) }
     var ty by remember { mutableFloatStateOf(0F) }
     var priblizeni by remember { mutableFloatStateOf(pocatecniPriblizeni) }
@@ -219,6 +219,8 @@ fun MainScreen(
     var upravitUlici by remember { mutableStateOf(null as UliceID?) }
     val scope = rememberCoroutineScope()
     val res = LocalContext.current.resources
+
+    println(priblizeni)
 
     LaunchedEffect(stred) {
         tx = with(density) { -stred.x.toPx() * pocatecniPriblizeni }
@@ -243,7 +245,7 @@ fun MainScreen(
                             withDismissAction = true,
                         )
                         if (result == SnackbarResult.ActionPerformed) {
-                            navigatate(MainScreenDestination)
+                            navigate(MainScreenDestination)
                             ukazatDosahlosti = true
                         }
                     }
@@ -265,7 +267,7 @@ fun MainScreen(
                             12.0.pow(6).penez
                     }
                 }) {
-                    navigatate(DopravniPodnikyScreenDestination)
+                    navigate(DopravniPodnikyScreenDestination)
                 },
                 actions = {
                     if (
@@ -566,7 +568,7 @@ fun MainScreen(
 
                     val (start, stop) = pitomyUlice.rohyMesta
                     val m = start
-                        .toDpSUlicema()
+                        .toDpSKrizovatkama()
                         .minus(ulicovyBlok * 2)
                         .toPx()
                         .minus(size.center.toOffset())
@@ -578,7 +580,7 @@ fun MainScreen(
                                 .toOffset()
                         )
                     val i = stop
-                        .toDpSUlicema()
+                        .toDpSKrizovatkama()
                         .plus(ulicovyBlok * 2)
                         .toPx()
                         .minus(size.center.toOffset())
@@ -611,6 +613,7 @@ fun MainScreen(
             Mesto(
                 malovatBusy = malovatBusy,
                 malovatLinky = !malovatBusy,
+                malovatTroleje = priblizeni > oddalenyRezim,
                 kliklyKrizovatky = emptyList(),
                 ulice = ulicove,
                 linky = linky,
@@ -718,7 +721,7 @@ fun MainScreen(
                         !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
                     ) TextButton(
                         onClick = {
-                            navigatate(LinkyScreenDestination)
+                            navigate(LinkyScreenDestination)
                         },
                         Modifier
                             .weight(1F)
@@ -738,7 +741,7 @@ fun MainScreen(
                         !(tutorial je StavTutorialu.Tutorialujeme.Zastavky)
                     ) TextButton(
                         onClick = {
-                            navigatate(GarazScreenDestination)
+                            navigate(GarazScreenDestination)
                         },
                         Modifier
                             .weight(1F)

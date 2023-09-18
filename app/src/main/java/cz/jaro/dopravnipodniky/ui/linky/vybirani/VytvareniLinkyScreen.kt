@@ -79,9 +79,10 @@ import cz.jaro.dopravnipodniky.shared.jednotky.plus
 import cz.jaro.dopravnipodniky.shared.jednotky.sousedi
 import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpOffset
-import cz.jaro.dopravnipodniky.shared.jednotky.toDpSUlicema
+import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
 import cz.jaro.dopravnipodniky.shared.jednotky.toPx
 import cz.jaro.dopravnipodniky.shared.maximalniOddaleni
+import cz.jaro.dopravnipodniky.shared.oddalenyRezim
 import cz.jaro.dopravnipodniky.shared.pocatecniPriblizeni
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
@@ -123,7 +124,7 @@ fun VytvareniLinkyScreen(
         tutorial = tutorial!!,
         zmenitTutorial = viewModel::zmenitTutorial,
         zmenitLinky = viewModel::zmenitLinky,
-        navigatateUp = navigator::navigateUp,
+        navigateUp = navigator::navigateUp,
         dosahni = viewModel.dosahni,
     )
 }
@@ -139,12 +140,12 @@ fun VytvareniLinkyScreen(
     linky: List<Linka>,
     ulicove: List<Ulice>,
     zmenitLinky: (MutableList<Linka>.() -> Unit) -> Unit,
-    navigatateUp: () -> Unit,
+    navigateUp: () -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
 ) {
     var waitForExit by remember { mutableStateOf(null as UUID?) }
     val density = LocalDensity.current
-    val stred = remember { ulicove.stred.toDpSUlicema() }
+    val stred = remember { ulicove.stred.toDpSKrizovatkama() }
     var tx by remember { mutableFloatStateOf(with(density) { -stred.x.toPx() * pocatecniPriblizeni }) }
     var ty by remember { mutableFloatStateOf(with(density) { -stred.y.toPx() * pocatecniPriblizeni }) }
     var priblizeni by remember { mutableFloatStateOf(pocatecniPriblizeni) }
@@ -173,7 +174,7 @@ fun VytvareniLinkyScreen(
 
             val k = ulicove.seznamKrizovatek.find { krizovatka ->
                 DpRect(
-                    origin = krizovatka.toDpSUlicema().minus(sirkaUlice / 2).toDpOffset(),
+                    origin = krizovatka.toDpSKrizovatkama().minus(sirkaUlice / 2).toDpOffset(),
                     size = DpSize(2 * sirkaUlice, 2 * sirkaUlice)
                 ).contains(pozice)
             } ?: return@run
@@ -201,7 +202,7 @@ fun VytvareniLinkyScreen(
                 // t - posunuti, c - coercovaný, p - prostředek, x - max, i - min
 
                 val (start, stop) = ulicove.rohyMesta
-                val m = start.toDpSUlicema()
+                val m = start.toDpSKrizovatkama()
                     .minus(ulicovyBlok * 2)
                     .toPx()
                     .minus(size.center.toOffset())
@@ -212,7 +213,7 @@ fun VytvareniLinkyScreen(
                             .times(priblizeni)
                             .toOffset()
                     )
-                val i = stop.toDpSUlicema()
+                val i = stop.toDpSKrizovatkama()
                     .plus(ulicovyBlok * 2)
                     .toPx()
                     .minus(size.center.toOffset())
@@ -246,7 +247,7 @@ fun VytvareniLinkyScreen(
 
     LaunchedEffect(linky, waitForExit) {
         if (waitForExit != null && linky.any { it.id == waitForExit }) {
-            navigatateUp()
+            navigateUp()
         }
     }
 
@@ -277,7 +278,7 @@ fun VytvareniLinkyScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            navigatateUp()
+                            navigateUp()
                         }
                     ) {
                         Icon(Icons.Default.ArrowBack, stringResource(R.string.zpet))
@@ -294,6 +295,7 @@ fun VytvareniLinkyScreen(
             Mesto(
                 malovatBusy = false,
                 malovatLinky = true,
+                malovatTroleje = priblizeni > oddalenyRezim,
                 ulice = ulicove,
                 linky = linky,
                 busy = emptyList(),

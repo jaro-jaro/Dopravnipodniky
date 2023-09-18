@@ -7,11 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,7 +22,6 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.unit.dp
-import cz.jaro.dopravnipodniky.data.seed
 import cz.jaro.dopravnipodniky.shared.TPS
 import cz.jaro.dopravnipodniky.shared.barvaChodniku
 import cz.jaro.dopravnipodniky.shared.barvaUlice
@@ -65,21 +62,6 @@ fun Loading() = DpTheme(
         ) {
             CircularProgressIndicator()
             Text("Hra se načítá...", Modifier.padding(all = 8.dp))
-
-            var seed2 by remember { mutableStateOf("") }
-
-            TextField(
-                value = seed2,
-                onValueChange = {
-                    seed2 = it
-                }
-            )
-
-            Button(onClick = {
-                seed = seed2.toIntOrNull()
-            }) {
-                Text("Ok")
-            }
 
             var sirka by remember { mutableStateOf(Float.MAX_VALUE.dp) }
             val delkaBusu = remember { 12.metru }

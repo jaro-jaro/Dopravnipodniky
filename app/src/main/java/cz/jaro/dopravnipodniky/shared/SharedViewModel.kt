@@ -2,6 +2,7 @@ package cz.jaro.dopravnipodniky.shared
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cz.jaro.dopravnipodniky.data.Generator
 import cz.jaro.dopravnipodniky.data.Nastaveni
 import cz.jaro.dopravnipodniky.data.PreferencesDataSource
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
@@ -14,15 +15,23 @@ import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlovac
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.ui.garaz.obchod.SkupinaFiltru
 import cz.jaro.dopravnipodniky.ui.garaz.obchod.SkupinaFiltru.Companion.filtrovat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.WhileSubscribed
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.annotation.KoinViewModel
 import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.seconds
+
+private val _novePodniky = MutableStateFlow(null as Triple<DopravniPodnik, DopravniPodnik, DopravniPodnik>?)
+val novePodniky = _novePodniky.asStateFlow()
 
 @KoinViewModel
 class SharedViewModel(
@@ -96,13 +105,11 @@ class SharedViewModel(
         }
     }
 
-    fun zmenitOstatniDopravnikyPodniky(update: suspend MutableList<DopravniPodnik>.() -> Unit) {
-        viewModelScope.launch {
-            preferencesDataSource.upravitOstatniDopravniPodniky(update)
-        }
+    suspend fun zmenitOstatniDopravnikyPodniky(update: suspend MutableList<DopravniPodnik>.() -> Unit) = withContext(Dispatchers.IO) {
+        preferencesDataSource.upravitOstatniDopravniPodniky(update)
     }
 
-    suspend fun zmenitDopravnikyPodnik(dpID: DPID) {
+    suspend fun zmenitDopravnikyPodnik(dpID: DPID) = withContext(Dispatchers.IO) {
         preferencesDataSource.zmenitDopravniPodnik(dpID)
     }
 
@@ -120,6 +127,44 @@ class SharedViewModel(
     val dosahni: (KClass<out Dosahlost>) -> Unit = {
         viewModelScope.launch {
             dosahlovac.dosahni(it)
+        }
+    }
+
+    init {
+        println(novePodniky.value)
+    }
+
+    fun najit3NovaMesta(
+        investice: Peniz,
+        hotovo: () -> Unit,
+    ) {
+        CoroutineScope(Dispatchers.IO).launch {
+
+            zmenitPrachy {
+                it - investice
+            }
+
+            _novePodniky.value = Triple(
+                Generator(investice).vygenerujMiMestoAToHnedVykricnik {},
+                Generator(investice).vygenerujMiMestoAToHnedVykricnik {},
+                Generator(investice).vygenerujMiMestoAToHnedVykricnik {},
+            ).also(::println)
+
+            withContext(Dispatchers.Main) {
+                hotovo()
+            }
+        }
+    }
+
+    fun vybratMesto(
+        id: DPID,
+    ) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val dp = _novePodniky.value?.toList()?.singleOrNull { it.info.id == id } ?: return@launch
+            zmenitOstatniDopravnikyPodniky {
+                add(dp)
+            }
+            zmenitDopravnikyPodnik(dp.info.id)
         }
     }
 

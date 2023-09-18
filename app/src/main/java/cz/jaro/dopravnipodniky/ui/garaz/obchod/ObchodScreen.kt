@@ -130,7 +130,7 @@ fun ObchodScreen(
         zmenitPrachy = viewModel::zmenitPrachy,
         zmenitNastaveni = viewModel::zmenitNastaveni,
         zmenitBusy = viewModel::zmenitBusy,
-        navigatateBack = navigator::navigateUp,
+        navigateBack = navigator::navigateUp,
         dosahni = viewModel.dosahni,
         tutorial = tutorial!!,
         zmenitTutorial = viewModel::zmenitTutorial,
@@ -156,7 +156,7 @@ fun ObchodScreen(
     zmenitPrachy: ((Peniz) -> Peniz) -> Unit,
     zmenitNastaveni: ((Nastaveni) -> Nastaveni) -> Unit,
     zmenitBusy: (MutableList<Bus>.() -> Unit) -> Unit,
-    navigatateBack: () -> Unit,
+    navigateBack: () -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
     tutorial: StavTutorialu,
     zmenitTutorial: ((StavTutorialu) -> StavTutorialu) -> Unit,
@@ -166,7 +166,7 @@ fun ObchodScreen(
         when (stav) {
             Zobrait.Filtry -> stav = Zobrait.Vysledky
             Zobrait.Razeni -> stav = Zobrait.Vysledky
-            Zobrait.Vysledky -> navigatateBack()
+            Zobrait.Vysledky -> navigateBack()
         }
     }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -193,7 +193,7 @@ fun ObchodScreen(
                             when (stav) {
                                 Zobrait.Filtry -> stav = Zobrait.Vysledky
                                 Zobrait.Razeni -> stav = Zobrait.Vysledky
-                                Zobrait.Vysledky -> navigatateBack()
+                                Zobrait.Vysledky -> navigateBack()
                             }
                         }
                     ) {
@@ -384,7 +384,7 @@ fun ObchodScreen(
                                 val ctx = LocalContext.current
                                 val maloPenez = stringResource(R.string.malo_penez)
                                 val zadejteValidniPocet = stringResource(R.string.zadejte_validni_pocet)
-                                val bohuzelNeVicNez500 = stringResource(R.string.bohuzel_ne_vic_nez_500)
+                                val bohuzelNeVicNez50 = stringResource(R.string.bohuzel_ne_vic_nez_50)
                                 val evCExistuje = stringResource(R.string.ev_c_existuje)
 
                                 suspend fun koupit(seznamEvC: List<Int>, naLinku: LinkaID?) {
@@ -434,8 +434,8 @@ fun ObchodScreen(
                                                         return@TextButton
                                                     }
 
-                                                    if (pocet.toInt() > 512) {
-                                                        Toast.makeText(ctx, bohuzelNeVicNez500, Toast.LENGTH_SHORT).show()
+                                                    if (pocet.toInt() > 50) {
+                                                        Toast.makeText(ctx, bohuzelNeVicNez50, Toast.LENGTH_SHORT).show()
                                                         return@TextButton
                                                     }
 

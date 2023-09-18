@@ -18,7 +18,7 @@ import cz.jaro.dopravnipodniky.shared.barvaUlice
 import cz.jaro.dopravnipodniky.shared.drawArc
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
-import cz.jaro.dopravnipodniky.shared.jednotky.toDpSUlicema
+import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
 import cz.jaro.dopravnipodniky.shared.predsazeniKrizovatky
 import cz.jaro.dopravnipodniky.shared.sirkaChodniku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
@@ -30,8 +30,8 @@ fun namalovatKrizovatku(
 ) {
     val (x, y) = krizovatka
 
-    val zacatekX = x.toDpSUlicema()
-    val zacatekY = y.toDpSUlicema()
+    val zacatekX = x.toDpSKrizovatkama()
+    val zacatekY = y.toDpSKrizovatkama()
 
     val sirkaUlice = sirkaUlice.toPx()
     val sirkaChodniku = sirkaChodniku.toPx()
