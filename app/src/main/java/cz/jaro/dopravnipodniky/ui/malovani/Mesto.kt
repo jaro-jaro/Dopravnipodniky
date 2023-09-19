@@ -13,6 +13,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.seznamKrizovatek
 import cz.jaro.dopravnipodniky.data.serializers.DpSerializer
 import cz.jaro.dopravnipodniky.shared.barvaPozadi
@@ -43,7 +44,7 @@ fun Mesto(
 
     val nakreslitLinky = remember(
         linky,
-        ulice.map { listOf(it.zacatek, it.konec, it.zacatekX, it.zacatekY, it.orientace, it.id) },
+        ulice.map { listOf(it.zacatek, it.konec, it.zacatekX, it.zacatekY, it.orientace, it.id, it.maZastavku) },
     ) {
         getNamalovatLinky(linky, ulice)
     }

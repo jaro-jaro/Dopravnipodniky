@@ -10,12 +10,17 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.DpRect
+import androidx.compose.ui.unit.center
+import androidx.compose.ui.unit.toOffset
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
+import cz.jaro.dopravnipodniky.shared.jednotky.toDp
+import cz.jaro.dopravnipodniky.shared.jednotky.toPx
 import kotlinx.coroutines.flow.Flow
 import kotlin.math.pow
 import kotlin.math.roundToLong
@@ -93,6 +98,7 @@ inline fun <E> List<E>.mutate(crossinline mutator: MutableList<E>.() -> Unit): L
     addAll(this@mutate)
     mutator()
 }
+
 suspend fun <E> List<E>.mutate(mutator: suspend MutableList<E>.() -> Unit): List<E> = buildList {
     addAll(this@mutate)
     mutator()
@@ -209,3 +215,158 @@ fun <T1, T2, T3, T4, T5, T6, T7, T8, R> combine(
 
 context(Density)
 fun DpOffset.toOffset() = Offset(x.toPx(), y.toPx())
+
+context(PointerInputScope)
+fun <T> List<T>.najitObdelnikVeKteremJe(
+    offset: Offset,
+    tx: Float,
+    ty: Float,
+    priblizeni: Float,
+    transform: ((T) -> DpRect),
+) = najitObdelnikVeKteremJe(
+    offset = offset,
+    tx = tx,
+    ty = ty,
+    priblizeni = priblizeni,
+    center = this@PointerInputScope.size.center.toOffset(),
+    transform = transform,
+)
+
+//context(PointerInputScope)
+//fun List<DpRect>.najitObdelnikVeKteremJe(
+//    offset: Offset,
+//    tx: Float,
+//    ty: Float,
+//    priblizeni: Float,
+//) = najitObdelnikVeKteremJe(
+//    offset = offset,
+//    tx = tx,
+//    ty = ty,
+//    priblizeni = priblizeni,
+//    center = this@PointerInputScope.size.center.toOffset(),
+//    transform = { it },
+//)
+//
+//context(Density)
+//fun List<DpRect>.najitObdelnikVeKteremJe(
+//    offset: Offset,
+//    tx: Float,
+//    ty: Float,
+//    center: Offset,
+//    priblizeni: Float,
+//) = najitObdelnikVeKteremJe(
+//    offset = offset,
+//    tx = tx,
+//    ty = ty,
+//    priblizeni = priblizeni,
+//    center = center,
+//    transform = { it },
+//)
+
+context(Density)
+fun <T> List<T>.najitObdelnikVeKteremJe(
+    offset: Offset,
+    tx: Float,
+    ty: Float,
+    priblizeni: Float,
+    center: Offset,
+    transform: ((T) -> DpRect),
+) = offset
+    .toDpSPosunutimAPriblizenim(tx = tx, ty = ty, priblizeni = priblizeni, center = center)
+    .let { pozice ->
+        val i = map(transform).indexOfFirst {
+            it.contains(pozice)
+        }
+        this.getOrNull(i)
+    }
+
+context(Density)
+fun Offset.toDpSPosunutimAPriblizenim(
+    tx: Float,
+    ty: Float,
+    priblizeni: Float,
+    center: Offset,
+) = this
+    .minus(center * priblizeni)
+    .minus(Offset(tx, ty) * priblizeni)
+    .minus(center)
+    .div(priblizeni)
+    .plus(center)
+    .toDp()
+
+context(PointerInputScope)
+fun Offset.toDpSPosunutimAPriblizenim(
+    tx: Float,
+    ty: Float,
+    priblizeni: Float,
+) = toDpSPosunutimAPriblizenim(
+    tx = tx, ty = ty, priblizeni = priblizeni,
+    center = this@PointerInputScope.size.center.toOffset(),
+)
+
+context(Density)
+fun Pozice<Dp>.toOffsetSPriblizenim(
+    priblizeni: Float,
+    center: Offset,
+) = this
+    .toPx()
+    .minus(center)
+    .times(priblizeni)
+    .plus(center)
+    .plus(
+        center * priblizeni
+    )
+
+context(PointerInputScope)
+fun Pozice<Dp>.toOffsetSPriblizenim(
+    priblizeni: Float,
+) = toOffsetSPriblizenim(
+    priblizeni = priblizeni,
+    center = this@PointerInputScope.size.center.toOffset(),
+)
+
+fun Offset.odNulaNula(priblizeni: Float) = -this / priblizeni
+
+fun <A, B, C> zip(
+    iterableA: Iterable<A>,
+    iterableB: Iterable<B>,
+    iterableC: Iterable<C>,
+) = zip(iterableA, iterableB, iterableC) { a, b, c -> Triple(a, b, c) }
+
+fun <A, B, C, Z> zip(
+    iterableA: Iterable<A>,
+    iterableB: Iterable<B>,
+    iterableC: Iterable<C>,
+    transform: (a: A, b: B, c: C) -> Z
+): ArrayList<Z> {
+    val a = iterableA.iterator()
+    val b = iterableB.iterator()
+    val c = iterableC.iterator()
+
+    val list = ArrayList<Z>(
+        minOf(
+            iterableA.collectionSizeOrDefault(10),
+            iterableB.collectionSizeOrDefault(10),
+            iterableC.collectionSizeOrDefault(10)
+        )
+    )
+    while (a.hasNext() && b.hasNext() && c.hasNext()) {
+        list.add(transform(a.next(), b.next(), c.next()))
+    }
+    return list
+}
+
+fun <Z> zip(
+    iterables: List<Iterable<Any?>>,
+    transform: (List<Any?>) -> Z
+): ArrayList<Z> {
+    val iterators = iterables.map { it.iterator() }
+
+    val list = ArrayList<Z>(iterables.minOf { it.collectionSizeOrDefault(10) })
+    while (iterators.all { it.hasNext() }) {
+        list.add(transform(iterators.map { it.next() }))
+    }
+    return list
+}
+
+fun <T> Iterable<T>.collectionSizeOrDefault(default: Int): Int = if (this is Collection<*>) this.size else default

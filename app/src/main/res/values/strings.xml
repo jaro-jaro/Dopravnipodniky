@@ -163,7 +163,7 @@
     <string name="zaplatit">Zaplatit: %s €</string>
     <string name="logaritmus_vyse_investice">Logaritmus výše investice</string>
     <string name="velke_mnozstvi_penez_za_dp">Zadali jste vysoké množství peněz a proto ne jen tak ledajaké město je schopno se nabídnout na dostatečné úrovni, proto musíte potvrdit, že chcete doopravdy investovat takto vysokou částku a vzít na vědomí, že nejspíš bude chvíli trvat, než se nějaké město přihlásí.</string>
-    <string name="generuje_se_nove_mesto">"Generuje se město, prosíme o chvíli strpení"</string>
+    <string name="generace_mesta">"Probíhá generace měst"</string>
     <string name="odebrat_z_linek">Odebrat z linek</string>
     <string name="opravdu_chcete_odebrat_vozidla_z_linek">Opravdu chcete odebrat vybraná vozidla z jejich linek?</string>
     <string name="vybrano">Vybráno: %d</string>

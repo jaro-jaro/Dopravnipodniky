@@ -6,6 +6,7 @@ import cz.jaro.dopravnipodniky.shared.jednotky.DpZaHodinu
 import cz.jaro.dopravnipodniky.shared.jednotky.Metr
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.PenizZaMinutu
+import cz.jaro.dopravnipodniky.shared.jednotky.metru
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration
@@ -17,15 +18,21 @@ data class TypBusu(
     val trakce: Trakce,
     val vyrobce: Vyrobce,
     val kapacita: Int,
-    val rychlost: DpZaHodinu,
+    val maxRychlost: DpZaHodinu,
     val maxNaklady: PenizZaMinutu,
     val cena: Peniz,
     val delka: Metr,
+    val clanky: List<Metr> = listOf(delka),
     val sirka: Metr,
     val vydrz: Duration,
     val popis: String,
 ) {
     override fun toString() = model
+
+    init {
+        require(clanky.isNotEmpty())
+        require(clanky.sumOf { it.value }.metru == delka)
+    }
 }
 
 val TypBusu.zrychleniOdebiraniPenez get() = maxNaklady.value / vydrz.inWholeHours

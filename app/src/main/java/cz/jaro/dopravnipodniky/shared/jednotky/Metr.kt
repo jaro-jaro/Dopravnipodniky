@@ -7,7 +7,9 @@ import kotlinx.serialization.Serializable
 @JvmInline
 @Serializable
 @SerialName("Metr")
-value class Metr(val value: Double)
+value class Metr(val value: Double) {
+    operator fun plus(other: Metr) = Metr(value + other.value)
+}
 
 val Int.metru get() = Metr(this.toDouble())
 val Double.metru get() = Metr(this)

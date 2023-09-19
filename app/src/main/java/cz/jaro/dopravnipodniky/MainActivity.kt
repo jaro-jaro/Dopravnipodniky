@@ -91,7 +91,7 @@ class MainActivity : ComponentActivity() {
                 val scope = rememberCoroutineScope()
                 var vyuctovani by remember { mutableStateOf(null as Duration?) }
                 LaunchedEffect(Unit) {
-                    hodiny.registerListener(1.seconds) {
+                    hodiny.registerListener(1.seconds) { _ ->
                         // zistovani jestli nejses moc dlouho pryc
                         val posledniId = dpInfo!!.id
 

@@ -3,7 +3,6 @@ package cz.jaro.dopravnipodniky.data
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Barak
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
@@ -78,14 +77,14 @@ class Generator(
         this@Generator.stredovyRandom = stredovyRandom
         this@Generator.kapacitaRandom = kapacitaRandom
 
-        opakovac(1, listOf(0.ulicovychBloku to 0.ulicovychBloku), nahodnostNaZacatku)
+        opakovac(1, listOf(0.ulicovychBloku to 0.ulicovychBloku), nahodnostNaZacatku, step)
 
         zbarakuj()
 
         DopravniPodnik(jmenoMesta = jmenoMesta, ulicove = ulicove)
     }
 
-    private tailrec fun opakovac(hloubka: Int, posledniKrizovatky: List<Pozice<UlicovyBlok>>, sance: Float) {
+    private tailrec fun opakovac(hloubka: Int, posledniKrizovatky: List<Pozice<UlicovyBlok>>, sance: Float, step: (Float) -> Unit) {
 
         if (hloubka > velikost) return
 
@@ -116,14 +115,16 @@ class Generator(
                 }
         }
 
-        val procentaz = Regex("1*..[.]..").find("0${(hloubka / velikost.toDouble() * 100)}0")?.groupValues?.first()
-        Log.i("generace", "$hloubka z $velikost -> $procentaz %")
+        val uzHotovo = hloubka / velikost.toDouble()
+        step(uzHotovo.toFloat())
+        val uzHotovoTextem = Regex("1?..\\...").find("0${(uzHotovo * 100)}0")?.groupValues?.first()
+        Log.i("generace", "$hloubka z $velikost -> $uzHotovoTextem %")
 
         if (noveKrizovatky.isEmpty()) {
             val zredukovanyKrizovatky = posledniKrizovatky.shuffled(michaniRandom).take((posledniKrizovatky.size * nasobitelRedukce).roundToInt())
-            opakovac(hloubka + 1, zredukovanyKrizovatky, nahodnostPoObnoveni)
+            opakovac(hloubka + 1, zredukovanyKrizovatky, nahodnostPoObnoveni, step)
         } else {
-            opakovac(hloubka + 1, noveKrizovatky, sance - rozdilNahodnosti)
+            opakovac(hloubka + 1, noveKrizovatky, sance - rozdilNahodnosti, step)
         }
     }
 
@@ -163,7 +164,7 @@ class Generator(
                 cloveci = kapacitaRandom.nextInt(ulicove[i].kapacita / 2, ulicove[i].kapacita)
             )
 
-            println(ulice.baraky.size)
+//            println(ulice.baraky.size)
         }
     }
 }

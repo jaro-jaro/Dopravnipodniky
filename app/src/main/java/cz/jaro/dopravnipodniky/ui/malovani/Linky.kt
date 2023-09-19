@@ -11,7 +11,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.delkaUlice
 import cz.jaro.dopravnipodniky.shared.delkaZastavky
-import cz.jaro.dopravnipodniky.shared.odsazeniBarakuAZastavky
+import cz.jaro.dopravnipodniky.shared.odsazeniZastavky
 import cz.jaro.dopravnipodniky.shared.sirkaChodniku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 
@@ -79,7 +79,7 @@ fun getNamalovatLinky(
                                 y = odsazeniOdBoku.toPx(),
                             ),
                             end = Offset(
-                                x = delkaUlice.toPx() / 2 - delkaZastavky.toPx() / 2 - (odsazeniBarakuAZastavky.toPx() + sirka.toPx() / 2),
+                                x = delkaUlice.toPx() / 2 - delkaZastavky.toPx() / 2 - (odsazeniZastavky.toPx() + sirka.toPx() / 2),
                                 y = odsazeniOdBoku.toPx(),
                             ),
                             strokeWidth = sirka.toPx(),
@@ -88,11 +88,11 @@ fun getNamalovatLinky(
                         drawLine(
                             color = linka.barvicka.barva.copy(alpha = if (maPodSebouZastavku) 1 / 3F else 1F),
                             start = Offset(
-                                x = delkaUlice.toPx() / 2 - delkaZastavky.toPx() / 2 - (odsazeniBarakuAZastavky.toPx() + sirka.toPx() / 2),
+                                x = delkaUlice.toPx() / 2 - delkaZastavky.toPx() / 2 - (odsazeniZastavky.toPx() + sirka.toPx() / 2),
                                 y = odsazeniOdBoku.toPx(),
                             ),
                             end = Offset(
-                                x = delkaUlice.toPx() / 2 + delkaZastavky.toPx() / 2 + (odsazeniBarakuAZastavky.toPx() + sirka.toPx() / 2),
+                                x = delkaUlice.toPx() / 2 + delkaZastavky.toPx() / 2 + (odsazeniZastavky.toPx() + sirka.toPx() / 2),
                                 y = odsazeniOdBoku.toPx(),
                             ),
                             strokeWidth = sirka.toPx(),
@@ -101,7 +101,7 @@ fun getNamalovatLinky(
                         drawLine(
                             color = linka.barvicka.barva,
                             start = Offset(
-                                x = delkaUlice.toPx() / 2 + delkaZastavky.toPx() / 2 + (odsazeniBarakuAZastavky.toPx() + sirka.toPx() / 2),
+                                x = delkaUlice.toPx() / 2 + delkaZastavky.toPx() / 2 + (odsazeniZastavky.toPx() + sirka.toPx() / 2),
                                 y = odsazeniOdBoku.toPx(),
                             ),
                             end = Offset(

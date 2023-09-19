@@ -23,29 +23,25 @@ import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlovac
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.Smer
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
-import cz.jaro.dopravnipodniky.shared.Text
 import cz.jaro.dopravnipodniky.shared.TypKrizovatky
 import cz.jaro.dopravnipodniky.shared.delkaUlice
 import cz.jaro.dopravnipodniky.shared.delkaZastavky
 import cz.jaro.dopravnipodniky.shared.dobaPobytuNaZastavce
-import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.hezkaCisla
 import cz.jaro.dopravnipodniky.shared.idealniInterval
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.PenizZaMinutu
-import cz.jaro.dopravnipodniky.shared.jednotky.Tik
 import cz.jaro.dopravnipodniky.shared.jednotky.div
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.penezZaMin
 import cz.jaro.dopravnipodniky.shared.jednotky.tiku
 import cz.jaro.dopravnipodniky.shared.jednotky.times
 import cz.jaro.dopravnipodniky.shared.jednotky.toDp
-import cz.jaro.dopravnipodniky.shared.jednotky.toDuration
-import cz.jaro.dopravnipodniky.shared.millisPerTik
+import cz.jaro.dopravnipodniky.shared.jednotky.toTiky
 import cz.jaro.dopravnipodniky.shared.nahodnostProjetiZastavky
 import cz.jaro.dopravnipodniky.shared.nasobitelZisku
-import cz.jaro.dopravnipodniky.shared.odsazeniBarakuAZastavky
 import cz.jaro.dopravnipodniky.shared.odsazeniBusu
+import cz.jaro.dopravnipodniky.shared.odsazeniZastavky
 import cz.jaro.dopravnipodniky.shared.predsazeniKrizovatky
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.shared.times
@@ -84,20 +80,24 @@ private fun update(
     dataSource: PreferencesDataSource,
     dosahlovac: Dosahlovac,
 ) {
-    hodiny.registerListener(10.seconds) { tik ->
+    hodiny.registerListener(1.tiku) { ubehlo ->
+//        val tik = ubehlo.toTiky().toDurationZrychlene().toTiky().value
+//        if (tik != 1L) println("Hodiny nejsou seřízené! 1 t bylo $tik")
 //            Log.i("sekání", "tik: ${tik.hezky()}, čas: ${System.currentTimeMillis().hezky()}; Začátek")
 
         dataSource.upravitBusy {
             forEachIndexed { i, bus ->
                 this[i] = bus.copy(
-                    najeto = bus.najeto + 10.seconds
+                    najeto = bus.najeto + ubehlo
                 )
             }
         }
     }
 
 
-    hodiny.registerListener(1.tiku) { tik ->
+    hodiny.registerListener(1.tiku) { ubehlo ->
+//        val tik = ubehlo.toTiky().toDurationZrychlene().toTiky().value
+//        if (tik != 1L) println("Hodiny nejsou seřízené! 1 t bylo $tik")
 //            Log.i("sekání", "tik: ${tik.hezky()}, čas: ${System.currentTimeMillis().hezky()}; Začátek")
 
         val puvodniDp = dataSource.dp.first()
@@ -127,9 +127,12 @@ private fun update(
                 if (bus.stavZastavky !is StavZastavky.Na) {
                     // posouvani busu po mape
 
-                    poziceVUlici += bus.typBusu.rychlost * 1.tiku.toDuration()
+                    poziceVUlici += bus.typBusu.maxRychlost * ubehlo
 
-                    val pristiUlice = ulicove.getOrNull(indexUliceNaLince + 1)
+                    val pristiUlice = when (smerNaLince) {
+                        Smer.Pozitivni -> ulicove.getOrNull(indexUliceNaLince + 1)
+                        Smer.Negativni -> ulicove.getOrNull(indexUliceNaLince - 1)
+                    }
                     val krizovatka = when {
                         pristiUlice == null -> TypKrizovatky.Otocka
                         pristiUlice.orientace == ulice.orientace -> TypKrizovatky.Rovne
@@ -183,7 +186,7 @@ private fun update(
 
                     if (stavZastavky is StavZastavky.Na) {
 
-                        stavZastavky = stavZastavky.copy(doba = stavZastavky.doba + 1.tiku)
+                        stavZastavky = stavZastavky.copy(doba = stavZastavky.doba + ubehlo.toTiky())
 
                         if (stavZastavky.doba >= dobaPobytuNaZastavce) {
 
@@ -255,7 +258,7 @@ private fun update(
 
                     if (
                         stavZastavky == StavZastavky.Pred &&
-                        poziceVUlici >= (delkaUlice + delkaZastavky) / 2 - bus.typBusu.delka.toDp() / 2 - odsazeniBarakuAZastavky
+                        poziceVUlici >= (delkaUlice + delkaZastavky) / 2 - bus.typBusu.delka.toDp() / 2 - odsazeniZastavky
                     ) {
                         stavZastavky = StavZastavky.Na(
                             if (Random.nextInt(0, nahodnostProjetiZastavky) == 0) {
@@ -323,7 +326,9 @@ private fun update(
     }
 
 
-    hodiny.registerListener(10.seconds) { tik ->
+    hodiny.registerListener(1.tiku) { ubehlo ->
+//        val tik = ubehlo.toTiky().toDurationZrychlene().toTiky().value
+//        if (tik != 1L) println("Hodiny nejsou seřízené! 1 t bylo $tik")
 //            Log.i("sekání", "tik: ${tik.hezky()}, čas: ${System.currentTimeMillis().hezky()}; Začátek")
 
         val puvodniDp = dataSource.dp.first()
@@ -339,7 +344,7 @@ private fun update(
             zisk += bus.vydelkuj(puvodniDp)
 
             // odebrani penez za naklady + starnuti busuu
-            deltaPrachy -= bus.naklady * 10.seconds
+            deltaPrachy -= bus.naklady * ubehlo
 
         }
 
@@ -351,7 +356,7 @@ private fun update(
 //                println(zaZastavky)
 //                println(zaTroleje)
 
-        deltaPrachy -= (zaZastavky * 10.seconds + zaTroleje * 10.seconds)
+        deltaPrachy -= (zaZastavky * ubehlo + zaTroleje * ubehlo)
         zisk -= (zaZastavky + zaTroleje)
 
         // dosahlosti
@@ -452,6 +457,12 @@ private fun update(
 //                    println(zisky)
 //                    println(zisky.map { it.value }.average().penezZaMin)
                 },
+            )
+        }
+    }
+    hodiny.registerListener(10.seconds) {
+        dataSource.upravitDPInfo { dpInfo ->
+            dpInfo.copy(
                 tema = Theme.entries.random()
             )
         }
@@ -578,7 +589,7 @@ fun Bus.vydelkuj(
                     (a + b) / 2
                 },
             )
-            println((ulice.zacatek to ulice.konec) to vystupujici)
+//            println((ulice.zacatek to ulice.konec) to vystupujici)
 
             cloveci -= vystupujici
 
@@ -650,7 +661,7 @@ fun Bus.vydelkuj(
 
     val ziskZaKolo = puvodniDp.info.jizdne * nastupujicichZaKolo * nasobitelZisku
 
-    val dobaUlic = (delkaUlice - predsazeniKrizovatky * 2) * linka.ulice.size * 2 / typBusu.rychlost
+    val dobaUlic = (delkaUlice - predsazeniKrizovatky * 2) * linka.ulice.size * 2 / typBusu.maxRychlost
 
     val dobaKrizovatek = ulicove.windowed(
         2, partialWindows = true
@@ -696,16 +707,16 @@ fun Bus.vydelkuj(
         }
 
         delkaKrizovatky.value.toDouble()
-    }.dp * 2 / typBusu.rychlost
+    }.dp * 2 / typBusu.maxRychlost
 
     val dobaKola = dobaUlic + dobaKrizovatek
 
     return ziskZaKolo / dobaKola
 }
-
-private fun Long.hezky() = (div(1_000.0).minus(div(1_000_000).times(1_000)).formatovat() as Text.Plain).value
-
-private fun Tik.hezky() = ((System.currentTimeMillis() / millisPerTik - value).formatovat() as Text.Plain).value
+//
+//private fun Long.hezky() = (div(1_000.0).minus(div(1_000_000).times(1_000)).formatovat() as Text.Plain).value
+//
+//private fun Tik.hezky() = ((System.currentTimeMillis() / millisPerTik - value).formatovat() as Text.Plain).value
 
 inline fun <T> Iterable<T>.sumOfIndexed(selector: (Int, T) -> Int): Int {
     var index = 0

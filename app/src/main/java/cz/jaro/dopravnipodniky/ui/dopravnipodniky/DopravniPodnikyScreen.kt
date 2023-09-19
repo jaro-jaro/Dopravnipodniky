@@ -2,13 +2,11 @@ package cz.jaro.dopravnipodniky.ui.dopravnipodniky
 
 import android.widget.NumberPicker
 import android.widget.Toast
+import androidx.annotation.FloatRange
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.Interaction
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,19 +21,17 @@ import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCartCheckout
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -73,6 +69,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.urovenMesta
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.shared.DPID
+import cz.jaro.dopravnipodniky.shared.LongPressButton
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
@@ -89,7 +86,6 @@ import cz.jaro.dopravnipodniky.ui.destinations.NovyDopravniPodnikScreenDestinati
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import kotlin.random.Random
@@ -135,12 +131,12 @@ fun DopravniPodnikyScreen(
     dpInfo: DPInfo,
     prachy: Peniz,
     navigate: (Direction) -> Unit,
-    novaMesta: (Peniz, () -> Unit) -> Unit,
+    novaMesta: (Peniz, (Float) -> Unit, () -> Unit) -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
     navigateBack: () -> Unit,
 ) {
+    var loading by rememberSaveable { mutableStateOf(null as (@FloatRange(0.0, 3.0) Float)?) }
     var novejDp by rememberSaveable { mutableStateOf(false) }
-    var novejDPLogaritmicky by rememberSaveable { mutableStateOf(false) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -217,21 +213,30 @@ fun DopravniPodnikyScreen(
                             it - i
                         }
 
+                        novejDp = false
+                        loading = 0F
+
                         if (i == 69_420.penez) {
                             dosahni(Dosahlost.JostoMesto::class)
 
                             novaMesta(
-                                i * 100
+                                i * 100,
+                                {
+                                    loading = it
+                                }
                             ) {
-                                novejDp = false
+                                loading = null
                                 navigate(NovyDopravniPodnikScreenDestination)
                             }
 
                         } else {
                             novaMesta(
-                                i
+                                i,
+                                {
+                                    loading = it
+                                }
                             ) {
-                                novejDp = false
+                                loading = null
                                 navigate(NovyDopravniPodnikScreenDestination)
                             }
                         }
@@ -257,25 +262,28 @@ fun DopravniPodnikyScreen(
                 )
             },
         )
-        if (novejDPLogaritmicky) AlertDialog(
-            onDismissRequest = {
-                novejDPLogaritmicky = false
-            },
+        if (loading != null) AlertDialog(
+            onDismissRequest = { },
             confirmButton = { },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        novejDPLogaritmicky = false
-                    }
-                ) {
-                    Text(stringResource(R.string.odebrat_bus_z_linek))
-                }
-            },
+            dismissButton = { },
             title = {
-                Text(stringResource(R.string.vyberte_linku))
+                Text(stringResource(R.string.generace_mesta))
             },
             text = {
-
+                Column(
+                    Modifier.fillMaxWidth()
+                ) {
+                    if (loading!! != 3F) {
+                        Text("${loading!!.toInt() + 1}: ${((loading!! % 1) * 100).formatovat(2).composeString()} %")
+                        LinearProgressIndicator(
+                            progress = loading!! % 1,
+                            Modifier.fillMaxWidth()
+                        )
+                    } else {
+                        Text("Hotovo!")
+                        LinearProgressIndicator(Modifier.fillMaxWidth())
+                    }
+                }
             },
         )
 
@@ -556,52 +564,32 @@ fun DopravniPodnikyScreen(
                                     },
                                 )
 
-
                                 Row(
                                     Modifier.fillMaxWidth(),
                                 ) {
-                                    if (dpInfo.id != dp.info.id) Surface(
+                                    if (dpInfo.id != dp.info.id) LongPressButton(
                                         Modifier
-                                            .combinedClickable(
-                                                onLongClick = {
-                                                    scope.launch {
-                                                        if (dp.info.jmenoMesta == kremze)
-                                                            zmenitPodniky {
-                                                                val i = indexOfFirst { it.info.id == dp.info.id }
-                                                                this[i] = this[i].copy(
-                                                                    info = this[i].info.copy(
-                                                                        jmenoMesta = vecne
-                                                                    )
-                                                                )
-                                                            }
+                                            .padding(all = 8.dp),
+                                        onClick = {
+                                            oddelatDP = true
+                                        },
+                                        onLongPress = {
+                                            scope.launch {
+                                                if (dp.info.jmenoMesta == kremze)
+                                                    zmenitPodniky {
+                                                        val i = indexOfFirst { it.info.id == dp.info.id }
+                                                        this[i] = this[i].copy(
+                                                            info = this[i].info.copy(
+                                                                jmenoMesta = vecne
+                                                            )
+                                                        )
                                                     }
-                                                },
-                                                onClick = {
-                                                    oddelatDP = true
-                                                }
-                                            ),
-                                    ) {
-                                        Button(
-                                            onClick = {
-                                                oddelatDP = true
-                                            },
-                                            Modifier
-                                                .padding(all = 8.dp),
-                                            enabled = false,
-                                            colors = ButtonDefaults.buttonColors(
-                                                disabledContainerColor = ButtonDefaults.buttonColors().containerColor,
-                                                disabledContentColor = ButtonDefaults.buttonColors().contentColor,
-                                            ),
-                                            interactionSource = object : MutableInteractionSource {
-                                                override val interactions = emptyFlow<Interaction>()
-                                                override suspend fun emit(interaction: Interaction) = Unit
-                                                override fun tryEmit(interaction: Interaction) = false
                                             }
-                                        ) {
-                                            Text(
-                                                text = stringResource(R.string.prodat)
-                                            )
-                                        }
+                                        },
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.prodat)
+                                        )
                                     }
                                     Spacer(modifier = Modifier.weight(1F))
                                     OutlinedButton(

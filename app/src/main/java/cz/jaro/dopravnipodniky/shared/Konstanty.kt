@@ -1,5 +1,8 @@
 package cz.jaro.dopravnipodniky.shared
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.shared.jednotky.metru
@@ -9,7 +12,6 @@ import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toTiky
 import cz.jaro.dopravnipodniky.ui.theme.green800
 import kotlinx.serialization.json.Json
-import org.intellij.lang.annotations.Language
 import kotlin.math.PI
 import kotlin.time.Duration.Companion.seconds
 
@@ -133,9 +135,10 @@ val ulicovyBlok = 72.metru.toDp()
 
 val delkaUlice = ulicovyBlok
 val sirkaUlice = 10.metru.toDp()
-val odsazeniBarakuAZastavky = 1.metru.toDp()
+val odsazeniZastavky = 1.metru.toDp()
+val odsazeniBaraku = 1.metru.toDp()
 const val barakuVUlici = 5
-val velikostBaraku = (ulicovyBlok - odsazeniBarakuAZastavky * (barakuVUlici + 1)) / barakuVUlici
+val velikostBaraku = (ulicovyBlok - odsazeniBaraku * (barakuVUlici + 1)) / barakuVUlici
 val sirkaChodniku = 1.metru.toDp()
 val zaobleniBaraku = 5.dp
 val predsazeniKrizovatky = zaobleniBaraku
@@ -177,6 +180,8 @@ const val TPS = 90
 const val TPM = TPS * 60
 const val TPH = TPM * 60
 
+var zrychlovacHry by mutableFloatStateOf(/*480F*//*.25F*/1F/*60F*/)
+
 const val millisPerTik = 1000L / TPS
 
 val pocatecniCenaMesta = 1_200_000L.penez/*3_141_592.penez*//*10_000_000.penez*/
@@ -212,12 +217,6 @@ const val nahodnostSebevrazdyKazdouMinutu = 10
 const val nahodnostSebevrazdyKazdyTik = nahodnostSebevrazdyKazdouMinutu * TPM
 val cenaPruzkumuVerejnehoMineni = 50_000.penez
 val prodejniCenaCloveka = 256.penez // Ano, jsou to otroci
-
-@Language("kotlin")
-val a = """
-    val  a = 1
-    
-""".trimIndent()
 
 val hezkaCisla =
     Json.decodeFromString<List<Int>>("[1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30,32,36,40,45,48,50,54,60,64,72,75,80,81,90,96,100,108,120,125,128,135,144,150,160,162,180,192,200,216,225,240,243,250,256,270,288,300,320,324,360,375,384,400,405]")

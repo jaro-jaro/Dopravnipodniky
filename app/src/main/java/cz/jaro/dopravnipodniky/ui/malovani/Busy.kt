@@ -24,10 +24,12 @@ import cz.jaro.dopravnipodniky.shared.TypKrizovatky.Rovne
 import cz.jaro.dopravnipodniky.shared.TypKrizovatky.Vlevo
 import cz.jaro.dopravnipodniky.shared.TypKrizovatky.Vpravo
 import cz.jaro.dopravnipodniky.shared.delkaUlice
+import cz.jaro.dopravnipodniky.shared.jednotky.metru
 import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.odsazeniBusu
 import cz.jaro.dopravnipodniky.shared.predsazeniKrizovatky
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
+import cz.jaro.dopravnipodniky.shared.zip
 import cz.jaro.dopravnipodniky.ui.main.DEBUG_TEXT
 import java.lang.Math.toRadians
 import kotlin.math.abs
@@ -87,6 +89,7 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
             if (vpravo) Vpravo else Vlevo
         }
     }
+
     val uhelZatoceni = when (krizovatka) {
         Otocka -> -180F
         Rovne -> 0F
@@ -114,20 +117,27 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
         }
     }
 
-    val poziceVKrizovatce = bus.poziceVUlici - (delkaUlice - predsazeniKrizovatky)
+    val clanekClanky = bus.typBusu.clanky.runningFold(0.metru to 0.metru) { (konecPredminulyho, minuly), clanek ->
+        konecPredminulyho + minuly to clanek
+    }
 
-    val natoceniBusu = if (poziceVKrizovatce < 0.dp) 0F else (poziceVKrizovatce / delkaKrizovatky) * uhelZatoceni
+    val poziceKonceVKrizovatce = bus.poziceVUlici - (delkaUlice - predsazeniKrizovatky)
+
+    val poziceClankuVKrizovatce = clanekClanky.map { (konecMinulyho, clanek) ->
+        poziceKonceVKrizovatce + konecMinulyho.toDp() + clanek.toDp() / 2
+    }
+
+    val natoceniClanku = poziceClankuVKrizovatce.map { pozice ->
+        if (pozice < 0.dp) 0F else (pozice / delkaKrizovatky) * uhelZatoceni
+    }
 
     return {
         val zacatekX = ulice.zacatekX.toPx()
         val zacatekY = ulice.zacatekY.toPx()
 
-        val posunPulkyBusuVUlici = bus.poziceVUlici.toPx()
-
-        val delkaBusu = bus.typBusu.delka.toDp().toPx()
+        val clanky = bus.typBusu.clanky.map { it.toDp().toPx() }
         val sirkaBusu = bus.typBusu.sirka.toDp().toPx()
         val odsazeni = odsazeniBusu.toPx()
-        val odsazeni2 = sirkaUlice.toPx() - odsazeni - sirkaBusu
         val sirkaUlice = sirkaUlice.toPx()
         val delkaUlice = delkaUlice.toPx()
 
@@ -143,19 +153,19 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
                     degrees = stredovaRotace,
                     pivot = Offset(x = delkaUlice / 2, y = sirkaUlice / 2),
                 ) {
-                    val malovat: DrawScope.() -> Unit = {
+                    val malovat: DrawScope.(clanek: Float, natoceni: Float) -> Unit = { clanek, natoceni ->
                         rotate(
-                            degrees = natoceniBusu,
+                            degrees = natoceni,
                             pivot = Offset()
                         ) {
                             drawRoundRect(
                                 color = linka.barvicka.barva,
                                 topLeft = Offset(
-                                    x = -delkaBusu / 2,
+                                    x = -clanek / 2,
                                     y = -sirkaBusu / 2,
                                 ),
                                 size = Size(
-                                    width = delkaBusu,
+                                    width = clanek,
                                     height = sirkaBusu,
                                 ),
                                 cornerRadius = CornerRadius(3F.dp.toPx()),
@@ -184,63 +194,65 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
                             }
                         }
                     }
-                    when {
-                        poziceVKrizovatce < 0.dp -> translate(
-                            left = posunPulkyBusuVUlici,
-                            top = sirkaUlice - odsazeni - sirkaBusu / 2,
-                        ) {
-                            malovat()
-                        }
-
-                        krizovatka == Rovne -> translate(
-                            left = posunPulkyBusuVUlici,
-                            top = sirkaUlice - odsazeni - sirkaBusu / 2,
-                        ) {
-                            malovat()
-                        }
-
-                        krizovatka == Vpravo -> translate(
-                            left = delkaUlice - predsazeniKrizovatky.toPx(),
-                            top = sirkaUlice + predsazeniKrizovatky.toPx(),
-                        ) {
-                            val r = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2
-                            val x = r * sin(toRadians(natoceniBusu.toDouble())).toFloat()
-                            val y = -r * cos(toRadians(natoceniBusu.toDouble())).toFloat()
-                            translate(
-                                left = x,
-                                top = y,
+                    zip(poziceClankuVKrizovatce, natoceniClanku, clanky).forEach { (pozice, natoceni, clanek) ->
+                        when {
+                            pozice < 0.dp -> translate(
+                                left = delkaUlice + pozice.toPx(),
+                                top = sirkaUlice - odsazeni - sirkaBusu / 2,
                             ) {
-                                malovat()
+                                malovat(clanek, natoceni)
                             }
-                        }
 
-                        krizovatka == Vlevo -> translate(
-                            left = delkaUlice - predsazeniKrizovatky.toPx(),
-                            top = -predsazeniKrizovatky.toPx(),
-                        ) {
-                            val r = predsazeniKrizovatky.toPx() + sirkaUlice - odsazeni - sirkaBusu / 2
-                            val x = r * sin(abs(toRadians(natoceniBusu.toDouble()))).toFloat()
-                            val y = r * cos(toRadians(natoceniBusu.toDouble())).toFloat()
-                            translate(
-                                left = x,
-                                top = y,
+                            krizovatka == Rovne -> translate(
+                                left = delkaUlice + pozice.toPx(),
+                                top = sirkaUlice - odsazeni - sirkaBusu / 2,
                             ) {
-                                malovat()
+                                malovat(clanek, natoceni)
                             }
-                        }
 
-                        else/*krizovatka == Otocka*/ -> translate(
-                            left = delkaUlice - predsazeniKrizovatky.toPx(),
-                            top = sirkaUlice / 2,
-                        ) {
-                            val r = sirkaUlice / 2 - odsazeni - sirkaBusu / 2
-                            val x = -r * sin(toRadians(natoceniBusu.toDouble())).toFloat()
-                            val y = r * cos(toRadians(natoceniBusu.toDouble())).toFloat()
-                            translate(
-                                left = x,
-                                top = y,
+                            krizovatka == Vpravo -> translate(
+                                left = delkaUlice - predsazeniKrizovatky.toPx(),
+                                top = sirkaUlice + predsazeniKrizovatky.toPx(),
                             ) {
-                                malovat()
+                                val r = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2
+                                val x = r * sin(toRadians(natoceni.toDouble())).toFloat()
+                                val y = -r * cos(toRadians(natoceni.toDouble())).toFloat()
+                                translate(
+                                    left = x,
+                                    top = y,
+                                ) {
+                                    malovat(clanek, natoceni)
+                                }
+                            }
+
+                            krizovatka == Vlevo -> translate(
+                                left = delkaUlice - predsazeniKrizovatky.toPx(),
+                                top = -predsazeniKrizovatky.toPx(),
+                            ) {
+                                val r = predsazeniKrizovatky.toPx() + sirkaUlice - odsazeni - sirkaBusu / 2
+                                val x = r * sin(abs(toRadians(natoceni.toDouble()))).toFloat()
+                                val y = r * cos(toRadians(natoceni.toDouble())).toFloat()
+                                translate(
+                                    left = x,
+                                    top = y,
+                                ) {
+                                    malovat(clanek, natoceni)
+                                }
+                            }
+
+                            else/*krizovatka == Otocka*/ -> translate(
+                                left = delkaUlice - predsazeniKrizovatky.toPx(),
+                                top = sirkaUlice / 2,
+                            ) {
+                                val r = sirkaUlice / 2 - odsazeni - sirkaBusu / 2
+                                val x = -r * sin(toRadians(natoceni.toDouble())).toFloat()
+                                val y = r * cos(toRadians(natoceni.toDouble())).toFloat()
+                                translate(
+                                    left = x,
+                                    top = y,
+                                ) {
+                                    malovat(clanek, natoceni)
+                                }
                             }
                         }
                     }

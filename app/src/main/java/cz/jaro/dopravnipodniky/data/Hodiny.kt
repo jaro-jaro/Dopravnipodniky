@@ -4,6 +4,7 @@ import cz.jaro.dopravnipodniky.shared.jednotky.Tik
 import cz.jaro.dopravnipodniky.shared.jednotky.tiku
 import cz.jaro.dopravnipodniky.shared.jednotky.toTiky
 import cz.jaro.dopravnipodniky.shared.millisPerTik
+import cz.jaro.dopravnipodniky.shared.zrychlovacHry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
@@ -16,6 +17,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 @Single
 class Hodiny {
@@ -39,32 +41,42 @@ class Hodiny {
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    private val listeners: MutableList<Pair<Tik, suspend CoroutineScope.(tik: Tik) -> Unit>> = mutableListOf()
+    private val casy: MutableList<Long> = mutableListOf()
+    private val listeners: MutableList<Pair<Tik, suspend CoroutineScope.(diff: Duration) -> Unit>> = mutableListOf()
 
     fun registerListener(
         every: Duration,
-        listener: suspend CoroutineScope.(tik: Tik) -> Unit,
+        listener: suspend CoroutineScope.(diff: Duration) -> Unit,
     ) {
+        casy += System.currentTimeMillis()
         listeners += every.toTiky() to listener
     }
 
     fun registerListener(
         every: Tik,
-        listener: suspend CoroutineScope.(tik: Tik) -> Unit,
+        listener: suspend CoroutineScope.(diff: Duration) -> Unit,
     ) {
+        casy += System.currentTimeMillis()
         listeners += every to listener
     }
 
     init {
         scope.launch(Dispatchers.IO) {
             cas.collect { tik ->
-                listeners
-                    .filter { (every, _) ->
+                val l = listeners.toList()
+                l
+                    .mapIndexed { i, (every, listener) -> Triple(i, every, listener) }
+                    .filter { (i, every, _) ->
                         tik % every == 0.tiku
                     }
-                    .forEach { (_, listener) ->
+                    .forEach { (i, _, listener) ->
                         launch(Dispatchers.IO) {
-                            listener(tik)
+                            val last = casy[i]
+                            val new = System.currentTimeMillis()
+                            val diff = (new - last).milliseconds
+//                            println(listOf(last, diff, new))
+                            casy[i] = new
+                            listener(diff * zrychlovacHry.toDouble())
                         }
                     }
             }

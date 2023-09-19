@@ -8,7 +8,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.Barak
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypBaraku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.Orientace
-import cz.jaro.dopravnipodniky.shared.odsazeniBarakuAZastavky
+import cz.jaro.dopravnipodniky.shared.odsazeniBaraku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.shared.translate
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
@@ -32,7 +32,7 @@ fun Barak.draw(
     val konecUliceX = ulice.konecX.toPx()
     val konecUliceY = ulice.konecY.toPx()
 
-    val odsazeni = odsazeniBarakuAZastavky.toPx()
+    val odsazeni = odsazeniBaraku.toPx()
 
     val indexbarvy = Theme.entries.indexOf(tema)
     val indexSkoroNoveBarvy = indexbarvy + barvicka

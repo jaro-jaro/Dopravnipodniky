@@ -130,12 +130,9 @@ class SharedViewModel(
         }
     }
 
-    init {
-        println(novePodniky.value)
-    }
-
     fun najit3NovaMesta(
         investice: Peniz,
+        progress: (Float) -> Unit,
         hotovo: () -> Unit,
     ) {
         CoroutineScope(Dispatchers.IO).launch {
@@ -145,10 +142,16 @@ class SharedViewModel(
             }
 
             _novePodniky.value = Triple(
-                Generator(investice).vygenerujMiMestoAToHnedVykricnik {},
-                Generator(investice).vygenerujMiMestoAToHnedVykricnik {},
-                Generator(investice).vygenerujMiMestoAToHnedVykricnik {},
-            ).also(::println)
+                Generator(investice).vygenerujMiMestoAToHnedVykricnik {
+                    progress(it)
+                },
+                Generator(investice).vygenerujMiMestoAToHnedVykricnik {
+                    progress(1 + it)
+                },
+                Generator(investice).vygenerujMiMestoAToHnedVykricnik {
+                    progress(2 + it)
+                },
+            )
 
             withContext(Dispatchers.Main) {
                 hotovo()

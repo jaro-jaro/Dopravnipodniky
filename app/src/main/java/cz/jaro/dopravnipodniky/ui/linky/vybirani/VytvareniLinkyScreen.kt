@@ -53,9 +53,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
 import androidx.compose.ui.unit.toOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
@@ -70,21 +68,21 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.stred
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
-import cz.jaro.dopravnipodniky.shared.contains
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.minus
 import cz.jaro.dopravnipodniky.shared.jednotky.plus
 import cz.jaro.dopravnipodniky.shared.jednotky.sousedi
-import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpOffset
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
-import cz.jaro.dopravnipodniky.shared.jednotky.toPx
 import cz.jaro.dopravnipodniky.shared.maximalniOddaleni
+import cz.jaro.dopravnipodniky.shared.najitObdelnikVeKteremJe
+import cz.jaro.dopravnipodniky.shared.odNulaNula
 import cz.jaro.dopravnipodniky.shared.oddalenyRezim
 import cz.jaro.dopravnipodniky.shared.pocatecniPriblizeni
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
+import cz.jaro.dopravnipodniky.shared.toOffsetSPriblizenim
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
 import cz.jaro.dopravnipodniky.ui.malovani.Mesto
 import cz.jaro.dopravnipodniky.ui.theme.Barvicka
@@ -157,27 +155,17 @@ fun VytvareniLinkyScreen(
         pos = centroid
 
         if (listSize == 1) run {
-            val pozice = centroid
-                .minus(
-                    size.center
-                        .times(priblizeni)
-                        .toOffset()
-                )
-                .minus(
-                    Offset(tx, ty)
-                        .times(priblizeni)
-                )
-                .minus(size.center.toOffset())
-                .div(priblizeni)
-                .plus(size.center.toOffset())
-                .toDp()
 
-            val k = ulicove.seznamKrizovatek.find { krizovatka ->
+            val k = ulicove.seznamKrizovatek.najitObdelnikVeKteremJe(
+                offset = centroid,
+                tx = tx, ty = ty, priblizeni = priblizeni
+            ) {
                 DpRect(
-                    origin = krizovatka.toDpSKrizovatkama().minus(sirkaUlice / 2).toDpOffset(),
-                    size = DpSize(2 * sirkaUlice, 2 * sirkaUlice)
-                ).contains(pozice)
+                    origin = (it.toDpSKrizovatkama() - sirkaUlice).toDpOffset(),
+                    size = DpSize(sirkaUlice * 3, sirkaUlice * 3)
+                )
             } ?: return@run
+
             if (kliklyKrizovatky.isEmpty()) {
                 kliklyKrizovatky += k
                 return@run
@@ -199,47 +187,24 @@ fun VytvareniLinkyScreen(
             if (zoom != 1f ||
                 pan != Offset.Zero
             ) {
-                // t - posunuti, c - coercovaný, p - prostředek, x - max, i - min
+                // t - posunuti, p - prostředek, x - max, i - min
 
                 val (start, stop) = ulicove.rohyMesta
                 val m = start.toDpSKrizovatkama()
                     .minus(ulicovyBlok * 2)
-                    .toPx()
-                    .minus(size.center.toOffset())
-                    .times(priblizeni)
-                    .plus(size.center.toOffset())
-                    .plus(
-                        size.center
-                            .times(priblizeni)
-                            .toOffset()
-                    )
+                    .toOffsetSPriblizenim(priblizeni)
                 val i = stop.toDpSKrizovatkama()
                     .plus(ulicovyBlok * 2)
-                    .toPx()
-                    .minus(size.center.toOffset())
-                    .times(priblizeni)
-                    .plus(size.center.toOffset())
-                    .plus(
-                        size.center
-                            .times(priblizeni)
-                            .toOffset()
-                    )
+                    .toOffsetSPriblizenim(priblizeni)
                     .minus(IntOffset(size.width, size.height).toOffset())
                 val p = (i + m) / 2F
 
-                val t = Offset(
-                    tx.plus(pan.x / priblizeni),
-                    ty.plus(pan.y / priblizeni),
-                )
+                val ti = i.odNulaNula(priblizeni)
+                val tm = m.odNulaNula(priblizeni)
+                val pt = p.odNulaNula(priblizeni)
 
-                val ti = -i / priblizeni
-                val tm = -m / priblizeni
-                val pt = -p / priblizeni
-                val txc = if (ti.x > tm.x) pt.x else t.x.coerceIn(ti.x, tm.x)
-                val tyc = if (ti.y > tm.y) pt.y else t.y.coerceIn(ti.y, tm.y)
-
-                tx = txc
-                ty = tyc
+                tx = if (ti.x > tm.x) pt.x else tx.minus(pan.odNulaNula(priblizeni).x).coerceIn(ti.x, tm.x)
+                ty = if (ti.y > tm.y) pt.y else ty.minus(pan.odNulaNula(priblizeni).y).coerceIn(ti.y, tm.y)
                 priblizeni = (priblizeni * zoom).coerceAtLeast(maximalniOddaleni)
             }
         }
