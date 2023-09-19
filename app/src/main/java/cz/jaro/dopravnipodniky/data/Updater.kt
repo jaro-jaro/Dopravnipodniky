@@ -37,7 +37,7 @@ import cz.jaro.dopravnipodniky.shared.jednotky.penezZaMin
 import cz.jaro.dopravnipodniky.shared.jednotky.tiku
 import cz.jaro.dopravnipodniky.shared.jednotky.times
 import cz.jaro.dopravnipodniky.shared.jednotky.toDp
-import cz.jaro.dopravnipodniky.shared.jednotky.toTiky
+import cz.jaro.dopravnipodniky.shared.jednotky.toDuration
 import cz.jaro.dopravnipodniky.shared.nahodnostProjetiZastavky
 import cz.jaro.dopravnipodniky.shared.nasobitelZisku
 import cz.jaro.dopravnipodniky.shared.odsazeniBusu
@@ -80,10 +80,7 @@ private fun update(
     dataSource: PreferencesDataSource,
     dosahlovac: Dosahlovac,
 ) {
-    hodiny.registerListener(1.tiku) { ubehlo ->
-//        val tik = ubehlo.toTiky().toDurationZrychlene().toTiky().value
-//        if (tik != 1L) println("Hodiny nejsou seřízené! 1 t bylo $tik")
-//            Log.i("sekání", "tik: ${tik.hezky()}, čas: ${System.currentTimeMillis().hezky()}; Začátek")
+    hodiny.registerListener(1.seconds) { ubehlo ->
 
         dataSource.upravitBusy {
             forEachIndexed { i, bus ->
@@ -96,17 +93,12 @@ private fun update(
 
 
     hodiny.registerListener(1.tiku) { ubehlo ->
-//        val tik = ubehlo.toTiky().toDurationZrychlene().toTiky().value
-//        if (tik != 1L) println("Hodiny nejsou seřízené! 1 t bylo $tik")
-//            Log.i("sekání", "tik: ${tik.hezky()}, čas: ${System.currentTimeMillis().hezky()}; Začátek")
 
         val puvodniDp = dataSource.dp.first()
 
         dataSource.upravitBusy {
-//                    Log.i("sekání", "tik: ${tik.hezky()}, čas: ${System.currentTimeMillis().hezky()}; Začátek posouvání busů")
             forEachIndexed { i, bus ->
                 if (bus.linka == null) return@upravitBusy
-//                        Log.i("sekání", "tik: ${tik.hezky()}, čas: ${System.currentTimeMillis().hezky()}; Začátek posouvání busu ${bus.evCislo}")
 
                 val linka = puvodniDp.linky.linka(bus.linka)
                 val ulicove = linka.ulice(puvodniDp.ulice)
@@ -186,9 +178,9 @@ private fun update(
 
                     if (stavZastavky is StavZastavky.Na) {
 
-                        stavZastavky = stavZastavky.copy(doba = stavZastavky.doba + ubehlo.toTiky())
+                        stavZastavky = stavZastavky.copy(doba = stavZastavky.doba + ubehlo)
 
-                        if (stavZastavky.doba >= dobaPobytuNaZastavce) {
+                        if (stavZastavky.doba >= dobaPobytuNaZastavce.toDuration()) {
 
                             stavZastavky = StavZastavky.Po
 
@@ -263,8 +255,8 @@ private fun update(
                         stavZastavky = StavZastavky.Na(
                             if (Random.nextInt(0, nahodnostProjetiZastavky) == 0) {
                                 dosahlovac.dosahni(Dosahlost.ProjetZastavku::class)
-                                dobaPobytuNaZastavce
-                            } else 0.tiku
+                                dobaPobytuNaZastavce.toDuration()
+                            } else 0.seconds
                         )
 
                         launch(Dispatchers.IO) {
@@ -326,10 +318,7 @@ private fun update(
     }
 
 
-    hodiny.registerListener(1.tiku) { ubehlo ->
-//        val tik = ubehlo.toTiky().toDurationZrychlene().toTiky().value
-//        if (tik != 1L) println("Hodiny nejsou seřízené! 1 t bylo $tik")
-//            Log.i("sekání", "tik: ${tik.hezky()}, čas: ${System.currentTimeMillis().hezky()}; Začátek")
+    hodiny.registerListener(1.seconds) { ubehlo ->
 
         val puvodniDp = dataSource.dp.first()
         val puvodniVse = dataSource.vse.first()

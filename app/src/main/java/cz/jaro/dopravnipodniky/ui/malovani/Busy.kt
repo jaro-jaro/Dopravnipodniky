@@ -128,7 +128,11 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
     }
 
     val natoceniClanku = poziceClankuVKrizovatce.map { pozice ->
-        if (pozice < 0.dp) 0F else (pozice / delkaKrizovatky) * uhelZatoceni
+        when {
+            pozice < 0.dp -> 0F
+            pozice > delkaKrizovatky -> uhelZatoceni
+            else -> (pozice / delkaKrizovatky) * uhelZatoceni
+        }
     }
 
     return {

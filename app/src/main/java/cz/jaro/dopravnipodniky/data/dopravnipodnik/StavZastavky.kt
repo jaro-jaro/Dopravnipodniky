@@ -1,8 +1,8 @@
 package cz.jaro.dopravnipodniky.data.dopravnipodnik
 
-import cz.jaro.dopravnipodniky.shared.jednotky.Tik
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.time.Duration
 
 @Serializable
 @SerialName("StavZastavky")
@@ -13,7 +13,7 @@ sealed class StavZastavky {
     @Serializable
     @SerialName("StavZastavky.Na")
     data class Na(
-        val doba: Tik,
+        val doba: Duration,
     ) : StavZastavky()
     @Serializable
     @SerialName("StavZastavky.Po")
