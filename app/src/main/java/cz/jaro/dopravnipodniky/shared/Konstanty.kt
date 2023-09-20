@@ -180,7 +180,8 @@ const val TPS = 90
 const val TPM = TPS * 60
 const val TPH = TPM * 60
 
-var zrychlovacHry by mutableFloatStateOf(/*480F*//*.25F*/1F/*60F*/)
+var zrychlovacHry by mutableFloatStateOf(/*480F*/.25F/*1F*//*60F*/)
+
 
 const val millisPerTik = 1000L / TPS
 

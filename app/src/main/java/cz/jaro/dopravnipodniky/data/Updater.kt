@@ -250,7 +250,7 @@ private fun update(
 
                     if (
                         stavZastavky == StavZastavky.Pred &&
-                        poziceVUlici >= (delkaUlice + delkaZastavky) / 2 - bus.typBusu.delka.toDp() / 2 - odsazeniZastavky
+                        poziceVUlici >= (delkaUlice + delkaZastavky) / 2 - bus.typBusu.delka.toDp() - odsazeniZastavky
                     ) {
                         stavZastavky = StavZastavky.Na(
                             if (Random.nextInt(0, nahodnostProjetiZastavky) == 0) {

@@ -117,14 +117,14 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
         }
     }
 
-    val clanekClanky = bus.typBusu.clanky.runningFold(0.metru to 0.metru) { (konecPredminulyho, minuly), clanek ->
+    val clanekClanky = bus.typBusu.clanky.scan(0.metru to 0.metru) { (konecPredminulyho, minuly), clanek ->
         konecPredminulyho + minuly to clanek
-    }
+    }.drop(1)
 
     val poziceKonceVKrizovatce = bus.poziceVUlici - (delkaUlice - predsazeniKrizovatky)
 
     val poziceClankuVKrizovatce = clanekClanky.map { (konecMinulyho, clanek) ->
-        poziceKonceVKrizovatce + konecMinulyho.toDp() + clanek.toDp() / 2
+        poziceKonceVKrizovatce + bus.typBusu.delka.toDp() - (konecMinulyho.toDp() + clanek.toDp() / 2)
     }
 
     val natoceniClanku = poziceClankuVKrizovatce.map { pozice ->
@@ -134,6 +134,12 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
             else -> (pozice / delkaKrizovatky) * uhelZatoceni
         }
     }
+
+//    println(poziceKonceVKrizovatce)
+//    println(bus.typBusu.clanky)
+//    println(clanekClanky)
+//    println(poziceClankuVKrizovatce)
+//    println(natoceniClanku)
 
     return {
         val zacatekX = ulice.zacatekX.toPx()
@@ -214,6 +220,19 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
                                 malovat(clanek, natoceni)
                             }
 
+                            pozice > delkaKrizovatky && krizovatka == Vpravo -> translate(
+                                left = delkaUlice - predsazeniKrizovatky.toPx(),
+                                top = sirkaUlice + predsazeniKrizovatky.toPx(),
+                            ) {
+                                val r = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2
+                                translate(
+                                    left = r,
+                                    top = pozice.toPx() - delkaKrizovatky.toPx(),
+                                ) {
+                                    malovat(clanek, natoceni)
+                                }
+                            }
+
                             krizovatka == Vpravo -> translate(
                                 left = delkaUlice - predsazeniKrizovatky.toPx(),
                                 top = sirkaUlice + predsazeniKrizovatky.toPx(),
@@ -229,6 +248,19 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
                                 }
                             }
 
+                            pozice > delkaKrizovatky && krizovatka == Vlevo -> translate(
+                                left = delkaUlice - predsazeniKrizovatky.toPx(),
+                                top = -predsazeniKrizovatky.toPx(),
+                            ) {
+                                val r = predsazeniKrizovatky.toPx() + sirkaUlice - odsazeni - sirkaBusu / 2
+                                translate(
+                                    left = r,
+                                    top = -(pozice.toPx() - delkaKrizovatky.toPx()),
+                                ) {
+                                    malovat(clanek, natoceni)
+                                }
+                            }
+
                             krizovatka == Vlevo -> translate(
                                 left = delkaUlice - predsazeniKrizovatky.toPx(),
                                 top = -predsazeniKrizovatky.toPx(),
@@ -239,6 +271,19 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
                                 translate(
                                     left = x,
                                     top = y,
+                                ) {
+                                    malovat(clanek, natoceni)
+                                }
+                            }
+
+                            pozice > delkaKrizovatky/* && krizovatka == Otocka*/ -> translate(
+                                left = delkaUlice - predsazeniKrizovatky.toPx(),
+                                top = sirkaUlice / 2,
+                            ) {
+                                val r = sirkaUlice / 2 - odsazeni - sirkaBusu / 2
+                                translate(
+                                    left = pozice.toPx() - delkaKrizovatky.toPx(),
+                                    top = r,
                                 ) {
                                     malovat(clanek, natoceni)
                                 }
