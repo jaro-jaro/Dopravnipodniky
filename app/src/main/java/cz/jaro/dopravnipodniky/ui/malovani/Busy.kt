@@ -4,12 +4,12 @@ import android.graphics.Paint
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
@@ -124,15 +124,15 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
     val poziceKonceVKrizovatce = bus.poziceVUlici - (delkaUlice - predsazeniKrizovatky)
 
     val poziceClankuVKrizovatce = clanekClanky.map { (konecMinulyho, clanek) ->
-        poziceKonceVKrizovatce + bus.typBusu.delka.toDp() - (konecMinulyho.toDp() + clanek.toDp() / 2)
+        poziceKonceVKrizovatce + bus.typBusu.delka.toDp() - konecMinulyho.toDp() - clanek.toDp() / 2
     }
 
+    println(clanekClanky)
+    println(poziceKonceVKrizovatce)
+    println(poziceClankuVKrizovatce)
+
     val natoceniClanku = poziceClankuVKrizovatce.map { pozice ->
-        when {
-            pozice < 0.dp -> 0F
-            pozice > delkaKrizovatky -> uhelZatoceni
-            else -> (pozice / delkaKrizovatky) * uhelZatoceni
-        }
+        (pozice.coerceIn(0.dp, delkaKrizovatky) / delkaKrizovatky) * uhelZatoceni
     }
 
 //    println(poziceKonceVKrizovatce)
@@ -163,36 +163,46 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
                     degrees = stredovaRotace,
                     pivot = Offset(x = delkaUlice / 2, y = sirkaUlice / 2),
                 ) {
-                    val malovat: DrawScope.(clanek: Float, natoceni: Float) -> Unit = { clanek, natoceni ->
+                    val malovat: DrawScope.(clanek: Float, natoceni: Float, i: Int) -> Unit = { clanek, natoceni, i ->
                         rotate(
                             degrees = natoceni,
                             pivot = Offset()
                         ) {
+                            val jePrvni = i == 0
+                            val jePosledni = i == clanekClanky.lastIndex
+                            val zaobleni = sirkaBusu / 4
                             drawRoundRect(
                                 color = linka.barvicka.barva,
                                 topLeft = Offset(
-                                    x = -clanek / 2,
+                                    x = when {
+                                        !jePosledni -> -clanek / 2 - zaobleni
+                                        else -> -clanek / 2
+                                    },
                                     y = -sirkaBusu / 2,
                                 ),
                                 size = Size(
-                                    width = clanek,
+                                    width = when {
+                                        jePrvni && jePosledni -> clanek
+                                        jePrvni || jePosledni -> clanek + zaobleni
+                                        else /*!jePrvni && !jePosledni*/ -> clanek + zaobleni * 2
+                                    },
                                     height = sirkaBusu,
                                 ),
-                                cornerRadius = CornerRadius(3F.dp.toPx()),
+                                cornerRadius = CornerRadius(zaobleni * 2),
                             )
-                            drawRoundRect(
-                                color = Color.Green,
-                                topLeft = Offset(
-                                    x = -1.dp.toPx(),
-                                    y = -1.dp.toPx(),
-                                ),
-                                size = Size(
-                                    width = 2.dp.toPx(),
-                                    height = 2.dp.toPx(),
-                                ),
-                                cornerRadius = CornerRadius(3F.dp.toPx()),
-                            )
-                            if (DEBUG_TEXT) drawIntoCanvas {
+//                            drawRoundRect(
+//                                color = Color.Green,
+//                                topLeft = Offset(
+//                                    x = -1.dp.toPx(),
+//                                    y = -1.dp.toPx(),
+//                                ),
+//                                size = Size(
+//                                    width = 2.dp.toPx(),
+//                                    height = 2.dp.toPx(),
+//                                ),
+//                                cornerRadius = CornerRadius(3F.dp.toPx()),
+//                            )
+                            if (jePrvni && DEBUG_TEXT) drawIntoCanvas {
                                 it.nativeCanvas.drawText(
                                     bus.cloveci.toString(),
                                     0F,
@@ -204,20 +214,20 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
                             }
                         }
                     }
-                    zip(poziceClankuVKrizovatce, natoceniClanku, clanky).forEach { (pozice, natoceni, clanek) ->
+                    zip(poziceClankuVKrizovatce, natoceniClanku, clanky).forEachIndexed { i, (pozice, natoceni, clanek) ->
                         when {
                             pozice < 0.dp -> translate(
-                                left = delkaUlice + pozice.toPx(),
+                                left = delkaUlice - predsazeniKrizovatky.toPx() + pozice.toPx(),
                                 top = sirkaUlice - odsazeni - sirkaBusu / 2,
                             ) {
-                                malovat(clanek, natoceni)
+                                malovat(clanek, natoceni, i)
                             }
 
                             krizovatka == Rovne -> translate(
-                                left = delkaUlice + pozice.toPx(),
+                                left = delkaUlice - predsazeniKrizovatky.toPx() + pozice.toPx(),
                                 top = sirkaUlice - odsazeni - sirkaBusu / 2,
                             ) {
-                                malovat(clanek, natoceni)
+                                malovat(clanek, natoceni, i)
                             }
 
                             pozice > delkaKrizovatky && krizovatka == Vpravo -> translate(
@@ -229,7 +239,7 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
                                     left = r,
                                     top = pozice.toPx() - delkaKrizovatky.toPx(),
                                 ) {
-                                    malovat(clanek, natoceni)
+                                    malovat(clanek, natoceni, i)
                                 }
                             }
 
@@ -244,7 +254,7 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
                                     left = x,
                                     top = y,
                                 ) {
-                                    malovat(clanek, natoceni)
+                                    malovat(clanek, natoceni, i)
                                 }
                             }
 
@@ -257,7 +267,7 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
                                     left = r,
                                     top = -(pozice.toPx() - delkaKrizovatky.toPx()),
                                 ) {
-                                    malovat(clanek, natoceni)
+                                    malovat(clanek, natoceni, i)
                                 }
                             }
 
@@ -272,7 +282,7 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
                                     left = x,
                                     top = y,
                                 ) {
-                                    malovat(clanek, natoceni)
+                                    malovat(clanek, natoceni, i)
                                 }
                             }
 
@@ -282,10 +292,10 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
                             ) {
                                 val r = sirkaUlice / 2 - odsazeni - sirkaBusu / 2
                                 translate(
-                                    left = pozice.toPx() - delkaKrizovatky.toPx(),
-                                    top = r,
+                                    left = -(pozice.toPx() - delkaKrizovatky.toPx()),
+                                    top = -r,
                                 ) {
-                                    malovat(clanek, natoceni)
+                                    malovat(clanek, natoceni, i)
                                 }
                             }
 
@@ -300,7 +310,7 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
                                     left = x,
                                     top = y,
                                 ) {
-                                    malovat(clanek, natoceni)
+                                    malovat(clanek, natoceni, i)
                                 }
                             }
                         }

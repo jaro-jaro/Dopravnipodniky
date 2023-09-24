@@ -3747,6 +3747,11 @@ private val trolejbusy = listOf(
         maxNaklady = 30.0.penezZaMin,
         cena = 260_000.penez,
         delka = 24F.metru,
+        clanky = listOf(
+            10.metru,
+            6.metru,
+            8.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 240.hours,
         popis = """
