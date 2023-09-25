@@ -39,13 +39,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -53,6 +53,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -64,7 +66,6 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.rohyMesta
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.seznamKrizovatek
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.stred
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
@@ -76,11 +77,11 @@ import cz.jaro.dopravnipodniky.shared.jednotky.plus
 import cz.jaro.dopravnipodniky.shared.jednotky.sousedi
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpOffset
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
+import cz.jaro.dopravnipodniky.shared.jednotky.ulicovychBloku
 import cz.jaro.dopravnipodniky.shared.maximalniOddaleni
 import cz.jaro.dopravnipodniky.shared.najitObdelnikVeKteremJe
 import cz.jaro.dopravnipodniky.shared.odNulaNula
 import cz.jaro.dopravnipodniky.shared.oddalenyRezim
-import cz.jaro.dopravnipodniky.shared.pocatecniPriblizeni
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.shared.toOffsetSPriblizenim
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
@@ -88,6 +89,7 @@ import cz.jaro.dopravnipodniky.ui.malovani.Mesto
 import cz.jaro.dopravnipodniky.ui.theme.Barvicka
 import org.koin.androidx.compose.koinViewModel
 import java.util.UUID
+import kotlin.math.min
 import kotlin.reflect.KClass
 
 @Composable
@@ -141,14 +143,43 @@ fun VytvareniLinkyScreen(
     navigateUp: () -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
 ) {
+    var size by remember { mutableStateOf(null as IntSize?) }
     var waitForExit by remember { mutableStateOf(null as UUID?) }
     val density = LocalDensity.current
-    val stred = remember { ulicove.stred.toDpSKrizovatkama() }
-    var tx by remember { mutableFloatStateOf(with(density) { -stred.x.toPx() * pocatecniPriblizeni }) }
-    var ty by remember { mutableFloatStateOf(with(density) { -stred.y.toPx() * pocatecniPriblizeni }) }
-    var priblizeni by remember { mutableFloatStateOf(pocatecniPriblizeni) }
-//    val realPriblizeni = animateFloatAsState(priblizeni.first, label = "zoom").value to priblizeni.second
+    var tx by remember { mutableFloatStateOf(0F) }
+    var ty by remember { mutableFloatStateOf(0F) }
+    var priblizeni by remember { mutableFloatStateOf(1F) }
     var kliklyKrizovatky by remember { mutableStateOf(emptyList<Pozice<UlicovyBlok>>()) }
+
+    LaunchedEffect(ulicove, size) {
+        if (size == null) return@LaunchedEffect
+        with(density) {
+            val (start, stop) = ulicove.rohyMesta
+            val m = start
+                .toDpSKrizovatkama()
+                .minus(ulicovyBlok)
+                .toOffsetSPriblizenim(priblizeni, size!!.center.toOffset())
+            val i = stop
+                .toDpSKrizovatkama()
+                .plus(ulicovyBlok)
+                .toOffsetSPriblizenim(priblizeni, size!!.center.toOffset())
+                .minus(IntOffset(size!!.width, size!!.height).toOffset())
+            val p = (i + m) / 2F
+
+            tx = p.odNulaNula(priblizeni).x
+            ty = p.odNulaNula(priblizeni).y
+
+            val sirkaMesta = stop.x - start.x
+            val vyskaMesta = stop.y - start.y
+            val priblizeniPodleSirky = size!!.width / (sirkaMesta + 2.ulicovychBloku)
+                .toDpSKrizovatkama()
+                .toPx()
+            val priblizeniPodleVysky = size!!.height / (vyskaMesta + 2.ulicovychBloku)
+                .toDpSKrizovatkama()
+                .toPx()
+            priblizeni = min(priblizeniPodleSirky, priblizeniPodleVysky)
+        }
+    }
 
     fun PointerInputScope.delejNeco(centroid: Offset, listSize: Int, zoom: Float, pan: Offset) {
 
@@ -196,7 +227,7 @@ fun VytvareniLinkyScreen(
                 val i = stop.toDpSKrizovatkama()
                     .plus(ulicovyBlok * 2)
                     .toOffsetSPriblizenim(priblizeni)
-                    .minus(IntOffset(size.width, size.height).toOffset())
+                    .minus(IntOffset(this.size.width, this.size.height).toOffset())
                 val p = (i + m) / 2F
 
                 val ti = i.odNulaNula(priblizeni)
@@ -320,6 +351,9 @@ fun VytvareniLinkyScreen(
                                 }
                             } while (!canceled && event.changes.any { it.pressed })
                         }
+                    }
+                    .onSizeChanged {
+                        size = it
                     },
                 kliklyKrizovatky = kliklyKrizovatky,
             )
@@ -346,7 +380,6 @@ fun VytvareniLinkyScreen(
                             text = stringResource(R.string.hotovo)
                         )
                     }
-                    val scope = rememberCoroutineScope()
                     val ctx = LocalContext.current
                     if (zobrazit) AlertDialog(
                         onDismissRequest = {

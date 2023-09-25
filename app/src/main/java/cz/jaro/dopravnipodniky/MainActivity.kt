@@ -31,6 +31,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.DestinationsNavHost
+import cz.jaro.compose_dialog.AlertDialogState
 import cz.jaro.dopravnipodniky.data.Hodiny
 import cz.jaro.dopravnipodniky.data.PreferencesDataSource
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.dobaOdPoslednihoHrani
@@ -59,6 +60,7 @@ import kotlin.time.Duration.Companion.seconds
 var zobrazitLoading by mutableStateOf(true)
 var uplnePoprve = true
 var snackbarHostState = SnackbarHostState()
+var dialogState = AlertDialogState()
 
 class MainActivity : ComponentActivity() {
 
@@ -71,8 +73,8 @@ class MainActivity : ComponentActivity() {
         val dpInfoFlow = dataSource.dpInfo
         val temaFlow = dpInfoFlow.map { it.tema }
         val loading = temaFlow.map {
-            if (zobrazitLoading) {
-                delay(if (uplnePoprve) 5.seconds else 0.hours)
+            if (zobrazitLoading && uplnePoprve) {
+                delay(5.seconds)
                 uplnePoprve = false
                 zobrazitLoading = false
             }
@@ -132,6 +134,8 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+
+                cz.jaro.compose_dialog.AlertDialog(dialogState)
 
                 if (tutorial is StavTutorialu.Tutorialujeme && !zobrazitLoading) AlertDialog(
                     onDismissRequest = {

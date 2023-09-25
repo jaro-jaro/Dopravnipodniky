@@ -1,8 +1,10 @@
 package cz.jaro.dopravnipodniky.ui.malovani
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
@@ -46,7 +48,7 @@ fun getNamalovatLinky(
                 else -> null
             }
 
-            val odsazeniOdBoku = sirka * index + sirka / 2 + sirkaChodniku
+            val odsazeniOdBoku = sirkaChodniku + sirka * index + sirka / 2
 
             val odsazeniVMensiUlici =
                 if (mensiUlice?.orientace == ulice.orientace) sirkaUlice
@@ -70,47 +72,53 @@ fun getNamalovatLinky(
                 ) {
                     rotate(
                         degrees = rohovaRotace,
-                        pivot = androidx.compose.ui.geometry.Offset(x = sirkaUlice.toPx() / 2, y = sirkaUlice.toPx() / 2),
+                        pivot = Offset(x = sirkaUlice.toPx() / 2, y = sirkaUlice.toPx() / 2),
                     ) {
-                        drawLine(
-                            color = linka.barvicka.barva,
-                            start = Offset(
-                                x = -odsazeniVMensiUlici.toPx(),
-                                y = odsazeniOdBoku.toPx(),
-                            ),
-                            end = Offset(
-                                x = delkaUlice.toPx() / 2 - delkaZastavky.toPx() / 2 - (odsazeniZastavky.toPx() + sirka.toPx() / 2),
-                                y = odsazeniOdBoku.toPx(),
-                            ),
-                            strokeWidth = sirka.toPx(),
-                            cap = StrokeCap.Round,
-                        )
-                        drawLine(
-                            color = linka.barvicka.barva.copy(alpha = if (maPodSebouZastavku) 1 / 3F else 1F),
-                            start = Offset(
-                                x = delkaUlice.toPx() / 2 - delkaZastavky.toPx() / 2 - (odsazeniZastavky.toPx() + sirka.toPx() / 2),
-                                y = odsazeniOdBoku.toPx(),
-                            ),
-                            end = Offset(
-                                x = delkaUlice.toPx() / 2 + delkaZastavky.toPx() / 2 + (odsazeniZastavky.toPx() + sirka.toPx() / 2),
-                                y = odsazeniOdBoku.toPx(),
-                            ),
-                            strokeWidth = sirka.toPx(),
-                            cap = StrokeCap.Round,
-                        )
-                        drawLine(
-                            color = linka.barvicka.barva,
-                            start = Offset(
-                                x = delkaUlice.toPx() / 2 + delkaZastavky.toPx() / 2 + (odsazeniZastavky.toPx() + sirka.toPx() / 2),
-                                y = odsazeniOdBoku.toPx(),
-                            ),
-                            end = Offset(
-                                x = delkaUlice.toPx() + odsazeniVeVetsiUlici.toPx(),
-                                y = odsazeniOdBoku.toPx(),
-                            ),
-                            strokeWidth = sirka.toPx(),
-                            cap = StrokeCap.Round,
-                        )
+                        scale(
+                            scaleX = 1F,
+                            scaleY = if (ulice.orientace == Orientace.Svisle) -1F else 1F,
+                            pivot = Offset(x = delkaUlice.toPx() / 2, y = sirkaUlice.toPx() / 2)
+                        ) {
+                            drawLine(
+                                color = linka.barvicka.barva,
+                                start = Offset(
+                                    x = -odsazeniVMensiUlici.toPx(),
+                                    y = odsazeniOdBoku.toPx(),
+                                ),
+                                end = Offset(
+                                    x = delkaUlice.toPx() / 2 - delkaZastavky.toPx() / 2 - (odsazeniZastavky.toPx() + sirka.toPx() / 2),
+                                    y = odsazeniOdBoku.toPx(),
+                                ),
+                                strokeWidth = sirka.toPx(),
+                                cap = StrokeCap.Round,
+                            )
+                            drawLine(
+                                color = linka.barvicka.barva.copy(alpha = if (maPodSebouZastavku) 1 / 3F else 1F),
+                                start = Offset(
+                                    x = delkaUlice.toPx() / 2 - delkaZastavky.toPx() / 2 - (odsazeniZastavky.toPx() + sirka.toPx() / 2),
+                                    y = odsazeniOdBoku.toPx(),
+                                ),
+                                end = Offset(
+                                    x = delkaUlice.toPx() / 2 + delkaZastavky.toPx() / 2 + (odsazeniZastavky.toPx() + sirka.toPx() / 2),
+                                    y = odsazeniOdBoku.toPx(),
+                                ),
+                                strokeWidth = sirka.toPx(),
+                                cap = StrokeCap.Round,
+                            )
+                            drawLine(
+                                color = linka.barvicka.barva,
+                                start = Offset(
+                                    x = delkaUlice.toPx() / 2 + delkaZastavky.toPx() / 2 + (odsazeniZastavky.toPx() + sirka.toPx() / 2),
+                                    y = odsazeniOdBoku.toPx(),
+                                ),
+                                end = Offset(
+                                    x = delkaUlice.toPx() + odsazeniVeVetsiUlici.toPx(),
+                                    y = odsazeniOdBoku.toPx(),
+                                ),
+                                strokeWidth = sirka.toPx(),
+                                cap = StrokeCap.Round,
+                            )
+                        }
                     }
                 }
             }

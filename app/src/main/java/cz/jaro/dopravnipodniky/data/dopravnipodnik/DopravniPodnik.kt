@@ -33,7 +33,8 @@ data class DopravniPodnik(
 ) {
     constructor(
         jmenoMesta: String,
-        ulicove: List<Ulice> = listOf(),
+        ulicove: List<Ulice>,
+        tema: Theme,
     ) : this(
         linky = listOf(),
         busy = listOf(),
@@ -42,7 +43,7 @@ data class DopravniPodnik(
             jmenoMesta = jmenoMesta,
             jizdne = 10.penez,
             zisk = 0.penezZaMin,
-            tema = Theme.entries.random(),
+            tema = tema,
             id = DPID.randomUUID(),
         ),
     )

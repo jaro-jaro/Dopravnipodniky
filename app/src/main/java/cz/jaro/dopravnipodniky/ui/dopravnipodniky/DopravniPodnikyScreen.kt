@@ -473,6 +473,11 @@ fun DopravniPodnikyScreen(
 
                                                     with(res) {
                                                         snackbarHostState.showSnackbar(
+                                                            message = getString(R.string.vecne_neni_vecne),
+                                                            duration = SnackbarDuration.Long,
+                                                            withDismissAction = true,
+                                                        )
+                                                        snackbarHostState.showSnackbar(
                                                             message = getString(
                                                                 R.string.prodali_jste_dp,
                                                                 dp.info.jmenoMesta,

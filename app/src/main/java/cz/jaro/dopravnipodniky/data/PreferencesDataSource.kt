@@ -59,7 +59,7 @@ class PreferencesDataSource(
     private val _ulice = MutableStateFlow(null as List<Ulice>?)
     val ulice = _ulice.filterNotNull()
     private val _dpInfo = MutableStateFlow(null as DPInfo?)
-    val dpInfo = _dpInfo.filterNotNull().filter { !LOCK }
+    val dpInfo = _dpInfo.filterNotNull()
     private val _prachy = MutableStateFlow(null as Peniz?)
     val prachy = _prachy.filterNotNull()
     private val _dosahlosti = MutableStateFlow(null as List<Dosahlost.NormalniDosahlost>?)
@@ -218,5 +218,6 @@ class PreferencesDataSource(
         println("MĚNĚNÍ DOPRAVNÍHO PODNIKU DOKONČENO ZA ${(millis.formatovat() as Text.Plain).value} ms")
         delay(1.seconds)
         LOCK = false
+        zobrazitLoading = false
     }
 }

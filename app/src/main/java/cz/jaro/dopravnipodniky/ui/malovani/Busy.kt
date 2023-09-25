@@ -127,10 +127,6 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
         poziceKonceVKrizovatce + bus.typBusu.delka.toDp() - konecMinulyho.toDp() - clanek.toDp() / 2
     }
 
-    println(clanekClanky)
-    println(poziceKonceVKrizovatce)
-    println(poziceClankuVKrizovatce)
-
     val natoceniClanku = poziceClankuVKrizovatce.map { pozice ->
         (pozice.coerceIn(0.dp, delkaKrizovatky) / delkaKrizovatky) * uhelZatoceni
     }

@@ -125,7 +125,6 @@ val minimumInvestice = 1_000_000L.penez
 
 // vykreslovani
 
-const val pocatecniPriblizeni = 1F
 const val oddalenyRezim = 1.2F
 const val maximalniOddaleni = .1F
 val pocatecniPosunutiX = 0.dp //200
@@ -186,7 +185,7 @@ var zrychlovacHry by mutableFloatStateOf(/*480F*/.25F/*1F*//*60F*/)
 const val millisPerTik = 1000L / TPS
 
 val pocatecniCenaMesta = 1_200_000L.penez/*3_141_592.penez*//*10_000_000.penez*/
-const val nasobitelInvestice = 1 / 65536.0
+const val nasobitelInvestice = (1 / 2.0) / 65536.0
 const val nahodnostStaveniKOkupantum = .6F
 const val nahodnostStaveniKNeokupantum = 1.1F
 const val nahodnostPoObnoveni = .35F

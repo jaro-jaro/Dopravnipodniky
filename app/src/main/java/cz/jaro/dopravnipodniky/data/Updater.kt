@@ -49,7 +49,6 @@ import cz.jaro.dopravnipodniky.shared.udrzbaTroleje
 import cz.jaro.dopravnipodniky.shared.udrzbaZastavky
 import cz.jaro.dopravnipodniky.shared.vecne
 import cz.jaro.dopravnipodniky.shared.vecneLinky
-import cz.jaro.dopravnipodniky.ui.theme.Theme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -446,13 +445,6 @@ private fun update(
 //                    println(zisky)
 //                    println(zisky.map { it.value }.average().penezZaMin)
                 },
-            )
-        }
-    }
-    hodiny.registerListener(10.seconds) {
-        dataSource.upravitDPInfo { dpInfo ->
-            dpInfo.copy(
-                tema = Theme.entries.random()
             )
         }
     }

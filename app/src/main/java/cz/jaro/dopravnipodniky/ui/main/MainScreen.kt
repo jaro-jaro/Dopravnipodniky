@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
@@ -19,9 +20,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Accessible
 import androidx.compose.material.icons.filled.AccessibleForward
+import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EditRoad
@@ -29,7 +32,6 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -37,10 +39,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
@@ -63,13 +68,18 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
@@ -77,23 +87,18 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.Direction
 import cz.jaro.dopravnipodniky.BuildConfig
 import cz.jaro.dopravnipodniky.R
-import cz.jaro.dopravnipodniky.data.Generator
 import cz.jaro.dopravnipodniky.data.Nastaveni
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Zastavka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.rohyMesta
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.stred
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.zasebevrazdujZastavku
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.dosahlosti.DosahlostCallback
-import cz.jaro.dopravnipodniky.data.seed
-import cz.jaro.dopravnipodniky.shared.DPID
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.UliceID
@@ -110,11 +115,11 @@ import cz.jaro.dopravnipodniky.shared.jednotky.minus
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.plus
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
+import cz.jaro.dopravnipodniky.shared.jednotky.ulicovychBloku
 import cz.jaro.dopravnipodniky.shared.maximalniOddaleni
 import cz.jaro.dopravnipodniky.shared.najitObdelnikVeKteremJe
 import cz.jaro.dopravnipodniky.shared.odNulaNula
 import cz.jaro.dopravnipodniky.shared.oddalenyRezim
-import cz.jaro.dopravnipodniky.shared.pocatecniPriblizeni
 import cz.jaro.dopravnipodniky.shared.replaceBy
 import cz.jaro.dopravnipodniky.shared.toOffsetSPriblizenim
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
@@ -125,15 +130,15 @@ import cz.jaro.dopravnipodniky.ui.destinations.GarazScreenDestination
 import cz.jaro.dopravnipodniky.ui.destinations.LinkyScreenDestination
 import cz.jaro.dopravnipodniky.ui.destinations.MainScreenDestination
 import cz.jaro.dopravnipodniky.ui.malovani.Mesto
-import kotlinx.coroutines.Dispatchers
+import cz.jaro.dopravnipodniky.ui.theme.Theme
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
+import java.time.LocalDate
+import kotlin.math.min
 import kotlin.math.pow
-import kotlin.random.Random
 
 @Composable
 @Destination(start = true)
@@ -168,8 +173,8 @@ fun MainScreen(
         busy != null &&
         prachy != null
     ) MainScreen(
-        zmenitPodniky = viewModel::zmenitOstatniDopravnikyPodniky,
-        zmenitDP = viewModel::zmenitDopravnikyPodnik,
+//        zmenitPodniky = viewModel::zmenitOstatniDopravnikyPodniky,
+//        zmenitDP = viewModel::zmenitDopravnikyPodnik,
         dpInfo = dpInfo!!,
         nastaveni = nastaveni!!,
         tutorial = tutorial!!,
@@ -179,13 +184,14 @@ fun MainScreen(
         busy = busy!!,
         prachy = prachy!!,
         zmenitTutorial = viewModel::zmenitTutorial,
+        zmenitDPInfo = viewModel::zmenitDPInfo,
         zmenitPrachy = viewModel::zmenitPrachy,
         zmenitNastaveni = viewModel::zmenitNastaveni,
         zmenitUlice = viewModel::zmenitUlice,
         navigate = navigator::navigate,
         ziskatUlice = {
             ulicove!!
-        }
+        },
     )
 }
 
@@ -195,8 +201,8 @@ var ukazatDosahlosti by mutableStateOf(false)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(
-    zmenitPodniky: suspend (suspend MutableList<DopravniPodnik>.() -> Unit) -> Unit,
-    zmenitDP: suspend (DPID) -> Unit,
+//    zmenitPodniky: suspend (suspend MutableList<DopravniPodnik>.() -> Unit) -> Unit,
+//    zmenitDP: suspend (DPID) -> Unit,
     dpInfo: DPInfo,
     nastaveni: Nastaveni,
     tutorial: StavTutorialu,
@@ -205,6 +211,7 @@ fun MainScreen(
     linky: List<Linka>,
     busy: List<Bus>,
     prachy: Peniz,
+    zmenitDPInfo: ((DPInfo) -> DPInfo) -> Unit,
     zmenitTutorial: ((StavTutorialu) -> StavTutorialu) -> Unit,
     zmenitPrachy: ((Peniz) -> Peniz) -> Unit,
     zmenitNastaveni: ((Nastaveni) -> Nastaveni) -> Unit,
@@ -212,19 +219,44 @@ fun MainScreen(
     navigate: (Direction) -> Unit,
     ziskatUlice: () -> List<Ulice>,
 ) {
+    var size by remember { mutableStateOf(null as IntSize?) }
     val density = LocalDensity.current
-    val stred = remember(ulicove.stred) { ulicove.stred.toDpSKrizovatkama() }
     var tx by remember { mutableFloatStateOf(0F) }
     var ty by remember { mutableFloatStateOf(0F) }
-    var priblizeni by remember { mutableFloatStateOf(pocatecniPriblizeni) }
+    var priblizeni by remember { mutableFloatStateOf(1F) }
     var editor by remember { mutableStateOf(false) }
     var upravitUlici by remember { mutableStateOf(null as UliceID?) }
     val scope = rememberCoroutineScope()
     val res = LocalContext.current.resources
 
-    LaunchedEffect(stred) {
-        tx = with(density) { -stred.x.toPx() * pocatecniPriblizeni }
-        ty = with(density) { -stred.y.toPx() * pocatecniPriblizeni }
+    LaunchedEffect(ulicove, size) {
+        if (size == null) return@LaunchedEffect
+        with(density) {
+            val (start, stop) = ulicove.rohyMesta
+            val m = start
+                .toDpSKrizovatkama()
+                .minus(ulicovyBlok)
+                .toOffsetSPriblizenim(priblizeni, size!!.center.toOffset())
+            val i = stop
+                .toDpSKrizovatkama()
+                .plus(ulicovyBlok)
+                .toOffsetSPriblizenim(priblizeni, size!!.center.toOffset())
+                .minus(IntOffset(size!!.width, size!!.height).toOffset())
+            val p = (i + m) / 2F
+
+            tx = p.odNulaNula(priblizeni).x
+            ty = p.odNulaNula(priblizeni).y
+
+            val sirkaMesta = stop.x - start.x
+            val vyskaMesta = stop.y - start.y
+            val priblizeniPodleSirky = size!!.width / (sirkaMesta + 2.ulicovychBloku)
+                .toDpSKrizovatkama()
+                .toPx()
+            val priblizeniPodleVysky = size!!.height / (vyskaMesta + 2.ulicovychBloku)
+                .toDpSKrizovatkama()
+                .toPx()
+            priblizeni = min(priblizeniPodleSirky, priblizeniPodleVysky)
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -257,7 +289,8 @@ fun MainScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("${dpInfo.jmenoMesta} — $seed")
+//                    Text("${dpInfo.jmenoMesta} — $seed")
+                    Text(dpInfo.jmenoMesta)
                 },
                 Modifier.combinedClickable(onLongClick = {
                     zmenitPrachy {
@@ -283,21 +316,21 @@ fun MainScreen(
                     ) {
                         Icon(Icons.Default.EmojiEvents, stringResource(R.string.uspechy))
                     }
-                    if (BuildConfig.DEBUG) IconButton(
-                        onClick = {
-                            scope.launch(Dispatchers.IO) {
-                                seed = Random.nextInt()
-                                val novyDP = Generator.vygenerujMiPrvniMesto()
-                                zmenitPodniky {
-                                    add(novyDP)
-                                }
-                                delay(500)
-                                zmenitDP(novyDP.info.id)
-                            }
-                        }
-                    ) {
-                        Icon(Icons.Default.Refresh, stringResource(R.string.uspechy))
-                    }
+//                    if (BuildConfig.DEBUG) IconButton(
+//                        onClick = {
+//                            CoroutineScope(Dispatchers.Main).launch(Dispatchers.IO) {
+//                                seed = Random.nextInt()
+//                                val novyDP = Generator.vygenerujMiPrvniMesto()
+//                                zmenitPodniky {
+//                                    add(novyDP)
+//                                }
+//                                delay(500)
+//                                zmenitDP(novyDP.info.id)
+//                            }
+//                        }
+//                    ) {
+//                        Icon(Icons.Default.Refresh, stringResource(R.string.uspechy))
+//                    }
                     if (BuildConfig.DEBUG) IconButton(
                         onClick = {
                             zrychlovacHry = if (zrychlovacHry == 1F) 60F else 1F
@@ -347,41 +380,154 @@ fun MainScreen(
                     if (zobrazitNastaveni) AlertDialog(
                         onDismissRequest = {
                             zobrazitNastaveni = false
-                        }
-                    ) {
-                        Column {
-                            Text("Provizorní nastavení")
-                            Text(stringResource(R.string.automaticky_prirazovat_ev_c))
-                            Switch(
-                                checked = nastaveni.automatickyUdelovatEvC,
-                                onCheckedChange = {
-                                    zmenitNastaveni { n ->
-                                        n.copy(
-                                            automatickyUdelovatEvC = it
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    zobrazitNastaveni = false
+                                }
+                            ) {
+                                Text(stringResource(android.R.string.ok))
+                            }
+                        },
+                        icon = {
+                            Icon(Icons.Default.Settings, null)
+                        },
+                        title = {
+                            Text(stringResource(R.string.nastaveni))
+                        },
+                        text = {
+                            Column(
+                                Modifier.fillMaxWidth()
+                            ) {
+                                var expanded by remember { mutableStateOf(false) }
+                                ExposedDropdownMenuBox(
+                                    expanded = expanded,
+                                    onExpandedChange = { expanded = !expanded },
+                                ) {
+                                    OutlinedTextField(
+                                        modifier = Modifier
+                                            .menuAnchor()
+                                            .padding(vertical = 4.dp)
+                                            .fillMaxWidth(),
+                                        readOnly = true,
+                                        value = stringResource(dpInfo.tema.jmeno),
+                                        leadingIcon = {
+                                            Icon(Icons.Default.Circle, null, tint = dpInfo.tema.barva)
+                                        },
+                                        onValueChange = {},
+                                        label = { Text(stringResource(R.string.barva_linky)) },
+                                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                                        keyboardOptions = KeyboardOptions(
+                                            keyboardType = KeyboardType.Number,
                                         )
+                                    )
+                                    ExposedDropdownMenu(
+                                        expanded = expanded,
+                                        onDismissRequest = { expanded = false },
+                                    ) {
+                                        Theme.entries.forEach { tohleTema ->
+                                            DropdownMenuItem(
+                                                text = { Text(stringResource(tohleTema.jmeno)) },
+                                                onClick = {
+                                                    zmenitDPInfo {
+                                                        it.copy(
+                                                            tema = tohleTema
+                                                        )
+                                                    }
+                                                    expanded = false
+                                                },
+                                                leadingIcon = {
+                                                    Icon(Icons.Default.Circle, null, tint = tohleTema.barva)
+                                                },
+                                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                                            )
+                                        }
                                     }
                                 }
-                            )
-                            Text(stringResource(R.string.vicenasobne_kupovani))
-                            Switch(
-                                checked = nastaveni.vicenasobnyKupovani,
-                                onCheckedChange = {
-                                    zmenitNastaveni { n ->
-                                        n.copy(
-                                            vicenasobnyKupovani = it
-                                        )
-                                    }
+                                Row(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp)
+                                ) {
+                                    Text(stringResource(R.string.automaticky_prirazovat_ev_c), Modifier.weight(1F))
+                                    Switch(
+                                        checked = nastaveni.automatickyUdelovatEvC,
+                                        onCheckedChange = {
+                                            zmenitNastaveni { n ->
+                                                n.copy(
+                                                    automatickyUdelovatEvC = it
+                                                )
+                                            }
+                                        }
+                                    )
                                 }
-                            )
-                            Text("DEBUG MÓD")
-                            Switch(
-                                checked = DEBUG_TEXT,
-                                onCheckedChange = {
-                                    DEBUG_TEXT = !DEBUG_TEXT
+                                Row(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp)
+                                ) {
+                                    Text(stringResource(R.string.vicenasobne_kupovani), Modifier.weight(1F))
+                                    Switch(
+                                        checked = nastaveni.vicenasobnyKupovani,
+                                        onCheckedChange = {
+                                            zmenitNastaveni { n ->
+                                                n.copy(
+                                                    vicenasobnyKupovani = it
+                                                )
+                                            }
+                                        }
+                                    )
                                 }
-                            )
+                                Row(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp)
+                                ) {
+                                    Text("DEBUG MÓD", Modifier.weight(1F))
+                                    Switch(
+                                        checked = DEBUG_TEXT,
+                                        onCheckedChange = {
+                                            DEBUG_TEXT = !DEBUG_TEXT
+                                        }
+                                    )
+                                }
+                            }
                         }
-                    }
+                    )
+
+                    var zobrazitTuDruhouKravinu by remember { mutableStateOf(false) }
+                    if (zobrazitTuDruhouKravinu) AlertDialog(
+                        onDismissRequest = {
+                            zobrazitTuDruhouKravinu = false
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    zobrazitTuDruhouKravinu = false
+                                }
+                            ) {
+                                Text(stringResource(android.R.string.ok))
+                            }
+                        },
+                        icon = {
+                            Icon(Icons.Default.Info, null)
+                        },
+                        title = {
+                            Text(stringResource(R.string.o_aplikaci))
+                        },
+                        text = {
+                            Column {
+                                Text("Verze aplikace: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
+                                Text("2021-${LocalDate.now().year} RO studios, člen skupiny JARO")
+                                Text("2019-${LocalDate.now().year} JARO")
+                                Text("Všechna data o busech byla ukradena bez svolení majitelů. Na naše data není v žádném případě spolehnutí,")
+                                Text("Simulate crash...", Modifier.clickable {
+                                    throw RuntimeException("Test exception")
+                                }, fontSize = 10.sp)
+                            }
+                        }
+                    )
                     DropdownMenu(
                         expanded = show,
                         onDismissRequest = {
@@ -411,7 +557,8 @@ fun MainScreen(
                                 Text(stringResource(R.string.o_aplikaci))
                             },
                             onClick = {
-
+                                zobrazitTuDruhouKravinu = true
+                                show = false
                             },
                             leadingIcon = {
                                 Icon(Icons.Default.Info, null)
@@ -555,6 +702,7 @@ fun MainScreen(
                     upravitUlici = ulice?.id
                 }
             }
+
             @Suppress("UNUSED_PARAMETER")
             fun PointerInputScope.onTransform(p0: Offset, pan: Offset, zoom: Float, p3: Float) {
                 val pitomyUlice = ziskatUlice()
@@ -568,7 +716,7 @@ fun MainScreen(
                     val i = stop.toDpSKrizovatkama()
                         .plus(ulicovyBlok * 2)
                         .toOffsetSPriblizenim(priblizeni)
-                        .minus(IntOffset(size.width, size.height).toOffset())
+                        .minus(IntOffset(this@onTransform.size.width, this@onTransform.size.height).toOffset())
                     val p = (i + m) / 2F
 
                     val ti = i.odNulaNula(priblizeni)
@@ -603,6 +751,9 @@ fun MainScreen(
                     }
                     .pointerInput(Unit) {
                         detectTransformGestures(onGesture = ::onTransform)
+                    }
+                    .onSizeChanged {
+                        size = it
                     },
             )
             Column(

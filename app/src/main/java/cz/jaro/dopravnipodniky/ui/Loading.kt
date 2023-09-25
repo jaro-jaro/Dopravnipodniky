@@ -34,7 +34,6 @@ import cz.jaro.dopravnipodniky.shared.millisPerTik
 import cz.jaro.dopravnipodniky.shared.odsazeniBusu
 import cz.jaro.dopravnipodniky.shared.sirkaChodniku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
-import cz.jaro.dopravnipodniky.shared.zrychlovacHry
 import cz.jaro.dopravnipodniky.ui.malovani.Offset
 import cz.jaro.dopravnipodniky.ui.theme.Barvicka
 import cz.jaro.dopravnipodniky.ui.theme.DpTheme
@@ -92,11 +91,11 @@ fun Loading() = DpTheme(
                                 r1 = Random.nextInt(rychlostBusu - 80, rychlostBusu + 80)
                                 r2 = Random.nextInt(rychlostBusu2 - 80, rychlostBusu2 + 80)
                             }
-                            poloha += r2.kilometruZaHodinu * (1.tiku.toDuration() * zrychlovacHry.toDouble())
+                            poloha += r2.kilometruZaHodinu * 1.tiku.toDuration()
                             if (poloha > sirka) {
                                 poloha = -delkaBusu.toDp()
                             }
-                            poloha2 += r1.kilometruZaHodinu * (1.tiku.toDuration() * zrychlovacHry.toDouble())
+                            poloha2 += r1.kilometruZaHodinu * 1.tiku.toDuration()
                             if (poloha2 > sirka) {
                                 poloha2 = -delkaBusu.toDp()
                             }

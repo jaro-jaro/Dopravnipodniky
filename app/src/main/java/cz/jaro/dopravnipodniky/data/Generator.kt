@@ -24,6 +24,7 @@ import cz.jaro.dopravnipodniky.shared.nasobitelRedukce
 import cz.jaro.dopravnipodniky.shared.pocatecniCenaMesta
 import cz.jaro.dopravnipodniky.shared.rozdilNahodnosti
 import cz.jaro.dopravnipodniky.shared.seznamy.MESTA
+import cz.jaro.dopravnipodniky.ui.theme.Theme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
@@ -38,11 +39,19 @@ class Generator(
     companion object {
         suspend fun vygenerujMiPrvniMesto(): DopravniPodnik = withContext(Dispatchers.IO) {
 
+            seed = 19250533
+
             Generator(
                 investice = pocatecniCenaMesta,
                 jmenoMestaRandom = Random(18),
             ).vygenerujMiMestoAToHnedVykricnik(
-                Random(seed),
+                michaniRandom = Random(seed),
+                sanceRandom = Random(seed),
+                barakyRandom = Random(seed),
+                panelakyRandom = Random(seed),
+                stredovyRandom = Random(seed),
+                kapacitaRandom = Random(seed),
+                tema = Theme.Jantarove,
             ) {}
         }
     }
@@ -67,6 +76,7 @@ class Generator(
         panelakyRandom: Random = Random,
         stredovyRandom: Random = Random,
         kapacitaRandom: Random = Random,
+        tema: Theme = Theme.entries.random(),
         step: (Float) -> Unit,
     ) = withContext(Dispatchers.IO) {
         // Okej hned to bude, nez bys rekl pi
@@ -81,7 +91,7 @@ class Generator(
 
         zbarakuj()
 
-        DopravniPodnik(jmenoMesta = jmenoMesta, ulicove = ulicove)
+        DopravniPodnik(jmenoMesta = jmenoMesta, ulicove = ulicove, tema = tema)
     }
 
     private tailrec fun opakovac(hloubka: Int, posledniKrizovatky: List<Pozice<UlicovyBlok>>, sance: Float, step: (Float) -> Unit) {
