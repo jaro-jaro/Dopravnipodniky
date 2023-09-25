@@ -1,5 +1,8 @@
 package cz.jaro.compose_dialog
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,7 +18,7 @@ data class AlertDialogInfo(
     val onDismissed: (() -> Unit)? = null,
     val icon: @Composable (() -> Unit)? = null,
     val title: @Composable (() -> Unit)? = null,
-    val text: @Composable (() -> Unit)? = null,
+    val content: @Composable (ColumnScope.() -> Unit)? = null,
     val properties: DialogProperties = DialogProperties(),
 )
 
@@ -35,11 +38,11 @@ class AlertDialogState {
         onDismissed: (() -> Unit)? = null,
         icon: @Composable (() -> Unit)? = null,
         title: @Composable (() -> Unit)? = null,
-        text: @Composable (() -> Unit)? = null,
+        content: @Composable (ColumnScope.() -> Unit)? = null,
         properties: DialogProperties = DialogProperties(),
     ) = show(
         AlertDialogInfo(
-            confirmButton, modifier, dismissButton, onDismissed, icon, title, text, properties
+            confirmButton, modifier, dismissButton, onDismissed, icon, title, content, properties
         )
     )
 
@@ -63,7 +66,15 @@ fun AlertDialog(
             dismissButton = info.dismissButton,
             icon = info.icon,
             title = info.title,
-            text = info.text,
+            text = info.content?.let {
+                {
+                    Column(
+                        Modifier.fillMaxWidth()
+                    ) {
+                        it()
+                    }
+                }
+            },
             properties = info.properties
         )
     }

@@ -26,6 +26,7 @@
     <string name="koupit">Koupit za %s €</string>
     <string name="ev_c_existuje">Toto evidenční číslo již existuej!</string>
     <string name="zadejte_ev_c">Zadejte evidenční číslo nového %su:</string>
+    <string name="upravte_ev_c">Upravte evidenční číslo Vašeho %su:</string>
     <string name="nova_linka">Nová linka</string>
     <string name="zobrazit_na_mape">Zobrazit na mapě</string>
     <string name="upravit">Upravit</string>
@@ -179,7 +180,7 @@
     <string name="zastavky">zastávky</string>
     <string name="uspesne_pridany_zastavky">Úspěšně přidány zastávky</string>
     <string name="odstranit_linku">Odstranit linku</string>
-    <string name="jste_si_vedomi_odstraneni_linky">Jste si vědomi, že odstraněním linky se Vám všechna vozidla přiřazená této lince odeberou z linek?</string>
+    <string name="jste_si_vedomi_odstraneni_linky">Opravdu chcete odstranit linku? Odstraněním linky odeberete všechy busy na ní jedoucí.</string>
     <string name="pridejte_vozidla_na_linku">Přidejte nějaká vozidla na linku</string>
     <string name="moc_vozidel_na_rozmisteni">Na rozmístění vozidel po lince jich je moc</string>
     <string name="solaris" translatable="false">Solaris bus &amp; coach</string>
@@ -354,5 +355,9 @@
     <string name="rozloha">Rozloha: %s m²</string>
     <string name="pocet_cloveku">Počet obyvatel: %s</string>
     <string name="vecne_neni_vecne">Ani Věčné není věčné</string>
+    <string name="tema_aplikace">Téma aplikace</string>
+    <string name="upravit_nazev">Změnit název</string>
+    <string name="upravit_nazev2">Změnit název nebo barvu</string>
+    <string name="upravit_vedeni">Změnit vedení linky</string>
 
 </resources>

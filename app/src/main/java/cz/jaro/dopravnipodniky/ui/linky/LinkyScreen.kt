@@ -1,29 +1,41 @@
 package cz.jaro.dopravnipodniky.ui.linky
 
+import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.EditRoad
 import androidx.compose.material.icons.filled.FormatLineSpacing
 import androidx.compose.material.icons.filled.GridGoldenratio
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Text
@@ -31,10 +43,14 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
@@ -60,6 +76,7 @@ import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.snackbarHostState
 import cz.jaro.dopravnipodniky.ui.destinations.VytvareniLinkyScreenDestination
+import cz.jaro.dopravnipodniky.ui.theme.Barvicka
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import kotlin.math.roundToInt
@@ -141,7 +158,7 @@ fun LinkyScreen(
                     Icon(Icons.Default.Add, null)
                 },
                 onClick = {
-                    navigate(VytvareniLinkyScreenDestination)
+                    navigate(VytvareniLinkyScreenDestination())
                 },
             )
         },
@@ -223,83 +240,246 @@ fun LinkyScreen(
                                 ) {
                                     Icon(Icons.Default.FormatLineSpacing, null)
                                 }
+
+                                var show by remember { mutableStateOf(false) }
                                 IconButton(
                                     onClick = {
-                                        dialogState.show(
-                                            confirmButton = {
-                                                TextButton(
-                                                    onClick = {
-                                                        if (prachy < cenaTroleje * linka.ulice(ulicove).count { !it.maTrolej }) {
+                                        show = !show
+                                    }
+                                ) {
+                                    Icon(Icons.Default.MoreVert, null)
+                                }
+                                DropdownMenu(
+                                    expanded = show,
+                                    onDismissRequest = {
+                                        show = false
+                                    }
+                                ) {
+                                    var expanded by remember { mutableStateOf(false) }
+                                    var cisloLinky by remember { mutableStateOf(linka.cislo) }
+                                    var barva by remember { mutableStateOf(linka.barvicka) }
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(stringResource(R.string.upravit_nazev))
+                                        },
+                                        onClick = {
+                                            dialogState.show(
+                                                confirmButton = {
+                                                    TextButton(
+                                                        onClick = {
+                                                            if (cisloLinky.isEmpty()) {
+                                                                Toast.makeText(ctx, R.string.spatne_cislo_linky, Toast.LENGTH_LONG).show()
+                                                                return@TextButton
+                                                            }
+                                                            if (linky.any { it.cislo == cisloLinky }) {
+                                                                Toast.makeText(ctx, R.string.linka_existuje, Toast.LENGTH_LONG).show()
+                                                                return@TextButton
+                                                            }
+
+                                                            zmenitLinky {
+                                                                val i = indexOfFirst { it.id == linka.id }
+                                                                this[i] = this[i].copy(
+                                                                    cislo = cisloLinky,
+                                                                    barvicka = barva,
+                                                                )
+                                                            }
+
+                                                            dialogState.hideTopMost()
+                                                        }
+                                                    ) {
+                                                        Text(stringResource(android.R.string.ok))
+                                                    }
+                                                },
+                                                title = {
+                                                    Text(stringResource(id = R.string.upravit_nazev2))
+                                                },
+                                                content = {
+                                                    OutlinedTextField(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth(),
+                                                        value = cisloLinky,
+                                                        onValueChange = {
+                                                            cisloLinky = it
+                                                        },
+                                                        label = { Text(stringResource(R.string.zadejte_cislo_linky)) },
+                                                    )
+                                                    ExposedDropdownMenuBox(
+                                                        expanded = expanded,
+                                                        onExpandedChange = { expanded = !expanded },
+                                                    ) {
+                                                        OutlinedTextField(
+                                                            modifier = Modifier
+                                                                .menuAnchor()
+                                                                .padding(top = 8.dp)
+                                                                .fillMaxWidth(),
+                                                            readOnly = true,
+                                                            value = stringResource(barva.jmeno),
+                                                            leadingIcon = {
+                                                                Icon(Icons.Default.Circle, null, tint = barva.barva)
+                                                            },
+                                                            onValueChange = {},
+                                                            label = { Text(stringResource(R.string.barva_linky)) },
+                                                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                                                            keyboardOptions = KeyboardOptions(
+                                                                keyboardType = KeyboardType.Number,
+                                                            )
+                                                        )
+                                                        ExposedDropdownMenu(
+                                                            expanded = expanded,
+                                                            onDismissRequest = { expanded = false },
+                                                        ) {
+                                                            Barvicka.entries.forEach { tahleBarva ->
+                                                                DropdownMenuItem(
+                                                                    text = { Text(stringResource(tahleBarva.jmeno)) },
+                                                                    onClick = {
+                                                                        barva = tahleBarva
+                                                                        expanded = false
+                                                                    },
+                                                                    leadingIcon = {
+                                                                        Icon(Icons.Default.Circle, null, tint = tahleBarva.barva)
+                                                                    },
+                                                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                            )
+                                            show = false
+                                        },
+                                        leadingIcon = {
+                                            Icon(Icons.Default.Edit, null)
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(stringResource(R.string.upravit_vedeni))
+                                        },
+                                        onClick = {
+                                            navigate(VytvareniLinkyScreenDestination(upravovani = linka.id))
+                                            show = false
+                                        },
+                                        leadingIcon = {
+                                            Icon(Icons.Default.EditRoad, null)
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(stringResource(R.string.pridat_troleje_linka))
+                                        },
+                                        onClick = {
+                                            dialogState.show(
+                                                confirmButton = {
+                                                    TextButton(
+                                                        onClick = {
+                                                            if (prachy < cenaTroleje * linka.ulice(ulicove).count { !it.maTrolej }) {
+                                                                scope.launch {
+                                                                    snackbarHostState.showSnackbar(
+                                                                        ctx.getString(R.string.malo_penez),
+                                                                        duration = SnackbarDuration.Short,
+                                                                        withDismissAction = true,
+                                                                    )
+                                                                }
+                                                                dialogState.hideTopMost()
+                                                                return@TextButton
+                                                            }
+
+                                                            zmenitPrachy {
+                                                                it - cenaTroleje * linka.ulice(ulicove).count { !it.maTrolej }
+                                                            }
+
+                                                            zmenitUlice {
+                                                                linka.ulice(ulicove).forEach { ulice ->
+                                                                    if (!ulice.maTrolej) {
+                                                                        val i = this.indexOfFirst { it.id == ulice.id }
+                                                                        this[i] = this[i].copy(
+                                                                            maTrolej = true
+                                                                        )
+                                                                    }
+                                                                }
+                                                            }
                                                             scope.launch {
                                                                 snackbarHostState.showSnackbar(
-                                                                    ctx.getString(R.string.malo_penez),
+                                                                    ctx.getString(R.string.uspesne_pridany_troleje),
                                                                     duration = SnackbarDuration.Short,
                                                                     withDismissAction = true,
                                                                 )
                                                             }
                                                             dialogState.hideTopMost()
-                                                            return@TextButton
                                                         }
-
-                                                        zmenitPrachy {
-                                                            it - cenaTroleje * linka.ulice(ulicove).count { !it.maTrolej }
-                                                        }
-
-                                                        zmenitUlice {
-                                                            linka.ulice(ulicove).forEach { ulice ->
-                                                                if (!ulice.maTrolej) {
-                                                                    val i = this.indexOfFirst { it.id == ulice.id }
-                                                                    this[i] = this[i].copy(
-                                                                        maTrolej = true
+                                                    ) {
+                                                        Text(stringResource(android.R.string.ok))
+                                                    }
+                                                },
+                                                content = {
+                                                    Text(
+                                                        stringResource(
+                                                            R.string.pridat_troleje_nebo_zastavky_linka_dialog,
+                                                            (cenaTroleje * linka.ulice(ulicove).count { !it.maTrolej }).asString(),
+                                                            stringResource(R.string.troleje)
+                                                        )
+                                                    )
+                                                },
+                                                title = {
+                                                    Text(stringResource(R.string.pridat_troleje_linka))
+                                                },
+                                            )
+                                            show = false
+                                        },
+                                        leadingIcon = {
+                                            Icon(Icons.Default.GridGoldenratio, null)
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(stringResource(R.string.odstranit_linku))
+                                        },
+                                        onClick = {
+                                            dialogState.show(
+                                                confirmButton = {
+                                                    TextButton(
+                                                        onClick = {
+                                                            zmenitBusy {
+                                                                forEachIndexed { i, it ->
+                                                                    if (it.linka == linka.id) this[i] = it.copy(
+                                                                        linka = null
                                                                     )
                                                                 }
                                                             }
+                                                            zmenitLinky {
+                                                                remove(linka)
+                                                            }
+                                                            dialogState.hideTopMost()
                                                         }
-                                                        scope.launch {
-                                                            snackbarHostState.showSnackbar(
-                                                                ctx.getString(R.string.uspesne_pridany_troleje),
-                                                                duration = SnackbarDuration.Short,
-                                                                withDismissAction = true,
-                                                            )
-                                                        }
-                                                        dialogState.hideTopMost()
+                                                    ) {
+                                                        Text(stringResource(android.R.string.ok))
                                                     }
-                                                ) {
-                                                    Text(stringResource(android.R.string.ok))
+                                                },
+                                                icon = {
+                                                    Icon(Icons.Default.Delete, null)
+                                                },
+                                                title = {
+                                                    Text(stringResource(R.string.odstranit_linku))
+                                                },
+                                                content = {
+                                                    Text(stringResource(R.string.jste_si_vedomi_odstraneni_linky))
+                                                },
+                                                dismissButton = {
+                                                    TextButton(
+                                                        onClick = {
+                                                            dialogState.hideTopMost()
+                                                        }
+                                                    ) {
+                                                        Text(stringResource(R.string.zrusit))
+                                                    }
                                                 }
-                                            },
-                                            text = {
-                                                Text(
-                                                    stringResource(
-                                                        R.string.pridat_troleje_nebo_zastavky_linka_dialog,
-                                                        (cenaTroleje * linka.ulice(ulicove).count { !it.maTrolej }).asString(),
-                                                        stringResource(R.string.troleje)
-                                                    )
-                                                )
-                                            },
-                                            title = {
-                                                Text(stringResource(R.string.pridat_troleje_linka))
-                                            },
-                                        )
-                                    }
-                                ) {
-                                    Icon(Icons.Default.GridGoldenratio, null)
-                                }
-                                IconButton(
-                                    onClick = {
-                                        zmenitBusy {
-                                            forEachIndexed { i, it ->
-                                                if (it.linka == linka.id) this[i] = it.copy(
-                                                    linka = null
-                                                )
-                                            }
+                                            )
+                                            show = false
+                                        },
+                                        leadingIcon = {
+                                            Icon(Icons.Default.Delete, null)
                                         }
-                                        zmenitLinky {
-                                            remove(linka)
-                                        }
-                                    }
-                                ) {
-                                    Icon(Icons.Default.Delete, null)
+                                    )
                                 }
                             }
                         },

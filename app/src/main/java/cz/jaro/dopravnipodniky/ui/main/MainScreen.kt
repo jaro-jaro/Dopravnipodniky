@@ -33,7 +33,6 @@ import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -56,6 +55,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -95,13 +95,12 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Zastavka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.rohyMesta
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.zasebevrazdujZastavku
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.dosahlosti.DosahlostCallback
+import cz.jaro.dopravnipodniky.dialogState
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
-import cz.jaro.dopravnipodniky.shared.UliceID
 import cz.jaro.dopravnipodniky.shared.barvaDosahnuteDosahlosti
 import cz.jaro.dopravnipodniky.shared.barvaSecretDosahlosti
 import cz.jaro.dopravnipodniky.shared.cenaTroleje
@@ -128,7 +127,6 @@ import cz.jaro.dopravnipodniky.snackbarHostState
 import cz.jaro.dopravnipodniky.ui.destinations.DopravniPodnikyScreenDestination
 import cz.jaro.dopravnipodniky.ui.destinations.GarazScreenDestination
 import cz.jaro.dopravnipodniky.ui.destinations.LinkyScreenDestination
-import cz.jaro.dopravnipodniky.ui.destinations.MainScreenDestination
 import cz.jaro.dopravnipodniky.ui.malovani.Mesto
 import cz.jaro.dopravnipodniky.ui.theme.Theme
 import kotlinx.coroutines.MainScope
@@ -196,7 +194,6 @@ fun MainScreen(
 }
 
 var DEBUG_TEXT by mutableStateOf(false)
-var ukazatDosahlosti by mutableStateOf(false)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -225,11 +222,10 @@ fun MainScreen(
     var ty by remember { mutableFloatStateOf(0F) }
     var priblizeni by remember { mutableFloatStateOf(1F) }
     var editor by remember { mutableStateOf(false) }
-    var upravitUlici by remember { mutableStateOf(null as UliceID?) }
     val scope = rememberCoroutineScope()
     val res = LocalContext.current.resources
 
-    LaunchedEffect(ulicove, size) {
+    LaunchedEffect(ulicove.map { it.zacatek to it.konec }, size) {
         if (size == null) return@LaunchedEffect
         with(density) {
             val (start, stop) = ulicove.rohyMesta
@@ -263,13 +259,7 @@ fun MainScreen(
         loadKoinModules(module {
             single {
                 DosahlostCallback {
-                    if (
-                        !(tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
-                        !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
-                        !(tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
-                        !(tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
-                        !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
-                    ) MainScope().launch {
+                    MainScope().launch {
                         val result = snackbarHostState.showSnackbar(
                             message = "Splněno ${res.getString(it.jmeno)}",
                             actionLabel = "Zobrazit",
@@ -277,8 +267,7 @@ fun MainScreen(
                             withDismissAction = true,
                         )
                         if (result == SnackbarResult.ActionPerformed) {
-                            navigate(MainScreenDestination)
-                            ukazatDosahlosti = true
+                            zobrazitDosahlosti(dosahlosti)
                         }
                     }
                 }
@@ -311,7 +300,7 @@ fun MainScreen(
                         !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
                     ) IconButton(
                         onClick = {
-                            ukazatDosahlosti = true
+                            zobrazitDosahlosti(dosahlosti)
                         }
                     ) {
                         Icon(Icons.Default.EmojiEvents, stringResource(R.string.uspechy))
@@ -369,6 +358,10 @@ fun MainScreen(
                         Icon(Icons.Default.Help, stringResource(R.string.tutorial))
                     }
                     var show by remember { mutableStateOf(false) }
+                    var debug by remember { mutableStateOf(DEBUG_TEXT) }
+                    var evc by remember { mutableStateOf(nastaveni.automatickyUdelovatEvC) }
+                    var multi by remember { mutableStateOf(nastaveni.vicenasobnyKupovani) }
+                    var tema by remember { mutableStateOf(dpInfo.tema) }
                     IconButton(
                         onClick = {
                             show = !show
@@ -376,158 +369,6 @@ fun MainScreen(
                     ) {
                         Icon(Icons.Default.MoreVert, null)
                     }
-                    var zobrazitNastaveni by remember { mutableStateOf(false) }
-                    if (zobrazitNastaveni) AlertDialog(
-                        onDismissRequest = {
-                            zobrazitNastaveni = false
-                        },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    zobrazitNastaveni = false
-                                }
-                            ) {
-                                Text(stringResource(android.R.string.ok))
-                            }
-                        },
-                        icon = {
-                            Icon(Icons.Default.Settings, null)
-                        },
-                        title = {
-                            Text(stringResource(R.string.nastaveni))
-                        },
-                        text = {
-                            Column(
-                                Modifier.fillMaxWidth()
-                            ) {
-                                var expanded by remember { mutableStateOf(false) }
-                                ExposedDropdownMenuBox(
-                                    expanded = expanded,
-                                    onExpandedChange = { expanded = !expanded },
-                                ) {
-                                    OutlinedTextField(
-                                        modifier = Modifier
-                                            .menuAnchor()
-                                            .padding(vertical = 4.dp)
-                                            .fillMaxWidth(),
-                                        readOnly = true,
-                                        value = stringResource(dpInfo.tema.jmeno),
-                                        leadingIcon = {
-                                            Icon(Icons.Default.Circle, null, tint = dpInfo.tema.barva)
-                                        },
-                                        onValueChange = {},
-                                        label = { Text(stringResource(R.string.barva_linky)) },
-                                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                                        keyboardOptions = KeyboardOptions(
-                                            keyboardType = KeyboardType.Number,
-                                        )
-                                    )
-                                    ExposedDropdownMenu(
-                                        expanded = expanded,
-                                        onDismissRequest = { expanded = false },
-                                    ) {
-                                        Theme.entries.forEach { tohleTema ->
-                                            DropdownMenuItem(
-                                                text = { Text(stringResource(tohleTema.jmeno)) },
-                                                onClick = {
-                                                    zmenitDPInfo {
-                                                        it.copy(
-                                                            tema = tohleTema
-                                                        )
-                                                    }
-                                                    expanded = false
-                                                },
-                                                leadingIcon = {
-                                                    Icon(Icons.Default.Circle, null, tint = tohleTema.barva)
-                                                },
-                                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                                            )
-                                        }
-                                    }
-                                }
-                                Row(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp)
-                                ) {
-                                    Text(stringResource(R.string.automaticky_prirazovat_ev_c), Modifier.weight(1F))
-                                    Switch(
-                                        checked = nastaveni.automatickyUdelovatEvC,
-                                        onCheckedChange = {
-                                            zmenitNastaveni { n ->
-                                                n.copy(
-                                                    automatickyUdelovatEvC = it
-                                                )
-                                            }
-                                        }
-                                    )
-                                }
-                                Row(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp)
-                                ) {
-                                    Text(stringResource(R.string.vicenasobne_kupovani), Modifier.weight(1F))
-                                    Switch(
-                                        checked = nastaveni.vicenasobnyKupovani,
-                                        onCheckedChange = {
-                                            zmenitNastaveni { n ->
-                                                n.copy(
-                                                    vicenasobnyKupovani = it
-                                                )
-                                            }
-                                        }
-                                    )
-                                }
-                                Row(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp)
-                                ) {
-                                    Text("DEBUG MÓD", Modifier.weight(1F))
-                                    Switch(
-                                        checked = DEBUG_TEXT,
-                                        onCheckedChange = {
-                                            DEBUG_TEXT = !DEBUG_TEXT
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    )
-
-                    var zobrazitTuDruhouKravinu by remember { mutableStateOf(false) }
-                    if (zobrazitTuDruhouKravinu) AlertDialog(
-                        onDismissRequest = {
-                            zobrazitTuDruhouKravinu = false
-                        },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    zobrazitTuDruhouKravinu = false
-                                }
-                            ) {
-                                Text(stringResource(android.R.string.ok))
-                            }
-                        },
-                        icon = {
-                            Icon(Icons.Default.Info, null)
-                        },
-                        title = {
-                            Text(stringResource(R.string.o_aplikaci))
-                        },
-                        text = {
-                            Column {
-                                Text("Verze aplikace: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
-                                Text("2021-${LocalDate.now().year} RO studios, člen skupiny JARO")
-                                Text("2019-${LocalDate.now().year} JARO")
-                                Text("Všechna data o busech byla ukradena bez svolení majitelů. Na naše data není v žádném případě spolehnutí,")
-                                Text("Simulate crash...", Modifier.clickable {
-                                    throw RuntimeException("Test exception")
-                                }, fontSize = 10.sp)
-                            }
-                        }
-                    )
                     DropdownMenu(
                         expanded = show,
                         onDismissRequest = {
@@ -545,7 +386,121 @@ fun MainScreen(
                                 Text(stringResource(R.string.nastaveni))
                             },
                             onClick = {
-                                zobrazitNastaveni = true
+                                dialogState.show(
+                                    confirmButton = {
+                                        TextButton(
+                                            onClick = {
+                                                dialogState.hideTopMost()
+                                            }
+                                        ) {
+                                            Text(stringResource(android.R.string.ok))
+                                        }
+                                    },
+                                    icon = {
+                                        Icon(Icons.Default.Settings, null)
+                                    },
+                                    title = {
+                                        Text(stringResource(R.string.nastaveni))
+                                    },
+                                    content = {
+                                        var expanded by remember { mutableStateOf(false) }
+                                        ExposedDropdownMenuBox(
+                                            expanded = expanded,
+                                            onExpandedChange = { expanded = !expanded },
+                                        ) {
+                                            OutlinedTextField(
+                                                modifier = Modifier
+                                                    .menuAnchor()
+                                                    .padding(vertical = 4.dp)
+                                                    .fillMaxWidth(),
+                                                readOnly = true,
+                                                value = stringResource(tema.jmeno),
+                                                leadingIcon = {
+                                                    Icon(Icons.Default.Circle, null, tint = tema.barva)
+                                                },
+                                                onValueChange = {},
+                                                label = { Text(stringResource(R.string.tema_aplikace)) },
+                                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                                                keyboardOptions = KeyboardOptions(
+                                                    keyboardType = KeyboardType.Number,
+                                                )
+                                            )
+                                            ExposedDropdownMenu(
+                                                expanded = expanded,
+                                                onDismissRequest = { expanded = false },
+                                            ) {
+                                                Theme.entries.forEach { tohleTema ->
+                                                    DropdownMenuItem(
+                                                        text = { Text(stringResource(tohleTema.jmeno)) },
+                                                        onClick = {
+                                                            zmenitDPInfo {
+                                                                it.copy(
+                                                                    tema = tohleTema
+                                                                )
+                                                            }
+                                                            tema = tohleTema
+                                                            expanded = false
+                                                        },
+                                                        leadingIcon = {
+                                                            Icon(Icons.Default.Circle, null, tint = tohleTema.barva)
+                                                        },
+                                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                                                    )
+                                                }
+                                            }
+                                        }
+                                        Row(
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 4.dp)
+                                        ) {
+                                            Text(stringResource(R.string.automaticky_prirazovat_ev_c), Modifier.weight(1F))
+                                            Switch(
+                                                checked = evc,
+                                                onCheckedChange = {
+                                                    zmenitNastaveni { n ->
+                                                        n.copy(
+                                                            automatickyUdelovatEvC = it
+                                                        )
+                                                    }
+                                                    evc = it
+                                                }
+                                            )
+                                        }
+                                        Row(
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 4.dp)
+                                        ) {
+                                            Text(stringResource(R.string.vicenasobne_kupovani), Modifier.weight(1F))
+                                            Switch(
+                                                checked = multi,
+                                                onCheckedChange = {
+                                                    zmenitNastaveni { n ->
+                                                        n.copy(
+                                                            vicenasobnyKupovani = it
+                                                        )
+                                                    }
+                                                    multi = it
+                                                }
+                                            )
+                                        }
+                                        Row(
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 4.dp)
+                                        ) {
+                                            Text("DEBUG MÓD", Modifier.weight(1F))
+                                            Switch(
+                                                checked = debug,
+                                                onCheckedChange = {
+                                                    DEBUG_TEXT = !DEBUG_TEXT
+                                                    debug = DEBUG_TEXT
+                                                }
+                                            )
+                                        }
+                                    }
+                                )
                                 show = false
                             },
                             leadingIcon = {
@@ -557,7 +512,32 @@ fun MainScreen(
                                 Text(stringResource(R.string.o_aplikaci))
                             },
                             onClick = {
-                                zobrazitTuDruhouKravinu = true
+                                dialogState.show(
+                                    confirmButton = {
+                                        TextButton(
+                                            onClick = {
+                                                dialogState.hideTopMost()
+                                            }
+                                        ) {
+                                            Text(stringResource(android.R.string.ok))
+                                        }
+                                    },
+                                    icon = {
+                                        Icon(Icons.Default.Info, null)
+                                    },
+                                    title = {
+                                        Text(stringResource(R.string.o_aplikaci))
+                                    },
+                                    content = {
+                                        Text("Verze aplikace: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
+                                        Text("2021-${LocalDate.now().year} RO studios, člen skupiny JARO")
+                                        Text("2019-${LocalDate.now().year} JARO")
+                                        Text("Všechna data o busech byla ukradena bez svolení majitelů. Na naše data není v žádném případě spolehnutí,")
+                                        Text("Simulate crash...", Modifier.clickable {
+                                            throw RuntimeException("Test exception")
+                                        }, fontSize = 10.sp)
+                                    }
+                                )
                                 show = false
                             },
                             leadingIcon = {
@@ -574,56 +554,39 @@ fun MainScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            if (ukazatDosahlosti) AlertDialog(
-                onDismissRequest = {
-                    ukazatDosahlosti = false
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            ukazatDosahlosti = false
-                        }
-                    ) {
-                        Text(stringResource(android.R.string.ok))
-                    }
-                },
-                title = {
-                    Text(stringResource(R.string.uspechy))
-                },
-                icon = {
-                    Icon(Icons.Default.EmojiEvents, null)
-                },
-                text = {
-                    Dosahlosti(dosahlosti)
-                }
-            )
-            if (upravitUlici != null) {
-                val staraUlice = remember { ulicove.ulice(upravitUlici!!) }
+            fun PointerInputScope.onClick(it: Offset) {
+                val pitomyUlice = ziskatUlice()
+                if (editor) {
+                    val staraUlice = pitomyUlice.najitObdelnikVeKteremJe(
+                        offset = it,
+                        tx = tx, ty = ty, priblizeni = priblizeni
+                    ) { ulice ->
+                        DpRect(
+                            left = ulice.zacatekX,
+                            top = ulice.zacatekY,
+                            right = ulice.konecX,
+                            bottom = ulice.konecY,
+                        )
+                    } ?: return
 
-                AlertDialog(
-                    onDismissRequest = {
-                        upravitUlici = null
-                    },
-                    confirmButton = {},
-                    dismissButton = {
-                        TextButton(
-                            onClick = {
-                                upravitUlici = null
+                    dialogState.show(
+                        confirmButton = {},
+                        dismissButton = {
+                            TextButton(
+                                onClick = {
+                                    dialogState.hideTopMost()
+                                }
+                            ) {
+                                Text(stringResource(R.string.zrusit))
                             }
-                        ) {
-                            Text(stringResource(R.string.zrusit))
-                        }
-                    },
-                    icon = {
-                        Icon(Icons.Default.EditRoad, null)
-                    },
-                    title = {
-                        Text(stringResource(R.string.upravit_ulici))
-                    },
-                    text = {
-                        Column(
-                            Modifier.fillMaxWidth()
-                        ) {
+                        },
+                        icon = {
+                            Icon(Icons.Default.EditRoad, null)
+                        },
+                        title = {
+                            Text(stringResource(R.string.upravit_ulici))
+                        },
+                        content = {
                             OutlinedButton(
                                 onClick = {
                                     zmenitUlice {
@@ -635,7 +598,7 @@ fun MainScreen(
                                     zmenitPrachy {
                                         it - if (!staraUlice.maZastavku) cenaZastavky else cenaZastavky / 5
                                     }
-                                    upravitUlici = null
+                                    dialogState.hideTopMost()
                                 },
                                 Modifier
                                     .padding(vertical = 4.dp)
@@ -666,7 +629,7 @@ fun MainScreen(
                                     zmenitPrachy {
                                         it - if (!staraUlice.maTrolej) cenaTroleje else cenaTroleje / 5
                                     }
-                                    upravitUlici = null
+                                    dialogState.hideTopMost()
                                 },
                                 Modifier
                                     .padding(vertical = 4.dp)
@@ -680,26 +643,7 @@ fun MainScreen(
                                 )
                             }
                         }
-                    }
-                )
-            }
-
-            fun PointerInputScope.onClick(it: Offset) {
-                val pitomyUlice = ziskatUlice()
-                if (editor) {
-                    val ulice = pitomyUlice.najitObdelnikVeKteremJe(
-                        offset = it,
-                        tx = tx, ty = ty, priblizeni = priblizeni
-                    ) { ulice ->
-                        DpRect(
-                            left = ulice.zacatekX,
-                            top = ulice.zacatekY,
-                            right = ulice.konecX,
-                            bottom = ulice.konecY,
-                        )
-                    }
-
-                    upravitUlici = ulice?.id
+                    )
                 }
             }
 
@@ -885,6 +829,27 @@ fun MainScreen(
         }
     }
 }
+
+fun zobrazitDosahlosti(dosahlosti: List<Dosahlost.NormalniDosahlost>) = dialogState.show(
+    confirmButton = {
+        TextButton(
+            onClick = {
+                dialogState.hideTopMost()
+            }
+        ) {
+            Text(stringResource(android.R.string.ok))
+        }
+    },
+    title = {
+        Text(stringResource(R.string.uspechy))
+    },
+    icon = {
+        Icon(Icons.Default.EmojiEvents, null)
+    },
+    content = {
+        Dosahlosti(dosahlosti)
+    },
+)
 
 @Composable
 fun Dosahlosti(

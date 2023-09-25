@@ -24,7 +24,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Help
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -73,6 +72,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.jsouVsechnyZatrolejovane
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.nakladyTextem
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
+import cz.jaro.dopravnipodniky.dialogState
 import cz.jaro.dopravnipodniky.shared.LinkaID
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
@@ -84,7 +84,6 @@ import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.toText
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import java.util.UUID
 import kotlin.reflect.KClass
 
 @Composable
@@ -376,9 +375,6 @@ fun ObchodScreen(
                                         .fillMaxWidth()
                                         .padding(all = 8.dp),
                                 )
-                                var zeptatSeNaPocet by rememberSaveable { mutableStateOf(false) }
-                                var vybratLinku by rememberSaveable { mutableStateOf(false) }
-                                var zadejteEvC by rememberSaveable { mutableStateOf(false) }
 
                                 val scope = rememberCoroutineScope()
                                 val ctx = LocalContext.current
@@ -419,28 +415,13 @@ fun ObchodScreen(
                                 }
 
                                 var pocet by rememberSaveable { mutableStateOf("") }
-                                var evc by rememberSaveable { mutableStateOf("") }
-                                var linka by rememberSaveable { mutableStateOf(null as String?) }
-                                if (zeptatSeNaPocet) {
-                                    AlertDialog(
-                                        onDismissRequest = {
-                                            zeptatSeNaPocet = false
-                                        },
+                                fun zeptatSeNaPocet(callback: (String) -> Unit) {
+                                    dialogState.show(
                                         confirmButton = {
                                             TextButton(
                                                 onClick = {
-                                                    if (pocet.isEmpty() || pocet.toIntOrNull() == null || pocet.toInt() < 1) {
-                                                        Toast.makeText(ctx, zadejteValidniPocet, Toast.LENGTH_SHORT).show()
-                                                        return@TextButton
-                                                    }
-
-                                                    if (pocet.toInt() > 50) {
-                                                        Toast.makeText(ctx, bohuzelNeVicNez50, Toast.LENGTH_SHORT).show()
-                                                        return@TextButton
-                                                    }
-
-                                                    vybratLinku = true
-                                                    zeptatSeNaPocet = false
+                                                    dialogState.hideTopMost()
+                                                    callback(pocet)
                                                 }
                                             ) {
                                                 Text(stringResource(android.R.string.ok))
@@ -449,7 +430,7 @@ fun ObchodScreen(
                                         title = {
                                             Text(stringResource(R.string.nadpis_vicenasobne_kupovani))
                                         },
-                                        text = {
+                                        content = {
                                             OutlinedTextField(
                                                 value = pocet,
                                                 onValueChange = {
@@ -467,44 +448,23 @@ fun ObchodScreen(
                                         },
                                     )
                                 }
-
-                                if (vybratLinku) {
-                                    fun dalsikrok(id: LinkaID?) {
-                                        if (nastaveni.automatickyUdelovatEvC) {
-                                            val aktualniEvCisla = busy.map { it.evCislo }
-                                            val neobsazenaEvC = (1..1_000_000).asSequence().filter { it !in aktualniEvCisla }
-
-                                            val seznamEvC = neobsazenaEvC.take(pocet.toInt())
-
-                                            scope.launch {
-                                                koupit(seznamEvC.toList(), id)
-                                            }
-                                        } else {
-                                            linka = id?.toString()
-                                            zadejteEvC = true
-                                        }
-                                        vybratLinku = false
-                                    }
-
+                                fun vybratLinku(callback: (LinkaID?) -> Unit) {
                                     val pouzitelneLinky = when (typBusu.trakce) {
                                         is Trakce.Trolejbus -> linky.filter { it.ulice(ulicove).jsouVsechnyZatrolejovane() }
                                         else -> linky
                                     }
-                                    LaunchedEffect(pouzitelneLinky) {
-                                        if (pouzitelneLinky.isEmpty()) {
-                                            dalsikrok(null)
-                                        }
-                                    }
 
-                                    if (pouzitelneLinky.isNotEmpty()) AlertDialog(
-                                        onDismissRequest = {
-                                            vybratLinku = false
-                                        },
+                                    if (pouzitelneLinky.isEmpty()) {
+                                        dialogState.hideTopMost()
+                                        callback(null)
+                                    }
+                                    else dialogState.show(
                                         confirmButton = {},
                                         dismissButton = {
                                             TextButton(
                                                 onClick = {
-                                                    dalsikrok(null)
+                                                    dialogState.hideTopMost()
+                                                    callback(null)
                                                 }
                                             ) {
                                                 Text(stringResource(R.string.nepridavat))
@@ -513,53 +473,30 @@ fun ObchodScreen(
                                         title = {
                                             Text(stringResource(R.string.vyberte_linku))
                                         },
-                                        text = {
-                                            LazyColumn(
-                                                Modifier.fillMaxWidth()
-                                            ) LazyColumn2@{
-                                                items(pouzitelneLinky) {
-                                                    ListItem(
-                                                        headlineContent = {
-                                                            Text(it.cislo.toString())
-                                                        },
-                                                        Modifier.clickable {
-                                                            dalsikrok(it.id)
-                                                        },
-                                                    )
-                                                }
+                                        content = {
+                                            pouzitelneLinky.forEach {
+                                                ListItem(
+                                                    headlineContent = {
+                                                        Text(it.cislo)
+                                                    },
+                                                    Modifier.clickable {
+                                                        dialogState.hideTopMost()
+                                                        callback(it.id)
+                                                    },
+                                                )
                                             }
                                         },
                                     )
                                 }
-                                if (zadejteEvC) {
-                                    AlertDialog(
-                                        onDismissRequest = {
-                                            zadejteEvC = false
-                                        },
+                                var evc by rememberSaveable { mutableStateOf("") }
+                                fun zadejteEvC(callback: (String) -> Unit) {
+                                    dialogState.show(
                                         confirmButton = {
                                             TextButton(
                                                 enabled = evc.isNotEmpty() && evc.toIntOrNull() != null && evc.toInt() >= 1,
                                                 onClick = {
-                                                    if (nastaveni.vicenasobnyKupovani) {
-                                                        val cisla = evc.toInt()..<(evc.toInt() + pocet.toInt())
-
-                                                        if (cisla.any { cislo -> busy.any { it.evCislo == cislo } }) {
-                                                            Toast.makeText(ctx, evCExistuje, Toast.LENGTH_SHORT).show()
-                                                            return@TextButton
-                                                        }
-                                                        scope.launch {
-                                                            koupit(cisla.toList(), linka?.let { UUID.fromString(linka) })
-                                                        }
-                                                    } else {
-                                                        if (busy.any { it.evCislo == evc.toInt() }) {
-                                                            Toast.makeText(ctx, evCExistuje, Toast.LENGTH_SHORT).show()
-                                                            return@TextButton
-                                                        }
-                                                        scope.launch {
-                                                            koupit(listOf(evc.toInt()), null)
-                                                        }
-                                                    }
-                                                    zadejteEvC = false
+                                                    dialogState.hideTopMost()
+                                                    callback(evc)
                                                 }
                                             ) {
                                                 Text(stringResource(android.R.string.ok))
@@ -568,7 +505,7 @@ fun ObchodScreen(
                                         title = {
                                             Text(stringResource(R.string.zadejte_ev_c, stringResource(typBusu.trakce.jmeno)))
                                         },
-                                        text = {
+                                        content = {
                                             OutlinedTextField(
                                                 value = evc,
                                                 onValueChange = {
@@ -591,12 +528,60 @@ fun ObchodScreen(
                                     onClick = {
 
                                         when {
-                                            nastaveni.vicenasobnyKupovani -> {
+                                            nastaveni.vicenasobnyKupovani && nastaveni.automatickyUdelovatEvC -> {
+                                                zeptatSeNaPocet { pocet ->
+                                                    if (pocet.isEmpty() || pocet.toIntOrNull() == null || pocet.toInt() < 1) {
+                                                        Toast.makeText(ctx, zadejteValidniPocet, Toast.LENGTH_SHORT).show()
+                                                        return@zeptatSeNaPocet
+                                                    }
 
-                                                zeptatSeNaPocet = true
+                                                    if (pocet.toInt() > 50) {
+                                                        Toast.makeText(ctx, bohuzelNeVicNez50, Toast.LENGTH_SHORT).show()
+                                                        return@zeptatSeNaPocet
+                                                    }
+
+                                                    vybratLinku { linkaID ->
+                                                        val aktualniEvCisla = busy.map { it.evCislo }
+                                                        val neobsazenaEvC = (1..1_000_000).asSequence().filter { it !in aktualniEvCisla }
+
+                                                        val seznamEvC = neobsazenaEvC.take(pocet.toInt())
+
+                                                        scope.launch {
+                                                            koupit(seznamEvC.toList(), linkaID)
+                                                        }
+                                                    }
+                                                }
                                             }
 
-                                            nastaveni.automatickyUdelovatEvC -> {
+                                            nastaveni.vicenasobnyKupovani/* && !nastaveni.automatickyUdelovatEvC*/ -> {
+                                                zeptatSeNaPocet { pocet ->
+                                                    if (pocet.isEmpty() || pocet.toIntOrNull() == null || pocet.toInt() < 1) {
+                                                        Toast.makeText(ctx, zadejteValidniPocet, Toast.LENGTH_SHORT).show()
+                                                        return@zeptatSeNaPocet
+                                                    }
+
+                                                    if (pocet.toInt() > 50) {
+                                                        Toast.makeText(ctx, bohuzelNeVicNez50, Toast.LENGTH_SHORT).show()
+                                                        return@zeptatSeNaPocet
+                                                    }
+
+                                                    vybratLinku { linkaID ->
+                                                        zadejteEvC { evc ->
+                                                            val cisla = evc.toInt()..<(evc.toInt() + pocet.toInt())
+
+                                                            if (cisla.any { cislo -> busy.any { it.evCislo == cislo } }) {
+                                                                Toast.makeText(ctx, evCExistuje, Toast.LENGTH_SHORT).show()
+                                                                return@zadejteEvC
+                                                            }
+                                                            scope.launch {
+                                                                koupit(cisla.toList(), linkaID)
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            /*!nastaveni.vicenasobnyKupovani && */nastaveni.automatickyUdelovatEvC -> {
                                                 val aktualniEvCisla = busy.map { it.evCislo }
                                                 val nejnizsiNoveEvc = (1..10000).first { it !in aktualniEvCisla }
 
@@ -605,9 +590,16 @@ fun ObchodScreen(
                                                 }
                                             }
 
-                                            else -> {
-
-                                                zadejteEvC = true
+                                            /*!nastaveni.vicenasobnyKupovani && !nastaveni.automatickyUdelovatEvC*/else -> {
+                                                zadejteEvC { evc ->
+                                                    if (busy.any { it.evCislo == evc.toInt() }) {
+                                                        Toast.makeText(ctx, evCExistuje, Toast.LENGTH_SHORT).show()
+                                                        return@zadejteEvC
+                                                    }
+                                                    scope.launch {
+                                                        koupit(listOf(evc.toInt()), null)
+                                                    }
+                                                }
                                             }
                                         }
                                     },

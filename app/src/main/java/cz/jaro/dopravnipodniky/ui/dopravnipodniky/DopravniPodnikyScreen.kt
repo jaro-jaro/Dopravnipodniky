@@ -68,6 +68,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.typMesta
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.urovenMesta
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
+import cz.jaro.dopravnipodniky.dialogState
 import cz.jaro.dopravnipodniky.shared.DPID
 import cz.jaro.dopravnipodniky.shared.LongPressButton
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
@@ -136,7 +137,6 @@ fun DopravniPodnikyScreen(
     navigateBack: () -> Unit,
 ) {
     var loading by rememberSaveable { mutableStateOf(null as (@FloatRange(0.0, 3.0) Float)?) }
-    var novejDp by rememberSaveable { mutableStateOf(false) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -155,6 +155,7 @@ fun DopravniPodnikyScreen(
             )
         },
         floatingActionButton = {
+            var investice by rememberSaveable { mutableStateOf("") }
             ExtendedFloatingActionButton(
                 text = {
                     Text(stringResource(R.string.najit_nove_mesto))
@@ -163,7 +164,92 @@ fun DopravniPodnikyScreen(
                     Icon(Icons.Default.Search, null)
                 },
                 onClick = {
-                    novejDp = true
+                    dialogState.show(
+                        confirmButton = {
+                            val ctx = LocalContext.current
+                            val scope = rememberCoroutineScope()
+                            TextButton(
+                                onClick = {
+                                    val i = investice.toLongOrNull()?.penez ?: run {
+                                        Toast.makeText(ctx, R.string.zadejte_validni_pocet, Toast.LENGTH_LONG).show()
+                                        return@TextButton
+                                    }
+
+                                    if (i > prachy) {
+                                        Toast.makeText(ctx, R.string.malo_penez, Toast.LENGTH_LONG).show()
+                                        return@TextButton
+                                    }
+
+                                    if (i < minimumInvestice && i != 69_420.penez) {
+
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = ctx.getString(R.string.nigdo_nebyl_ochoten),
+                                                duration = SnackbarDuration.Indefinite
+                                            )
+                                        }
+
+                                        zmenitPrachy {
+                                            it - i / 10
+                                        }
+
+                                        dialogState.hideTopMost()
+                                        return@TextButton
+                                    }
+
+                                    zmenitPrachy {
+                                        it - i
+                                    }
+
+                                    dialogState.hideTopMost()
+                                    loading = 0F
+
+                                    if (i == 69_420.penez) {
+                                        dosahni(Dosahlost.JostoMesto::class)
+
+                                        novaMesta(
+                                            i * 100,
+                                            {
+                                                loading = it
+                                            }
+                                        ) {
+                                            loading = null
+                                            navigate(NovyDopravniPodnikScreenDestination)
+                                        }
+
+                                    } else {
+                                        novaMesta(
+                                            i,
+                                            {
+                                                loading = it
+                                            }
+                                        ) {
+                                            loading = null
+                                            navigate(NovyDopravniPodnikScreenDestination)
+                                        }
+                                    }
+                                }
+                            ) {
+                                Text(stringResource(android.R.string.ok))
+                            }
+                        },
+                        dismissButton = { },
+                        title = {
+                            Text(stringResource(R.string.novy_dp))
+                        },
+                        content = {
+                            TextField(
+                                value = investice,
+                                onValueChange = {
+                                    investice = it
+                                },
+                                Modifier.fillMaxWidth(),
+                                label = {
+                                    Text(stringResource(R.string.vyse_investice))
+                                }
+                            )
+                        },
+                    )
                 }
             )
         },
@@ -171,97 +257,8 @@ fun DopravniPodnikyScreen(
     ) { paddingValues ->
 
         val res = LocalContext.current.resources
-        val ctx = LocalContext.current
         val scope = rememberCoroutineScope()
 
-        var investice by rememberSaveable { mutableStateOf("") }
-        if (novejDp) AlertDialog(
-            onDismissRequest = {
-                novejDp = false
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        val i = investice.toLongOrNull()?.penez ?: run {
-                            Toast.makeText(ctx, R.string.zadejte_validni_pocet, Toast.LENGTH_LONG).show()
-                            return@TextButton
-                        }
-
-                        if (i > prachy) {
-                            Toast.makeText(ctx, R.string.malo_penez, Toast.LENGTH_LONG).show()
-                            return@TextButton
-                        }
-
-                        if (i < minimumInvestice && i != 69_420.penez) {
-
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = res.getString(R.string.nigdo_nebyl_ochoten),
-                                    duration = SnackbarDuration.Indefinite
-                                )
-                            }
-
-                            zmenitPrachy {
-                                it - i / 10
-                            }
-
-                            novejDp = false
-                            return@TextButton
-                        }
-
-                        zmenitPrachy {
-                            it - i
-                        }
-
-                        novejDp = false
-                        loading = 0F
-
-                        if (i == 69_420.penez) {
-                            dosahni(Dosahlost.JostoMesto::class)
-
-                            novaMesta(
-                                i * 100,
-                                {
-                                    loading = it
-                                }
-                            ) {
-                                loading = null
-                                navigate(NovyDopravniPodnikScreenDestination)
-                            }
-
-                        } else {
-                            novaMesta(
-                                i,
-                                {
-                                    loading = it
-                                }
-                            ) {
-                                loading = null
-                                navigate(NovyDopravniPodnikScreenDestination)
-                            }
-                        }
-                    }
-                ) {
-                    Text(stringResource(android.R.string.ok))
-                }
-            },
-            dismissButton = { },
-            title = {
-                Text(stringResource(R.string.novy_dp))
-            },
-            text = {
-                TextField(
-                    value = investice,
-                    onValueChange = {
-                        investice = it
-                    },
-                    Modifier.fillMaxWidth(),
-                    label = {
-                        Text(stringResource(R.string.vyse_investice))
-                    }
-                )
-            },
-        )
         if (loading != null) AlertDialog(
             onDismissRequest = { },
             confirmButton = { },
@@ -448,126 +445,13 @@ fun DopravniPodnikyScreen(
                                         .padding(all = 8.dp),
                                 )
 
-                                var oddelatDP by rememberSaveable { mutableStateOf(false) }
-                                var smenitJizdne by rememberSaveable { mutableStateOf(false) }
-
                                 val oddelavaciCena = prodejniCenaCloveka * dp.cloveci + dp.busy.sumOf { it.prodejniCena.value }.penez
 
-                                if (oddelatDP) AlertDialog(
-                                    onDismissRequest = {
-                                        oddelatDP = false
-                                    },
-                                    confirmButton = {
-                                        TextButton(
-                                            onClick = {
-                                                val actualCena = oddelavaciCena * Random.nextDouble(.5, 1.5)
-                                                MainScope().launch {
-
-                                                    zmenitPodniky {
-                                                        removeAt(indexOfFirst { it.info.id == dp.info.id })
-                                                    }
-
-                                                    zmenitPrachy {
-                                                        it + actualCena
-                                                    }
-
-                                                    with(res) {
-                                                        snackbarHostState.showSnackbar(
-                                                            message = getString(R.string.vecne_neni_vecne),
-                                                            duration = SnackbarDuration.Long,
-                                                            withDismissAction = true,
-                                                        )
-                                                        snackbarHostState.showSnackbar(
-                                                            message = getString(
-                                                                R.string.prodali_jste_dp,
-                                                                dp.info.jmenoMesta,
-                                                                getString(R.string.kc, actualCena.value.formatovat(0).asString())
-                                                            ),
-                                                            duration = SnackbarDuration.Indefinite,
-                                                            withDismissAction = true,
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        ) {
-                                            Text(stringResource(R.string.prodat_dp))
-                                        }
-                                    },
-                                    dismissButton = {
-                                        TextButton(
-                                            onClick = {
-                                                oddelatDP = false
-                                            }
-                                        ) {
-                                            Text(stringResource(R.string.zrusit))
-                                        }
-                                    },
-                                    title = {
-                                        Text(stringResource(R.string.prodat_dp))
-                                    },
-                                    text = {
-                                        Text(stringResource(R.string.za_prodej_dp_dostanete, oddelavaciCena.asString()))
-                                    },
-                                )
                                 var vybraneJizdne by rememberSaveable { mutableIntStateOf(0) }
 
                                 LaunchedEffect(dp.info.jizdne) {
                                     vybraneJizdne = dp.info.jizdne.value.toInt()
                                 }
-
-                                if (smenitJizdne) AlertDialog(
-                                    onDismissRequest = {
-                                        smenitJizdne = false
-                                    },
-                                    confirmButton = {
-                                        TextButton(
-                                            onClick = {
-                                                scope.launch {
-                                                    zmenitPodniky {
-                                                        val i = indexOfFirst { it.info.id == dp.info.id }
-                                                        this[i] = this[i].copy(
-                                                            info = this[i].info.copy(
-                                                                jizdne = vybraneJizdne.penez,
-                                                            )
-                                                        )
-                                                    }
-                                                }
-                                                smenitJizdne = false
-                                            }
-                                        ) {
-                                            Text(stringResource(R.string.potvrdit))
-                                        }
-                                    },
-                                    dismissButton = {
-                                        TextButton(
-                                            onClick = {
-
-                                            }
-                                        ) {
-                                            Text(stringResource(R.string.pruzkum_mineni))
-                                        }
-                                    },
-                                    title = {
-                                        Text(stringResource(R.string.vyberte_linku))
-                                    },
-                                    text = {
-                                        AndroidView(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            factory = { context ->
-                                                NumberPicker(context).apply {
-                                                    minValue = 0
-                                                    maxValue = 100
-                                                    setOnValueChangedListener { _, _, noveJizdne ->
-                                                        vybraneJizdne = noveJizdne
-                                                    }
-                                                }
-                                            },
-                                            update = {
-                                                it.value = vybraneJizdne
-                                            }
-                                        )
-                                    },
-                                )
 
                                 Row(
                                     Modifier.fillMaxWidth(),
@@ -576,7 +460,64 @@ fun DopravniPodnikyScreen(
                                         Modifier
                                             .padding(all = 8.dp),
                                         onClick = {
-                                            oddelatDP = true
+                                            dialogState.show(
+                                                confirmButton = {
+                                                    TextButton(
+                                                        onClick = {
+                                                            val actualCena = oddelavaciCena * Random.nextDouble(.5, 1.5)
+                                                            MainScope().launch {
+
+                                                                zmenitPodniky {
+                                                                    removeAt(indexOfFirst { it.info.id == dp.info.id })
+                                                                }
+
+                                                                zmenitPrachy {
+                                                                    it + actualCena
+                                                                }
+
+                                                                dialogState.hideTopMost()
+
+                                                                with(res) {
+                                                                    if (dp.info.jmenoMesta == vecne) snackbarHostState.showSnackbar(
+                                                                        message = getString(R.string.vecne_neni_vecne),
+                                                                        duration = SnackbarDuration.Long,
+                                                                        withDismissAction = true,
+                                                                    )
+                                                                    snackbarHostState.showSnackbar(
+                                                                        message = getString(
+                                                                            R.string.prodali_jste_dp,
+                                                                            dp.info.jmenoMesta,
+                                                                            getString(
+                                                                                R.string.kc,
+                                                                                actualCena.value.formatovat(0).asString()
+                                                                            )
+                                                                        ),
+                                                                        duration = SnackbarDuration.Indefinite,
+                                                                        withDismissAction = true,
+                                                                    )
+                                                                }
+                                                            }
+                                                        }
+                                                    ) {
+                                                        Text(stringResource(R.string.prodat_dp))
+                                                    }
+                                                },
+                                                dismissButton = {
+                                                    TextButton(
+                                                        onClick = {
+                                                            dialogState.hideTopMost()
+                                                        }
+                                                    ) {
+                                                        Text(stringResource(R.string.zrusit))
+                                                    }
+                                                },
+                                                title = {
+                                                    Text(stringResource(R.string.prodat_dp))
+                                                },
+                                                content = {
+                                                    Text(stringResource(R.string.za_prodej_dp_dostanete, oddelavaciCena.asString()))
+                                                },
+                                            )
                                         },
                                         onLongPress = {
                                             scope.launch {
@@ -599,7 +540,56 @@ fun DopravniPodnikyScreen(
                                     Spacer(modifier = Modifier.weight(1F))
                                     OutlinedButton(
                                         onClick = {
-                                            smenitJizdne = true
+                                            dialogState.show(
+                                                confirmButton = {
+                                                    TextButton(
+                                                        onClick = {
+                                                            scope.launch {
+                                                                zmenitPodniky {
+                                                                    val i = indexOfFirst { it.info.id == dp.info.id }
+                                                                    this[i] = this[i].copy(
+                                                                        info = this[i].info.copy(
+                                                                            jizdne = vybraneJizdne.penez,
+                                                                        )
+                                                                    )
+                                                                }
+                                                            }
+                                                            dialogState.hideTopMost()
+                                                        }
+                                                    ) {
+                                                        Text(stringResource(R.string.potvrdit))
+                                                    }
+                                                },
+                                                dismissButton = {
+                                                    TextButton(
+                                                        onClick = {
+
+                                                        }
+                                                    ) {
+                                                        Text(stringResource(R.string.pruzkum_mineni))
+                                                    }
+                                                },
+                                                title = {
+                                                    Text(stringResource(R.string.vyberte_linku))
+                                                },
+                                                content = {
+                                                    AndroidView(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        factory = { context ->
+                                                            NumberPicker(context).apply {
+                                                                minValue = 0
+                                                                maxValue = 100
+                                                                setOnValueChangedListener { _, _, noveJizdne ->
+                                                                    vybraneJizdne = noveJizdne
+                                                                }
+                                                            }
+                                                        },
+                                                        update = {
+                                                            it.value = vybraneJizdne
+                                                        },
+                                                    )
+                                                },
+                                            )
                                         },
                                         Modifier
                                             .padding(all = 8.dp),
