@@ -161,8 +161,8 @@ private fun update(
                         }
                     }
 
-                    if (poziceVUlici >= (delkaUlice - predsazeniKrizovatky) + delkaKrizovatky) {  // odjel mimo ulici
-                        poziceVUlici = predsazeniKrizovatky
+                    if (poziceVUlici >= (delkaUlice - predsazeniKrizovatky) + delkaKrizovatky + bus.typBusu.delka.toDp()) {  // odjel mimo ulici
+                        poziceVUlici = predsazeniKrizovatky + bus.typBusu.delka.toDp()
                         stavZastavky = StavZastavky.Pred
                         poziceNaLince += 1
 
@@ -249,7 +249,7 @@ private fun update(
 
                     if (
                         stavZastavky == StavZastavky.Pred &&
-                        poziceVUlici >= (delkaUlice + delkaZastavky) / 2 - bus.typBusu.delka.toDp() - odsazeniZastavky
+                        poziceVUlici >= delkaUlice / 2 + delkaZastavky / 2 - odsazeniZastavky
                     ) {
                         stavZastavky = StavZastavky.Na(
                             if (Random.nextInt(0, nahodnostProjetiZastavky) == 0) {
