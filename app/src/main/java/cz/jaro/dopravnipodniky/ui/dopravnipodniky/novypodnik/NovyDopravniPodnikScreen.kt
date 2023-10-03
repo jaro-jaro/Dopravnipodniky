@@ -43,7 +43,6 @@ import com.ramcosta.composedestinations.spec.Route
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.rohyMesta
-import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.shared.DPID
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.jednotky.minus
@@ -67,17 +66,9 @@ fun NovyDopravniPodnikScreen(
 ) {
     val viewModel = koinViewModel<SharedViewModel>()
 
-    val nastaveni by viewModel.nastaveni.collectAsStateWithLifecycle()
-    val tutorial by viewModel.tutorial.collectAsStateWithLifecycle()
-    val dosahlosti: List<Dosahlost.NormalniDosahlost>? by viewModel.dosahlosti.collectAsStateWithLifecycle()
-    val prachy by viewModel.prachy.collectAsStateWithLifecycle()
     val podniky by novePodniky.collectAsStateWithLifecycle()
 
     if (
-        nastaveni != null &&
-        tutorial != null &&
-        dosahlosti != null &&
-        prachy != null &&
         podniky != null
     ) NovyDopravniPodnikScreen(
         podniky = podniky!!,
@@ -129,7 +120,7 @@ fun NovyDopravniPodnikScreen(
                         .onSizeChanged { size ->
                             with(density) {
 
-                                val (start, stop) = dp.ulice.rohyMesta
+                                val (start, stop) = dp.rohyMesta
                                 val m = start
                                     .toDpSKrizovatkama()
                                     .minus(ulicovyBlok * 2)
@@ -162,12 +153,9 @@ fun NovyDopravniPodnikScreen(
                         malovatLinky = false,
                         malovatTroleje = false,
                         kliklyKrizovatky = emptyList(),
-                        ulice = dp.ulice,
-                        linky = listOf(),
-                        busy = listOf(),
+                        dp = dp,
                         tx = tx!!,
                         ty = ty!!,
-                        dpInfo = dp.info,
                         priblizeni = priblizeni!!,
                         modifier = Modifier.fillMaxSize()
                     )

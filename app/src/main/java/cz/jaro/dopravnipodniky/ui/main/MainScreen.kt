@@ -55,7 +55,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -87,11 +86,8 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.Direction
 import cz.jaro.dopravnipodniky.BuildConfig
 import cz.jaro.dopravnipodniky.R
-import cz.jaro.dopravnipodniky.data.Nastaveni
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
+import cz.jaro.dopravnipodniky.data.Vse
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Zastavka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.rohyMesta
@@ -99,6 +95,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.zasebevrazdujZastavku
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.dosahlosti.DosahlostCallback
 import cz.jaro.dopravnipodniky.dialogState
+import cz.jaro.dopravnipodniky.shared.Menic
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.barvaDosahnuteDosahlosti
@@ -108,7 +105,6 @@ import cz.jaro.dopravnipodniky.shared.cenaZastavky
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.je
-import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.jednotky.minus
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
@@ -146,49 +142,25 @@ fun MainScreen(
     val viewModel = koinViewModel<SharedViewModel>()
 
     LaunchedEffect(Unit) {
-        viewModel.zmenitTutorial {
+        viewModel.menic.zmenitTutorial {
             if (it je StavTutorialu.Tutorialujeme.Linky)
                 StavTutorialu.Tutorialujeme.Zastavky
             else it
         }
     }
-    val dpInfo by viewModel.dpInfo.collectAsStateWithLifecycle()
-    val nastaveni by viewModel.nastaveni.collectAsStateWithLifecycle()
-    val tutorial by viewModel.tutorial.collectAsStateWithLifecycle()
-    val dosahlosti: List<Dosahlost.NormalniDosahlost>? by viewModel.dosahlosti.collectAsStateWithLifecycle()
-    val ulicove by viewModel.ulice.collectAsStateWithLifecycle()
-    val linky by viewModel.linky.collectAsStateWithLifecycle()
-    val busy by viewModel.busy.collectAsStateWithLifecycle()
-    val prachy by viewModel.prachy.collectAsStateWithLifecycle()
+    val dp by viewModel.dp.collectAsStateWithLifecycle()
+    val vse by viewModel.vse.collectAsStateWithLifecycle()
 
     if (
-        dpInfo != null &&
-        nastaveni != null &&
-        tutorial != null &&
-        dosahlosti != null &&
-        ulicove != null &&
-        linky != null &&
-        busy != null &&
-        prachy != null
+        dp != null &&
+        vse != null
     ) MainScreen(
-//        zmenitPodniky = viewModel::zmenitOstatniDopravnikyPodniky,
-//        zmenitDP = viewModel::zmenitDopravnikyPodnik,
-        dpInfo = dpInfo!!,
-        nastaveni = nastaveni!!,
-        tutorial = tutorial!!,
-        dosahlosti = dosahlosti!!,
-        ulicove = ulicove!!,
-        linky = linky!!,
-        busy = busy!!,
-        prachy = prachy!!,
-        zmenitTutorial = viewModel::zmenitTutorial,
-        zmenitDPInfo = viewModel::zmenitDPInfo,
-        zmenitPrachy = viewModel::zmenitPrachy,
-        zmenitNastaveni = viewModel::zmenitNastaveni,
-        zmenitUlice = viewModel::zmenitUlice,
+        dp = dp!!,
+        vse = vse!!,
+        menic = viewModel.menic,
         navigate = navigator::navigate,
-        ziskatUlice = {
-            ulicove!!
+        ziskatDP = {
+            dp!!
         },
     )
 }
@@ -198,23 +170,11 @@ var DEBUG_TEXT by mutableStateOf(false)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(
-//    zmenitPodniky: suspend (suspend MutableList<DopravniPodnik>.() -> Unit) -> Unit,
-//    zmenitDP: suspend (DPID) -> Unit,
-    dpInfo: DPInfo,
-    nastaveni: Nastaveni,
-    tutorial: StavTutorialu,
-    dosahlosti: List<Dosahlost.NormalniDosahlost>,
-    ulicove: List<Ulice>,
-    linky: List<Linka>,
-    busy: List<Bus>,
-    prachy: Peniz,
-    zmenitDPInfo: ((DPInfo) -> DPInfo) -> Unit,
-    zmenitTutorial: ((StavTutorialu) -> StavTutorialu) -> Unit,
-    zmenitPrachy: ((Peniz) -> Peniz) -> Unit,
-    zmenitNastaveni: ((Nastaveni) -> Nastaveni) -> Unit,
-    zmenitUlice: (MutableList<Ulice>.() -> Unit) -> Unit,
+    dp: DopravniPodnik,
+    vse: Vse,
+    menic: Menic,
     navigate: (Direction) -> Unit,
-    ziskatUlice: () -> List<Ulice>,
+    ziskatDP: () -> DopravniPodnik,
 ) {
     var size by remember { mutableStateOf(null as IntSize?) }
     val density = LocalDensity.current
@@ -225,10 +185,10 @@ fun MainScreen(
     val scope = rememberCoroutineScope()
     val res = LocalContext.current.resources
 
-    LaunchedEffect(ulicove.map { it.zacatek to it.konec }, size) {
+    LaunchedEffect(dp.ulice.map { it.zacatek to it.konec }, size) {
         if (size == null) return@LaunchedEffect
         with(density) {
-            val (start, stop) = ulicove.rohyMesta
+            val (start, stop) = dp.rohyMesta
             val m = start
                 .toDpSKrizovatkama()
                 .minus(ulicovyBlok)
@@ -267,7 +227,7 @@ fun MainScreen(
                             withDismissAction = true,
                         )
                         if (result == SnackbarResult.ActionPerformed) {
-                            zobrazitDosahlosti(dosahlosti)
+                            zobrazitDosahlosti(vse.dosahlosti)
                         }
                     }
                 }
@@ -278,11 +238,11 @@ fun MainScreen(
         topBar = {
             TopAppBar(
                 title = {
-//                    Text("${dpInfo.jmenoMesta} — $seed")
-                    Text(dpInfo.jmenoMesta)
+//                    Text("${dp.info.jmenoMesta} — $seed")
+                    Text(dp.info.jmenoMesta)
                 },
                 Modifier.combinedClickable(onLongClick = {
-                    zmenitPrachy {
+                    menic.zmenitPrachy {
                         if (it < Double.POSITIVE_INFINITY.penez)
                             Double.POSITIVE_INFINITY.penez
                         else
@@ -293,14 +253,14 @@ fun MainScreen(
                 },
                 actions = {
                     if (
-                        !(tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
-                        !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
-                        !(tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
-                        !(tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
-                        !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Obchod)
                     ) IconButton(
                         onClick = {
-                            zobrazitDosahlosti(dosahlosti)
+                            zobrazitDosahlosti(vse.dosahlosti)
                         }
                     ) {
                         Icon(Icons.Default.EmojiEvents, stringResource(R.string.uspechy))
@@ -310,11 +270,11 @@ fun MainScreen(
 //                            CoroutineScope(Dispatchers.Main).launch(Dispatchers.IO) {
 //                                seed = Random.nextInt()
 //                                val novyDP = Generator.vygenerujMiPrvniMesto()
-//                                zmenitPodniky {
+//                                menic.zmenitPodniky {
 //                                    add(novyDP)
 //                                }
 //                                delay(500)
-//                                zmenitDP(novyDP.info.id)
+//                                menic.zmenitDP(novyDP.info.id)
 //                            }
 //                        }
 //                    ) {
@@ -330,27 +290,27 @@ fun MainScreen(
                             stringResource(R.string.uspechy)
                         )
                     }
-                    if (tutorial je StavTutorialu.Tutorialujeme.Uvod) IconButton(
+                    if (vse.tutorial je StavTutorialu.Tutorialujeme.Uvod) IconButton(
                         onClick = {
-                            zmenitTutorial {
+                            menic.zmenitTutorial {
                                 StavTutorialu.Tutorialujeme.Uvod
                             }
                         }
                     ) {
                         Icon(Icons.Default.Help, stringResource(R.string.tutorial))
                     }
-                    if (tutorial je StavTutorialu.Tutorialujeme.Zastavky) IconButton(
+                    if (vse.tutorial je StavTutorialu.Tutorialujeme.Zastavky) IconButton(
                         onClick = {
-                            zmenitTutorial {
+                            menic.zmenitTutorial {
                                 StavTutorialu.Tutorialujeme.Zastavky
                             }
                         }
                     ) {
                         Icon(Icons.Default.Help, stringResource(R.string.tutorial))
                     }
-                    if (tutorial je StavTutorialu.Tutorialujeme.Garaz) IconButton(
+                    if (vse.tutorial je StavTutorialu.Tutorialujeme.Garaz) IconButton(
                         onClick = {
-                            zmenitTutorial {
+                            menic.zmenitTutorial {
                                 StavTutorialu.Tutorialujeme.Garaz
                             }
                         }
@@ -359,9 +319,9 @@ fun MainScreen(
                     }
                     var show by remember { mutableStateOf(false) }
                     var debug by remember { mutableStateOf(DEBUG_TEXT) }
-                    var evc by remember { mutableStateOf(nastaveni.automatickyUdelovatEvC) }
-                    var multi by remember { mutableStateOf(nastaveni.vicenasobnyKupovani) }
-                    var tema by remember { mutableStateOf(dpInfo.tema) }
+                    var evc by remember { mutableStateOf(vse.nastaveni.automatickyUdelovatEvC) }
+                    var multi by remember { mutableStateOf(vse.nastaveni.vicenasobnyKupovani) }
+                    var tema by remember { mutableStateOf(dp.info.tema) }
                     IconButton(
                         onClick = {
                             show = !show
@@ -376,11 +336,11 @@ fun MainScreen(
                         }
                     ) {
                         if (
-                            !(tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
-                            !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
-                            !(tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
-                            !(tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
-                            !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
+                            !(vse.tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                            !(vse.tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                            !(vse.tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
+                            !(vse.tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                            !(vse.tutorial je StavTutorialu.Tutorialujeme.Obchod)
                         ) DropdownMenuItem(
                             text = {
                                 Text(stringResource(R.string.nastaveni))
@@ -433,7 +393,7 @@ fun MainScreen(
                                                     DropdownMenuItem(
                                                         text = { Text(stringResource(tohleTema.jmeno)) },
                                                         onClick = {
-                                                            zmenitDPInfo {
+                                                            menic.zmenitDPInfo {
                                                                 it.copy(
                                                                     tema = tohleTema
                                                                 )
@@ -458,7 +418,7 @@ fun MainScreen(
                                             Switch(
                                                 checked = evc,
                                                 onCheckedChange = {
-                                                    zmenitNastaveni { n ->
+                                                    menic.zmenitNastaveni { n ->
                                                         n.copy(
                                                             automatickyUdelovatEvC = it
                                                         )
@@ -476,7 +436,7 @@ fun MainScreen(
                                             Switch(
                                                 checked = multi,
                                                 onCheckedChange = {
-                                                    zmenitNastaveni { n ->
+                                                    menic.zmenitNastaveni { n ->
                                                         n.copy(
                                                             vicenasobnyKupovani = it
                                                         )
@@ -555,9 +515,9 @@ fun MainScreen(
                 .fillMaxSize()
         ) {
             fun PointerInputScope.onClick(it: Offset) {
-                val pitomyUlice = ziskatUlice()
+                val pitomyDP = ziskatDP()
                 if (editor) {
-                    val staraUlice = pitomyUlice.najitObdelnikVeKteremJe(
+                    val staraUlice = pitomyDP.ulice.najitObdelnikVeKteremJe(
                         offset = it,
                         tx = tx, ty = ty, priblizeni = priblizeni
                     ) { ulice ->
@@ -589,13 +549,13 @@ fun MainScreen(
                         content = {
                             OutlinedButton(
                                 onClick = {
-                                    zmenitUlice {
+                                    menic.zmenitUlice {
                                         if (staraUlice.maZastavku)
                                             replaceBy(staraUlice.zasebevrazdujZastavku()) { it.id }
                                         else
                                             replaceBy(staraUlice.copy(zastavka = Zastavka())) { it.id }
                                     }
-                                    zmenitPrachy {
+                                    menic.zmenitPrachy {
                                         it - if (!staraUlice.maZastavku) cenaZastavky else cenaZastavky / 5
                                     }
                                     dialogState.hideTopMost()
@@ -613,20 +573,20 @@ fun MainScreen(
                                 )
                             }
                             if (
-                                !(tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
-                                !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
-                                !(tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
-                                !(tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
-                                !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
+                                !(vse.tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                                !(vse.tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                                !(vse.tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
+                                !(vse.tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                                !(vse.tutorial je StavTutorialu.Tutorialujeme.Obchod)
                             ) OutlinedButton(
                                 onClick = {
-                                    zmenitUlice {
+                                    menic.zmenitUlice {
                                         if (staraUlice.maTrolej)
                                             replaceBy(staraUlice.copy(maTrolej = false)) { it.id }
                                         else
                                             replaceBy(staraUlice.copy(maTrolej = true)) { it.id }
                                     }
-                                    zmenitPrachy {
+                                    menic.zmenitPrachy {
                                         it - if (!staraUlice.maTrolej) cenaTroleje else cenaTroleje / 5
                                     }
                                     dialogState.hideTopMost()
@@ -649,11 +609,11 @@ fun MainScreen(
 
             @Suppress("UNUSED_PARAMETER")
             fun PointerInputScope.onTransform(p0: Offset, pan: Offset, zoom: Float, p3: Float) {
-                val pitomyUlice = ziskatUlice()
+                val pitomyDP = ziskatDP()
                 scope.launch {
                     // t - posunuti, p - prostředek, x - max, i - min
 
-                    val (start, stop) = pitomyUlice.rohyMesta
+                    val (start, stop) = pitomyDP.rohyMesta
                     val m = start.toDpSKrizovatkama()
                         .minus(ulicovyBlok * 2)
                         .toOffsetSPriblizenim(priblizeni)
@@ -681,12 +641,9 @@ fun MainScreen(
                 malovatLinky = !malovatBusy,
                 malovatTroleje = priblizeni > oddalenyRezim,
                 kliklyKrizovatky = emptyList(),
-                ulice = ulicove,
-                linky = linky,
-                busy = busy,
+                dp = dp,
                 tx = tx,
                 ty = ty,
-                dpInfo = dpInfo,
                 priblizeni = priblizeni,
                 modifier = Modifier
                     .fillMaxSize()
@@ -707,9 +664,9 @@ fun MainScreen(
                     Modifier.fillMaxWidth(),
                 ) {
                     if (
-                        !(tutorial je StavTutorialu.Tutorialujeme.Uvod)
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Uvod)
                     ) Text(
-                        text = prachy.asString(),
+                        text = vse.prachy.asString(),
                         Modifier
                             .weight(1F)
                             .padding(all = 16.dp),
@@ -717,13 +674,13 @@ fun MainScreen(
                     )
 
                     if (
-                        !(tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
-                        !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
-                        !(tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
-                        !(tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
-                        !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Obchod)
                     ) Text(
-                        text = dpInfo.zisk.asString(),
+                        text = dp.info.zisk.asString(),
                         Modifier
                             .weight(1F)
                             .padding(all = 16.dp),
@@ -732,10 +689,10 @@ fun MainScreen(
                 }
                 Spacer(modifier = Modifier.weight(1F))
                 if (
-                    !(tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
-                    !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
-                    !(tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
-                    !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
+                    !(vse.tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                    !(vse.tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                    !(vse.tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                    !(vse.tutorial je StavTutorialu.Tutorialujeme.Obchod)
                 ) Row(
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
@@ -744,7 +701,7 @@ fun MainScreen(
                         onClick = {
                             editor = !editor
 
-                            if (!editor) zmenitTutorial {
+                            if (!editor) menic.zmenitTutorial {
                                 if (it je StavTutorialu.Tutorialujeme.Zastavky)
                                     StavTutorialu.Tutorialujeme.Garaz
                                 else it
@@ -784,10 +741,10 @@ fun MainScreen(
                     Modifier.fillMaxWidth(),
                 ) {
                     if (
-                        !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
-                        !(tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
-                        !(tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
-                        !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Obchod)
                     ) TextButton(
                         onClick = {
                             navigate(LinkyScreenDestination)
@@ -805,9 +762,9 @@ fun MainScreen(
                             .padding(all = 8.dp)
                     )
                     if (
-                        !(tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
-                        !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
-                        !(tutorial je StavTutorialu.Tutorialujeme.Zastavky)
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Zastavky)
                     ) TextButton(
                         onClick = {
                             navigate(GarazScreenDestination)

@@ -183,7 +183,7 @@ class MainActivity : ComponentActivity() {
                     text = {
                         Text(
                             stringResource((tutorial as StavTutorialu.Tutorialujeme).text),
-                            Modifier.verticalScroll(rememberScrollState())
+                            Modifier.verticalScroll(rememberScrollState()),
                         )
                     },
                 )
@@ -231,7 +231,8 @@ class MainActivity : ComponentActivity() {
                                 if (vyuctovani!! >= 8.hours)
                                     getString(R.string.bohuzel_dlouho_neaktivni)
                                 else ""
-                            )
+                            ),
+                            Modifier.verticalScroll(rememberScrollState()),
                         )
                     }
                 )

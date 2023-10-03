@@ -9,10 +9,7 @@ import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.unit.Dp
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.seznamKrizovatek
 import cz.jaro.dopravnipodniky.data.serializers.DpSerializer
@@ -30,10 +27,7 @@ fun Mesto(
     malovatLinky: Boolean,
     malovatTroleje: Boolean,
     kliklyKrizovatky: List<Pozice<UlicovyBlok>>,
-    ulice: List<Ulice>,
-    linky: List<Linka>,
-    busy: List<Bus>,
-    dpInfo: DPInfo,
+    dp: DopravniPodnik,
     modifier: Modifier,
     tx: Float,
     ty: Float,
@@ -43,19 +37,19 @@ fun Mesto(
 //    println(dp.ulicove.map { "(${it.zacatek.x.value} ${it.zacatek.y.value} - ${it.konec.x.value} ${it.konec.y.value})" })
 
     val nakreslitLinky = remember(
-        linky,
-        ulice.map { listOf(it.zacatek, it.konec, it.zacatekX, it.zacatekY, it.orientace, it.id, it.maZastavku) },
+        dp.linky,
+        dp.ulice.map { listOf(it.zacatek, it.konec, it.zacatekX, it.zacatekY, it.orientace, it.id, it.maZastavku) },
     ) {
-        getNamalovatLinky(linky, ulice)
+        getNamalovatLinky(dp.linky, dp.ulice)
     }
 
     val nakreslitBusy = remember(
-        busy,
-        ulice,
-        linky,
+        dp.busy,
+        dp.ulice,
+        dp.linky,
     ) {
-        busy.map { bus ->
-            getNamalovatBus(bus, linky, ulice)
+        dp.busy.map { bus ->
+            getNamalovatBus(bus, dp)
         }
     }
 
@@ -76,17 +70,17 @@ fun Mesto(
                 left = tx + size.center.x,
                 top = ty + size.center.y,
             ) {
-                ulice.seznamKrizovatek.forEach { krizovatka ->
-                    namalovatKrizovatku(ulice, krizovatka)
+                dp.seznamKrizovatek.forEach { krizovatka ->
+                    namalovatKrizovatku(dp.ulice, krizovatka)
                 }
 
-                ulice.forEach { ulice ->
+                dp.ulice.forEach { ulice ->
                     ulice.baraky.forEach { barak ->
-                        barak.draw(dpInfo.tema, ulice)
+                        barak.draw(dp.info.tema, ulice)
                     }
                 }
 
-                ulice.forEach { ulice ->
+                dp.ulice.forEach { ulice ->
                     ulice.draw()
                 }
 
@@ -100,15 +94,15 @@ fun Mesto(
 
                 namalovatVybiraniLinky(
                     kliklyKrizovatky = kliklyKrizovatky,
-                    barva = dpInfo.tema.barva,
+                    barva = dp.info.tema.barva,
                 )
 
                 if (malovatTroleje) {
-                    ulice.forEach { ulice ->
+                    dp.ulice.forEach { ulice ->
                         if (ulice.maTrolej) ulice.nakreslitTroleje()
                     }
-                    ulice.seznamKrizovatek.forEach { krizovatka ->
-                        nakreslitTrolejeNaKrizovatku(ulice, krizovatka)
+                    dp.seznamKrizovatek.forEach { krizovatka ->
+                        nakreslitTrolejeNaKrizovatku(dp.ulice, krizovatka)
                     }
                 }
             }

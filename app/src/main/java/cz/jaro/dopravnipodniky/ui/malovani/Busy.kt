@@ -13,8 +13,7 @@ import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.shared.Orientace
@@ -36,9 +35,9 @@ import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
-fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawScope.() -> Unit {
+fun getNamalovatBus(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
     if (bus.linka == null) return {}
-    val linka = linky.linka(bus.linka)
+    val linka = dp.linka(bus.linka)
 
     val seznamUlic = if (bus.smerNaLince == Smer.Pozitivni) {
         linka.ulice.toList()
@@ -46,17 +45,17 @@ fun getNamalovatBus(bus: Bus, linky: List<Linka>, ulicove: List<Ulice>): DrawSco
         linka.ulice.reversed()
     }
 
-    val ulice = ulicove.ulice(seznamUlic[bus.poziceNaLince])
-    val pristiUlice = seznamUlic.getOrNull(bus.poziceNaLince + 1)?.let { ulicove.ulice(it) }
+    val ulice = dp.ulice(seznamUlic[bus.poziceNaLince])
+    val pristiUlice = seznamUlic.getOrNull(bus.poziceNaLince + 1)?.let { dp.ulice(it) }
 
     val smerBusuNaUlici = when {
         bus.poziceNaLince != 0 -> { // existuje ulice pred
-            val ulicePred = ulicove.ulice(seznamUlic[bus.poziceNaLince - 1])
+            val ulicePred = dp.ulice(seznamUlic[bus.poziceNaLince - 1])
             if (ulice.zacatek == ulicePred.zacatek || ulice.zacatek == ulicePred.konec) Smer.Pozitivni else Smer.Negativni
         }
 
         seznamUlic.size != 1 -> { // existuje ulice po
-            val ulicePo = ulicove.ulice(seznamUlic[1])
+            val ulicePo = dp.ulice(seznamUlic[1])
             if (ulice.konec == ulicePo.zacatek || ulice.konec == ulicePo.konec) Smer.Pozitivni else Smer.Negativni
         }
 

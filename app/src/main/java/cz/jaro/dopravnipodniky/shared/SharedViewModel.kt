@@ -21,8 +21,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -38,89 +38,78 @@ class SharedViewModel(
     private val preferencesDataSource: PreferencesDataSource,
     private val dosahlovac: Dosahlovac,
 ) : ViewModel() {
-    val busy = preferencesDataSource.busy
+    val dp = preferencesDataSource.dp
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
-    val linky = preferencesDataSource.linky
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
-    val ulice = preferencesDataSource.ulice
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
-    val dpInfo = preferencesDataSource.dpInfo
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
-    val prachy = preferencesDataSource.prachy
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
-    val dosahlosti = preferencesDataSource.dosahlosti
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
-    val tutorial = preferencesDataSource.tutorial
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
-    val nastaveni = preferencesDataSource.nastaveni
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
-    val podniky = preferencesDataSource.podniky
+    val vse = preferencesDataSource.vse
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), null)
 
-    fun zmenitBusy(update: MutableList<Bus>.() -> Unit) {
-        viewModelScope.launch {
-            preferencesDataSource.upravitBusy(update)
+    val menic = object : Menic {
+        override fun zmenitBusy(update: MutableList<Bus>.() -> Unit) {
+            viewModelScope.launch {
+                preferencesDataSource.upravitBusy(update)
+            }
         }
-    }
 
-    fun zmenitLinky(update: MutableList<Linka>.() -> Unit) {
-        viewModelScope.launch {
-            preferencesDataSource.upravitLinky(update)
+        override fun zmenitLinky(update: MutableList<Linka>.() -> Unit) {
+            viewModelScope.launch {
+                preferencesDataSource.upravitLinky(update)
+            }
         }
-    }
 
-    fun zmenitUlice(update: MutableList<Ulice>.() -> Unit) {
-        viewModelScope.launch {
-            preferencesDataSource.upravitUlice(update)
+        override fun zmenitUlice(update: MutableList<Ulice>.() -> Unit) {
+            viewModelScope.launch {
+                preferencesDataSource.upravitUlice(update)
+            }
         }
-    }
 
-    fun zmenitDPInfo(update: (DPInfo) -> DPInfo) {
-        viewModelScope.launch {
-            preferencesDataSource.upravitDPInfo(update)
+        override fun zmenitDPInfo(update: (DPInfo) -> DPInfo) {
+            viewModelScope.launch {
+                preferencesDataSource.upravitDPInfo(update)
+            }
         }
-    }
 
-    fun zmenitPrachy(update: (Peniz) -> Peniz) {
-        viewModelScope.launch {
-            preferencesDataSource.upravitPrachy(update)
+        override fun zmenitPrachy(update: (Peniz) -> Peniz) {
+            viewModelScope.launch {
+                preferencesDataSource.upravitPrachy(update)
+            }
         }
-    }
 
-    fun zmenitDosahlosti(update: MutableList<Dosahlost.NormalniDosahlost>.() -> Unit) {
-        viewModelScope.launch {
-            preferencesDataSource.upravitDosahlosti(update)
+        override fun zmenitDosahlosti(update: MutableList<Dosahlost.NormalniDosahlost>.() -> Unit) {
+            viewModelScope.launch {
+                preferencesDataSource.upravitDosahlosti(update)
+            }
         }
-    }
 
-    fun zmenitTutorial(update: (StavTutorialu) -> StavTutorialu) {
-        viewModelScope.launch {
-            preferencesDataSource.upravitTutorial(update)
+        override fun zmenitTutorial(update: (StavTutorialu) -> StavTutorialu) {
+            viewModelScope.launch {
+                preferencesDataSource.upravitTutorial(update)
+            }
         }
-    }
 
-    fun zmenitNastaveni(update: (Nastaveni) -> Nastaveni) {
-        viewModelScope.launch {
-            preferencesDataSource.upravitNastaveni(update)
+        override fun zmenitNastaveni(update: (Nastaveni) -> Nastaveni) {
+            viewModelScope.launch {
+                preferencesDataSource.upravitNastaveni(update)
+            }
         }
-    }
 
-    suspend fun zmenitOstatniDopravnikyPodniky(update: suspend MutableList<DopravniPodnik>.() -> Unit) = withContext(Dispatchers.IO) {
-        preferencesDataSource.upravitOstatniDopravniPodniky(update)
-    }
+        override suspend fun zmenitOstatniDopravniPodniky(update: suspend MutableList<DopravniPodnik>.() -> Unit) =
+            withContext(Dispatchers.IO) {
+                preferencesDataSource.upravitOstatniDopravniPodniky(update)
+            }
 
-    suspend fun zmenitDopravnikyPodnik(dpID: DPID) = withContext(Dispatchers.IO) {
-        preferencesDataSource.zmenitDopravniPodnik(dpID)
+        override suspend fun zmenitDopravniPodnik(dpID: DPID) = withContext(Dispatchers.IO) {
+            preferencesDataSource.zmenitDopravniPodnik(dpID)
+        }
     }
 
     val filtrovaneBusy =
-        nastaveni.filterNotNull().combine(prachy.filterNotNull()) { nastaveni, prachy ->
+        vse.filterNotNull().map { vse ->
             SkupinaFiltru.skupinyFiltru.fold(typyBusu.asSequence()) { filtrovaneTypy, skupina ->
-                filtrovaneTypy.filtrovat(nastaveni.filtry.filter { it in skupina.filtry })
+                filtrovaneTypy.filtrovat(vse.nastaveni.filtry.filter { it in skupina.filtry })
             }.filter {
-                if (SkupinaFiltru.Cena.MamNaTo in nastaveni.filtry) it.cena <= prachy
+                if (SkupinaFiltru.Cena.MamNaTo in vse.nastaveni.filtry) it.cena <= vse.prachy
                 else true
-            }.sortedWith(nastaveni.razeni.comparator)
+            }.sortedWith(vse.nastaveni.razeni.comparator)
         }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), emptySequence())
 
@@ -137,7 +126,7 @@ class SharedViewModel(
     ) {
         CoroutineScope(Dispatchers.IO).launch {
 
-            zmenitPrachy {
+            menic.zmenitPrachy {
                 it - investice
             }
 
@@ -164,19 +153,10 @@ class SharedViewModel(
     ) {
         CoroutineScope(Dispatchers.IO).launch {
             val dp = _novePodniky.value?.toList()?.singleOrNull { it.info.id == id } ?: return@launch
-            zmenitOstatniDopravnikyPodniky {
+            menic.zmenitOstatniDopravniPodniky {
                 add(dp)
             }
-            zmenitDopravnikyPodnik(dp.info.id)
+            menic.zmenitDopravniPodnik(dp.info.id)
         }
     }
-
-//    init {
-//        println(
-//            typyBusu.sortedBy { it.zrychleniOdebiraniPenez }.joinToString("\n") { it.model }
-//        )
-//        println(
-//            typyBusu.sortedBy { it.zrychleniOdebiraniPenez }.joinToString("\n") { (it.zrychleniOdebiraniPenez.formatovat() as Text.Plain).value }
-//        )
-//    }
 }

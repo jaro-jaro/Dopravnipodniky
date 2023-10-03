@@ -99,8 +99,8 @@ private fun update(
             forEachIndexed { i, bus ->
                 if (bus.linka == null) return@upravitBusy
 
-                val linka = puvodniDp.linky.linka(bus.linka)
-                val ulicove = linka.ulice(puvodniDp.ulice)
+                val linka = puvodniDp.linka(bus.linka)
+                val ulicove = linka.ulice(puvodniDp)
 
                 if (bus.typBusu.trakce is Trakce.Trolejbus && !ulicove.jsouVsechnyZatrolejovane()) return@upravitBusy
 
@@ -506,7 +506,7 @@ else {
     val zbyvajiciKapacitaBusu = typBusu.kapacita - cloveci
     val zbyvajiciUlice = ulicove.subList(indexUliceNaLince + 1, ulicove.size)
     val pocetLinekVUlici = ulice.pocetLinek(linky)
-    val interval = linka.ulice.size * 2 / linka.busy(busy).size
+    val interval = linka.ulice.size * 2 / busy.count { it.linka == linka.id }
 
     val maximumLidiCoChtejiNastoupit =
         cloveciNaZastavce / pocetLinekVUlici + Random.nextInt(-5, 5)
@@ -545,8 +545,8 @@ fun Bus.vydelkuj(
 ): PenizZaMinutu {
     if (linka == null) return 0.penezZaMin
 
-    val linka = puvodniDp.linky.linka(linka)
-    val ulicove = linka.ulice(puvodniDp.ulice)
+    val linka = puvodniDp.linka(linka)
+    val ulicove = linka.ulice(puvodniDp)
 
     if (typBusu.trakce is Trakce.Trolejbus && !ulicove.jsouVsechnyZatrolejovane()) return 0.penezZaMin
 

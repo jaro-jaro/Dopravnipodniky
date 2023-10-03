@@ -18,8 +18,8 @@ data class Linka(
     override fun toString() = "Linka(cislo=$cislo,ulice=List(${ulice.size}))"
 }
 
-fun Linka.busy(busy: List<Bus>) = busy.filter { it.linka == id }
+fun Linka.busy(dp: DopravniPodnik) = dp.busy.filter { it.linka == id }
 
-fun Linka.ulice(ulicove: List<Ulice>) = ulicove.filter { it.id in ulice }.sortedBy { ulice.indexOf(it.id) }
+fun Linka.ulice(dp: DopravniPodnik) = dp.ulice.filter { it.id in ulice }.sortedBy { ulice.indexOf(it.id) }
 
 fun List<Ulice>.jsouVsechnyZatrolejovane() = all { it.maTrolej }

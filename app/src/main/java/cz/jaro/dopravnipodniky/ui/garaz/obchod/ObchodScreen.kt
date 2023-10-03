@@ -60,13 +60,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import cz.jaro.dopravnipodniky.R
-import cz.jaro.dopravnipodniky.data.Nastaveni
+import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Trakce
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypBusu
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ikonka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.jsouVsechnyZatrolejovane
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.nakladyTextem
@@ -74,12 +72,12 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.dialogState
 import cz.jaro.dopravnipodniky.shared.LinkaID
+import cz.jaro.dopravnipodniky.shared.Menic
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.je
-import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.toText
 import kotlinx.coroutines.launch
@@ -96,43 +94,26 @@ fun ObchodScreen(
     val filtrovaneBusy by viewModel.filtrovaneBusy.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        viewModel.zmenitTutorial {
+        viewModel.menic.zmenitTutorial {
             if (it je StavTutorialu.Tutorialujeme.Garaz)
                 StavTutorialu.Tutorialujeme.Obchod
             else it
         }
     }
 
-    val dpInfo by viewModel.dpInfo.collectAsStateWithLifecycle()
-    val nastaveni by viewModel.nastaveni.collectAsStateWithLifecycle()
-    val ulicove by viewModel.ulice.collectAsStateWithLifecycle()
-    val linky by viewModel.linky.collectAsStateWithLifecycle()
-    val busy by viewModel.busy.collectAsStateWithLifecycle()
-    val prachy by viewModel.prachy.collectAsStateWithLifecycle()
-    val tutorial by viewModel.tutorial.collectAsStateWithLifecycle()
+    val dp by viewModel.dp.collectAsStateWithLifecycle()
+    val vse by viewModel.vse.collectAsStateWithLifecycle()
 
     if (
-        dpInfo != null &&
-        nastaveni != null &&
-        ulicove != null &&
-        linky != null &&
-        busy != null &&
-        prachy != null
+        dp != null &&
+        vse != null
     ) ObchodScreen(
         filtrovaneBusy = filtrovaneBusy,
-        dpInfo = dpInfo!!,
-        nastaveni = nastaveni!!,
-        ulicove = ulicove!!,
-        linky = linky!!,
-        busy = busy!!,
-        prachy = prachy!!,
-        zmenitPrachy = viewModel::zmenitPrachy,
-        zmenitNastaveni = viewModel::zmenitNastaveni,
-        zmenitBusy = viewModel::zmenitBusy,
+        dp = dp!!,
+        vse = vse!!,
+        menic = viewModel.menic,
         navigateBack = navigator::navigateUp,
         dosahni = viewModel.dosahni,
-        tutorial = tutorial!!,
-        zmenitTutorial = viewModel::zmenitTutorial,
     )
 }
 
@@ -146,19 +127,11 @@ enum class Zobrait {
 @Composable
 fun ObchodScreen(
     filtrovaneBusy: Sequence<TypBusu>,
-    dpInfo: DPInfo,
-    nastaveni: Nastaveni,
-    ulicove: List<Ulice>,
-    linky: List<Linka>,
-    busy: List<Bus>,
-    prachy: Peniz,
-    zmenitPrachy: ((Peniz) -> Peniz) -> Unit,
-    zmenitNastaveni: ((Nastaveni) -> Nastaveni) -> Unit,
-    zmenitBusy: (MutableList<Bus>.() -> Unit) -> Unit,
+    dp: DopravniPodnik,
+    vse: Vse,
+    menic: Menic,
     navigateBack: () -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
-    tutorial: StavTutorialu,
-    zmenitTutorial: ((StavTutorialu) -> StavTutorialu) -> Unit,
 ) {
     var stav by rememberSaveable { mutableStateOf(Zobrait.Vysledky) }
     BackHandler {
@@ -176,9 +149,9 @@ fun ObchodScreen(
                     Text(stringResource(R.string.obchod))
                 },
                 actions = {
-                    if (tutorial je StavTutorialu.Tutorialujeme.Obchod) IconButton(
+                    if (vse.tutorial je StavTutorialu.Tutorialujeme.Obchod) IconButton(
                         onClick = {
-                            zmenitTutorial {
+                            menic.zmenitTutorial {
                                 StavTutorialu.Tutorialujeme.Obchod
                             }
                         }
@@ -218,7 +191,7 @@ fun ObchodScreen(
                 Modifier.fillMaxWidth(),
             ) {
                 Text(
-                    text = prachy.asString(),
+                    text = vse.prachy.asString(),
                     Modifier
                         .weight(1F)
                         .padding(all = 16.dp),
@@ -277,11 +250,11 @@ fun ObchodScreen(
                             if (skupina is SkupinaFiltru.Cena) SkupinaFiltru.Cena.filtry + SkupinaFiltru.Cena.MamNaTo else skupina.filtry
                         filtry.forEach { filtr ->
                             FilterChip(
-                                selected = filtr in nastaveni.filtry,
+                                selected = filtr in vse.nastaveni.filtry,
                                 onClick = {
-                                    zmenitNastaveni {
+                                    menic.zmenitNastaveni {
                                         it.copy(
-                                            filtry = if (filtr in nastaveni.filtry) nastaveni.filtry - filtr else nastaveni.filtry + filtr
+                                            filtry = if (filtr in vse.nastaveni.filtry) vse.nastaveni.filtry - filtr else vse.nastaveni.filtry + filtr
                                         )
                                     }
                                 },
@@ -307,11 +280,11 @@ fun ObchodScreen(
                     ) {
                         skupina.forEachIndexed { i, razeni ->
                             FilterChip(
-                                selected = nastaveni.razeni == razeni,
+                                selected = vse.nastaveni.razeni == razeni,
                                 onClick = {
-                                    zmenitNastaveni {
+                                    menic.zmenitNastaveni {
                                         it.copy(
-                                            razeni = if (nastaveni.razeni == razeni) Razeni.Zadne else razeni
+                                            razeni = if (vse.nastaveni.razeni == razeni) Razeni.Zadne else razeni
                                         )
                                     }
                                 },
@@ -347,7 +320,7 @@ fun ObchodScreen(
                                     Modifier
                                         .width(40.dp)
                                         .height(40.dp),
-                                    colorFilter = ColorFilter.tint(color = dpInfo.tema.barva),
+                                    colorFilter = ColorFilter.tint(color = dp.info.tema.barva),
                                 )
                             },
                         )
@@ -384,7 +357,7 @@ fun ObchodScreen(
                                 val evCExistuje = stringResource(R.string.ev_c_existuje)
 
                                 suspend fun koupit(seznamEvC: List<Int>, naLinku: LinkaID?) {
-                                    if (typBusu.cena * seznamEvC.size > prachy) {
+                                    if (typBusu.cena * seznamEvC.size > vse.prachy) {
 
                                         snackbarHostState.showSnackbar(
                                             message = maloPenez,
@@ -404,10 +377,10 @@ fun ObchodScreen(
                                             linka = naLinku,
                                         )
                                     }
-                                    zmenitPrachy {
+                                    menic.zmenitPrachy {
                                         it - typBusu.cena * seznamEvC.size
                                     }
-                                    zmenitBusy {
+                                    menic.zmenitBusy {
                                         addAll(novyBusy)
                                     }
 
@@ -450,8 +423,8 @@ fun ObchodScreen(
                                 }
                                 fun vybratLinku(callback: (LinkaID?) -> Unit) {
                                     val pouzitelneLinky = when (typBusu.trakce) {
-                                        is Trakce.Trolejbus -> linky.filter { it.ulice(ulicove).jsouVsechnyZatrolejovane() }
-                                        else -> linky
+                                        is Trakce.Trolejbus -> dp.linky.filter { it.ulice(dp).jsouVsechnyZatrolejovane() }
+                                        else -> dp.linky
                                     }
 
                                     if (pouzitelneLinky.isEmpty()) {
@@ -528,7 +501,7 @@ fun ObchodScreen(
                                     onClick = {
 
                                         when {
-                                            nastaveni.vicenasobnyKupovani && nastaveni.automatickyUdelovatEvC -> {
+                                            vse.nastaveni.vicenasobnyKupovani && vse.nastaveni.automatickyUdelovatEvC -> {
                                                 zeptatSeNaPocet { pocet ->
                                                     if (pocet.isEmpty() || pocet.toIntOrNull() == null || pocet.toInt() < 1) {
                                                         Toast.makeText(ctx, zadejteValidniPocet, Toast.LENGTH_SHORT).show()
@@ -541,7 +514,7 @@ fun ObchodScreen(
                                                     }
 
                                                     vybratLinku { linkaID ->
-                                                        val aktualniEvCisla = busy.map { it.evCislo }
+                                                        val aktualniEvCisla = dp.busy.map { it.evCislo }
                                                         val neobsazenaEvC = (1..1_000_000).asSequence().filter { it !in aktualniEvCisla }
 
                                                         val seznamEvC = neobsazenaEvC.take(pocet.toInt())
@@ -553,7 +526,7 @@ fun ObchodScreen(
                                                 }
                                             }
 
-                                            nastaveni.vicenasobnyKupovani/* && !nastaveni.automatickyUdelovatEvC*/ -> {
+                                            vse.nastaveni.vicenasobnyKupovani/* && !nastaveni.automatickyUdelovatEvC*/ -> {
                                                 zeptatSeNaPocet { pocet ->
                                                     if (pocet.isEmpty() || pocet.toIntOrNull() == null || pocet.toInt() < 1) {
                                                         Toast.makeText(ctx, zadejteValidniPocet, Toast.LENGTH_SHORT).show()
@@ -569,7 +542,7 @@ fun ObchodScreen(
                                                         zadejteEvC { evc ->
                                                             val cisla = evc.toInt()..<(evc.toInt() + pocet.toInt())
 
-                                                            if (cisla.any { cislo -> busy.any { it.evCislo == cislo } }) {
+                                                            if (cisla.any { cislo -> dp.busy.any { it.evCislo == cislo } }) {
                                                                 Toast.makeText(ctx, evCExistuje, Toast.LENGTH_SHORT).show()
                                                                 return@zadejteEvC
                                                             }
@@ -581,8 +554,8 @@ fun ObchodScreen(
                                                 }
                                             }
 
-                                            /*!nastaveni.vicenasobnyKupovani && */nastaveni.automatickyUdelovatEvC -> {
-                                                val aktualniEvCisla = busy.map { it.evCislo }
+                                            /*!nastaveni.vicenasobnyKupovani && */vse.nastaveni.automatickyUdelovatEvC -> {
+                                            val aktualniEvCisla = dp.busy.map { it.evCislo }
                                                 val nejnizsiNoveEvc = (1..10000).first { it !in aktualniEvCisla }
 
                                                 scope.launch {
@@ -592,7 +565,7 @@ fun ObchodScreen(
 
                                             /*!nastaveni.vicenasobnyKupovani && !nastaveni.automatickyUdelovatEvC*/else -> {
                                                 zadejteEvC { evc ->
-                                                    if (busy.any { it.evCislo == evc.toInt() }) {
+                                                    if (dp.busy.any { it.evCislo == evc.toInt() }) {
                                                         Toast.makeText(ctx, evCExistuje, Toast.LENGTH_SHORT).show()
                                                         return@zadejteEvC
                                                     }

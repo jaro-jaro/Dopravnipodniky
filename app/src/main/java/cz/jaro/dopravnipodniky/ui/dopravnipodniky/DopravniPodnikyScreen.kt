@@ -55,7 +55,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.Direction
 import cz.jaro.dopravnipodniky.R
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
+import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Trakce
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.dobaOdPoslednihoHrani
@@ -69,8 +69,8 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.urovenMesta
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.dialogState
-import cz.jaro.dopravnipodniky.shared.DPID
 import cz.jaro.dopravnipodniky.shared.LongPressButton
+import cz.jaro.dopravnipodniky.shared.Menic
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
@@ -91,7 +91,6 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import kotlin.random.Random
 import kotlin.reflect.KClass
-import kotlin.reflect.KSuspendFunction1
 
 @Composable
 @Destination
@@ -100,21 +99,16 @@ fun DopravniPodnikyScreen(
 ) {
     val viewModel = koinViewModel<SharedViewModel>()
 
-    val prachy by viewModel.prachy.collectAsStateWithLifecycle()
-    val dpInfo by viewModel.dpInfo.collectAsStateWithLifecycle()
-    val podniky by viewModel.podniky.collectAsStateWithLifecycle()
+    val dp by viewModel.dp.collectAsStateWithLifecycle()
+    val vse by viewModel.vse.collectAsStateWithLifecycle()
 
     if (
-        prachy != null &&
-        dpInfo != null &&
-        podniky != null
+        dp != null &&
+        vse != null
     ) DopravniPodnikyScreen(
-        podniky = podniky!!,
-        zmenitPodniky = viewModel::zmenitOstatniDopravnikyPodniky,
-        zmenitDP = viewModel::zmenitDopravnikyPodnik,
-        zmenitPrachy = viewModel::zmenitPrachy,
-        dpInfo = dpInfo!!,
-        prachy = prachy!!,
+        tentoDP = dp!!,
+        vse = vse!!,
+        menic = viewModel.menic,
         novaMesta = viewModel::najit3NovaMesta,
         navigate = navigator::navigate,
         navigateBack = navigator::navigateUp,
@@ -125,12 +119,9 @@ fun DopravniPodnikyScreen(
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun DopravniPodnikyScreen(
-    podniky: List<DopravniPodnik>,
-    zmenitPodniky: KSuspendFunction1<suspend MutableList<DopravniPodnik>.() -> Unit, Unit>,
-    zmenitDP: suspend (DPID) -> Unit,
-    zmenitPrachy: ((Peniz) -> Peniz) -> Unit,
-    dpInfo: DPInfo,
-    prachy: Peniz,
+    tentoDP: DopravniPodnik,
+    vse: Vse,
+    menic: Menic,
     navigate: (Direction) -> Unit,
     novaMesta: (Peniz, (Float) -> Unit, () -> Unit) -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
@@ -175,7 +166,7 @@ fun DopravniPodnikyScreen(
                                         return@TextButton
                                     }
 
-                                    if (i > prachy) {
+                                    if (i > vse.prachy) {
                                         Toast.makeText(ctx, R.string.malo_penez, Toast.LENGTH_LONG).show()
                                         return@TextButton
                                     }
@@ -189,7 +180,7 @@ fun DopravniPodnikyScreen(
                                             )
                                         }
 
-                                        zmenitPrachy {
+                                        menic.zmenitPrachy {
                                             it - i / 10
                                         }
 
@@ -197,7 +188,7 @@ fun DopravniPodnikyScreen(
                                         return@TextButton
                                     }
 
-                                    zmenitPrachy {
+                                    menic.zmenitPrachy {
                                         it - i
                                     }
 
@@ -294,7 +285,7 @@ fun DopravniPodnikyScreen(
                 Modifier.fillMaxWidth(),
             ) {
                 Text(
-                    text = prachy.asString(),
+                    text = vse.prachy.asString(),
                     Modifier
                         .weight(1F)
                         .padding(all = 16.dp),
@@ -304,7 +295,7 @@ fun DopravniPodnikyScreen(
             LazyColumn(
                 Modifier.weight(1F)
             ) {
-                items(podniky.distinctBy { it.info.id }, key = { it.info.id }) { dp ->
+                items(vse.podniky.distinctBy { it.info.id }, key = { it.info.id }) { dp ->
                     val expanded = otevreno == dp.info.id.toString()
                     Column(
                         Modifier
@@ -319,10 +310,10 @@ fun DopravniPodnikyScreen(
                                 Text(dp.info.jmenoMesta)
                             },
                             trailingContent = {
-                                if (dpInfo.id != dp.info.id) IconButton(
+                                if (tentoDP.info.id != dp.info.id) IconButton(
                                     onClick = {
                                         CoroutineScope(Dispatchers.Main).launch {
-                                            zmenitDP(dp.info.id)
+                                            menic.zmenitDopravniPodnik(dp.info.id)
                                             navigateBack()
                                         }
                                     }
@@ -337,13 +328,13 @@ fun DopravniPodnikyScreen(
                                     .fillMaxWidth()
                                     .padding(8.dp)
                             ) {
-                                if (dpInfo.id != dp.info.id) Text(
+                                if (tentoDP.info.id != dp.info.id) Text(
                                     text = stringResource(R.string.nevyzvednuto, dp.info.nevyzvednuto.asString()),
                                     Modifier
                                         .fillMaxWidth()
                                         .padding(all = 8.dp),
                                 )
-                                if (dpInfo.id != dp.info.id) Text(
+                                if (tentoDP.info.id != dp.info.id) Text(
                                     text = stringResource(
                                         R.string.doba_od_posledniho_otevreni,
                                         dp.info.dobaOdPoslednihoHrani.minutes.formatovat(0).composeString()
@@ -389,8 +380,8 @@ fun DopravniPodnikyScreen(
                                     text = stringResource(
                                         R.string.jedoucich_vozidel,
                                         dp.busy.count {
-                                            it.linka != null && (it.typBusu.trakce !is Trakce.Trolejbus || dp.linky.linka(it.linka)
-                                                .ulice(dp.ulice).jsouVsechnyZatrolejovane())
+                                            it.linka != null && (it.typBusu.trakce !is Trakce.Trolejbus || dp.linka(it.linka)
+                                                .ulice(dp).jsouVsechnyZatrolejovane())
                                         },
                                         dp.busy.count(),
                                     ),
@@ -456,7 +447,7 @@ fun DopravniPodnikyScreen(
                                 Row(
                                     Modifier.fillMaxWidth(),
                                 ) {
-                                    if (dpInfo.id != dp.info.id) LongPressButton(
+                                    if (tentoDP.info.id != dp.info.id) LongPressButton(
                                         Modifier
                                             .padding(all = 8.dp),
                                         onClick = {
@@ -467,11 +458,11 @@ fun DopravniPodnikyScreen(
                                                             val actualCena = oddelavaciCena * Random.nextDouble(.5, 1.5)
                                                             MainScope().launch {
 
-                                                                zmenitPodniky {
+                                                                menic.zmenitOstatniDopravniPodniky {
                                                                     removeAt(indexOfFirst { it.info.id == dp.info.id })
                                                                 }
 
-                                                                zmenitPrachy {
+                                                                menic.zmenitPrachy {
                                                                     it + actualCena
                                                                 }
 
@@ -522,7 +513,7 @@ fun DopravniPodnikyScreen(
                                         onLongPress = {
                                             scope.launch {
                                                 if (dp.info.jmenoMesta == kremze)
-                                                    zmenitPodniky {
+                                                    menic.zmenitOstatniDopravniPodniky {
                                                         val i = indexOfFirst { it.info.id == dp.info.id }
                                                         this[i] = this[i].copy(
                                                             info = this[i].info.copy(
@@ -545,7 +536,7 @@ fun DopravniPodnikyScreen(
                                                     TextButton(
                                                         onClick = {
                                                             scope.launch {
-                                                                zmenitPodniky {
+                                                                menic.zmenitOstatniDopravniPodniky {
                                                                     val i = indexOfFirst { it.info.id == dp.info.id }
                                                                     this[i] = this[i].copy(
                                                                         info = this[i].info.copy(

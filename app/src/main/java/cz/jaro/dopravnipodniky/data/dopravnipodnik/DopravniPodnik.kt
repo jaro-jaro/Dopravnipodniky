@@ -58,16 +58,20 @@ data class DopravniPodnik(
     val kapacita = ulice.sumOf { it.kapacita }
 }
 
-fun List<Ulice>.ulice(id: UliceID): Ulice = find { ulice -> id == ulice.id } ?: throw IndexOutOfBoundsException("tatoUliceNeexistuje")
-fun List<Linka>.linka(id: LinkaID): Linka = find { linka -> id == linka.id } ?: throw IndexOutOfBoundsException("tatoLinkaNeexistuje")
-fun List<Bus>.bus(id: BusID): Bus = find { bus -> id == bus.id } ?: throw IndexOutOfBoundsException("tentoBusNeexistuje")
+fun DopravniPodnik.ulice(id: UliceID): Ulice =
+    ulice.find { ulice -> id == ulice.id } ?: throw IndexOutOfBoundsException("tatoUliceNeexistuje")
+
+fun DopravniPodnik.linka(id: LinkaID): Linka =
+    linky.find { linka -> id == linka.id } ?: throw IndexOutOfBoundsException("tatoLinkaNeexistuje")
+
+fun DopravniPodnik.bus(id: BusID): Bus = busy.find { bus -> id == bus.id } ?: throw IndexOutOfBoundsException("tentoBusNeexistuje")
 
 val DPInfo.dobaOdPoslednihoHrani get() = (System.currentTimeMillis() - casPosledniNavstevy).milliseconds
 
 val DopravniPodnik.velikostMesta
     get() = Pair(
-        ulice.rohyMesta.second.x - ulice.rohyMesta.first.x,
-        ulice.rohyMesta.second.y - ulice.rohyMesta.first.y
+        rohyMesta.second.x - rohyMesta.first.x,
+        rohyMesta.second.y - rohyMesta.first.y
     )
 
 val DopravniPodnik.plocha get() = velikostMesta.first.toDpSKrizovatkama() * velikostMesta.second.toDpSKrizovatkama()
@@ -91,28 +95,28 @@ val DopravniPodnik.typMesta
 
 val DPInfo.nevyzvednuto get() = (zisk * dobaOdPoslednihoHrani.coerceAtMost(8.hours)) * nasobitelZiskuPoOffline
 
-val List<Ulice>.stred
+val DopravniPodnik.stred
     get() = rohyMesta.let { (min, max) ->
         (min.x + max.x) / 2 to (min.y + max.y) / 2
     }
 
-val List<Ulice>.rohyMesta: Pair<Pozice<UlicovyBlok>, Pozice<UlicovyBlok>>
+val DopravniPodnik.rohyMesta: Pair<Pozice<UlicovyBlok>, Pozice<UlicovyBlok>>
     get() {
-        val maxX = maxOf { it.konec.x }
-        val maxY = maxOf { it.konec.y }
-        val minX = minOf { it.zacatek.x }
-        val minY = minOf { it.zacatek.y }
+        val maxX = ulice.maxOf { it.konec.x }
+        val maxY = ulice.maxOf { it.konec.y }
+        val minX = ulice.minOf { it.zacatek.x }
+        val minY = ulice.minOf { it.zacatek.y }
 
         return (minX to minY) to (maxX to maxY)
     }
 
-val List<Ulice>.seznamKrizovatek
+val DopravniPodnik.seznamKrizovatek
     get() = (rohyMesta.first.x..rohyMesta.second.x).flatMap x@{ x ->
         (rohyMesta.first.y..rohyMesta.second.y).map y@{ y ->
             x to y
         }
     }.filter { (x, y) ->
-        val sousedi = filter {
+        val sousedi = ulice.filter {
             it.konec == x to y || it.zacatek == x to y
         }
 

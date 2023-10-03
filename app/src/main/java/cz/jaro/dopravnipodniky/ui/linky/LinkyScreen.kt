@@ -59,19 +59,18 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.Direction
 import cz.jaro.dopravnipodniky.R
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
+import cz.jaro.dopravnipodniky.data.Vse
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.busy
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.dialogState
+import cz.jaro.dopravnipodniky.shared.Menic
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.Smer
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.cenaTroleje
 import cz.jaro.dopravnipodniky.shared.delkaUlice
 import cz.jaro.dopravnipodniky.shared.je
-import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.snackbarHostState
@@ -80,7 +79,6 @@ import cz.jaro.dopravnipodniky.ui.theme.Barvicka
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import kotlin.math.roundToInt
-import kotlin.reflect.KFunction1
 
 
 @Composable
@@ -90,28 +88,16 @@ fun LinkyScreen(
 ) {
     val viewModel = koinViewModel<SharedViewModel>()
 
-    val linky by viewModel.linky.collectAsStateWithLifecycle()
-    val ulicove by viewModel.ulice.collectAsStateWithLifecycle()
-    val prachy by viewModel.prachy.collectAsStateWithLifecycle()
-    val busy by viewModel.busy.collectAsStateWithLifecycle()
-    val tutorial by viewModel.tutorial.collectAsStateWithLifecycle()
+    val dp by viewModel.dp.collectAsStateWithLifecycle()
+    val vse by viewModel.vse.collectAsStateWithLifecycle()
 
     if (
-        linky != null &&
-        ulicove != null &&
-        prachy != null &&
-        busy != null &&
-        tutorial != null
+        dp != null &&
+        vse != null
     ) LinkyScreen(
-        linky = linky!!,
-        ulicove = ulicove!!,
-        busy = busy!!,
-        tutorial = tutorial!!,
-        prachy = prachy!!,
-        zmenitPrachy = viewModel::zmenitPrachy,
-        zmenitLinky = viewModel::zmenitLinky,
-        zmenitBusy = viewModel::zmenitBusy,
-        zmenitUlice = viewModel::zmenitUlice,
+        dp = dp!!,
+        vse = vse!!,
+        menic = viewModel.menic,
         navigate = navigator::navigate,
         navigateBack = navigator::navigateUp
     )
@@ -120,15 +106,9 @@ fun LinkyScreen(
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun LinkyScreen(
-    linky: List<Linka>,
-    ulicove: List<Ulice>,
-    busy: List<Bus>,
-    tutorial: StavTutorialu,
-    prachy: Peniz,
-    zmenitPrachy: KFunction1<(Peniz) -> Peniz, Unit>,
-    zmenitLinky: (MutableList<Linka>.() -> Unit) -> Unit,
-    zmenitBusy: (MutableList<Bus>.() -> Unit) -> Unit,
-    zmenitUlice: (MutableList<Ulice>.() -> Unit) -> Unit,
+    dp: DopravniPodnik,
+    vse: Vse,
+    menic: Menic,
     navigate: (Direction) -> Unit,
     navigateBack: () -> Unit,
 ) {
@@ -169,10 +149,10 @@ fun LinkyScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            if (linky.isEmpty()) item {
+            if (dp.linky.isEmpty()) item {
                 Text(stringResource(R.string.zadna_linka), Modifier.padding(8.dp))
             }
-            items(linky, key = { it.cislo }) { linka ->
+            items(dp.linky, key = { it.cislo }) { linka ->
                 Column(
                     Modifier
                         .animateItemPlacement()
@@ -186,17 +166,17 @@ fun LinkyScreen(
                             val ctx = LocalContext.current
                             val scope = rememberCoroutineScope()
                             if (
-                                !(tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
-                                !(tutorial je StavTutorialu.Tutorialujeme.Linky) &&
-                                !(tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
-                                !(tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
-                                !(tutorial je StavTutorialu.Tutorialujeme.Obchod)
+                                !(vse.tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                                !(vse.tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                                !(vse.tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
+                                !(vse.tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                                !(vse.tutorial je StavTutorialu.Tutorialujeme.Obchod)
                             ) Row {
                                 IconButton(
                                     onClick = {
                                         val ulicNaLince = linka.ulice.size
                                         val delkaLinky = ulicNaLince * (delkaUlice + sirkaUlice)
-                                        val pocetBusu = linka.busy(busy).size
+                                        val pocetBusu = linka.busy(dp).size
 
                                         if (pocetBusu == 0) {
                                             scope.launch {
@@ -211,8 +191,8 @@ fun LinkyScreen(
 
                                         val odstupy = (2 * delkaLinky) / pocetBusu.toFloat()
 
-                                        zmenitBusy {
-                                            linka.busy(busy).forEachIndexed { i, bus ->
+                                        menic.zmenitBusy {
+                                            linka.busy(dp).forEachIndexed { i, bus ->
                                                 val poziceOdZacatkuLinky = odstupy * i
 
                                                 val jeDruhySmer = poziceOdZacatkuLinky / delkaLinky >= 1
@@ -271,12 +251,12 @@ fun LinkyScreen(
                                                                 Toast.makeText(ctx, R.string.spatne_cislo_linky, Toast.LENGTH_LONG).show()
                                                                 return@TextButton
                                                             }
-                                                            if (linky.any { it.cislo == cisloLinky }) {
+                                                            if (dp.linky.any { it.cislo == cisloLinky && it.cislo != linka.cislo }) {
                                                                 Toast.makeText(ctx, R.string.linka_existuje, Toast.LENGTH_LONG).show()
                                                                 return@TextButton
                                                             }
 
-                                                            zmenitLinky {
+                                                            menic.zmenitLinky {
                                                                 val i = indexOfFirst { it.id == linka.id }
                                                                 this[i] = this[i].copy(
                                                                     cislo = cisloLinky,
@@ -372,7 +352,7 @@ fun LinkyScreen(
                                                 confirmButton = {
                                                     TextButton(
                                                         onClick = {
-                                                            if (prachy < cenaTroleje * linka.ulice(ulicove).count { !it.maTrolej }) {
+                                                            if (vse.prachy < cenaTroleje * linka.ulice(dp).count { !it.maTrolej }) {
                                                                 scope.launch {
                                                                     snackbarHostState.showSnackbar(
                                                                         ctx.getString(R.string.malo_penez),
@@ -384,12 +364,12 @@ fun LinkyScreen(
                                                                 return@TextButton
                                                             }
 
-                                                            zmenitPrachy {
-                                                                it - cenaTroleje * linka.ulice(ulicove).count { !it.maTrolej }
+                                                            menic.zmenitPrachy {
+                                                                it - cenaTroleje * linka.ulice(dp).count { !it.maTrolej }
                                                             }
 
-                                                            zmenitUlice {
-                                                                linka.ulice(ulicove).forEach { ulice ->
+                                                            menic.zmenitUlice {
+                                                                linka.ulice(dp).forEach { ulice ->
                                                                     if (!ulice.maTrolej) {
                                                                         val i = this.indexOfFirst { it.id == ulice.id }
                                                                         this[i] = this[i].copy(
@@ -415,7 +395,7 @@ fun LinkyScreen(
                                                     Text(
                                                         stringResource(
                                                             R.string.pridat_troleje_nebo_zastavky_linka_dialog,
-                                                            (cenaTroleje * linka.ulice(ulicove).count { !it.maTrolej }).asString(),
+                                                            (cenaTroleje * linka.ulice(dp).count { !it.maTrolej }).asString(),
                                                             stringResource(R.string.troleje)
                                                         )
                                                     )
@@ -439,14 +419,14 @@ fun LinkyScreen(
                                                 confirmButton = {
                                                     TextButton(
                                                         onClick = {
-                                                            zmenitBusy {
+                                                            menic.zmenitBusy {
                                                                 forEachIndexed { i, it ->
                                                                     if (it.linka == linka.id) this[i] = it.copy(
                                                                         linka = null
                                                                     )
                                                                 }
                                                             }
-                                                            zmenitLinky {
+                                                            menic.zmenitLinky {
                                                                 remove(linka)
                                                             }
                                                             dialogState.hideTopMost()
