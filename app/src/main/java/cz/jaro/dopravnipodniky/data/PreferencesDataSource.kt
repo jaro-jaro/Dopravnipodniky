@@ -38,7 +38,7 @@ import kotlin.time.Duration.Companion.seconds
 class PreferencesDataSource(
     private val dataStore: DataStore<Preferences>,
     hodiny: Hodiny,
-) {
+) : DataSource {
     var LOCK = false
 
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -53,23 +53,23 @@ class PreferencesDataSource(
     private val ostatniPodniky = _ostatniPodniky.filterNotNull()
 
     private val _busy = MutableStateFlow(null as List<Bus>?)
-    val busy = _busy.filterNotNull()
+    override val busy = _busy.filterNotNull()
     private val _linky = MutableStateFlow(null as List<Linka>?)
-    val linky = _linky.filterNotNull()
+    override val linky = _linky.filterNotNull()
     private val _ulice = MutableStateFlow(null as List<Ulice>?)
-    val ulice = _ulice.filterNotNull()
+    override val ulice = _ulice.filterNotNull()
     private val _dpInfo = MutableStateFlow(null as DPInfo?)
-    val dpInfo = _dpInfo.filterNotNull()
+    override val dpInfo = _dpInfo.filterNotNull()
     private val _prachy = MutableStateFlow(null as Peniz?)
-    val prachy = _prachy.filterNotNull()
+    override val prachy = _prachy.filterNotNull()
     private val _dosahlosti = MutableStateFlow(null as List<Dosahlost.NormalniDosahlost>?)
-    val dosahlosti = _dosahlosti.filterNotNull()
+    override val dosahlosti = _dosahlosti.filterNotNull()
     private val _tutorial = MutableStateFlow(null as StavTutorialu?)
-    val tutorial = _tutorial.filterNotNull()
+    override val tutorial = _tutorial.filterNotNull()
     private val _nastaveni = MutableStateFlow(null as Nastaveni?)
-    val nastaveni = _nastaveni.filterNotNull()
+    override val nastaveni = _nastaveni.filterNotNull()
 
-    val dp = combine(
+    override val dp = combine(
         busy,
         linky,
         ulice,
@@ -88,14 +88,14 @@ class PreferencesDataSource(
         )
     }.filter { !LOCK }
 
-    val podniky = combine(
+    override val podniky = combine(
         dp,
         ostatniPodniky,
     ) { dp, ostatniPodniky ->
         listOf(dp) + ostatniPodniky
     }.filter { !LOCK }
 
-    val vse = combine(
+    override val vse = combine(
         podniky,
         prachy,
         dosahlosti,
@@ -166,43 +166,45 @@ class PreferencesDataSource(
         }
     }
 
-    suspend fun upravitBusy(update: suspend MutableList<Bus>.() -> Unit) = withContext(Dispatchers.IO) {
+    override suspend fun upravitBusy(update: suspend MutableList<Bus>.() -> Unit) = withContext(Dispatchers.IO) {
         if (!LOCK) _busy.value = (_busy.value ?: return@withContext).mutate(update)
     }
 
-    suspend fun upravitLinky(update: suspend MutableList<Linka>.() -> Unit) = withContext(Dispatchers.IO) {
+    override suspend fun upravitLinky(update: suspend MutableList<Linka>.() -> Unit) = withContext(Dispatchers.IO) {
         if (!LOCK) _linky.value = (_linky.value ?: return@withContext).mutate(update)
     }
 
-    suspend fun upravitUlice(update: suspend MutableList<Ulice>.() -> Unit) = withContext(Dispatchers.IO) {
+    override suspend fun upravitUlice(update: suspend MutableList<Ulice>.() -> Unit) = withContext(Dispatchers.IO) {
         if (!LOCK) _ulice.value = (_ulice.value ?: return@withContext).mutate(update)
     }
 
-    suspend fun upravitDPInfo(update: suspend (DPInfo) -> DPInfo) = withContext(Dispatchers.IO) {
+    override suspend fun upravitDPInfo(update: suspend (DPInfo) -> DPInfo) = withContext(Dispatchers.IO) {
         if (!LOCK) _dpInfo.value = update(_dpInfo.value ?: return@withContext)
     }
 
-    suspend fun upravitPrachy(update: suspend (Peniz) -> Peniz) = withContext(Dispatchers.IO) {
+    override suspend fun upravitPrachy(update: suspend (Peniz) -> Peniz) = withContext(Dispatchers.IO) {
         if (!LOCK) _prachy.value = update(_prachy.value ?: return@withContext)
     }
 
-    suspend fun upravitDosahlosti(update: suspend MutableList<Dosahlost.NormalniDosahlost>.() -> Unit) = withContext(Dispatchers.IO) {
+    override suspend fun upravitDosahlosti(update: suspend MutableList<Dosahlost.NormalniDosahlost>.() -> Unit) =
+        withContext(Dispatchers.IO) {
         if (!LOCK) _dosahlosti.value = (_dosahlosti.value ?: return@withContext).mutate(update)
     }
 
-    suspend fun upravitTutorial(update: suspend (StavTutorialu) -> StavTutorialu) = withContext(Dispatchers.IO) {
+    override suspend fun upravitTutorial(update: suspend (StavTutorialu) -> StavTutorialu) = withContext(Dispatchers.IO) {
         if (!LOCK) _tutorial.value = update(_tutorial.value ?: return@withContext)
     }
 
-    suspend fun upravitNastaveni(update: suspend (Nastaveni) -> Nastaveni) = withContext(Dispatchers.IO) {
+    override suspend fun upravitNastaveni(update: suspend (Nastaveni) -> Nastaveni) = withContext(Dispatchers.IO) {
         if (!LOCK) _nastaveni.value = update(_nastaveni.value ?: return@withContext)
     }
 
-    suspend fun upravitOstatniDopravniPodniky(update: suspend MutableList<DopravniPodnik>.() -> Unit) = withContext(Dispatchers.IO) {
+    override suspend fun upravitOstatniDopravniPodniky(update: suspend MutableList<DopravniPodnik>.() -> Unit) =
+        withContext(Dispatchers.IO) {
         _ostatniPodniky.value = (_ostatniPodniky.value ?: emptyList()).mutate(update)
     }
 
-    suspend fun zmenitDopravniPodnik(dpID: DPID) = withContext(Dispatchers.IO) {
+    override suspend fun zmenitDopravniPodnik(dpID: DPID) = withContext(Dispatchers.IO) {
         val aktualniVse = vse.first()
         LOCK = true
         zobrazitLoading = true

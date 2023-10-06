@@ -1,15 +1,14 @@
 package cz.jaro.dopravnipodniky.data.dopravnipodnik
 
-import cz.jaro.dopravnipodniky.shared.nasobitelMaxCloveku
+import androidx.room.ColumnInfo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlin.math.roundToInt
 
 @JvmInline
 @Serializable
 @SerialName("Zastavka")
 value class Zastavka(
-    val cloveci: Int = 0
+    @ColumnInfo(name = "cloveciNaZastavce") val cloveciNaZastavce: Int = 0
 )
 //        init {
 //            ulice.baraky.forEach {
@@ -23,4 +22,4 @@ value class Zastavka(
 //            Log.i("Vytvořena zastávka", "Byla vytvořena zastávka na ulici ${ulice.id}.")
 //        }
 
-fun Ulice.kapacitaZastavky() = (kapacita * nasobitelMaxCloveku).roundToInt()
+//fun Ulice.kapacitaZastavky() = (kapacita * nasobitelMaxCloveku).roundToInt()

@@ -11,6 +11,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.Quintuple
 import cz.jaro.dopravnipodniky.shared.barvaTroleje
+import cz.jaro.dopravnipodniky.shared.delkaUlice
 import cz.jaro.dopravnipodniky.shared.drawArc
 import cz.jaro.dopravnipodniky.shared.existuje
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
@@ -31,7 +32,7 @@ private const val DEBUG_BARVY = false
 context (DrawScope)
 fun Ulice.nakreslitTroleje() {
 
-    val delkaUlice = delka.toPx()
+    val delkaUlice = delkaUlice.toPx()
     val sirka = sirkaTroleje.toPx()
     val predsazeniS = predsazeniTrolejiS.toPx()
     val troleje = odsazeniTroleji.map { it.toPx() }

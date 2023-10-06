@@ -76,4 +76,8 @@ dependencies {
     implementation(libs.kotlinx.serialization)
     implementation(libs.androidx.datastore)
     implementation(kotlin("reflect"))
+    implementation(libs.room.runtime)
+    annotationProcessor(libs.room.compiler)
+    ksp(libs.room.compiler)
+    implementation(libs.room.ktx)
 }
