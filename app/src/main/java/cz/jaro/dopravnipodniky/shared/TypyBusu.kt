@@ -1332,6 +1332,7 @@ private val autobusy = listOf(
         maxNaklady = 60.0.penezZaMin,
         cena = 90_000.penez,
         delka = 10.55F.metru,
+        posledniKoloVPrvnimClanku = 7F.metru,
         sirka = 2.550.metru,
         vydrz = 225.hours,
         popis = """
@@ -1932,9 +1933,10 @@ private val autobusy = listOf(
         maxNaklady = 61.0.penezZaMin,
         cena = 165_000.penez,
         delka = 18F.metru,
+        posledniKoloVPrvnimClanku = 8.6F.metru,
         clanky = listOf(
-            10.5.metru,
-            7.5.metru,
+            10.metru,
+            8.metru,
         ),
         sirka = 2.550.metru,
         vydrz = 255.hours,
@@ -3746,6 +3748,7 @@ private val trolejbusy = listOf(
         maxRychlost = 65.kilometruZaHodinu,
         maxNaklady = 30.0.penezZaMin,
         cena = 260_000.penez,
+        posledniKoloVPrvnimClanku = 8.3.metru,
         delka = 24F.metru,
         clanky = listOf(
             10.metru,

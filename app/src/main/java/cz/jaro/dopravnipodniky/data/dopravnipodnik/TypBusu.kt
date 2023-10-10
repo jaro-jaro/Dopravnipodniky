@@ -22,6 +22,7 @@ data class TypBusu(
     val maxNaklady: PenizZaMinutu,
     val cena: Peniz,
     val delka: Metr,
+    val posledniKoloVPrvnimClanku: Metr = delka,
     val clanky: List<Metr> = listOf(delka),
     val sirka: Metr,
     val vydrz: Duration,

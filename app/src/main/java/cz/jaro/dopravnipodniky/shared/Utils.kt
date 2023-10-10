@@ -347,11 +347,44 @@ fun <A, B, C, Z> zip(
         minOf(
             iterableA.collectionSizeOrDefault(10),
             iterableB.collectionSizeOrDefault(10),
-            iterableC.collectionSizeOrDefault(10)
+            iterableC.collectionSizeOrDefault(10),
         )
     )
     while (a.hasNext() && b.hasNext() && c.hasNext()) {
         list.add(transform(a.next(), b.next(), c.next()))
+    }
+    return list
+}
+
+fun <A, B, C, D> zip(
+    iterableA: Iterable<A>,
+    iterableB: Iterable<B>,
+    iterableC: Iterable<C>,
+    iterableD: Iterable<D>,
+) = zip(iterableA, iterableB, iterableC, iterableD) { a, b, c, d -> Quadruple(a, b, c, d) }
+
+fun <A, B, C, D, Z> zip(
+    iterableA: Iterable<A>,
+    iterableB: Iterable<B>,
+    iterableC: Iterable<C>,
+    iterableD: Iterable<D>,
+    transform: (a: A, b: B, c: C, d: D) -> Z
+): ArrayList<Z> {
+    val a = iterableA.iterator()
+    val b = iterableB.iterator()
+    val c = iterableC.iterator()
+    val d = iterableD.iterator()
+
+    val list = ArrayList<Z>(
+        minOf(
+            iterableA.collectionSizeOrDefault(10),
+            iterableB.collectionSizeOrDefault(10),
+            iterableC.collectionSizeOrDefault(10),
+            iterableD.collectionSizeOrDefault(10),
+        )
+    )
+    while (a.hasNext() && b.hasNext() && c.hasNext() && d.hasNext()) {
+        list.add(transform(a.next(), b.next(), c.next(), d.next()))
     }
     return list
 }
