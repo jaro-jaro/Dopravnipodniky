@@ -18,10 +18,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddShoppingCart
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Euro
 import androidx.compose.material.icons.filled.LocationSearching
+import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -77,7 +79,10 @@ import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.replaceBy
+import cz.jaro.dopravnipodniky.snackbarHostState
 import cz.jaro.dopravnipodniky.ui.destinations.ObchodScreenDestination
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import kotlin.reflect.KClass
 
@@ -134,7 +139,7 @@ fun GarazScreen(
                             navigateBack()
                         }
                     ) {
-                        Icon(Icons.Default.ArrowBack, stringResource(R.string.zpet))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.zpet))
                     }
                 },
             )
@@ -226,7 +231,10 @@ fun GarazScreen(
                                                     TextButton(
                                                         enabled = evc.isNotEmpty() && evc.toIntOrNull() != null && evc.toInt() >= 1,
                                                         onClick = {
-                                                            dialogState.hideTopMost()
+                                                            if (evc.toInt() == bus.evCislo) {
+                                                                dialogState.hideTopMost()
+                                                                return@TextButton
+                                                            }
 
                                                             if (dp.busy.any { it.evCislo == evc.toInt() }) {
                                                                 Toast.makeText(
@@ -236,6 +244,8 @@ fun GarazScreen(
                                                                 ).show()
                                                                 return@TextButton
                                                             }
+
+                                                            dialogState.hideTopMost()
 
                                                             menic.zmenitBusy {
                                                                 val i = indexOfFirst { it.id == bus.id }
@@ -336,8 +346,7 @@ fun GarazScreen(
 
                                             if (pouzitelneLinky.isEmpty()) {
                                                 Toast.makeText(ctx, R.string.nejprve_si_vytvorte_linku, Toast.LENGTH_SHORT).show()
-                                            }
-                                            else dialogState.show(
+                                            } else dialogState.show(
                                                 confirmButton = { },
                                                 dismissButton = {
                                                     TextButton(
@@ -375,6 +384,9 @@ fun GarazScreen(
                                                                 dosahni(Dosahlost.BusNaLince::class)
                                                                 dialogState.hideTopMost()
                                                             },
+                                                            leadingContent = {
+                                                                Icon(Icons.Default.Timeline, null, tint = linka.barvicka.barva)
+                                                            },
                                                         )
                                                     }
                                                 },
@@ -390,29 +402,74 @@ fun GarazScreen(
                                     Spacer(modifier = Modifier.weight(1F))
                                     OutlinedButton(
                                         onClick = {
-                                            menic.zmenitUlice {
-
-                                                var cloveci = bus.cloveci
-                                                val noveUlice = shuffled().map { ulice ->
-                                                    var cloveciVUlici = ulice.cloveci
-                                                    while (cloveciVUlici < ulice.kapacita && cloveci > 0) {
-
-                                                        cloveci--
-                                                        cloveciVUlici++
-                                                    }
-
-                                                    ulice.copy(
-                                                        cloveci = cloveciVUlici
+                                            dialogState.show(
+                                                confirmButton = {
+                                                    val prodaciZprava = stringResource(
+                                                        R.string.prodali_jste,
+                                                        stringResource(bus.typBusu.trakce.jmeno),
+                                                        bus.prodejniCena.asString()
                                                     )
-                                                }
+                                                    TextButton(
+                                                        onClick = {
+                                                            MainScope().launch {
 
-                                                clear()
-                                                addAll(noveUlice)
-                                            }
-                                            menic.zmenitBusy {
-                                                val i = indexOfFirst { it.id == bus.id }
-                                                removeAt(i)
-                                            }
+                                                                menic.zmenitUlice {
+                                                                    var cloveci = bus.cloveci
+                                                                    val noveUlice = shuffled().map { ulice ->
+                                                                        var cloveciVUlici = ulice.cloveci
+                                                                        while (cloveciVUlici < ulice.kapacita && cloveci > 0) {
+
+                                                                            cloveci--
+                                                                            cloveciVUlici++
+                                                                        }
+
+                                                                        ulice.copy(
+                                                                            cloveci = cloveciVUlici
+                                                                        )
+                                                                    }
+
+                                                                    clear()
+                                                                    addAll(noveUlice)
+                                                                }
+                                                                menic.zmenitBusy {
+                                                                    val i = indexOfFirst { it.id == bus.id }
+                                                                    removeAt(i)
+                                                                }
+                                                                menic.zmenitPrachy {
+                                                                    it - bus.prodejniCena
+                                                                }
+
+                                                                dialogState.hideTopMost()
+
+                                                                snackbarHostState.showSnackbar(
+                                                                    message = prodaciZprava,
+                                                                    withDismissAction = true,
+                                                                )
+                                                            }
+                                                        }
+                                                    ) {
+                                                        Text(stringResource(android.R.string.ok))
+                                                    }
+                                                },
+                                                dismissButton = {
+                                                    TextButton(
+                                                        onClick = {
+                                                            dialogState.hideTopMost()
+                                                        }
+                                                    ) {
+                                                        Text(stringResource(R.string.zrusit))
+                                                    }
+                                                },
+                                                icon = {
+                                                    Icon(Icons.Default.Euro, null)
+                                                },
+                                                title = {
+                                                    Text(stringResource(R.string.prodat))
+                                                },
+                                                content = {
+                                                    Text(stringResource(R.string.fakt_chcete_prodat_bus))
+                                                },
+                                            )
                                         },
                                         Modifier
                                             .padding(all = 8.dp),

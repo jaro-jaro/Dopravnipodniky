@@ -16,8 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Login
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCartCheckout
 import androidx.compose.material3.AlertDialog
@@ -140,7 +139,7 @@ fun DopravniPodnikyScreen(
                             navigateBack()
                         }
                     ) {
-                        Icon(Icons.Default.ArrowBack, stringResource(R.string.zpet))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.zpet))
                     }
                 },
             )
@@ -318,7 +317,7 @@ fun DopravniPodnikyScreen(
                                         }
                                     }
                                 ) {
-                                    Icon(if (Random.nextFloat() < .001F) Icons.Default.ShoppingCartCheckout else Icons.Default.Login, null)
+                                    Icon(if (Random.nextFloat() < .001F) Icons.Default.ShoppingCartCheckout else Icons.AutoMirrored.Filled.Login, null)
                                 }
                             },
                         )

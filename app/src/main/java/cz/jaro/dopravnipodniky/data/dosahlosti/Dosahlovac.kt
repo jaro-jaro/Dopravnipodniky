@@ -46,7 +46,7 @@ class Dosahlovac(
             it + dosahlost.odmena
         }
 
-        dosahlostCallback.zobrazitSnackbar(novaDosahlost)
+        dosahlostCallback.zobrazitSnackbar(novaDosahlost, listOf())
     }
 
     private suspend fun ulozit(novaDosahlost: Dosahlost.NormalniDosahlost) {
@@ -88,6 +88,6 @@ class Dosahlovac(
             it + dosahlost.odmena
         }
 
-        dosahlostCallback.zobrazitSnackbar(novaDosahlost)
+        dosahlostCallback.zobrazitSnackbar(novaDosahlost, listOf())
     }
 }

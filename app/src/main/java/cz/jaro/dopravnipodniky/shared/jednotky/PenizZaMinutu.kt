@@ -6,6 +6,7 @@ import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.minutes
+import cz.jaro.dopravnipodniky.shared.toText
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration
@@ -23,6 +24,8 @@ value class PenizZaMinutu(val value: Double) : Comparable<PenizZaMinutu> {
     operator fun div(other: Int) = PenizZaMinutu(value / other)
 }
 
+operator fun Int.times(other: PenizZaMinutu) = PenizZaMinutu(this * other.value)
+
 operator fun Peniz.div(other: Duration) = PenizZaMinutu(value / other.minutes)
 operator fun PenizZaMinutu.times(other: Duration) = Peniz(value * other.minutes)
 operator fun PenizZaMinutu.times(other: Tik) = times(other.toDuration())
@@ -33,4 +36,15 @@ val Float.penezZaMin get() = PenizZaMinutu(this.toDouble())
 val Long.penezZaMin get() = PenizZaMinutu(this.toDouble())
 
 @Composable
-fun PenizZaMinutu.asString() = stringResource(R.string.zisk_kc, value.formatovat(if (value >= 10_000) 0 else 2).composeString())
+fun PenizZaMinutu.asString() = stringResource(R.string.zisk_penez, value.formatovat(if (value >= 10_000) 0 else 2).composeString())
+
+fun PenizZaMinutu.formatovat() = R.string.zisk_penez.toText(value.formatovat(if (value >= 10_000) 0 else 2))
+fun PenizZaMinutu.formatovatBezEura() = value.formatovat(if (value >= 10_000) 0 else 2)
+
+inline fun <T> Iterable<T>.sumOfPenizZaminutu(selector: (T) -> PenizZaMinutu): PenizZaMinutu {
+    var sum = 0.penezZaMin
+    for (element in this) {
+        sum += selector(element)
+    }
+    return sum
+}

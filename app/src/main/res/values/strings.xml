@@ -5,7 +5,7 @@
     <string name="garaz">Vozový park</string>
     <string name="obchod">Obchod</string>
     <string name="kc">%s €</string>
-    <string name="zisk_kc">%s €/min</string>
+    <string name="zisk_penez">%s €/min</string>
     <string name="zisk">Zisk: %s</string>
     <string name="pocet_busu">%1$d z %2$d vozů</string>
     <string name="garaz_koupit_vozidlo">Koupit vozidlo</string>
@@ -102,19 +102,19 @@
     <string name="odstranit_troleje">Odstranit trolejovou trať za %s</string>
     <string name="zrusit">Zrušit</string>
     <string name="podrobnosti_o_zisku">Podrobnosti o zisku</string>
-    <string name="celkove_prijmy">Celkové příjmy: %s €/min</string>
-    <string name="celkove_vydaje">Celkové výdaje: %s €/min</string>
-    <string name="celkovy_zisk">Celkový zisk: %s €/min</string>
-    <string name="vydaje_za_infrastrukturu">Výdaje za infrastrukturu:</string>
-    <string name="vydaje_za_zastavky">Zastávky: %s €/min</string>
-    <string name="vydaje_za_troleje">Trolejová síť: %s €/min</string>
+    <string name="celkove_prijmy">Celkové příjmy: %s</string>
+    <string name="celkove_vydaje">Celkové výdaje: %s</string>
+    <string name="celkovy_zisk">Celkový zisk: %s</string>
+    <string name="vydaje_za_infrastrukturu">Výdaje za infrastrukturu: %s</string>
+    <string name="vydaje_za_zastavky">Zastávky: %s</string>
+    <string name="vydaje_za_troleje">Trolejová síť: %s</string>
     <string name="vydaje_za_ekologii">Výdaje za ekologickou nezodpovědnost:</string>
-    <string name="vydaje_za_neekologicke_vozy">Výdaje za neekologický vozový park: %s €/min</string>
+    <string name="vydaje_za_neekologicke_vozy">Výdaje za neekologický vozový park: %s</string>
     <string name="zisk_linek">Zisk jednotlivých linek:</string>
-    <string name="linka_vydelava_tohle">Linka č. %d: %s €/min</string>
+    <string name="linka_vydelava_tohle">Linka %1$s: %2$s</string>
     <string name="zisk_vozidel">Zisk jednotlivých vozidel:</string>
-    <string name="bus_prodelava_tolik">Bus č. %1$d ≫ -%2$s €/min</string>
-    <string name="bus_vydelava_tolik">Bus č. %1$d: %2$s € - %3$s € ≫ %4$s €/min</string>
+    <string name="bus_prodelava_tolik">Bus č. %1$s ≫ -%2$s</string>
+    <string name="bus_vydelava_tolik">Bus č. %1$s: %2$s - %3$s ≫ %4$s </string>
     <string name="nigdo_nebyl_ochoten">Za zainvestovanou částku Vám nikdo nebyl ochoten nabídnout své město, proto Vám bude odečtena desetina vkladu, ale nové město nezískáte.</string>
     <string name="bus_ma_naklady">náklady: %s</string>
     <string name="neco_mezera_neco_jinyho">%1$s %2$s</string>
@@ -359,5 +359,7 @@
     <string name="upravit_nazev">Změnit název</string>
     <string name="upravit_nazev2">Změnit název nebo barvu</string>
     <string name="upravit_vedeni">Změnit vedení linky</string>
+    <string name="nemate_zadnou_linku">nemáte žádnou linku</string>
+    <string name="nemate_zadny_bus">nemáte žádné vozidlo</string>
 
 </resources>

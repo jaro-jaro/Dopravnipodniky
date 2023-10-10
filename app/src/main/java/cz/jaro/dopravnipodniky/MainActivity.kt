@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AttachMoney
-import androidx.compose.material.icons.filled.Help
+import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.filled.Euro
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -175,7 +175,7 @@ class MainActivity : ComponentActivity() {
                         }
                     },
                     icon = {
-                        Icon(Icons.Default.Help, null)
+                        Icon(Icons.AutoMirrored.Filled.Help, null)
                     },
                     title = {
                         Text(stringResource(R.string.tutorial))
@@ -202,7 +202,7 @@ class MainActivity : ComponentActivity() {
                         }
                     },
                     icon = {
-                        Icon(Icons.Default.AttachMoney, null)
+                        Icon(Icons.Default.Euro, null)
                     },
                     title = {
                         Text(stringResource(R.string.slovo_vyuctovani))

@@ -22,8 +22,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Help
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -114,6 +115,7 @@ fun ObchodScreen(
         menic = viewModel.menic,
         navigateBack = navigator::navigateUp,
         dosahni = viewModel.dosahni,
+        dosahni2 = viewModel.dosahni2,
     )
 }
 
@@ -132,6 +134,7 @@ fun ObchodScreen(
     menic: Menic,
     navigateBack: () -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
+    dosahni2: (KClass<out Dosahlost>, Int) -> Unit,
 ) {
     var stav by rememberSaveable { mutableStateOf(Zobrait.Vysledky) }
     BackHandler {
@@ -156,7 +159,7 @@ fun ObchodScreen(
                             }
                         }
                     ) {
-                        Icon(Icons.Default.Help, stringResource(R.string.tutorial))
+                        Icon(Icons.AutoMirrored.Filled.Help, stringResource(R.string.tutorial))
                     }
                 },
                 navigationIcon = {
@@ -169,7 +172,7 @@ fun ObchodScreen(
                             }
                         }
                     ) {
-                        Icon(Icons.Default.ArrowBack, stringResource(R.string.zpet))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.zpet))
                     }
                 },
             )
@@ -455,6 +458,9 @@ fun ObchodScreen(
                                                     Modifier.clickable {
                                                         dialogState.hideTopMost()
                                                         callback(it.id)
+                                                    },
+                                                    leadingContent = {
+                                                        Icon(Icons.Default.Timeline, null, tint = it.barvicka.barva)
                                                     },
                                                 )
                                             }

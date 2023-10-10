@@ -23,3 +23,5 @@ operator fun Dp.div(other: DpZaHodinu) = (value / other.value).toDouble().hours
 
 val Int.dpZaHodinu get() = DpZaHodinu(toLong())
 val Int.kilometruZaHodinu get() = (this * 1_000L).metru.toDp() / 1.hours
+
+fun DpZaHodinu.coerceAtMost(maximumValue: DpZaHodinu) = DpZaHodinu(value.coerceAtMost(maximumValue.value))

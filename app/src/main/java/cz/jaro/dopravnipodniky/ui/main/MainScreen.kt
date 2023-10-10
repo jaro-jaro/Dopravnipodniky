@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -20,16 +21,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Accessible
-import androidx.compose.material.icons.filled.AccessibleForward
+import androidx.compose.material.icons.automirrored.filled.Accessible
+import androidx.compose.material.icons.automirrored.filled.AccessibleForward
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EditRoad
 import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
@@ -54,6 +57,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -70,12 +74,15 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -133,6 +140,7 @@ import org.koin.dsl.module
 import java.time.LocalDate
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.reflect.KClass
 
 @Composable
 @Destination(start = true)
@@ -162,6 +170,7 @@ fun MainScreen(
         ziskatDP = {
             dp!!
         },
+        dosahni = viewModel.dosahni,
     )
 }
 
@@ -175,6 +184,7 @@ fun MainScreen(
     menic: Menic,
     navigate: (Direction) -> Unit,
     ziskatDP: () -> DopravniPodnik,
+    dosahni: (KClass<out Dosahlost>) -> Unit,
 ) {
     var size by remember { mutableStateOf(null as IntSize?) }
     val density = LocalDensity.current
@@ -218,10 +228,10 @@ fun MainScreen(
     LaunchedEffect(Unit) {
         loadKoinModules(module {
             single {
-                DosahlostCallback {
+                DosahlostCallback { dosahlost, _ ->
                     MainScope().launch {
                         val result = snackbarHostState.showSnackbar(
-                            message = "Splněno ${res.getString(it.jmeno)}",
+                            message = "Splněno ${res.getString(dosahlost.jmeno)}",
                             actionLabel = "Zobrazit",
                             duration = SnackbarDuration.Long,
                             withDismissAction = true,
@@ -242,12 +252,33 @@ fun MainScreen(
                     Text(dp.info.jmenoMesta)
                 },
                 Modifier.combinedClickable(onLongClick = {
-                    menic.zmenitPrachy {
-                        if (it < Double.POSITIVE_INFINITY.penez)
-                            Double.POSITIVE_INFINITY.penez
-                        else
-                            12.0.pow(6).penez
-                    }
+
+                    dosahni(Dosahlost.Kocka::class)
+
+                    dialogState.show(
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    dialogState.hideTopMost()
+
+                                    menic.zmenitPrachy {
+                                        if (it < Double.POSITIVE_INFINITY.penez)
+                                            Double.POSITIVE_INFINITY.penez
+                                        else
+                                            12.0.pow(6).penez
+                                    }
+                                }
+                            ) {
+                                Text(stringResource(R.string.kocka))
+                            }
+                        },
+                        content = {
+                            Image(
+                                painterResource(R.drawable.super_tajna_vec_doopravdy_na_me_neklikej),
+                                stringResource(R.string.kocka),
+                            )
+                        },
+                    )
                 }) {
                     navigate(DopravniPodnikyScreenDestination)
                 },
@@ -285,10 +316,13 @@ fun MainScreen(
                             zrychlovacHry = if (zrychlovacHry == 1F) 60F else 1F
                         }
                     ) {
-                        Icon(
-                            if (zrychlovacHry == 1F) Icons.Default.Accessible else Icons.Default.AccessibleForward,
-                            stringResource(R.string.uspechy)
-                        )
+                        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                            Icon(
+                                if (zrychlovacHry == 1F) Icons.AutoMirrored.Filled.Accessible else Icons.AutoMirrored.Filled.AccessibleForward,
+                                stringResource(R.string.uspechy)
+                            )
+                        }
+
                     }
                     if (vse.tutorial je StavTutorialu.Tutorialujeme.Uvod) IconButton(
                         onClick = {
@@ -297,7 +331,7 @@ fun MainScreen(
                             }
                         }
                     ) {
-                        Icon(Icons.Default.Help, stringResource(R.string.tutorial))
+                        Icon(Icons.AutoMirrored.Filled.Help, stringResource(R.string.tutorial))
                     }
                     if (vse.tutorial je StavTutorialu.Tutorialujeme.Zastavky) IconButton(
                         onClick = {
@@ -306,7 +340,7 @@ fun MainScreen(
                             }
                         }
                     ) {
-                        Icon(Icons.Default.Help, stringResource(R.string.tutorial))
+                        Icon(Icons.AutoMirrored.Filled.Help, stringResource(R.string.tutorial))
                     }
                     if (vse.tutorial je StavTutorialu.Tutorialujeme.Garaz) IconButton(
                         onClick = {
@@ -315,7 +349,7 @@ fun MainScreen(
                             }
                         }
                     ) {
-                        Icon(Icons.Default.Help, stringResource(R.string.tutorial))
+                        Icon(Icons.AutoMirrored.Filled.Help, stringResource(R.string.tutorial))
                     }
                     var show by remember { mutableStateOf(false) }
                     var debug by remember { mutableStateOf(DEBUG_TEXT) }
@@ -412,7 +446,8 @@ fun MainScreen(
                                         Row(
                                             Modifier
                                                 .fillMaxWidth()
-                                                .padding(vertical = 4.dp)
+                                                .padding(vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
                                         ) {
                                             Text(stringResource(R.string.automaticky_prirazovat_ev_c), Modifier.weight(1F))
                                             Switch(
@@ -430,7 +465,8 @@ fun MainScreen(
                                         Row(
                                             Modifier
                                                 .fillMaxWidth()
-                                                .padding(vertical = 4.dp)
+                                                .padding(vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
                                         ) {
                                             Text(stringResource(R.string.vicenasobne_kupovani), Modifier.weight(1F))
                                             Switch(
@@ -448,7 +484,8 @@ fun MainScreen(
                                         Row(
                                             Modifier
                                                 .fillMaxWidth()
-                                                .padding(vertical = 4.dp)
+                                                .padding(vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
                                         ) {
                                             Text("DEBUG MÓD", Modifier.weight(1F))
                                             Switch(
@@ -662,6 +699,7 @@ fun MainScreen(
             ) {
                 Row(
                     Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (
                         !(vse.tutorial je StavTutorialu.Tutorialujeme.Uvod)
@@ -679,10 +717,42 @@ fun MainScreen(
                         !(vse.tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
                         !(vse.tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
                         !(vse.tutorial je StavTutorialu.Tutorialujeme.Obchod)
+                    ) IconButton(
+                        onClick = {
+                            dialogState.show(
+                                confirmButton = {
+                                    TextButton(
+                                        onClick = {
+                                            dialogState.hideTopMost()
+                                        }
+                                    ) {
+                                        Text(stringResource(android.R.string.ok))
+                                    }
+                                },
+                                title = {
+                                    Text(stringResource(R.string.podrobnosti_o_zisku))
+                                },
+                                icon = {
+                                    Icon(Icons.Default.Info, null)
+                                },
+                                content = {
+                                    Text(dp.info.detailZisku.composeString(), Modifier.verticalScroll(rememberScrollState()))
+                                },
+                            )
+                        }
+                    ) {
+                        Icon(Icons.Default.Info, stringResource(R.string.podrobnosti_o_zisku))
+                    }
+
+                    if (
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                        !(vse.tutorial je StavTutorialu.Tutorialujeme.Obchod)
                     ) Text(
                         text = dp.info.zisk.asString(),
                         Modifier
-                            .weight(1F)
                             .padding(all = 16.dp),
                         textAlign = TextAlign.End,
                     )

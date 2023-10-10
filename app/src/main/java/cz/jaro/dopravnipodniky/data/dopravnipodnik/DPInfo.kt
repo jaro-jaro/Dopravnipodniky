@@ -1,6 +1,7 @@
 package cz.jaro.dopravnipodniky.data.dopravnipodnik
 
 import cz.jaro.dopravnipodniky.shared.DPID
+import cz.jaro.dopravnipodniky.shared.Text
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.PenizZaMinutu
 import cz.jaro.dopravnipodniky.ui.theme.Theme
@@ -16,5 +17,6 @@ data class DPInfo(
     val tema: Theme,
     val casPosledniNavstevy: Long = Calendar.getInstance().toInstant().toEpochMilli(),
     val zisk: PenizZaMinutu,
+    val detailZisku: Text,
     val id: DPID,
 )

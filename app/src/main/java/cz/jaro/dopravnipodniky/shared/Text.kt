@@ -20,7 +20,7 @@ sealed class Text {
     @SerialName("resource")
     data class StringRes(
         @androidx.annotation.StringRes val id: Int,
-        val args: List<String> = emptyList(),
+        val args: List<Text> = emptyList(),
     ) : Text()
 
     @Serializable
@@ -32,13 +32,13 @@ sealed class Text {
     context(Context)
     fun asString(): String = when (this) {
         is Plain -> value
-        is StringRes -> getString(id, *args.toTypedArray())
+        is StringRes -> getString(id, *args.map { it.asString() }.toTypedArray())
         is Mix -> (parts.joinToString("") { it.asString() })
     }
     context(Resources)
     fun asString(): String = when (this) {
         is Plain -> value
-        is StringRes -> getString(id, *args.toTypedArray())
+        is StringRes -> getString(id, *args.map { it.asString() }.toTypedArray())
         is Mix -> (parts.joinToString("") { it.asString() })
     }
 }
@@ -49,12 +49,12 @@ operator fun Text.plus(toText: Text): Text.Mix = Text.Mix(this, toText)
 fun Text.composeString(): String =
     when (this) {
         is Text.Plain -> value
-        is Text.StringRes -> stringResource(id, *args.toTypedArray())
+        is Text.StringRes -> stringResource(id, *args.map { it.composeString() }.toTypedArray())
         is Text.Mix -> {
             parts.mapIndexed { _, it -> it.composeString() }.joinToString("")
         }
     }
 
 fun Int.toText(): Text = Text.StringRes(this)
-fun Int.toText(vararg args: String): Text = Text.StringRes(this, args.toList())
+fun Int.toText(vararg args: Text): Text = Text.StringRes(this, args.toList())
 fun String.toText(): Text = Text.Plain(this)

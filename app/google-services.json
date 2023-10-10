@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "172234697589",
+    "project_id": "dopravnipodniky-jaro",
+    "storage_bucket": "dopravnipodniky-jaro.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:172234697589:android:560c57712cd61d4d75813c",
+        "android_client_info": {
+          "package_name": "cz.jaro.dopravnipodniky"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCtsEkkwmN8Qp3epoXjnnUDel07JomZMpM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

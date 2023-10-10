@@ -15,9 +15,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.Circle
-import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
@@ -261,7 +261,7 @@ fun VytvareniLinkyScreen(
                             }
                         }
                     ) {
-                        Icon(Icons.Default.Help, stringResource(R.string.tutorial))
+                        Icon(Icons.AutoMirrored.Filled.Help, stringResource(R.string.tutorial))
                     }
                     IconButton(
                         onClick = {
@@ -277,7 +277,7 @@ fun VytvareniLinkyScreen(
                             navigateUp()
                         }
                     ) {
-                        Icon(Icons.Default.ArrowBack, stringResource(R.string.zpet))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.zpet))
                     }
                 },
             )

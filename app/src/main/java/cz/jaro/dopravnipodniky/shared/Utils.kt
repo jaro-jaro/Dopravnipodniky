@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.center
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toOffset
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
@@ -370,3 +371,11 @@ fun <Z> zip(
 }
 
 fun <T> Iterable<T>.collectionSizeOrDefault(default: Int): Int = if (this is Collection<*>) this.size else default
+
+inline fun <T> Iterable<T>.sumOfDp(selector: (T) -> Dp): Dp {
+    var sum = 0.dp
+    for (element in this) {
+        sum += selector(element)
+    }
+    return sum
+}

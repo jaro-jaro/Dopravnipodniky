@@ -1,8 +1,8 @@
 package cz.jaro.dopravnipodniky.data
 
 import android.util.Log
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
@@ -11,6 +11,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.StavZastavky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Trakce
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Zastavka
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.bonusoveVydajeZaNeekologicnost
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.busy
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.jsouVsechnyZatrolejovane
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.kapacitaZastavky
@@ -20,9 +21,11 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.pocetLinek
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlovac
+import cz.jaro.dopravnipodniky.shared.BusID
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.Smer
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
+import cz.jaro.dopravnipodniky.shared.Text
 import cz.jaro.dopravnipodniky.shared.TypKrizovatky
 import cz.jaro.dopravnipodniky.shared.delkaUlice
 import cz.jaro.dopravnipodniky.shared.delkaZastavky
@@ -31,9 +34,14 @@ import cz.jaro.dopravnipodniky.shared.hezkaCisla
 import cz.jaro.dopravnipodniky.shared.idealniInterval
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.PenizZaMinutu
+import cz.jaro.dopravnipodniky.shared.jednotky.coerceAtMost
 import cz.jaro.dopravnipodniky.shared.jednotky.div
+import cz.jaro.dopravnipodniky.shared.jednotky.formatovat
+import cz.jaro.dopravnipodniky.shared.jednotky.formatovatBezEura
+import cz.jaro.dopravnipodniky.shared.jednotky.kilometruZaHodinu
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.penezZaMin
+import cz.jaro.dopravnipodniky.shared.jednotky.sumOfPenizZaminutu
 import cz.jaro.dopravnipodniky.shared.jednotky.tiku
 import cz.jaro.dopravnipodniky.shared.jednotky.times
 import cz.jaro.dopravnipodniky.shared.jednotky.toDp
@@ -44,7 +52,9 @@ import cz.jaro.dopravnipodniky.shared.odsazeniBusu
 import cz.jaro.dopravnipodniky.shared.odsazeniZastavky
 import cz.jaro.dopravnipodniky.shared.predsazeniKrizovatky
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
+import cz.jaro.dopravnipodniky.shared.sumOfDp
 import cz.jaro.dopravnipodniky.shared.times
+import cz.jaro.dopravnipodniky.shared.toText
 import cz.jaro.dopravnipodniky.shared.udrzbaTroleje
 import cz.jaro.dopravnipodniky.shared.udrzbaZastavky
 import cz.jaro.dopravnipodniky.shared.vecne
@@ -118,7 +128,7 @@ private fun update(
                 if (bus.stavZastavky !is StavZastavky.Na) {
                     // posouvani busu po mape
 
-                    poziceVUlici += bus.typBusu.maxRychlost * ubehlo
+                    poziceVUlici += bus.typBusu.maxRychlost.coerceAtMost(50.kilometruZaHodinu) * ubehlo
 
                     val pristiUlice = when (smerNaLince) {
                         Smer.Pozitivni -> ulicove.getOrNull(indexUliceNaLince + 1)
@@ -325,15 +335,18 @@ private fun update(
         var zisk = 0.0.penezZaMin
         var deltaPrachy = 0.0.penez
 
+        val vydelky = puvodniDp.busy.associate { it.id to it.vydelkuj(puvodniDp) }
+
+        val casti = casti(puvodniDp, vydelky)
+
         puvodniDp.busy.forEach { bus ->
 
             // pocitani zisku
             zisk -= bus.naklady
-            zisk += bus.vydelkuj(puvodniDp)
+            zisk += vydelky[bus.id]!!
 
             // odebrani penez za naklady + starnuti busuu
             deltaPrachy -= bus.naklady * ubehlo
-
         }
 
         // infrastruktura
@@ -368,6 +381,7 @@ private fun update(
             else it
         }
 
+        val detail = Text.Mix(*casti.toTypedArray())
 //                 mimoradnosti
 //
 //                if (nextInt(0, nahodnostKamionu) == 1 && dp.ulicove.any { it.maTrolej }) {
@@ -445,8 +459,88 @@ private fun update(
 //                    println(zisky)
 //                    println(zisky.map { it.value }.average().penezZaMin)
                 },
+                detailZisku = detail
             )
         }
+    }
+}
+
+private fun casti(
+    puvodniDp: DopravniPodnik,
+    vydelky: Map<BusID, PenizZaMinutu>
+): List<Text> {
+    val vydajeZaZastavky = puvodniDp.ulice.count { it.maZastavku } * udrzbaZastavky
+    val vydajeZaTroleje = puvodniDp.ulice.count { it.maTrolej } * udrzbaTroleje
+    val vydajeZaInfrastrukturu = vydajeZaZastavky + vydajeZaTroleje
+
+    return buildList {
+        this += listOf(
+            R.string.celkove_prijmy.toText(puvodniDp.busy.sumOfPenizZaminutu { vydelky[it.id]!! }.formatovat()),
+            "\n".toText(),
+            R.string.celkove_vydaje.toText((puvodniDp.busy.sumOfPenizZaminutu { it.naklady } + vydajeZaInfrastrukturu).formatovat()),
+            "\n".toText(),
+            R.string.celkovy_zisk.toText(puvodniDp.info.zisk.formatovat()),
+            "\n".toText(),
+            "\n".toText(),
+            R.string.vydaje_za_infrastrukturu.toText(vydajeZaInfrastrukturu.formatovat()),
+            "\n".toText(),
+            R.string.vydaje_za_zastavky.toText(vydajeZaZastavky.formatovat()),
+            "\n".toText(),
+            R.string.vydaje_za_troleje.toText(vydajeZaTroleje.formatovat()),
+            "\n".toText(),
+            "\n".toText(),
+            R.string.vydaje_za_ekologii.toText(),
+            "\n".toText(),
+            R.string.vydaje_za_neekologicke_vozy.toText(puvodniDp.busy.sumOfPenizZaminutu { it.typBusu.trakce.bonusoveVydajeZaNeekologicnost() }
+                .formatovat()),
+            "\n".toText(),
+            "\n".toText(),
+            R.string.zisk_linek.toText(),
+            "\n".toText(),
+        )
+
+        this += puvodniDp.linky.flatMap { linka ->
+            listOf(
+                R.string.linka_vydelava_tohle.toText(
+                    linka.cislo.toText(),
+                    linka.busy(puvodniDp).sumOfPenizZaminutu { vydelky[it.id]!! - it.naklady }.formatovat()
+                ),
+                "\n".toText(),
+            )
+        }
+        if (puvodniDp.linky.isEmpty()) this += listOf(
+            R.string.nemate_zadnou_linku.toText(),
+            "\n".toText(),
+        )
+
+        this += listOf(
+            "\n".toText(),
+            R.string.zisk_vozidel.toText(),
+            "\n".toText(),
+        )
+
+        this += puvodniDp.busy.flatMap { bus ->
+            listOf(
+                if (bus.linka == null) {
+                    R.string.bus_prodelava_tolik.toText(
+                        bus.evCislo.toString().toText(),
+                        bus.naklady.formatovat()
+                    )
+                } else {
+                    R.string.bus_vydelava_tolik.toText(
+                        bus.evCislo.toString().toText(),
+                        vydelky[bus.id]!!.formatovatBezEura(),
+                        bus.naklady.formatovatBezEura(),
+                        (vydelky[bus.id]!! - bus.naklady).formatovat()
+                    )
+                },
+                "\n".toText(),
+            )
+        }
+        if (puvodniDp.busy.isEmpty()) this += listOf(
+            R.string.nemate_zadny_bus.toText(),
+            "\n".toText(),
+        )
     }
 }
 
@@ -642,11 +736,11 @@ fun Bus.vydelkuj(
 
     val ziskZaKolo = puvodniDp.info.jizdne * nastupujicichZaKolo * nasobitelZisku
 
-    val dobaUlic = (delkaUlice - predsazeniKrizovatky * 2) * linka.ulice.size * 2 / typBusu.maxRychlost
+    val dobaUlic = (delkaUlice - predsazeniKrizovatky * 2) * linka.ulice.size * 2 / typBusu.maxRychlost.coerceAtMost(50.kilometruZaHodinu)
 
     val dobaKrizovatek = ulicove.windowed(
         2, partialWindows = true
-    ).sumOf { dvojice ->
+    ).sumOfDp { dvojice ->
         val ulice = dvojice.first()
         val pristiUlice = dvojice.getOrNull(1)
 
@@ -687,8 +781,8 @@ fun Bus.vydelkuj(
             }
         }
 
-        delkaKrizovatky.value.toDouble()
-    }.dp * 2 / typBusu.maxRychlost
+        delkaKrizovatky
+    } * 2 / typBusu.maxRychlost.coerceAtMost(50.kilometruZaHodinu)
 
     val dobaKola = dobaUlic + dobaKrizovatek
 

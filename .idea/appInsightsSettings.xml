@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="cz.jaro.dopravnipodniky" />
+                  <option name="mobileSdkAppId" value="1:172234697589:android:560c57712cd61d4d75813c" />
+                  <option name="projectId" value="dopravnipodniky-jaro" />
+                  <option name="projectNumber" value="172234697589" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

@@ -118,6 +118,11 @@ class SharedViewModel(
             dosahlovac.dosahni(it)
         }
     }
+    val dosahni2: (KClass<out Dosahlost>, hodnota: Int) -> Unit = { it, h ->
+        viewModelScope.launch {
+            dosahlovac.dosahniPocetniDosahlost(it, h)
+        }
+    }
 
     fun najit3NovaMesta(
         investice: Peniz,
