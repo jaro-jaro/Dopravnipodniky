@@ -367,6 +367,13 @@ private fun update(
             dataSource.vse.first().prachy.plus(deltaPrachy).value.roundToInt(),
         )
 
+        dosahlovac.dosahniPocetniDosahlost(
+            Dosahlost.SkupinovaDosahlost.Bus::class,
+            dataSource.dp.first().busy.size,
+        )
+
+        if (dataSource.dp.first().busy.any { it.linka != null }) dosahlovac.dosahni(Dosahlost.BusNaLince::class)
+
         if (puvodniDp.info.jmenoMesta == vecne) {
             dosahlovac.dosahni(Dosahlost.Vecne1::class)
             if (puvodniDp.linky.map { it.cislo.toIntOrNull() }.toSet() == vecneLinky)

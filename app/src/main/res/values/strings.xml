@@ -255,11 +255,11 @@
     <string name="d_p_bus1">A z toho plynou práva a povinnosti, jako například starat se o svůj bus, proto od nás něco dostanete.</string>
     <string name="d_n_bus2">Druhý bus!</string>
     <string name="d_p_bus2">To se ta vozovna ale rozrůstá, že?</string>
-    <string name="d_n_bus12">Kupte tucet busů</string>
+    <string name="d_n_bus12">Vlastněte tucet busů</string>
     <string name="d_p_bus12">Tucet je dost, ale do budoucna to stačit určitě nebude. Tak neváhej a kupuj!</string>
-    <string name="d_n_bus60">Kupte kopu vozidel</string>
+    <string name="d_n_bus60">Vlastněte kopu vozidel</string>
     <string name="d_p_bus60">Kopa je ještě víc, ale do budoucna to stejně stačit určitě nebude. Tak neváhej, kupuj, kupuj a kupuj!</string>
-    <string name="d_n_bus1024">Kupte deset bitů busů</string>
+    <string name="d_n_bus1024">Vlastněte deset bitů busů</string>
     <string name="d_p_bus1024">Deset bitů je opravdu nejvíc, tedy do budoucna to stačí</string>
     <string name="d_n_penize200000">Vydělejte 200 000 €</string>
     <string name="d_p_penize200000">200 000 € není moc, ale na většinu vozidel to stačí</string>

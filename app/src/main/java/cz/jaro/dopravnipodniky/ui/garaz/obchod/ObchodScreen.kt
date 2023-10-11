@@ -70,7 +70,6 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.ikonka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.jsouVsechnyZatrolejovane
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.nakladyTextem
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
-import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.dialogState
 import cz.jaro.dopravnipodniky.shared.LinkaID
 import cz.jaro.dopravnipodniky.shared.Menic
@@ -83,7 +82,6 @@ import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.toText
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import kotlin.reflect.KClass
 
 @Composable
 @Destination
@@ -114,8 +112,6 @@ fun ObchodScreen(
         vse = vse!!,
         menic = viewModel.menic,
         navigateBack = navigator::navigateUp,
-        dosahni = viewModel.dosahni,
-        dosahni2 = viewModel.dosahni2,
     )
 }
 
@@ -133,8 +129,6 @@ fun ObchodScreen(
     vse: Vse,
     menic: Menic,
     navigateBack: () -> Unit,
-    dosahni: (KClass<out Dosahlost>) -> Unit,
-    dosahni2: (KClass<out Dosahlost>, Int) -> Unit,
 ) {
     var stav by rememberSaveable { mutableStateOf(Zobrait.Vysledky) }
     BackHandler {
@@ -369,11 +363,6 @@ fun ObchodScreen(
                                     }
 
                                     val novyBusy = seznamEvC.map { evC ->
-                                        if (naLinku != null) {
-                                            dosahni(Dosahlost.BusNaLince::class)
-                                        }
-                                        dosahni(Dosahlost.SkupinovaDosahlost.Bus::class)
-
                                         Bus(
                                             evCislo = evC,
                                             typBusu = typBusu,
