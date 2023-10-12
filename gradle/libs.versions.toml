@@ -25,6 +25,7 @@ koin-annotations = "1.2.2"
 koin-android = "3.4.3"
 google-services = "4.4.0"
 firebase-crashlytics = "2.9.9"
+numberpicker = "1.0.3"
 
 [libraries]
 firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx", version.ref = "firebase-analytics-ktx" }
@@ -54,6 +55,7 @@ androidx-activity-compose = { module = "androidx.activity:activity-compose", ver
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle-compose" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle-compose" }
 androidx-datastore = { module = "androidx.datastore:datastore-preferences", version.ref = "androidx-datastore" }
+numberpicker = { module = "com.chargemap.compose:numberpicker", version.ref = "numberpicker" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

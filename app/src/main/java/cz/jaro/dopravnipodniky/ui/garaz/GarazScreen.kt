@@ -58,6 +58,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.Direction
+import cz.jaro.compose_dialog.show
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
@@ -232,7 +233,7 @@ fun GarazScreen(
                                                         enabled = evc.isNotEmpty() && evc.toIntOrNull() != null && evc.toInt() >= 1,
                                                         onClick = {
                                                             if (evc.toInt() == bus.evCislo) {
-                                                                dialogState.hideTopMost()
+                                                                hide()
                                                                 return@TextButton
                                                             }
 
@@ -245,7 +246,7 @@ fun GarazScreen(
                                                                 return@TextButton
                                                             }
 
-                                                            dialogState.hideTopMost()
+                                                            hide()
 
                                                             menic.zmenitBusy {
                                                                 val i = indexOfFirst { it.id == bus.id }
@@ -354,7 +355,7 @@ fun GarazScreen(
                                                             menic.zmenitBusy {
                                                                 replaceBy(bus.copy(linka = null)) { it.id }
                                                             }
-                                                            dialogState.hideTopMost()
+                                                            hide()
                                                         }
                                                     ) {
                                                         Text(stringResource(R.string.odebrat_bus_z_linek))
@@ -382,7 +383,7 @@ fun GarazScreen(
                                                                     ) { it.id }
                                                                 }
                                                                 dosahni(Dosahlost.BusNaLince::class)
-                                                                dialogState.hideTopMost()
+                                                                hide()
                                                             },
                                                             leadingContent = {
                                                                 Icon(Icons.Default.Timeline, null, tint = linka.barvicka.barva)
@@ -439,7 +440,7 @@ fun GarazScreen(
                                                                     it - bus.prodejniCena
                                                                 }
 
-                                                                dialogState.hideTopMost()
+                                                                hide()
 
                                                                 snackbarHostState.showSnackbar(
                                                                     message = prodaciZprava,
@@ -454,7 +455,7 @@ fun GarazScreen(
                                                 dismissButton = {
                                                     TextButton(
                                                         onClick = {
-                                                            dialogState.hideTopMost()
+                                                            hide()
                                                         }
                                                     ) {
                                                         Text(stringResource(R.string.zrusit))

@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import cz.jaro.compose_dialog.show
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
@@ -385,7 +386,7 @@ fun ObchodScreen(
                                         confirmButton = {
                                             TextButton(
                                                 onClick = {
-                                                    dialogState.hideTopMost()
+                                                    hide()
                                                     callback(pocet)
                                                 }
                                             ) {
@@ -420,7 +421,6 @@ fun ObchodScreen(
                                     }
 
                                     if (pouzitelneLinky.isEmpty()) {
-                                        dialogState.hideTopMost()
                                         callback(null)
                                     }
                                     else dialogState.show(
@@ -428,7 +428,7 @@ fun ObchodScreen(
                                         dismissButton = {
                                             TextButton(
                                                 onClick = {
-                                                    dialogState.hideTopMost()
+                                                    hide()
                                                     callback(null)
                                                 }
                                             ) {
@@ -445,7 +445,7 @@ fun ObchodScreen(
                                                         Text(it.cislo)
                                                     },
                                                     Modifier.clickable {
-                                                        dialogState.hideTopMost()
+                                                        hide()
                                                         callback(it.id)
                                                     },
                                                     leadingContent = {
@@ -463,7 +463,7 @@ fun ObchodScreen(
                                             TextButton(
                                                 enabled = evc.isNotEmpty() && evc.toIntOrNull() != null && evc.toInt() >= 1,
                                                 onClick = {
-                                                    dialogState.hideTopMost()
+                                                    hide()
                                                     callback(evc)
                                                 }
                                             ) {

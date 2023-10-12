@@ -127,8 +127,6 @@ val minimumInvestice = 1_000_000L.penez
 
 const val oddalenyRezim = 1.2F
 const val maximalniOddaleni = .1F
-val pocatecniPosunutiX = 0.dp //200
-val pocatecniPosunutiY = 0.dp //600
 
 val ulicovyBlok = 72.metru.toDp()
 
@@ -177,10 +175,8 @@ val barvaTroleje = Color(32, 32, 32)
 
 const val TPS = 90
 const val TPM = TPS * 60
-const val TPH = TPM * 60
 
-var zrychlovacHry by mutableFloatStateOf(/*480F*/.25F/*1F*//*60F*/)
-
+var zrychlovacHry by mutableFloatStateOf(/*480F*//*.25F*/1F/*60F*/)
 
 const val millisPerTik = 1000L / TPS
 

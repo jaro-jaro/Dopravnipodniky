@@ -41,21 +41,25 @@ class Dosahlovac(
         }
 
         val novaDosahlost = dosahlost.kopirovat(Dosahlost.Stav.Splneno(LocalDateTime.now()))
-        ulozit(novaDosahlost)
+        val vse = ulozit(novaDosahlost)
         dataSource.upravitPrachy {
             it + dosahlost.odmena
         }
 
-        dosahlostCallback.zobrazitSnackbar(novaDosahlost, listOf())
+        dosahlostCallback.zobrazitSnackbar(novaDosahlost, vse)
     }
 
-    private suspend fun ulozit(novaDosahlost: Dosahlost.NormalniDosahlost) {
+    private suspend fun ulozit(novaDosahlost: Dosahlost.NormalniDosahlost): List<Dosahlost.NormalniDosahlost> {
+        var vysledek: List<Dosahlost.NormalniDosahlost>? = null
         dataSource.upravitDosahlosti {
             add(0, novaDosahlost)
             val ruzne = distinctBy { it::class }
             clear()
             addAll(ruzne)
+            vysledek = this
         }
+        while (vysledek == null) Unit
+        return vysledek!!
     }
 
     suspend fun dosahni(dosahlostKlass: KClass<out Dosahlost>) {
@@ -83,11 +87,11 @@ class Dosahlovac(
         }
 
         val novaDosahlost = dosahlost.kopirovat(Dosahlost.Stav.Splneno(LocalDateTime.now()))
-        ulozit(novaDosahlost)
+        val vse = ulozit(novaDosahlost)
         dataSource.upravitPrachy {
             it + dosahlost.odmena
         }
 
-        dosahlostCallback.zobrazitSnackbar(novaDosahlost, listOf())
+        dosahlostCallback.zobrazitSnackbar(novaDosahlost, vse)
     }
 }

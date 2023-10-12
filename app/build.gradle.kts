@@ -16,7 +16,7 @@ android {
         minSdk = 26
         targetSdk = 34
         versionCode = 1
-        versionName = "3.0.0-pre.1"
+        versionName = "3.0.0-pre.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -80,4 +80,5 @@ dependencies {
     implementation(kotlin("reflect"))
     implementation(libs.firebase.analytics.ktx)
     implementation(libs.firebase.crashlytics.ktx)
+    implementation(libs.numberpicker)
 }

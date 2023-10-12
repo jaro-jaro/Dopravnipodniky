@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.toOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import cz.jaro.compose_dialog.show
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
@@ -435,7 +436,7 @@ fun VytvareniLinkyScreen(
                                                 add(linka)
                                             }
                                             waitForExit = linka.id
-                                            dialogState.hideTopMost()
+                                            hide()
                                         }
                                     ) {
                                         Text(stringResource(android.R.string.ok))

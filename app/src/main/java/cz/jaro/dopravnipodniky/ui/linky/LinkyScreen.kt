@@ -58,6 +58,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.Direction
+import cz.jaro.compose_dialog.show
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
@@ -215,7 +216,6 @@ fun LinkyScreen(
                                                 withDismissAction = true,
                                             )
                                         }
-                                        dialogState.hideTopMost()
                                     }
                                 ) {
                                     Icon(Icons.Default.FormatLineSpacing, null)
@@ -264,7 +264,7 @@ fun LinkyScreen(
                                                                 )
                                                             }
 
-                                                            dialogState.hideTopMost()
+                                                            hide()
                                                         }
                                                     ) {
                                                         Text(stringResource(android.R.string.ok))
@@ -360,7 +360,7 @@ fun LinkyScreen(
                                                                         withDismissAction = true,
                                                                     )
                                                                 }
-                                                                dialogState.hideTopMost()
+                                                                hide()
                                                                 return@TextButton
                                                             }
 
@@ -385,7 +385,7 @@ fun LinkyScreen(
                                                                     withDismissAction = true,
                                                                 )
                                                             }
-                                                            dialogState.hideTopMost()
+                                                            hide()
                                                         }
                                                     ) {
                                                         Text(stringResource(android.R.string.ok))
@@ -429,7 +429,7 @@ fun LinkyScreen(
                                                             menic.zmenitLinky {
                                                                 remove(linka)
                                                             }
-                                                            dialogState.hideTopMost()
+                                                            hide()
                                                         }
                                                     ) {
                                                         Text(stringResource(android.R.string.ok))
@@ -447,7 +447,7 @@ fun LinkyScreen(
                                                 dismissButton = {
                                                     TextButton(
                                                         onClick = {
-                                                            dialogState.hideTopMost()
+                                                            hide()
                                                         }
                                                     ) {
                                                         Text(stringResource(R.string.zrusit))
