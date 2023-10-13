@@ -50,6 +50,7 @@ import cz.jaro.dopravnipodniky.shared.minutes
 import cz.jaro.dopravnipodniky.shared.prodejniCenaCloveka
 import cz.jaro.dopravnipodniky.shared.vecne
 import cz.jaro.dopravnipodniky.snackbarHostState
+import cz.jaro.dopravnipodniky.ui.main.DEBUG_TEXT
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -89,6 +90,15 @@ fun DopravniPodnik(
     )
     Text(
         text = stringResource(
+            R.string.jizdne,
+            dp.info.jizdne.asString(),
+        ),
+        Modifier
+            .fillMaxWidth()
+            .padding(all = 8.dp),
+    )
+    Text(
+        text = stringResource(
             R.string.typ_mesta,
             dp.typMesta.composeString(),
         ),
@@ -105,7 +115,7 @@ fun DopravniPodnik(
             .fillMaxWidth()
             .padding(all = 8.dp),
     )
-    Text(
+    if (DEBUG_TEXT) Text(
         text = "Potenciál města: ${dp.ulice.sumOf { it.potencial }.formatovat(0).composeString()}",
         Modifier
             .fillMaxWidth()
@@ -304,7 +314,7 @@ fun DopravniPodnik(
 //                        }
                     },
                     title = {
-                        Text(stringResource(R.string.vyberte_linku))
+                        Text(stringResource(R.string.zmenit_jizdne))
                     },
                     content = {
                         Surface {

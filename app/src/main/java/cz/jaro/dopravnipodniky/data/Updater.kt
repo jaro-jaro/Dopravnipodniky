@@ -32,7 +32,6 @@ import cz.jaro.dopravnipodniky.shared.delkaZastavky
 import cz.jaro.dopravnipodniky.shared.dobaPobytuNaZastavce
 import cz.jaro.dopravnipodniky.shared.hezkaCisla
 import cz.jaro.dopravnipodniky.shared.idealniInterval
-import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.PenizZaMinutu
 import cz.jaro.dopravnipodniky.shared.jednotky.coerceAtMost
 import cz.jaro.dopravnipodniky.shared.jednotky.div
@@ -344,6 +343,9 @@ private fun update(
             // pocitani zisku
             zisk -= bus.naklady
             zisk += vydelky[bus.id]!!
+//
+//            println(vydelky[bus.id]!! - bus.naklady)
+//            println(vydelky[bus.id]!!)
 
             // odebrani penez za naklady + starnuti busuu
             deltaPrachy -= bus.naklady * ubehlo
@@ -359,6 +361,8 @@ private fun update(
 
         deltaPrachy -= (zaZastavky * ubehlo + zaTroleje * ubehlo)
         zisk -= (zaZastavky + zaTroleje)
+//
+//        println(-(zaZastavky + zaTroleje))
 
         // dosahlosti
 
@@ -383,7 +387,7 @@ private fun update(
         // tutorial
 
         dataSource.upravitTutorial {
-            if (it je StavTutorialu.Tutorialujeme.Vypraveni && puvodniVse.prachy + deltaPrachy >= 1_500_000.penez)
+            if (it == StavTutorialu.Odkliknuto(StavTutorialu.Tutorialujeme.Vypraveni) && puvodniVse.prachy + deltaPrachy >= 1_500_000.penez)
                 StavTutorialu.Tutorialujeme.NovejDp
             else it
         }

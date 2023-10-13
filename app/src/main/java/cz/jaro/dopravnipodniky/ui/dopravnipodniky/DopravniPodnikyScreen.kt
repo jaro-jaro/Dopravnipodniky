@@ -66,10 +66,12 @@ import cz.jaro.dopravnipodniky.snackbarHostState
 import cz.jaro.dopravnipodniky.ui.destinations.NovyDopravniPodnikScreenDestination
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import kotlin.random.Random
 import kotlin.reflect.KClass
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 @Destination
@@ -153,6 +155,12 @@ fun DopravniPodnikyScreen(
                                     if (i < minimumInvestice && i != 69_420.penez) {
 
                                         scope.launch {
+                                            loading = 4F
+
+                                            delay(3.seconds)
+
+                                            loading = null
+
                                             snackbarHostState.showSnackbar(
                                                 message = ctx.getString(R.string.nigdo_nebyl_ochoten),
                                                 duration = SnackbarDuration.Indefinite
@@ -195,7 +203,27 @@ fun DopravniPodnikyScreen(
                                             }
                                         ) {
                                             loading = null
-                                            navigate(NovyDopravniPodnikScreenDestination)
+                                            dialogState.show(
+                                                confirmButton = {
+                                                    TextButton(
+                                                        onClick = {
+                                                            hide()
+                                                            navigate(NovyDopravniPodnikScreenDestination)
+                                                        }
+                                                    ) {
+                                                        Text(stringResource(android.R.string.ok))
+                                                    }
+                                                },
+                                                onDismissed = {
+                                                    navigate(NovyDopravniPodnikScreenDestination)
+                                                },
+                                                content = {
+                                                    Text("Za vaši částku, která vám byla odečtena jsme úspěšně nalezli tři města. Nyní si je můžete prohlédnout a vybrat si to pravé!")
+                                                },
+                                                title = {
+                                                    Text(stringResource(R.string.novy_dp))
+                                                }
+                                            )
                                         }
                                     }
                                 }
@@ -237,15 +265,24 @@ fun DopravniPodnikyScreen(
                 Column(
                     Modifier.fillMaxWidth()
                 ) {
-                    if (loading!! != 3F) {
-                        Text("${loading!!.toInt() + 1}: ${((loading!! % 1) * 100).formatovat(2).composeString()} %")
-                        LinearProgressIndicator(
-                            progress = loading!! % 1,
-                            Modifier.fillMaxWidth()
-                        )
-                    } else {
-                        Text("Hotovo!")
-                        LinearProgressIndicator(Modifier.fillMaxWidth())
+                    when {
+                        loading!! == 4F -> {
+                            LinearProgressIndicator(
+                                progress = loading!! % 1,
+                                Modifier.fillMaxWidth()
+                            )
+                        }
+                        loading!! != 3F -> {
+                            Text("${loading!!.toInt() + 1}: ${((loading!! % 1) * 100).formatovat(2).composeString()} %")
+                            LinearProgressIndicator(
+                                progress = loading!! % 1,
+                                Modifier.fillMaxWidth()
+                            )
+                        }
+                        else -> {
+                            Text("Hotovo!")
+                            LinearProgressIndicator(Modifier.fillMaxWidth())
+                        }
                     }
                 }
             },

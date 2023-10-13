@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -35,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.center
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
@@ -107,9 +108,11 @@ fun NovyDopravniPodnikScreen(
                 Modifier.fillMaxSize(),
             ) {
                 Text(
-                    text = dp.info.jmenoMesta,
-                    Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.headlineMedium,
+                    text = "${dp.info.jmenoMesta}:",
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Center,
                 )
                 val density = LocalDensity.current
@@ -162,7 +165,7 @@ fun NovyDopravniPodnikScreen(
                     else CircularProgressIndicator()
                 }
                 Row(
-                    Modifier.fillMaxWidth(),
+                    Modifier.fillMaxWidth().padding(all = 8.dp),
                 ) {
                     IconButton(
                         onClick = {
@@ -173,7 +176,7 @@ fun NovyDopravniPodnikScreen(
                             dpId = podniky.toList()[(i - 1 + 3) % 3].info.id.toString()
                         },
                     ) {
-                        Icon(Icons.Default.KeyboardArrowLeft, "Vlevo")
+                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, "Vlevo")
                     }
                     Spacer(Modifier.weight(1F))
                     Button(
@@ -196,7 +199,7 @@ fun NovyDopravniPodnikScreen(
                             dpId = podniky.toList()[(i + 1) % 3].info.id.toString()
                         },
                     ) {
-                        Icon(Icons.Default.KeyboardArrowRight, "Vpravo")
+                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, "Vpravo")
                     }
                 }
             }

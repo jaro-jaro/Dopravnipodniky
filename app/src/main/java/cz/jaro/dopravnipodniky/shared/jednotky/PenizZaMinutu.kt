@@ -22,6 +22,7 @@ value class PenizZaMinutu(val value: Double) : Comparable<PenizZaMinutu> {
 
     override fun compareTo(other: PenizZaMinutu) = value.compareTo(other.value)
     operator fun div(other: Int) = PenizZaMinutu(value / other)
+    operator fun unaryMinus() = PenizZaMinutu(value.unaryMinus())
 }
 
 operator fun Int.times(other: PenizZaMinutu) = PenizZaMinutu(this * other.value)

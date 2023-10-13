@@ -126,9 +126,9 @@ class SharedViewModel(
     ) {
         CoroutineScope(Dispatchers.IO).launch {
 
-            menic.zmenitPrachy {
-                it - investice
-            }
+//            menic.zmenitPrachy {
+//                it - investice
+//            }
 
             _novePodniky.value = Triple(
                 Generator(investice).vygenerujMiMestoAToHnedVykricnik {

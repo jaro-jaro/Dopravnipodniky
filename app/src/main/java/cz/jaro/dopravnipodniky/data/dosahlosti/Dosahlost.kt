@@ -57,11 +57,11 @@ sealed interface Dosahlost {
         @SerialName("BusDosahlost")
         data object Bus : SkupinovaDosahlost {
             override val dosahlosti = listOf(
-                Bus1::class,
-                Bus2::class,
-                Bus12::class,
-                Bus60::class,
                 Bus1024::class,
+                Bus60::class,
+                Bus12::class,
+                Bus2::class,
+                Bus1::class,
             )
         }
 
@@ -69,11 +69,11 @@ sealed interface Dosahlost {
         @SerialName("PenizeDosahlost")
         data object Penize : SkupinovaDosahlost {
             override val dosahlosti = listOf(
-                Penize200000::class,
-                Penize500000::class,
-                Penize1000000::class,
-                Penize2000000::class,
                 Penize10000000::class,
+                Penize2000000::class,
+                Penize1000000::class,
+                Penize500000::class,
+                Penize200000::class,
             )
         }
 
