@@ -6,7 +6,7 @@ import cz.jaro.dopravnipodniky.shared.jednotky.DpZaHodinu
 import cz.jaro.dopravnipodniky.shared.jednotky.Metr
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.PenizZaMinutu
-import cz.jaro.dopravnipodniky.shared.jednotky.metru
+import cz.jaro.dopravnipodniky.shared.zaokrouhlit
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration
@@ -31,7 +31,7 @@ data class TypBusu(
 
     init {
         require(clanky.isNotEmpty())
-        require(clanky.sumOf { it.value }.metru == delka)
+        require(clanky.sumOf { it.value }.zaokrouhlit(3) == delka.value.zaokrouhlit(3)) { "${clanky.sumOf { it.value }.zaokrouhlit(3)} != ${delka.value.zaokrouhlit(3)}" }
     }
 }
 

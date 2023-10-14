@@ -36,10 +36,7 @@ fun Double.formatovat(decimalPlaces: Int = 2): Text {
     if (this == Double.NEGATIVE_INFINITY) return R.string.nekonecne_malo.toText()
 
     return this
-        .times(10F.pow(decimalPlaces))
-        .roundToLong()
-        .toDouble()
-        .div(10F.pow(decimalPlaces))
+        .zaokrouhlit(decimalPlaces)
         .toBigDecimal()
         .toPlainString()
         .split(".")
@@ -55,6 +52,12 @@ fun Double.formatovat(decimalPlaces: Int = 2): Text {
         .joinToString(",")
         .toText()
 }
+
+fun Double.zaokrouhlit(decimalPlaces: Int = 0) = this
+    .times(10F.pow(decimalPlaces))
+    .roundToLong()
+    .toDouble()
+    .div(10F.pow(decimalPlaces))
 
 private fun String.formatovatTrojice() = toList()
     .reversed()
