@@ -132,7 +132,11 @@ private val autobusy = listOf(
         maxRychlost = 70.kilometruZaHodinu,
         maxNaklady = 220.penezZaMin,
         cena = 120_000.penez,
-        delka = 16.66F.metru,
+        delka = 16.6F.metru,
+        clanky = listOf(
+            9.6.metru,
+            7.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 150.hours,
         popis = """
@@ -205,6 +209,10 @@ private val autobusy = listOf(
         maxNaklady = 150.penezZaMin,
         cena = 150_000.penez,
         delka = 17.355F.metru,
+        clanky = listOf(
+            10.6.metru,
+            6.755.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 324.hours,
         popis = """
@@ -277,6 +285,10 @@ private val autobusy = listOf(
         maxNaklady = 120.penezZaMin,
         cena = 160_000.penez,
         delka = 17.355F.metru,
+        clanky = listOf(
+            10.6.metru,
+            6.755.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 200.hours,
         popis = """
@@ -349,6 +361,10 @@ private val autobusy = listOf(
         maxNaklady = 99.penezZaMin,
         cena = 170_000.penez,
         delka = 17.615F.metru,
+        clanky = listOf(
+            10.6.metru,
+            7.015.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 256.hours,
         popis = """
@@ -421,6 +437,10 @@ private val autobusy = listOf(
         maxNaklady = 89.penezZaMin,
         cena = 180_000.penez,
         delka = 17.59F.metru,
+        clanky = listOf(
+            10.6.metru,
+            6.99.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 251.hours,
         popis = """
@@ -540,6 +560,10 @@ private val autobusy = listOf(
         maxNaklady = 190.penezZaMin,
         cena = 110_000.penez,
         delka = 16.5F.metru,
+        clanky = listOf(
+            9.43.metru,
+            7.07.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 140.hours,
         popis = """
@@ -796,6 +820,10 @@ private val autobusy = listOf(
         maxNaklady = 100.penezZaMin,
         cena = 140_000.penez,
         delka = 16.5F.metru,
+        clanky = listOf(
+            9.43.metru,
+            7.07.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 444.hours,
         popis = """
@@ -819,6 +847,10 @@ private val autobusy = listOf(
         maxNaklady = 110.penezZaMin,
         cena = 145_000.penez,
         delka = 16.5F.metru,
+        clanky = listOf(
+            9.43.metru,
+            7.07.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 200.hours,
         popis = """
@@ -842,6 +874,10 @@ private val autobusy = listOf(
         maxNaklady = 110.penezZaMin,
         cena = 150_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.1.metru,
+            7.9.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 200.hours,
         popis = """
@@ -865,6 +901,10 @@ private val autobusy = listOf(
         maxNaklady = 110.penezZaMin,
         cena = 155_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.1.metru,
+            7.9.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 190.hours,
         popis = """
@@ -888,6 +928,11 @@ private val autobusy = listOf(
         maxNaklady = 100.penezZaMin,
         cena = 250_000.penez,
         delka = 22.68F.metru,
+        clanky = listOf(
+            10.1.metru,
+            5.64.metru,
+            6.94.metru
+        ),
         sirka = 2.500.metru,
         vydrz = 300.hours,
         popis = """
@@ -980,10 +1025,14 @@ private val autobusy = listOf(
         maxNaklady = 98.penezZaMin,
         cena = 155_000.penez,
         delka = 17.63F.metru,
+        clanky = listOf(
+            8.9.metru,
+            7.73.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 220.hours,
         popis = """
-            |Ikarus 417 je příměstsko-městský nízkopodlažní (bez schodišťový) posuvný autobus továrny na autobusy Ikarus v Budapešti. S tímto designem byl také průkopníkem ve světě. Byl představen v roce 1994.
+            |Ikarus 417 je příměstsko-městský nízkopodlažní (bez schodišťový) posuvný autobus továrny na autobusy Ikarus v Budapešti. S tímto designem byl také průkopníkem ve světě. Byl představen v roce 1994. V České republice byl pouze jeden provozní kus, a to v Táboře. Táborský Ikarus byl první nízkopodlažní kloubový autobus v České republice 
             |
             |Výrobce: Ikarus Karosszéria - és Járműgyár
             |Rok výroby: 1995 – 2002
@@ -1003,6 +1052,10 @@ private val autobusy = listOf(
         maxNaklady = 99.penezZaMin,
         cena = 150_000.penez,
         delka = 17.85F.metru,
+        clanky = listOf(
+            10.4.metru,
+            7.45.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 200.hours,
         popis = """
@@ -1026,6 +1079,10 @@ private val autobusy = listOf(
         maxNaklady = 96.penezZaMin,
         cena = 160_000.penez,
         delka = 18.034F.metru,
+        clanky = listOf(
+            11.4.metru,
+            6.634.metru,
+        ),
         sirka = 2.600.metru,
         vydrz = 195.hours,
         popis = """
@@ -1141,6 +1198,10 @@ private val autobusy = listOf(
         maxNaklady = 60.penezZaMin,
         cena = 160_000.penez,
         delka = 18.75F.metru,
+        clanky = listOf(
+            11.metru,
+            7.75.metru,
+        ),
         sirka = 2.090.metru,
         vydrz = 234.hours,
         popis = """
@@ -1164,6 +1225,10 @@ private val autobusy = listOf(
         maxNaklady = 62.penezZaMin,
         cena = 225_000.penez,
         delka = 18.135F.metru,
+        clanky = listOf(
+            9.635.metru,
+            8.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 178.hours,
         popis = """
@@ -1860,6 +1925,10 @@ private val autobusy = listOf(
         maxNaklady = 89.penezZaMin,
         cena = 120_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.5.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 169.hours,
         popis = """
@@ -1884,6 +1953,10 @@ private val autobusy = listOf(
         maxNaklady = 79.penezZaMin,
         cena = 135_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.5.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 196.hours,
         popis = """
@@ -1908,6 +1981,10 @@ private val autobusy = listOf(
         maxNaklady = 68.penezZaMin,
         cena = 150_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.5.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 234.hours,
         popis = """
@@ -1960,6 +2037,10 @@ private val autobusy = listOf(
         maxNaklady = 70.penezZaMin,
         cena = 160_000.penez,
         delka = 18.75F.metru,
+        clanky = listOf(
+            11.25.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 234.hours,
         popis = """
@@ -1984,6 +2065,10 @@ private val autobusy = listOf(
         maxNaklady = 77.penezZaMin,
         cena = 160_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.5.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 196.hours,
         popis = """
@@ -2008,6 +2093,10 @@ private val autobusy = listOf(
         maxNaklady = 66.penezZaMin,
         cena = 175_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.5.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 225.hours,
         popis = """
@@ -2032,6 +2121,10 @@ private val autobusy = listOf(
         maxNaklady = 60.penezZaMin,
         cena = 190_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.5.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 225.hours,
         popis = """
@@ -2056,6 +2149,10 @@ private val autobusy = listOf(
         maxNaklady = 66.penezZaMin,
         cena = 175_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.5.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 234.hours,
         popis = """
@@ -2080,6 +2177,10 @@ private val autobusy = listOf(
         maxNaklady = 60.penezZaMin,
         cena = 190_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.5.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 255.hours,
         popis = """
@@ -2104,6 +2205,10 @@ private val autobusy = listOf(
         maxNaklady = 60.penezZaMin,
         cena = 240_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.5.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 255.hours,
         popis = """
@@ -2127,7 +2232,11 @@ private val autobusy = listOf(
         maxRychlost = 80.kilometruZaHodinu,
         maxNaklady = 67.penezZaMin,
         cena = 180_000.penez,
-        delka = 18F.metru,
+        delka = 18.1F.metru,
+        clanky = listOf(
+            10.6.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 255.hours,
         popis = """
@@ -2135,7 +2244,7 @@ private val autobusy = listOf(
             |
             |Výrobce: Solaris bus & coach
             |Rok výroby: od roku 2014
-            |Délka: 18 000 mm
+            |Délka: 18 100 mm
             |Šířka: 2 550 mm
             |Hmotnost: 15 000 kg
             |Maximální rychlost: 80 km/h
@@ -2151,7 +2260,11 @@ private val autobusy = listOf(
         maxRychlost = 80.kilometruZaHodinu,
         maxNaklady = 65.penezZaMin,
         cena = 205_000.penez,
-        delka = 18F.metru,
+        delka = 18.1F.metru,
+        clanky = listOf(
+            10.6.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 255.hours,
         popis = """
@@ -2159,7 +2272,7 @@ private val autobusy = listOf(
             |
             |Výrobce: Solaris bus & coach
             |Rok výroby: od roku 2010
-            |Délka: 18 000 mm
+            |Délka: 18 100 mm
             |Šířka: 2 550 mm
             |Hmotnost: 15 000 kg
             |Maximální rychlost: 80 km/h
@@ -2176,6 +2289,10 @@ private val autobusy = listOf(
         maxNaklady = 52.penezZaMin,
         cena = 550_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.5.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 270.hours,
         popis = """
@@ -2296,6 +2413,10 @@ private val autobusy = listOf(
         maxNaklady = 81.penezZaMin,
         cena = 155_000.penez,
         delka = 17.8F.metru,
+        clanky = listOf(
+            9.8.metru,
+            8.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 200.hours,
         popis = """
@@ -2682,6 +2803,10 @@ private val trolejbusy = listOf(
         maxNaklady = 60.penezZaMin,
         cena = 115_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            9.6.metru,
+            8.4.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 106.hours,
         popis = """
@@ -2752,7 +2877,11 @@ private val trolejbusy = listOf(
         maxRychlost = 65.kilometruZaHodinu,
         maxNaklady = 48.penezZaMin,
         cena = 160_000.penez,
-        delka = 17.360F.metru,
+        delka = 17.36F.metru,
+        clanky = listOf(
+            9.86.metru,
+            7.5.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 250.hours,
         popis = """
@@ -2776,7 +2905,11 @@ private val trolejbusy = listOf(
         maxRychlost = 65.kilometruZaHodinu,
         maxNaklady = 44.penezZaMin,
         cena = 165_000.penez,
-        delka = 17.360F.metru,
+        delka = 17.36F.metru,
+        clanky = listOf(
+            9.86.metru,
+            7.5.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 250.hours,
         popis = """
@@ -2849,6 +2982,10 @@ private val trolejbusy = listOf(
         maxNaklady = 43.penezZaMin,
         cena = 170_000.penez,
         delka = 18.070F.metru,
+        clanky = listOf(
+            10.07.metru,
+            8.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 192.hours,
         popis = """
@@ -2921,6 +3058,10 @@ private val trolejbusy = listOf(
         maxNaklady = 40.penezZaMin,
         cena = 175_000.penez,
         delka = 17.800F.metru,
+        clanky = listOf(
+            9.8.metru,
+            8.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 200.hours,
         popis = """
@@ -2945,6 +3086,10 @@ private val trolejbusy = listOf(
         maxNaklady = 39.penezZaMin,
         cena = 180_000.penez,
         delka = 17.900F.metru,
+        clanky = listOf(
+            9.8.metru,
+            8.1.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 200.hours,
         popis = """
@@ -3017,6 +3162,10 @@ private val trolejbusy = listOf(
         maxNaklady = 34.penezZaMin,
         cena = 180_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.4.metru,
+            7.6.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 242.hours,
         popis = """
@@ -3041,6 +3190,10 @@ private val trolejbusy = listOf(
         maxNaklady = 30.penezZaMin,
         cena = 195_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.4.metru,
+            7.6.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 256.hours,
         popis = """
@@ -3113,6 +3266,10 @@ private val trolejbusy = listOf(
         maxNaklady = 44.penezZaMin,
         cena = 200_000.penez,
         delka = 18.750F.metru,
+        clanky = listOf(
+            10.85.metru,
+            7.9.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 168.hours,
         popis = """
@@ -3161,6 +3318,10 @@ private val trolejbusy = listOf(
         maxNaklady = 29.penezZaMin,
         cena = 220_000.penez,
         delka = 18.750F.metru,
+        clanky = listOf(
+            10.85.metru,
+            7.9.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 240.hours,
         popis = """
@@ -3185,6 +3346,10 @@ private val trolejbusy = listOf(
         maxNaklady = 33.penezZaMin,
         cena = 240_000.penez,
         delka = 18.559F.metru,
+        clanky = listOf(
+            10.4.metru,
+            8.159.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 204.hours,
         popis = """
@@ -3302,6 +3467,10 @@ private val trolejbusy = listOf(
         maxNaklady = 75.penezZaMin,
         cena = 130_000.penez,
         delka = 16.5F.metru,
+        clanky = listOf(
+            9.43.metru,
+            7.07.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 176.hours,
         popis = """
@@ -3325,6 +3494,10 @@ private val trolejbusy = listOf(
         maxNaklady = 70.penezZaMin,
         cena = 140_000.penez,
         delka = 17.975F.metru,
+        clanky = listOf(
+            10.1.metru,
+            7.875.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 182.hours,
         popis = """
@@ -3417,6 +3590,10 @@ private val trolejbusy = listOf(
         maxNaklady = 50.penezZaMin,
         cena = 150_000.penez,
         delka = 17.85F.metru,
+        clanky = listOf(
+            10.25.metru,
+            7.6.metru,
+        ),
         sirka = 2.500.metru,
         vydrz = 194.hours,
         popis = """
@@ -3464,6 +3641,11 @@ private val trolejbusy = listOf(
         maxNaklady = 25.penezZaMin,
         cena = 300_000.penez,
         delka = 24.700F.metru,
+        clanky = listOf(
+            10.6.metru,
+            7.2.metru,
+            6.9.metru
+        ),
         sirka = 2.550.metru,
         vydrz = 240.hours,
         popis = """
@@ -3627,6 +3809,10 @@ private val trolejbusy = listOf(
         maxNaklady = 44.penezZaMin,
         cena = 150_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.5.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 169.hours,
         popis = """
@@ -3651,6 +3837,10 @@ private val trolejbusy = listOf(
         maxNaklady = 39.penezZaMin,
         cena = 165_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.5.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 196.hours,
         popis = """
@@ -3675,6 +3865,10 @@ private val trolejbusy = listOf(
         maxNaklady = 34.penezZaMin,
         cena = 180_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.5.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 242.hours,
         popis = """
@@ -3699,6 +3893,10 @@ private val trolejbusy = listOf(
         maxNaklady = 30.penezZaMin,
         cena = 195_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.5.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 256.hours,
         popis = """
@@ -3722,7 +3920,11 @@ private val trolejbusy = listOf(
         maxRychlost = 65.kilometruZaHodinu,
         maxNaklady = 29.penezZaMin,
         cena = 210_000.penez,
-        delka = 18F.metru,
+        delka = 18.1F.metru,
+        clanky = listOf(
+            10.6.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 256.hours,
         popis = """
@@ -3730,7 +3932,7 @@ private val trolejbusy = listOf(
             |
             |Výrobce: Solaris bus & coach
             |Rok výroby: 2012 – 2017
-            |Délka: 18 000 mm
+            |Délka: 18 100 mm
             |Šířka: 2 550 mm
             |Hmotnost: 16 500 kg
             |Maximální rychlost: 65 km/h
@@ -3748,8 +3950,8 @@ private val trolejbusy = listOf(
         cena = 260_000.penez,
         delka = 24F.metru,
         clanky = listOf(
-            10.metru,
-            6.metru,
+            9.5.metru,
+            6.5.metru,
             8.metru,
         ),
         sirka = 2.550.metru,
@@ -3774,7 +3976,12 @@ private val trolejbusy = listOf(
         maxRychlost = 65.kilometruZaHodinu,
         maxNaklady = 22.penezZaMin,
         cena = 310_000.penez,
-        delka = 24F.metru,
+        delka = 24.1F.metru,
+        clanky = listOf(
+            9.6.metru,
+            6.5.metru,
+            8.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 240.hours,
         popis = """
@@ -3782,7 +3989,7 @@ private val trolejbusy = listOf(
             |
             |Výrobce: Solaris Bus & Coach
             |Rok výroby: od roku 2019
-            |Délka: 24 000 mm
+            |Délka: 24 100 mm
             |Šířka: 2 550 mm
             |Maximální rychlost: 65 km/h
             |Míst k sezení: 68
@@ -3861,6 +4068,10 @@ private val trolejbusy = listOf(
         maxNaklady = 42.penezZaMin,
         cena = 180_000.penez,
         delka = 18.700F.metru,
+        clanky = listOf(
+            11.metru,
+            7.75.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 180.hours,
         popis = """
@@ -4146,6 +4357,10 @@ private val elektrobusy = listOf(
         maxNaklady = 60.penezZaMin,
         cena = 190_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.5.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 225.hours,
         popis = """
@@ -4170,6 +4385,10 @@ private val elektrobusy = listOf(
         maxNaklady = 50.penezZaMin,
         cena = 205_000.penez,
         delka = 18F.metru,
+        clanky = listOf(
+            10.5.metru,
+            7.5.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 225.hours,
         popis = """
@@ -4193,7 +4412,12 @@ private val elektrobusy = listOf(
         maxRychlost = 65.kilometruZaHodinu,
         maxNaklady = 55.penezZaMin,
         cena = 370_000.penez,
-        delka = 24F.metru,
+        delka = 24.1F.metru,
+        clanky = listOf(
+            9.6.metru,
+            6.5.metru,
+            8.metru,
+        ),
         sirka = 2.550.metru,
         vydrz = 240.hours,
         popis = """
@@ -4201,7 +4425,7 @@ private val elektrobusy = listOf(
             |
             |Výrobce: Solaris Bus & Coach
             |Rok výroby: od roku 2021
-            |Délka: 24 000 mm
+            |Délka: 24 100 mm
             |Šířka: 2 550 mm
             |Maximální rychlost: 65 km/h
             |Míst k sezení: 68
