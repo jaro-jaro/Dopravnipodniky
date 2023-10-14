@@ -22,7 +22,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Euro
-import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -288,7 +287,7 @@ fun GarazScreen(
                                     ) {
                                         Icon(Icons.Default.Edit, null)
                                     }
-                                    Icon(Icons.Default.LocationSearching, null)
+//                                    Icon(Icons.Default.LocationSearching, null)
                                 }
                             },
                             leadingContent = {
