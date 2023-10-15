@@ -68,6 +68,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.rohyMesta
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.seznamKrizovatek
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.zacatekKonecNaLince
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.dialogState
 import cz.jaro.dopravnipodniky.shared.LinkaID
@@ -147,8 +148,13 @@ fun VytvareniLinkyScreen(
     var priblizeni by remember { mutableFloatStateOf(1F) }
     var kliklyKrizovatky by remember {
         mutableStateOf(upravovani?.let { linkaID ->
-            dp.linka(linkaID).ulice.flatMap { uliceID -> dp.ulice(uliceID).let { listOf(it.zacatek, it.konec) } }.distinct()
+            val uliceNaLince = dp.linka(linkaID).ulice(dp)
+            uliceNaLince.flatMap { it.zacatekKonecNaLince(uliceNaLince).toList() }.distinct()
         } ?: emptyList())
+    }
+
+    LaunchedEffect(Unit) {
+        println(kliklyKrizovatky)
     }
 
     LaunchedEffect(dp.rohyMesta, size) {
@@ -192,8 +198,8 @@ fun VytvareniLinkyScreen(
                 tx = tx, ty = ty, priblizeni = priblizeni
             ) {
                 DpRect(
-                    origin = (it.toDpSKrizovatkama() - sirkaUlice).toDpOffset(),
-                    size = DpSize(sirkaUlice * 3, sirkaUlice * 3)
+                    origin = (it.toDpSKrizovatkama() - ulicovyBlok / 2).toDpOffset(),
+                    size = DpSize(ulicovyBlok + sirkaUlice, ulicovyBlok + sirkaUlice)
                 )
             } ?: return@run
 
@@ -369,6 +375,7 @@ fun VytvareniLinkyScreen(
                     val ctx = LocalContext.current
                     Button(
                         onClick = {
+                            println(kliklyKrizovatky)
                             if (upravovani != null) {
 
                                 if (kliklyKrizovatky.size < 2) {

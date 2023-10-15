@@ -76,6 +76,12 @@ data class Ulice(
     }
 }
 
+fun Ulice.zacatekKonecNaLince(linka: List<Ulice>): Pair<Pozice<UlicovyBlok>, Pozice<UlicovyBlok>> {
+    val dalsiUlice = linka.getOrNull(linka.indexOfFirst { it.id == id } + 1) ?: return zacatek to konec
+    return if (zacatek in dalsiUlice) konec to zacatek
+    else zacatek to konec
+}
+
 fun Ulice.zasebevrazdujZastavku() = copy(
     cloveci = cloveci + (zastavka?.cloveci ?: 0),
     zastavka = null,

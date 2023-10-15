@@ -19,6 +19,8 @@ value class UlicovyBlok(
     operator fun minus(other: UlicovyBlok) = UlicovyBlok(value - other.value)
     operator fun plus(other: UlicovyBlok) = UlicovyBlok(value + other.value)
     operator fun div(i: Int) = UlicovyBlok(value / i)
+
+    override fun toString() = "$value.ulicovychBloku"
 }
 
 class UlicovyBlokRange(

@@ -17,6 +17,8 @@ data class Pozice<T : Comparable<T>>(
         xy: T,
     ) : this(xy, xy)
 
+    override fun toString() = "($x, $y)"
+
     override fun compareTo(other: Pozice<T>): Int {
         val cx = x.compareTo(other.x)
         val cy = y.compareTo(other.y)

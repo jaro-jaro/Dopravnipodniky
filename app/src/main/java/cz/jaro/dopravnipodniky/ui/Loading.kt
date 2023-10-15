@@ -52,7 +52,7 @@ import kotlin.random.Random
 @Composable
 fun Loading() = DpTheme(
     useDynamicColor = true,
-    theme = Theme.Zlute
+    theme = Theme.Jantarove
 ) {
     Surface {
         Column(
