@@ -1,7 +1,6 @@
 package cz.jaro.dopravnipodniky.ui.dopravnipodniky
 
 import android.widget.Toast
-import androidx.annotation.FloatRange
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -108,7 +107,8 @@ fun DopravniPodnikyScreen(
     dosahni: (KClass<out Dosahlost>) -> Unit,
     navigateBack: () -> Unit,
 ) {
-    var loading by rememberSaveable { mutableStateOf(null as (@FloatRange(0.0, 3.0) Float)?) }
+    var loading by rememberSaveable { mutableStateOf(null as Float?) }
+    val scope = rememberCoroutineScope()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -139,7 +139,6 @@ fun DopravniPodnikyScreen(
                     dialogState.show(
                         confirmButton = {
                             val ctx = LocalContext.current
-                            val scope = rememberCoroutineScope()
                             TextButton(
                                 onClick = {
                                     val i = investice.toLongOrNull()?.penez ?: run {
@@ -218,7 +217,7 @@ fun DopravniPodnikyScreen(
                                                     navigate(NovyDopravniPodnikScreenDestination)
                                                 },
                                                 content = {
-                                                    Text("Za vaši částku, která vám byla odečtena jsme úspěšně nalezli tři města. Nyní si je můžete prohlédnout a vybrat si to pravé!")
+                                                    Text(stringResource(R.string.tri_mesta_se_nasla))
                                                 },
                                                 title = {
                                                     Text(stringResource(R.string.novy_dp))
@@ -267,10 +266,7 @@ fun DopravniPodnikyScreen(
                 ) {
                     when {
                         loading!! == 4F -> {
-                            LinearProgressIndicator(
-                                progress = loading!! % 1,
-                                Modifier.fillMaxWidth()
-                            )
+                            LinearProgressIndicator(Modifier.fillMaxWidth())
                         }
                         loading!! != 3F -> {
                             Text("${loading!!.toInt() + 1}: ${((loading!! % 1) * 100).formatovat(2).composeString()} %")
