@@ -144,7 +144,7 @@ private val autobusy = listOf(
             |
             |Výrobce: Karosa Vysoké Mýto
             |Rok výroby: 1966 – 1969
-            |Délka: 16 660 mm
+            |Délka: 16 600 mm
             |Šířka: 2 500 mm
             |Hmotnost: 11 800 kg
             |Maximální rychlost: 70 km/h
@@ -1032,7 +1032,7 @@ private val autobusy = listOf(
         sirka = 2.500.metru,
         vydrz = 220.hours,
         popis = """
-            |Ikarus 417 je příměstsko-městský nízkopodlažní (bez schodišťový) posuvný autobus továrny na autobusy Ikarus v Budapešti. S tímto designem byl také průkopníkem ve světě. Byl představen v roce 1994. V České republice byl pouze jeden provozní kus, a to v Táboře. Táborský Ikarus byl první nízkopodlažní kloubový autobus v České republice 
+            |Ikarus 417 je příměstsko-městský nízkopodlažní (bez schodišťový) posuvný autobus továrny na autobusy Ikarus v Budapešti. S tímto designem byl také průkopníkem ve světě. Byl představen v roce 1994. V České republice byl pouze jeden provozní kus, a to v Táboře. Táborský Ikarus byl první nízkopodlažní kloubový autobus v České republice.
             |
             |Výrobce: Ikarus Karosszéria - és Járműgyár
             |Rok výroby: 1995 – 2002
