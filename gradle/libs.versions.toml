@@ -1,5 +1,5 @@
 [versions]
-agp = "8.3.0-alpha07"
+agp = "8.3.0-alpha11"
 firebase-analytics-ktx = "21.3.0"
 firebase-crashlytics-ktx = "18.4.3"
 kotlin = "1.9.10"

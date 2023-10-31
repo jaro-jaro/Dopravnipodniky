@@ -316,8 +316,8 @@ fun ObchodScreen(
                                     painterResource(typBusu.trakce.ikonka),
                                     stringResource(R.string.ikonka_busiku),
                                     Modifier
-                                        .width(40.dp)
-                                        .height(40.dp),
+                                        .width(48.dp)
+                                        .height(48.dp),
                                     colorFilter = ColorFilter.tint(color = dp.info.tema.barva),
                                 )
                             },

@@ -363,4 +363,12 @@
     <string name="nemate_zadny_bus">nemáte žádné vozidlo</string>
     <string name="resetovat_tutorial">Resetovat tutoriál</string>
     <string name="tri_mesta_se_nasla">Za vaši částku, která vám byla odečtena jsme úspěšně nalezli tři města. Nyní si je můžete prohlédnout a vybrat si to pravé!</string>
+    <plurals name="vozidlo">
+        <item quantity="zero">vozidel</item>
+        <item quantity="one">vozidlo</item>
+        <item quantity="two">vozidla</item>
+        <item quantity="few">vozidla</item>
+        <item quantity="many">vozidel</item>
+        <item quantity="other">vozidel</item>
+    </plurals>
 </resources>

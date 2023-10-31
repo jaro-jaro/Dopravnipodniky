@@ -28,3 +28,11 @@ val Long.penez get() = Peniz(this.toDouble())
 
 @Composable
 fun Peniz.asString() = stringResource(R.string.kc, value.formatovat(0).composeString())
+
+inline fun <T> Iterable<T>.sumOfPeniz(selector: (T) -> Peniz): Peniz {
+    var sum = 0.penez
+    for (element in this) {
+        sum += selector(element)
+    }
+    return sum
+}

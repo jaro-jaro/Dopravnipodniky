@@ -87,15 +87,18 @@ val Trakce.ikonka: Int
         Trakce.Autobus.Zemeplynovy -> R.drawable.zemeplyn
         Trakce.Autobus.Hybridni -> R.drawable.hybrid
         Trakce.Autobus.Vodikovy -> R.drawable.vodik
-        Trakce.Trolejbus.Obycejny -> R.drawable.trolej
+        Trakce.Trolejbus.Obycejny -> R.drawable.trolejbus
         Trakce.Trolejbus.Parcialni -> R.drawable.parcial
-        Trakce.Elektrobus -> R.drawable.elektro
+        Trakce.Elektrobus -> R.drawable.ebus
         Trakce.SUSbus -> R.drawable.blbobus_69tr_urcite_to_neni_rickroll
     }
 
 fun Trakce.bonusoveVydajeZaNeekologicnost() = when (this) {
+    is Trakce.Trolejbus -> 0.penezZaMin
+    is Trakce.Elektrobus -> 0.penezZaMin
     Trakce.Autobus.Vodikovy -> 0.penezZaMin
     Trakce.Autobus.Hybridni -> bonusoveVydajeZaPoloekologickeBusy
     Trakce.Autobus.Zemeplynovy -> bonusoveVydajeZaPoloekologickeBusy
+    Trakce.SUSbus -> (-1).penezZaMin
     else -> bonusoveVydajeZaNeekologickeBusy
 }

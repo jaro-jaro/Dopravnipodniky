@@ -1,5 +1,6 @@
 package cz.jaro.dopravnipodniky
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,21 +16,27 @@ import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.Euro
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.rememberNavController
 import com.ramcosta.composedestinations.DestinationsNavHost
 import cz.jaro.compose_dialog.AlertDialogState
 import cz.jaro.dopravnipodniky.data.Hodiny
@@ -242,7 +249,23 @@ class MainActivity : ComponentActivity() {
                         SnackbarHost(snackbarHostState)
                     }
                 ) { paddingValues ->
-                    DestinationsNavHost(navGraph = NavGraphs.root, Modifier.padding(paddingValues))
+
+                    val navController = rememberNavController()
+
+                    val view = LocalView.current
+                    val bg = MaterialTheme.colorScheme.background
+
+                    SideEffect {
+                        navController.addOnDestinationChangedListener { _, _, _ ->
+                            if (!view.isInEditMode) {
+                                val window = (view.context as? Activity)?.window ?: return@addOnDestinationChangedListener
+                                window.statusBarColor = bg.toArgb()
+                                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+                            }
+                        }
+                    }
+
+                    DestinationsNavHost(navGraph = NavGraphs.root, Modifier.padding(paddingValues), navController = navController)
                 }
             }
             AnimatedVisibility(

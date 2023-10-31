@@ -1,11 +1,15 @@
 package cz.jaro.dopravnipodniky.ui.garaz
 
+import android.app.Activity
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,13 +20,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddShoppingCart
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Euro
+import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -31,28 +40,36 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -69,6 +86,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.dialogState
+import cz.jaro.dopravnipodniky.shared.BusID
 import cz.jaro.dopravnipodniky.shared.Menic
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.Smer
@@ -78,6 +96,7 @@ import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
+import cz.jaro.dopravnipodniky.shared.jednotky.sumOfPeniz
 import cz.jaro.dopravnipodniky.shared.replaceBy
 import cz.jaro.dopravnipodniky.snackbarHostState
 import cz.jaro.dopravnipodniky.ui.destinations.ObchodScreenDestination
@@ -104,6 +123,8 @@ fun GarazScreen(
     val dp by viewModel.dp.collectAsStateWithLifecycle()
     val vse by viewModel.vse.collectAsStateWithLifecycle()
 
+    var vybraneBusy by rememberSaveable { mutableStateOf(null as Set<String>?) }
+
     if (
         dp != null &&
         vse != null
@@ -113,7 +134,25 @@ fun GarazScreen(
         menic = viewModel.menic,
         navigate = navigator::navigate,
         navigateBack = navigator::navigateUp,
-        dosahni = viewModel.dosahni
+        dosahni = viewModel.dosahni,
+        vybraneBusy = vybraneBusy,
+        vybratBusy = scope@{ busy ->
+            vybraneBusy = (vybraneBusy ?: return@scope) + busy.map { it.toString() }
+        },
+        prepnoutBus = scope@{
+            vybraneBusy = vybraneBusy ?: setOf()
+
+            vybraneBusy = if (it.toString() in vybraneBusy!!) {
+                vybraneBusy!! - it.toString()
+            } else {
+                vybraneBusy!! + it.toString()
+            }
+
+            if (vybraneBusy!!.isEmpty()) vybraneBusy = null
+        },
+        zavritVsechny = {
+            vybraneBusy = null
+        },
     )
 }
 
@@ -126,23 +165,232 @@ fun GarazScreen(
     navigate: (Direction) -> Unit,
     navigateBack: () -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
+    vybraneBusy: Set<String>?,
+    prepnoutBus: (BusID) -> Unit,
+    vybratBusy: (List<BusID>) -> Unit,
+    zavritVsechny: () -> Unit,
 ) {
+
+    val bg = MaterialTheme.colorScheme.background
+    val sec = MaterialTheme.colorScheme.secondaryContainer
+
+    val view = LocalView.current
+
+    LaunchedEffect(vybraneBusy) {
+        if (!view.isInEditMode) {
+            val window = (view.context as? Activity)?.window ?: return@LaunchedEffect
+            window.statusBarColor = if (vybraneBusy == null) bg.toArgb() else sec.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+        }
+    }
+
+    BackHandler(vybraneBusy != null) {
+        zavritVsechny()
+    }
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(stringResource(R.string.garaz))
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            navigateBack()
+            if (vybraneBusy != null) {
+                TopAppBar(
+                    title = {
+                        Text(stringResource(R.string.vybrano, vybraneBusy.size))
+                    },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {
+                                zavritVsechny()
+                            }
+                        ) {
+                            Icon(Icons.Default.Check, stringResource(R.string.zpet))
                         }
-                    ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.zpet))
-                    }
-                },
-            )
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                vybratBusy(dp.busy.map { it.id })
+                            }
+                        ) {
+                            Icon(Icons.Default.SelectAll, stringResource(R.string.vybrat_vse))
+                        }
+
+                        IconButton(
+                            onClick = {
+                                dialogState.show(
+                                    confirmButton = {
+                                        val prodejniBusy = remember(dp.busy, vybraneBusy) {
+                                            dp.busy.filter { it.id.toString() in vybraneBusy }
+                                        }
+                                        val prodejniCena = remember(prodejniBusy) {
+                                            prodejniBusy.sumOfPeniz { it.prodejniCena }
+                                        }
+                                        val prodaciZprava = stringResource(
+                                            R.string.prodali_jste,
+                                            "${vybraneBusy.size} ${pluralStringResource(R.plurals.vozidlo, vybraneBusy.size)}",
+                                            prodejniCena.asString()
+                                        )
+                                        TextButton(
+                                            onClick = {
+                                                MainScope().launch {
+                                                    menic.zmenitUlice {
+                                                        prodejniBusy.forEach { bus ->
+                                                            var cloveci = bus.cloveci
+                                                            val noveUlice = shuffled().map { ulice ->
+                                                                var cloveciVUlici = ulice.cloveci
+                                                                while (cloveciVUlici < ulice.kapacita && cloveci > 0) {
+
+                                                                    cloveci--
+                                                                    cloveciVUlici++
+                                                                }
+
+                                                                ulice.copy(
+                                                                    cloveci = cloveciVUlici
+                                                                )
+                                                            }
+
+                                                            clear()
+                                                            addAll(noveUlice)
+                                                        }
+                                                    }
+                                                    menic.zmenitBusy {
+                                                        prodejniBusy.forEach { bus ->
+                                                            val i = indexOfFirst { it.id == bus.id }
+                                                            removeAt(i)
+                                                        }
+                                                    }
+
+                                                    menic.zmenitPrachy {
+                                                        it + prodejniCena
+                                                    }
+
+                                                    hide()
+
+                                                    zavritVsechny()
+
+                                                    snackbarHostState.showSnackbar(
+                                                        message = prodaciZprava,
+                                                        withDismissAction = true,
+                                                    )
+                                                }
+                                            }
+                                        ) {
+                                            Text(stringResource(android.R.string.ok))
+                                        }
+                                    },
+                                    dismissButton = {
+                                        TextButton(
+                                            onClick = {
+                                                hide()
+                                            }
+                                        ) {
+                                            Text(stringResource(R.string.zrusit))
+                                        }
+                                    },
+                                    icon = {
+                                        Icon(Icons.Default.Euro, null)
+                                    },
+                                    title = {
+                                        Text(stringResource(R.string.prodat))
+                                    },
+                                    content = {
+                                        Text(stringResource(R.string.fakt_chcete_prodat_bus))
+                                    },
+                                )
+                            }
+                        ) {
+                            Icon(Icons.Default.Euro, stringResource(R.string.prodat))
+                        }
+
+                        val ctx = LocalContext.current
+
+                        IconButton(
+                            onClick = {
+                                val prodejniBusy = dp.busy.filter { it.id.toString() in vybraneBusy }
+
+                                val pouzitelneLinky = when {
+                                    prodejniBusy.any { it.typBusu.trakce is Trakce.Trolejbus } -> dp.linky.filter {
+                                        it.ulice(dp).jsouVsechnyZatrolejovane()
+                                    }
+
+                                    else -> dp.linky
+                                }
+
+                                if (pouzitelneLinky.isEmpty()) {
+                                    Toast.makeText(ctx, R.string.nejprve_si_vytvorte_linku, Toast.LENGTH_SHORT).show()
+                                } else dialogState.show(
+                                    confirmButton = { },
+                                    dismissButton = {
+                                        TextButton(
+                                            onClick = {
+                                                menic.zmenitBusy {
+                                                    prodejniBusy.forEach { bus ->
+                                                        replaceBy(bus.copy(linka = null)) { it.id }
+                                                    }
+                                                }
+                                                hide()
+                                            }
+                                        ) {
+                                            Text(stringResource(R.string.odebrat_bus_z_linek))
+                                        }
+                                    },
+                                    title = {
+                                        Text(stringResource(R.string.vyberte_linku))
+                                    },
+                                    content = {
+                                        pouzitelneLinky.forEach { linka ->
+                                            ListItem(
+                                                headlineContent = {
+                                                    Text(linka.cislo)
+                                                },
+                                                Modifier.clickable {
+                                                    menic.zmenitBusy {
+                                                        prodejniBusy.forEach { bus ->
+                                                            replaceBy(
+                                                                bus.copy(
+                                                                    linka = linka.id,
+                                                                    poziceNaLince = 0,
+                                                                    poziceVUlici = 0.dp,
+                                                                    smerNaLince = Smer.Pozitivni,
+                                                                    stavZastavky = StavZastavky.Pred
+                                                                )
+                                                            ) { it.id }
+                                                        }
+                                                    }
+                                                    dosahni(Dosahlost.BusNaLince::class)
+                                                    zavritVsechny()
+                                                    hide()
+                                                },
+                                                leadingContent = {
+                                                    Icon(Icons.Default.Timeline, null, tint = linka.barvicka.barva)
+                                                },
+                                            )
+                                        }
+                                    },
+                                )
+                            }
+                        ) {
+                            Icon(Icons.Default.Timeline, stringResource(R.string.vypravit))
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    )
+                )
+            } else {
+                TopAppBar(
+                    title = {
+                        Text(stringResource(R.string.garaz))
+                    },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {
+                                navigateBack()
+                            }
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.zpet))
+                        }
+                    },
+                )
+            }
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
@@ -204,8 +452,14 @@ fun GarazScreen(
                         Modifier
                             .animateItemPlacement()
                             .animateContentSize()
-                            .clickable {
-                                otevreno = if (expanded) null else bus.evCislo
+                            .combinedClickable(
+                                onLongClick = {
+                                    otevreno = null
+                                    prepnoutBus(bus.id)
+                                }
+                            ) {
+                                if (vybraneBusy != null) prepnoutBus(bus.id)
+                                else otevreno = if (expanded) null else bus.evCislo
                             },
                     ) {
                         val linka = bus.linka?.let { dp.linka(it) }
@@ -291,14 +545,33 @@ fun GarazScreen(
                                 }
                             },
                             leadingContent = {
-                                Image(
-                                    painterResource(bus.typBusu.trakce.ikonka),
-                                    stringResource(R.string.ikonka_busiku),
-                                    Modifier
-                                        .width(40.dp)
-                                        .height(40.dp),
-                                    colorFilter = ColorFilter.tint(color = linka?.barvicka?.barva ?: barvaNepouzivanehoBusu),
-                                )
+                                if (vybraneBusy != null) {
+                                    Box(
+                                        Modifier
+                                            .width(48.dp)
+                                            .height(48.dp),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Icon(
+                                            if (bus.id.toString() in vybraneBusy) Icons.Outlined.CheckCircle else Icons.Outlined.Circle,
+                                            ""
+                                        )
+                                    }
+                                } else {
+                                    Image(
+                                        painterResource(bus.typBusu.trakce.ikonka),
+                                        stringResource(R.string.ikonka_busiku),
+                                        Modifier
+                                            .width(48.dp)
+                                            .height(48.dp)
+                                            .clip(CircleShape)
+                                            .clickable {
+                                                otevreno = null
+                                                prepnoutBus(bus.id)
+                                            },
+                                        colorFilter = ColorFilter.tint(color = linka?.barvicka?.barva ?: barvaNepouzivanehoBusu),
+                                    )
+                                }
                             },
                         )
                         AnimatedVisibility(expanded) {
@@ -436,7 +709,7 @@ fun GarazScreen(
                                                                     removeAt(i)
                                                                 }
                                                                 menic.zmenitPrachy {
-                                                                    it - bus.prodejniCena
+                                                                    it + bus.prodejniCena
                                                                 }
 
                                                                 hide()
