@@ -7,6 +7,7 @@ import cz.jaro.dopravnipodniky.data.Nastaveni
 import cz.jaro.dopravnipodniky.data.PreferencesDataSource
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DetailGenerace
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
@@ -131,13 +132,13 @@ class SharedViewModel(
 //            }
 
             _novePodniky.value = Triple(
-                Generator(investice).vygenerujMiMestoAToHnedVykricnik {
+                Generator(DetailGenerace(investice)) {
                     progress(it)
                 },
-                Generator(investice).vygenerujMiMestoAToHnedVykricnik {
+                Generator(DetailGenerace(investice)) {
                     progress(1 + it)
                 },
-                Generator(investice).vygenerujMiMestoAToHnedVykricnik {
+                Generator(DetailGenerace(investice)) {
                     progress(2 + it)
                 },
             )

@@ -48,7 +48,9 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.Direction
 import cz.jaro.compose_dialog.show
 import cz.jaro.dopravnipodniky.R
+import cz.jaro.dopravnipodniky.data.Generator
 import cz.jaro.dopravnipodniky.data.Vse
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DetailGenerace
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.dialogState
@@ -62,10 +64,12 @@ import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.minimumInvestice
 import cz.jaro.dopravnipodniky.snackbarHostState
 import cz.jaro.dopravnipodniky.ui.destinations.NovyDopravniPodnikScreenDestination
+import cz.jaro.dopravnipodniky.ui.main.DEBUG_TEXT
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.koinViewModel
 import kotlin.random.Random
 import kotlin.reflect.KClass
@@ -135,7 +139,58 @@ fun DopravniPodnikyScreen(
                     Icon(Icons.Default.Search, null)
                 },
                 onClick = {
-                    dialogState.show(
+                    if (DEBUG_TEXT) dialogState.show(
+                        confirmButton = {
+                            val ctx = LocalContext.current
+                            TextButton(
+                                onClick = {
+                                    val detailGenerace = try {
+                                        Json.decodeFromString<DetailGenerace>(investice)
+                                    } catch (_: IllegalArgumentException) {
+                                        Toast.makeText(ctx, "Toto není dobře", Toast.LENGTH_LONG).show()
+                                        return@TextButton
+                                    }
+                                    hide()
+
+                                    scope.launch {
+                                        val dp = Generator(detailGenerace) {
+                                            loading = it
+                                        }
+
+                                        loading = null
+
+                                        navigateBack()
+
+                                        CoroutineScope(Dispatchers.IO).launch {
+                                            menic.zmenitOstatniDopravniPodniky {
+                                                add(dp)
+                                            }
+                                            menic.zmenitDopravniPodnik(dp.info.id)
+                                        }
+                                    }
+                                }
+                            ) {
+                                Text(stringResource(android.R.string.ok))
+                            }
+                        },
+                        dismissButton = { },
+                        title = {
+                            Text(stringResource(R.string.novy_dp))
+                        },
+                        content = {
+                            TextField(
+                                value = investice,
+                                onValueChange = {
+                                    investice = it
+                                },
+                                Modifier.fillMaxWidth(),
+                                label = {
+                                    Text("Detail generace")
+                                }
+                            )
+                        },
+                    )
+                    else dialogState.show(
                         confirmButton = {
                             val ctx = LocalContext.current
                             TextButton(
@@ -326,7 +381,7 @@ fun DopravniPodnikyScreen(
                                         }
                                     }
                                 ) {
-                                    Icon(if (Random.nextFloat() < .001F) Icons.Default.ShoppingCartCheckout else Icons.AutoMirrored.Filled.Login, null)
+                                    Icon(if (Random.nextFloat() <= .01F) Icons.Default.ShoppingCartCheckout else Icons.AutoMirrored.Filled.Login, null)
                                 }
                             },
                         )

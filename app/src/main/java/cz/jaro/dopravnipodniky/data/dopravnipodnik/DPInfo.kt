@@ -19,4 +19,5 @@ data class DPInfo(
     val zisk: PenizZaMinutu,
     val detailZisku: Text,
     val id: DPID,
+    val detailGenerace: DetailGenerace,
 )

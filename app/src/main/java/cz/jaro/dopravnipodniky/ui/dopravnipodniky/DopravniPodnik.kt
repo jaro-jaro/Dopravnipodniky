@@ -20,9 +20,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import com.chargemap.compose.numberpicker.NumberPicker
 import cz.jaro.compose_dialog.show
@@ -53,7 +55,11 @@ import cz.jaro.dopravnipodniky.snackbarHostState
 import cz.jaro.dopravnipodniky.ui.main.DEBUG_TEXT
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlin.random.Random
+
+private val json = Json { prettyPrint = true }
 
 @Composable
 fun DopravniPodnik(
@@ -115,12 +121,58 @@ fun DopravniPodnik(
             .fillMaxWidth()
             .padding(all = 8.dp),
     )
-    if (DEBUG_TEXT) Text(
-        text = "Potenciál města: ${dp.ulice.sumOf { it.potencial }.formatovat(0).composeString()}",
-        Modifier
-            .fillMaxWidth()
-            .padding(all = 8.dp),
-    )
+    if (DEBUG_TEXT) {
+        Text(
+            text = "Potenciál města: ${dp.ulice.sumOf { it.potencial }.formatovat(0).composeString()}",
+            Modifier
+                .fillMaxWidth()
+                .padding(all = 8.dp),
+        )
+        if (dp.info.detailGenerace.investice == 0.penez) {
+            Text(
+                text = "Toto město bylo vygenerováno před verzí 3.0.2 a tudíž nelze získat jeho detaily generace. :(",
+                Modifier
+                    .fillMaxWidth()
+                    .padding(all = 8.dp),
+            )
+        }
+        else {
+            Text(
+                text = "Typ generace města: ${dp.info.detailGenerace::class.simpleName}",
+                Modifier
+                    .fillMaxWidth()
+                    .padding(all = 8.dp),
+            )
+            Text(
+                text = "Investice: ${dp.info.detailGenerace.investice.asString()}",
+                Modifier
+                    .fillMaxWidth()
+                    .padding(all = 8.dp),
+            )
+            Text(
+                text = "Seed názvu města: ${dp.info.detailGenerace.nazevMestaSeed}",
+                Modifier
+                    .fillMaxWidth()
+                    .padding(all = 8.dp),
+            )
+            Text(
+                text = "Ostatní seedy generace: ${dp.info.detailGenerace.ostatniSeedy().joinToString()}",
+                Modifier
+                    .fillMaxWidth()
+                    .padding(all = 8.dp),
+            )
+            val clipboardManager = LocalClipboardManager.current
+            TextButton(
+                onClick = {
+                    clipboardManager.setText(buildAnnotatedString {
+                        append(json.encodeToString(dp.info.detailGenerace))
+                    })
+                }
+            ) {
+                Text("Zkopírovat detaily generace města")
+            }
+        }
+    }
     Text(
         text = stringResource(
             R.string.jedoucich_vozidel,

@@ -1,10 +1,9 @@
 package cz.jaro.dopravnipodniky.data
 
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.setValue
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Barak
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DetailGenerace
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.DetailGeneraceV1
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypBaraku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
@@ -30,151 +29,202 @@ import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
-var seed: Int by mutableIntStateOf(Random.nextInt())
+object Generator {
 
-class Generator(
-    private val investice: Peniz,
-    jmenoMestaRandom: Random = Random,
-) {
-    companion object {
-        suspend fun vygenerujMiPrvniMesto(): DopravniPodnik = withContext(Dispatchers.IO) {
+    suspend fun vygenerujMiPrvniMesto(): DopravniPodnik = withContext(Dispatchers.IO) {
 
-            seed = 19250533
+        val seed = 19250533
 
-            Generator(
+        Generator(
+            detailGenerace = DetailGeneraceV1(
                 investice = pocatecniCenaMesta,
-                jmenoMestaRandom = Random(18),
-            ).vygenerujMiMestoAToHnedVykricnik(
-                michaniRandom = Random(seed),
-                sanceRandom = Random(seed),
-                barakyRandom = Random(seed),
-                panelakyRandom = Random(seed),
-                stredovyRandom = Random(seed),
-                kapacitaRandom = Random(seed),
-                tema = Theme.Jantarove,
-            ) {}
-        }
+                nazevMestaSeed = 18,
+                michaniSeed = seed,
+                sanceSeed = seed,
+                barakySeed = seed,
+                panelakySeed = seed,
+                stredovySeed = seed,
+                kapacitaSeed = seed,
+            ),
+            tema = Theme.Jantarove,
+        ) {}
     }
 
-    private val velikost: Int = (investice * nasobitelInvestice).value.roundToInt()
-
-    private val ulicove = mutableListOf<Ulice>()
-
-    private val jmenoMesta = MESTA.trim().lines().random(jmenoMestaRandom)
-
-    private lateinit var michaniRandom: Random
-    private lateinit var sanceRandom: Random
-    private lateinit var barakyRandom: Random
-    private lateinit var panelakyRandom: Random
-    private lateinit var stredovyRandom: Random
-    private lateinit var kapacitaRandom: Random
-
-    suspend fun vygenerujMiMestoAToHnedVykricnik(
-        michaniRandom: Random = Random,
-        sanceRandom: Random = Random,
-        barakyRandom: Random = Random,
-        panelakyRandom: Random = Random,
-        stredovyRandom: Random = Random,
-        kapacitaRandom: Random = Random,
+    suspend operator fun invoke(
+        detailGenerace: DetailGenerace,
         tema: Theme = Theme.entries.random(),
         step: (Float) -> Unit,
     ) = withContext(Dispatchers.IO) {
-        // Okej hned to bude, nez bys rekl pi
-        this@Generator.michaniRandom = michaniRandom
-        this@Generator.sanceRandom = sanceRandom
-        this@Generator.barakyRandom = barakyRandom
-        this@Generator.panelakyRandom = panelakyRandom
-        this@Generator.stredovyRandom = stredovyRandom
-        this@Generator.kapacitaRandom = kapacitaRandom
 
-        opakovac(1, listOf(0.ulicovychBloku to 0.ulicovychBloku), nahodnostNaZacatku, step)
-
-        zbarakuj()
-
-        DopravniPodnik(jmenoMesta = jmenoMesta, ulicove = ulicove, tema = tema)
-    }
-
-    private tailrec fun opakovac(hloubka: Int, posledniKrizovatky: List<Pozice<UlicovyBlok>>, sance: Float, step: (Float) -> Unit) {
-
-        if (hloubka > velikost) return
-
-        val noveKrizovatky = posledniKrizovatky.flatMap { krizovatka ->
-
-            val sousedi = krizovatka.sousedi()
-
-            sousedi
-                .filter { soused ->
-                    val uzNekdoOkupujeSouseda = ulicove.any { it.zacatek == soused || it.konec == soused }
-                    val novaSance = if (uzNekdoOkupujeSouseda) sance * nahodnostStaveniKOkupantum else sance * nahodnostStaveniKNeokupantum
-                    sanceRandom.nextFloat() < novaSance
-                }
-                .map { soused ->
-                    val (zacatek, konec) =
-                        if (krizovatka.x < soused.x || krizovatka.y < soused.y) krizovatka to soused else soused to krizovatka
-
-                    if (ulicove.none { it.zacatek == zacatek && it.konec == konec }) {
-                        ulicove += Ulice(zacatek, konec)
-                    } else {
-                        val i = ulicove.indexOfFirst { it.zacatek == zacatek && it.konec == konec }
-                        ulicove[i] = ulicove[i].copy(
-                            potencial = ulicove[i].potencial + 1
-                        )
-                    }
-
-                    soused
-                }
+        val ulicove = when(detailGenerace) {
+            is DetailGeneraceV1 -> generatorV1(
+                detailGenerace = detailGenerace,
+                step = step,
+            )
         }
 
-        val uzHotovo = hloubka / velikost.toDouble()
-        step(uzHotovo.toFloat())
-        val uzHotovoTextem = Regex("1?..\\...").find("0${(uzHotovo * 100)}0")?.groupValues?.first()
-        Log.i("generace", "$hloubka z $velikost -> $uzHotovoTextem %")
+        val jmenoMesta = MESTA.trim().lines().random(Random(detailGenerace.nazevMestaSeed))
 
-        if (noveKrizovatky.isEmpty()) {
-            val zredukovanyKrizovatky = posledniKrizovatky.shuffled(michaniRandom).take((posledniKrizovatky.size * nasobitelRedukce).roundToInt())
-            opakovac(hloubka + 1, zredukovanyKrizovatky, nahodnostPoObnoveni, step)
-        } else {
-            opakovac(hloubka + 1, noveKrizovatky, sance - rozdilNahodnosti, step)
-        }
+        DopravniPodnik(jmenoMesta = jmenoMesta, ulicove = ulicove, tema = tema, detailGenerace = detailGenerace)
+    }
+}
+
+private fun generatorV1(
+    detailGenerace: DetailGeneraceV1,
+    step: (Float) -> Unit,
+): List<Ulice> {
+
+    val investice = detailGenerace.investice
+    val ulicove = mutableListOf<Ulice>()
+
+    val michaniRandom = Random(detailGenerace.michaniSeed)
+    val sanceRandom = Random(detailGenerace.sanceSeed)
+    val barakyRandom = Random(detailGenerace.barakySeed)
+    val panelakyRandom = Random(detailGenerace.panelakySeed)
+    val stredovyRandom = Random(detailGenerace.stredovySeed)
+    val kapacitaRandom = Random(detailGenerace.kapacitaSeed)
+
+    // Okej hned to bude, nez bys rekl pi
+
+    opakovac(
+        hloubka = 1,
+        posledniKrizovatky = listOf(0.ulicovychBloku to 0.ulicovychBloku),
+        sance = nahodnostNaZacatku,
+        step = step,
+        ulicove = ulicove,
+        michaniRandom = michaniRandom,
+        sanceRandom = sanceRandom,
+        investice = investice,
+    )
+
+    zbarakuj(
+        ulicove = ulicove,
+        barakyRandom = barakyRandom,
+        panelakyRandom = panelakyRandom,
+        stredovyRandom = stredovyRandom,
+        kapacitaRandom = kapacitaRandom,
+        investice = investice,
+    )
+
+    return ulicove
+}
+
+private tailrec fun opakovac(
+    hloubka: Int,
+    posledniKrizovatky: List<Pozice<UlicovyBlok>>,
+    sance: Float,
+    step: (Float) -> Unit,
+    ulicove: MutableList<Ulice>,
+    michaniRandom: Random,
+    sanceRandom: Random,
+    investice: Peniz,
+) {
+    val velikost: Int = (investice * nasobitelInvestice).value.roundToInt()
+
+    if (hloubka > velikost) return
+
+    val noveKrizovatky = posledniKrizovatky.flatMap { krizovatka ->
+
+        val sousedi = krizovatka.sousedi()
+
+        sousedi
+            .filter { soused ->
+                val uzNekdoOkupujeSouseda = ulicove.any { it.zacatek == soused || it.konec == soused }
+                val novaSance = if (uzNekdoOkupujeSouseda) sance * nahodnostStaveniKOkupantum else sance * nahodnostStaveniKNeokupantum
+                sanceRandom.nextFloat() < novaSance
+            }
+            .map { soused ->
+                val (zacatek, konec) =
+                    if (krizovatka.x < soused.x || krizovatka.y < soused.y) krizovatka to soused else soused to krizovatka
+
+                if (ulicove.none { it.zacatek == zacatek && it.konec == konec }) {
+                    ulicove += Ulice(zacatek, konec)
+                } else {
+                    val i = ulicove.indexOfFirst { it.zacatek == zacatek && it.konec == konec }
+                    ulicove[i] = ulicove[i].copy(
+                        potencial = ulicove[i].potencial + 1
+                    )
+                }
+
+                soused
+            }
     }
 
-    private fun zbarakuj() {
+    val uzHotovo = hloubka / velikost.toDouble()
+    step(uzHotovo.toFloat())
+    val uzHotovoTextem = Regex("1?..\\...").find("0${(uzHotovo * 100)}0")?.groupValues?.first()
+    Log.i("generace", "$hloubka z $velikost -> $uzHotovoTextem %")
 
-        var baraku = 0
+    if (noveKrizovatky.isEmpty()) {
+        val zredukovanyKrizovatky =
+            posledniKrizovatky.shuffled(michaniRandom).take((posledniKrizovatky.size * nasobitelRedukce).roundToInt())
+        opakovac(
+            hloubka = hloubka + 1,
+            posledniKrizovatky = zredukovanyKrizovatky,
+            sance = nahodnostPoObnoveni,
+            step = step,
+            ulicove = ulicove,
+            michaniRandom = michaniRandom,
+            sanceRandom = sanceRandom,
+            investice = investice
+        )
+    } else {
+        opakovac(
+            hloubka = hloubka + 1,
+            posledniKrizovatky = noveKrizovatky,
+            sance = sance - rozdilNahodnosti,
+            step = step,
+            ulicove = ulicove,
+            michaniRandom = michaniRandom,
+            sanceRandom = sanceRandom,
+            investice = investice
+        )
+    }
+}
 
-        ulicove.forEachIndexed { i, ulice ->
+private fun zbarakuj(
+    ulicove: MutableList<Ulice>,
+    barakyRandom: Random,
+    panelakyRandom: Random,
+    stredovyRandom: Random,
+    kapacitaRandom: Random,
+    investice: Peniz,
+) {
 
-            if ("3141592" in investice.toString()) {
-                ulicove[i] = ulicove[i].copy(
-                    potencial = 100
-                )
-            }
-            repeat(
-                (ulice.potencial * barakyRandom.nextFloat() * 6)
-                    .roundToInt()
-                    .coerceAtLeast(1)
-                    .coerceAtMost((barakuVUlici - 1) * 2)
-            ) {
-                val typ = if (ulice.potencial >= 3 && panelakyRandom.nextBoolean()) TypBaraku.Panelak else TypBaraku.Normalni
-                ulicove[i] = ulicove[i].copy(
-                    baraky = ulicove[i].baraky + Barak(typ, ++baraku, it),
-                )
-            }
-            if (stredovyRandom.nextFloat() >= .25F && ulice.potencial >= 5)
-                ulicove[i] = ulicove[i].copy(
-                    baraky = ulicove[i].baraky + Barak(TypBaraku.Stredovy, ++baraku, (barakuVUlici - 1) * 2 + 1)
-                )
+    var baraku = 0
+
+    ulicove.forEachIndexed { i, ulice ->
+
+        if ("3141592" in investice.toString()) {
+            ulicove[i] = ulicove[i].copy(
+                potencial = 100
+            )
+        }
+        repeat(
+            (ulice.potencial * barakyRandom.nextFloat() * 6)
+                .roundToInt()
+                .coerceAtLeast(1)
+                .coerceAtMost((barakuVUlici - 1) * 2)
+        ) {
+            val typ = if (ulice.potencial >= 3 && panelakyRandom.nextBoolean()) TypBaraku.Panelak else TypBaraku.Normalni
+            ulicove[i] = ulicove[i].copy(
+                baraky = ulicove[i].baraky + Barak(typ, ++baraku, it),
+            )
+        }
+        if (stredovyRandom.nextFloat() >= .25F && ulice.potencial >= 5)
+            ulicove[i] = ulicove[i].copy(
+                baraky = ulicove[i].baraky + Barak(TypBaraku.Stredovy, ++baraku, (barakuVUlici - 1) * 2 + 1)
+            )
 
 //            println(ulicove[i].baraky)
-            ulicove[i] = ulicove[i].copy(
-                baraky = ulicove[i].baraky.take((barakuVUlici - 1) * 2)
-            )
+        ulicove[i] = ulicove[i].copy(
+            baraky = ulicove[i].baraky.take((barakuVUlici - 1) * 2)
+        )
 
-            ulicove[i] = ulicove[i].copy(
-                cloveci = kapacitaRandom.nextInt(ulicove[i].kapacita / 2, ulicove[i].kapacita)
-            )
+        ulicove[i] = ulicove[i].copy(
+            cloveci = kapacitaRandom.nextInt(ulicove[i].kapacita / 2, ulicove[i].kapacita)
+        )
 
 //            println(ulice.baraky.size)
-        }
     }
 }

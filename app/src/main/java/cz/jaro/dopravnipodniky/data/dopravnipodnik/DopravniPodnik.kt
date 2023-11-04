@@ -35,6 +35,7 @@ data class DopravniPodnik(
         jmenoMesta: String,
         ulicove: List<Ulice>,
         tema: Theme,
+        detailGenerace: DetailGenerace,
     ) : this(
         linky = listOf(),
         busy = listOf(),
@@ -45,7 +46,8 @@ data class DopravniPodnik(
             zisk = 0.penezZaMin,
             tema = tema,
             id = DPID.randomUUID(),
-            detailZisku = "Zatím nemáte žádný detail, kušuj".toText()
+            detailZisku = "Zatím nemáte žádný detail, kušuj".toText(),
+            detailGenerace = detailGenerace,
         ),
     )
 
