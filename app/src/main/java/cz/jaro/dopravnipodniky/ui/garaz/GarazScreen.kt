@@ -83,6 +83,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.Trakce
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ikonka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.jsouVsechnyZatrolejovane
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.rozmistitBusy
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.dialogState
@@ -213,163 +214,13 @@ fun GarazScreen(
                             Icon(Icons.Default.SelectAll, stringResource(R.string.vybrat_vse))
                         }
 
-                        IconButton(
-                            onClick = {
-                                dialogState.show(
-                                    confirmButton = {
-                                        val prodejniBusy = remember(dp.busy, vybraneBusy) {
-                                            dp.busy.filter { it.id.toString() in vybraneBusy }
-                                        }
-                                        val prodejniCena = remember(prodejniBusy) {
-                                            prodejniBusy.sumOfPeniz { it.prodejniCena }
-                                        }
-                                        val prodaciZprava = stringResource(
-                                            R.string.prodali_jste,
-                                            "${vybraneBusy.size} ${pluralStringResource(R.plurals.vozidlo, vybraneBusy.size)}",
-                                            prodejniCena.asString()
-                                        )
-                                        TextButton(
-                                            onClick = {
-                                                MainScope().launch {
-                                                    menic.zmenitUlice {
-                                                        prodejniBusy.forEach { bus ->
-                                                            var cloveci = bus.cloveci
-                                                            val noveUlice = shuffled().map { ulice ->
-                                                                var cloveciVUlici = ulice.cloveci
-                                                                while (cloveciVUlici < ulice.kapacita && cloveci > 0) {
-
-                                                                    cloveci--
-                                                                    cloveciVUlici++
-                                                                }
-
-                                                                ulice.copy(
-                                                                    cloveci = cloveciVUlici
-                                                                )
-                                                            }
-
-                                                            clear()
-                                                            addAll(noveUlice)
-                                                        }
-                                                    }
-                                                    menic.zmenitBusy {
-                                                        prodejniBusy.forEach { bus ->
-                                                            val i = indexOfFirst { it.id == bus.id }
-                                                            removeAt(i)
-                                                        }
-                                                    }
-
-                                                    menic.zmenitPrachy {
-                                                        it + prodejniCena
-                                                    }
-
-                                                    hide()
-
-                                                    zavritVsechny()
-
-                                                    snackbarHostState.showSnackbar(
-                                                        message = prodaciZprava,
-                                                        withDismissAction = true,
-                                                    )
-                                                }
-                                            }
-                                        ) {
-                                            Text(stringResource(android.R.string.ok))
-                                        }
-                                    },
-                                    dismissButton = {
-                                        TextButton(
-                                            onClick = {
-                                                hide()
-                                            }
-                                        ) {
-                                            Text(stringResource(R.string.zrusit))
-                                        }
-                                    },
-                                    icon = {
-                                        Icon(Icons.Default.Euro, null)
-                                    },
-                                    title = {
-                                        Text(stringResource(R.string.prodat))
-                                    },
-                                    content = {
-                                        Text(stringResource(R.string.fakt_chcete_prodat_bus))
-                                    },
-                                )
-                            }
-                        ) {
-                            Icon(Icons.Default.Euro, stringResource(R.string.prodat))
-                        }
-
-                        val ctx = LocalContext.current
-
-                        IconButton(
-                            onClick = {
-                                val prodejniBusy = dp.busy.filter { it.id.toString() in vybraneBusy }
-
-                                val pouzitelneLinky = when {
-                                    prodejniBusy.any { it.typBusu.trakce is Trakce.Trolejbus } -> dp.linky.filter {
-                                        it.ulice(dp).jsouVsechnyZatrolejovane()
-                                    }
-
-                                    else -> dp.linky
-                                }
-
-                                if (pouzitelneLinky.isEmpty()) {
-                                    Toast.makeText(ctx, R.string.nejprve_si_vytvorte_linku, Toast.LENGTH_SHORT).show()
-                                } else dialogState.show(
-                                    confirmButton = { },
-                                    dismissButton = {
-                                        TextButton(
-                                            onClick = {
-                                                menic.zmenitBusy {
-                                                    prodejniBusy.forEach { bus ->
-                                                        replaceBy(bus.copy(linka = null)) { it.id }
-                                                    }
-                                                }
-                                                hide()
-                                            }
-                                        ) {
-                                            Text(stringResource(R.string.odebrat_bus_z_linek))
-                                        }
-                                    },
-                                    title = {
-                                        Text(stringResource(R.string.vyberte_linku))
-                                    },
-                                    content = {
-                                        pouzitelneLinky.forEach { linka ->
-                                            ListItem(
-                                                headlineContent = {
-                                                    Text(linka.cislo)
-                                                },
-                                                Modifier.clickable {
-                                                    menic.zmenitBusy {
-                                                        prodejniBusy.forEach { bus ->
-                                                            replaceBy(
-                                                                bus.copy(
-                                                                    linka = linka.id,
-                                                                    poziceNaLince = 0,
-                                                                    poziceVUlici = 0.dp,
-                                                                    smerNaLince = Smer.Pozitivni,
-                                                                    stavZastavky = StavZastavky.Pred
-                                                                )
-                                                            ) { it.id }
-                                                        }
-                                                    }
-                                                    dosahni(Dosahlost.BusNaLince::class)
-                                                    zavritVsechny()
-                                                    hide()
-                                                },
-                                                leadingContent = {
-                                                    Icon(Icons.Default.Timeline, null, tint = linka.barvicka.barva)
-                                                },
-                                            )
-                                        }
-                                    },
-                                )
-                            }
-                        ) {
-                            Icon(Icons.Default.Timeline, stringResource(R.string.vypravit))
-                        }
+                        CoMuzesDelatBusum(
+                            dp = dp,
+                            vybraneBusy = vybraneBusy,
+                            menic = menic,
+                            zavritVsechny = zavritVsechny,
+                            dosahni = dosahni
+                        )
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.secondaryContainer
@@ -759,5 +610,184 @@ fun GarazScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun CoMuzesDelatBusum(
+    dp: DopravniPodnik,
+    vybraneBusy: Set<String>,
+    menic: Menic,
+    zavritVsechny: () -> Unit,
+    dosahni: (KClass<out Dosahlost>) -> Unit
+) {
+    IconButton(
+        onClick = {
+            dialogState.show(
+                confirmButton = {
+                    val prodejniBusy = remember(dp.busy, vybraneBusy) {
+                        dp.busy.filter { it.id.toString() in vybraneBusy }
+                    }
+                    val prodejniCena = remember(prodejniBusy) {
+                        prodejniBusy.sumOfPeniz { it.prodejniCena }
+                    }
+                    val prodaciZprava = stringResource(
+                        R.string.prodali_jste,
+                        "${vybraneBusy.size} ${
+                            pluralStringResource(R.plurals.vozidlo, vybraneBusy.size)
+                        }",
+                        prodejniCena.asString()
+                    )
+                    TextButton(
+                        onClick = {
+                            MainScope().launch {
+                                menic.zmenitUlice {
+                                    prodejniBusy.forEach { bus ->
+                                        var cloveci = bus.cloveci
+                                        val noveUlice = shuffled().map { ulice ->
+                                            var cloveciVUlici = ulice.cloveci
+                                            while (cloveciVUlici < ulice.kapacita && cloveci > 0) {
+
+                                                cloveci--
+                                                cloveciVUlici++
+                                            }
+
+                                            ulice.copy(
+                                                cloveci = cloveciVUlici
+                                            )
+                                        }
+
+                                        clear()
+                                        addAll(noveUlice)
+                                    }
+                                }
+                                menic.zmenitBusy {
+                                    prodejniBusy.forEach { bus ->
+                                        val i = indexOfFirst { it.id == bus.id }
+                                        removeAt(i)
+                                    }
+                                }
+
+                                menic.zmenitPrachy {
+                                    it + prodejniCena
+                                }
+
+                                hide()
+
+                                zavritVsechny()
+
+                                snackbarHostState.showSnackbar(
+                                    message = prodaciZprava,
+                                    withDismissAction = true,
+                                )
+                            }
+                        }
+                    ) {
+                        Text(stringResource(android.R.string.ok))
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            hide()
+                        }
+                    ) {
+                        Text(stringResource(R.string.zrusit))
+                    }
+                },
+                icon = {
+                    Icon(Icons.Default.Euro, null)
+                },
+                title = {
+                    Text(stringResource(R.string.prodat))
+                },
+                content = {
+                    Text(stringResource(R.string.fakt_chcete_prodat_bus))
+                },
+            )
+        }
+    ) {
+        Icon(Icons.Default.Euro, stringResource(R.string.prodat))
+    }
+
+    val ctx = LocalContext.current
+
+    IconButton(
+        onClick = {
+            val prodejniBusy = dp.busy.filter { it.id.toString() in vybraneBusy }
+
+            val pouzitelneLinky = when {
+                prodejniBusy.any { it.typBusu.trakce is Trakce.Trolejbus } -> dp.linky.filter {
+                    it.ulice(dp).jsouVsechnyZatrolejovane()
+                }
+
+                else -> dp.linky
+            }
+
+            if (pouzitelneLinky.isEmpty()) {
+                Toast.makeText(ctx, R.string.nejprve_si_vytvorte_linku, Toast.LENGTH_SHORT).show()
+            } else dialogState.show(
+                confirmButton = { },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            menic.zmenitBusy {
+                                val prodejniLinky = prodejniBusy.mapNotNull { it.linka }.distinct()
+                                prodejniBusy.forEach { bus ->
+                                    replaceBy(bus.copy(linka = null)) { it.id }
+                                }
+                                prodejniLinky.forEach {
+                                    apply(dp.linka(it).rozmistitBusy)
+                                }
+                            }
+                            zavritVsechny()
+                            hide()
+                        }
+                    ) {
+                        Text(stringResource(R.string.odebrat_bus_z_linek))
+                    }
+                },
+                title = {
+                    Text(stringResource(R.string.vyberte_linku))
+                },
+                content = {
+                    pouzitelneLinky.forEach { linka ->
+                        ListItem(
+                            headlineContent = {
+                                Text(linka.cislo)
+                            },
+                            Modifier.clickable {
+                                menic.zmenitBusy {
+                                    val prodejniLinky = prodejniBusy.mapNotNull { it.linka }.distinct()
+                                    prodejniBusy.forEach { bus ->
+                                        replaceBy(
+                                            bus.copy(
+                                                linka = linka.id,
+                                                poziceNaLince = 0,
+                                                poziceVUlici = 0.dp,
+                                                smerNaLince = Smer.Pozitivni,
+                                                stavZastavky = StavZastavky.Pred
+                                            )
+                                        ) { it.id }
+                                    }
+                                    prodejniLinky.forEach {
+                                        apply(dp.linka(it).rozmistitBusy)
+                                    }
+                                    apply(linka.rozmistitBusy)
+                                }
+                                dosahni(Dosahlost.BusNaLince::class)
+                                zavritVsechny()
+                                hide()
+                            },
+                            leadingContent = {
+                                Icon(Icons.Default.Timeline, null, tint = linka.barvicka.barva)
+                            },
+                        )
+                    }
+                },
+            )
+        }
+    ) {
+        Icon(Icons.Default.Timeline, stringResource(R.string.vypravit))
     }
 }

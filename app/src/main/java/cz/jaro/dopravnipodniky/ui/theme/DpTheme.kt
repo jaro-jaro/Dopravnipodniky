@@ -15,6 +15,7 @@ import androidx.core.view.WindowCompat
 fun DpTheme(
     useDynamicColor: Boolean,
     theme: Theme,
+    doStuff: Boolean = true,
     content: @Composable () -> Unit,
 ) {
 
@@ -24,7 +25,7 @@ fun DpTheme(
     }
 
     val view = LocalView.current
-    if (!view.isInEditMode) {
+    if (!view.isInEditMode && doStuff) {
         SideEffect {
             val window = (view.context as? Activity)?.window ?: return@SideEffect
             window.statusBarColor = colorScheme.background.toArgb()

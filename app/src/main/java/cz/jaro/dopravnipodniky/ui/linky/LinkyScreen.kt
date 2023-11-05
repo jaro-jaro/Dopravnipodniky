@@ -53,7 +53,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -63,23 +62,20 @@ import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.busy
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.rozmistitBusy
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.dialogState
 import cz.jaro.dopravnipodniky.shared.Menic
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
-import cz.jaro.dopravnipodniky.shared.Smer
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.cenaTroleje
-import cz.jaro.dopravnipodniky.shared.delkaUlice
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
-import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.snackbarHostState
 import cz.jaro.dopravnipodniky.ui.destinations.VytvareniLinkyScreenDestination
 import cz.jaro.dopravnipodniky.ui.theme.Barvicka
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import kotlin.math.roundToInt
 
 
 @Composable
@@ -175,8 +171,6 @@ fun LinkyScreen(
                             ) Row {
                                 IconButton(
                                     onClick = {
-                                        val ulicNaLince = linka.ulice.size
-                                        val delkaLinky = ulicNaLince * (delkaUlice + sirkaUlice)
                                         val pocetBusu = linka.busy(dp).size
 
                                         if (pocetBusu == 0) {
@@ -190,25 +184,8 @@ fun LinkyScreen(
                                             return@IconButton
                                         }
 
-                                        val odstupy = (2 * delkaLinky) / pocetBusu.toFloat()
+                                        menic.zmenitBusy(linka.rozmistitBusy)
 
-                                        menic.zmenitBusy {
-                                            linka.busy(dp).forEachIndexed { i, bus ->
-                                                val poziceOdZacatkuLinky = odstupy * i
-
-                                                val jeDruhySmer = poziceOdZacatkuLinky / delkaLinky >= 1
-                                                val indexUlice = (poziceOdZacatkuLinky % delkaLinky) / (delkaUlice + sirkaUlice)
-                                                val poziceVUlici = poziceOdZacatkuLinky % (delkaUlice + sirkaUlice)
-
-                                                val index = indexOfFirst { it.id == bus.id }
-
-                                                this[index] = this[index].copy(
-                                                    smerNaLince = if (!jeDruhySmer) Smer.Pozitivni else Smer.Negativni,
-                                                    poziceNaLince = indexUlice.roundToInt() % linka.ulice.size,
-                                                    poziceVUlici = poziceVUlici,
-                                                )
-                                            }
-                                        }
                                         scope.launch {
                                             snackbarHostState.showSnackbar(
                                                 ctx.getString(R.string.uspesne_rozmisteno),
@@ -481,4 +458,4 @@ fun LinkyScreen(
     }
 }
 
-private operator fun Dp.rem(other: Dp) = Dp(value % other.value)
+operator fun Dp.rem(other: Dp) = Dp(value % other.value)

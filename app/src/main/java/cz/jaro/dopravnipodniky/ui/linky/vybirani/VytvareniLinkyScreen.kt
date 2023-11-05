@@ -201,7 +201,11 @@ fun VytvareniLinkyScreen(
                     origin = (it.toDpSKrizovatkama() - ulicovyBlok / 2).toDpOffset(),
                     size = DpSize(ulicovyBlok + sirkaUlice, ulicovyBlok + sirkaUlice)
                 )
-            } ?: return@run
+            } ?: let {
+                if (kliklyKrizovatky.size == 1)
+                    kliklyKrizovatky = listOf()
+                return@run
+            }
 
             if (kliklyKrizovatky.isEmpty()) {
                 kliklyKrizovatky += k
@@ -212,12 +216,14 @@ fun VytvareniLinkyScreen(
                 kliklyKrizovatky -= l
                 return@run
             }
-            if (k in l.sousedi()) {
-                if (dp.ulice.any { it.zacatek == minOf(k, l) && it.konec == maxOf(k, l) }) {
-                    if (k !in kliklyKrizovatky/* || BuildConfig.DEBUG*/) {
-                        kliklyKrizovatky += k
-                    }
+            if (k in l.sousedi() && dp.ulice.any { it.zacatek == minOf(k, l) && it.konec == maxOf(k, l) }) {
+                if (k !in kliklyKrizovatky/* || BuildConfig.DEBUG*/) {
+                    kliklyKrizovatky += k
                 }
+            }
+            else {
+                if (kliklyKrizovatky.size == 1)
+                    kliklyKrizovatky = listOf(k)
             }
         }
         else {

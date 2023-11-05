@@ -11,17 +11,18 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
+import cz.jaro.dopravnipodniky.shared.typKrizovatky
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.Smer
 import cz.jaro.dopravnipodniky.shared.TypKrizovatky.Otocka
 import cz.jaro.dopravnipodniky.shared.TypKrizovatky.Rovne
 import cz.jaro.dopravnipodniky.shared.TypKrizovatky.Vlevo
 import cz.jaro.dopravnipodniky.shared.TypKrizovatky.Vpravo
+import cz.jaro.dopravnipodniky.shared.delkaKrizovatky
 import cz.jaro.dopravnipodniky.shared.delkaUlice
 import cz.jaro.dopravnipodniky.shared.jednotky.metru
 import cz.jaro.dopravnipodniky.shared.jednotky.toDp
@@ -72,22 +73,7 @@ fun getNamalovatBus(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
         Smer.Negativni -> 180F
     }
 
-    val krizovatka = when {
-        pristiUlice == null -> Otocka
-        pristiUlice.orientace == ulice.orientace -> Rovne
-        else -> {
-            val vpravoSvisle = when {
-                ulice.zacatek == pristiUlice.konec -> false
-                ulice.zacatek == pristiUlice.zacatek -> true
-                ulice.konec == pristiUlice.konec -> true
-                ulice.konec == pristiUlice.zacatek -> false
-                else -> throw IllegalStateException("WTF")
-            }
-
-            val vpravo = if (ulice.orientace == Orientace.Svisle) vpravoSvisle else !vpravoSvisle
-            if (vpravo) Vpravo else Vlevo
-        }
-    }
+    val krizovatka = typKrizovatky(ulice, pristiUlice)
 
     val uhelZatoceni = when (krizovatka) {
         Otocka -> -180F
@@ -95,26 +81,8 @@ fun getNamalovatBus(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
         Vpravo -> 90F
         Vlevo -> -90F
     }
-    val delkaKrizovatky = when (krizovatka) {
-        Otocka -> {
-            val r = sirkaUlice / 2 - odsazeniBusu - bus.typBusu.sirka.toDp() / 2
-            val theta = Math.PI
-            predsazeniKrizovatky + theta * r + predsazeniKrizovatky
-        }
 
-        Rovne -> predsazeniKrizovatky + sirkaUlice + predsazeniKrizovatky
-        Vpravo -> {
-            val r = predsazeniKrizovatky + odsazeniBusu + bus.typBusu.sirka.toDp() / 2
-            val theta = Math.PI / 2
-            theta * r
-        }
-
-        Vlevo -> {
-            val r = predsazeniKrizovatky + sirkaUlice - odsazeniBusu - bus.typBusu.sirka.toDp() / 2
-            val theta = Math.PI / 2
-            theta * r
-        }
-    }
+    val delkaKrizovatky = krizovatka.delkaKrizovatky(bus.typBusu.sirka.toDp())
 
     val clanekClanky = bus.typBusu.clanky.scan(0.metru to 0.metru) { (konecPredminulyho, minuly), clanek ->
         konecPredminulyho + minuly to clanek

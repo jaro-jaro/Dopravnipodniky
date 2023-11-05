@@ -47,9 +47,9 @@ object NovySystemGeneratoruMigration : DataMigration<Preferences> {
     override suspend fun shouldMigrate(currentData: Preferences): Boolean {
         val data = currentData[PreferencesDataSource.PreferenceKeys.VSE] ?: return false
         val vse = JSONObject(data.replace("Infinity", "${Double.MAX_VALUE}"))
-        val podniky = vse.getJSONArray("podniky") ?: return false
-        val dp = podniky.getJSONObject(0) ?: return false
-        val info = dp.getJSONObject("info") ?: return false
+        val podniky = vse.optJSONArray("podniky") ?: return false
+        val dp = podniky.optJSONObject(0) ?: return false
+        val info = dp.optJSONObject("info") ?: return false
         val maDetailGenerace = info.has("detailGenerace")
         return !maDetailGenerace
     }

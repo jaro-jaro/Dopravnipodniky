@@ -17,11 +17,14 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.times
 import androidx.compose.ui.unit.toOffset
 import cz.jaro.dopravnipodniky.R
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toPx
+import cz.jaro.dopravnipodniky.ui.theme.Theme
 import kotlinx.coroutines.flow.Flow
 import kotlin.math.pow
 import kotlin.math.roundToLong
@@ -379,6 +382,125 @@ inline fun <T> Iterable<T>.sumOfDp(selector: (T) -> Dp): Dp {
     var sum = 0.dp
     for (element in this) {
         sum += selector(element)
+    }
+    return sum
+}
+
+fun Color.toArgb2() = 0xFF000000 + ((red * 255) * 0x10000 + (green * 255) * 0x100 + (blue * 255)).toInt()
+
+fun IntRange.barvaTematu(tema: Theme): Pair<Color, Color> {
+    val indexZakladniBarvy = Theme.entries.indexOf(tema)
+    val indexNoveBarvy1MoznaPretekly = indexZakladniBarvy + first
+    val indexNoveBarvy2MoznaPretekly = indexZakladniBarvy + last
+    val indexNoveBarvy1 = (indexNoveBarvy1MoznaPretekly + Theme.entries.size) % Theme.entries.size
+    val indexNoveBarvy2 = (indexNoveBarvy2MoznaPretekly + Theme.entries.size) % Theme.entries.size
+    val barvicka1 = Theme.entries[indexNoveBarvy1].barva
+    val barvicka2 = Theme.entries[indexNoveBarvy2].barva
+    return barvicka1 to barvicka2
+}
+
+val ClosedFloatingPointRange<Double>.size get() = endInclusive - start
+
+fun IntRange.toClosedDoubleRange() = first.toDouble()..last.toDouble()
+fun ClosedFloatingPointRange<Float>.toDoubleRange() = start.toDouble()..endInclusive.toDouble()
+
+fun convert(
+    value: Int,
+    from: IntRange,
+    to: ClosedFloatingPointRange<Float>,
+) = convert(
+    value = value.toDouble(),
+    from = from.toClosedDoubleRange(),
+    to = to.toDoubleRange(),
+).toFloat()
+
+fun convert(
+    value: Int,
+    from: IntRange,
+    to: Pair<Color, Color>,
+): Color {
+    val r = convert(
+        value = value,
+        from = from,
+        to = to.first.red..to.second.red,
+    )
+    val g = convert(
+        value = value,
+        from = from,
+        to = to.first.green..to.second.green,
+    )
+    val b =convert(
+        value = value,
+        from = from,
+        to = to.first.blue..to.second.blue,
+    )
+    val a =convert(
+        value = value,
+        from = from,
+        to = to.first.alpha..to.second.alpha,
+    )
+    return Color(r, g, b, a)
+}
+
+fun convert(
+    value: Double,
+    from: ClosedFloatingPointRange<Double>,
+    to: ClosedFloatingPointRange<Double>,
+): Double {
+    val localValue = value - from.start
+    val relativeValue = (localValue / from.size)
+    val newLocalValue = relativeValue * to.size
+    return newLocalValue + to.start
+}
+
+fun TypKrizovatky.delkaKrizovatky(sirkaBusu: Dp) = when (this) {
+    TypKrizovatky.Otocka -> {
+        val r = sirkaUlice / 2 - odsazeniBusu - sirkaBusu / 2
+        val theta = Math.PI
+        predsazeniKrizovatky + theta * r + predsazeniKrizovatky
+    }
+
+    TypKrizovatky.Rovne -> predsazeniKrizovatky + sirkaUlice + predsazeniKrizovatky
+    TypKrizovatky.Vpravo -> {
+        val r = predsazeniKrizovatky + odsazeniBusu + sirkaBusu / 2
+        val theta = Math.PI / 2
+        theta * r
+    }
+
+    TypKrizovatky.Vlevo -> {
+        val r =
+            predsazeniKrizovatky + sirkaUlice - (odsazeniBusu + sirkaBusu / 2)
+        val theta = Math.PI / 2
+        theta * r
+    }
+}
+
+fun typKrizovatky(
+    ulice: Ulice,
+    pristiUlice: Ulice?
+) = when {
+    pristiUlice == null -> TypKrizovatky.Otocka
+    pristiUlice.orientace == ulice.orientace -> TypKrizovatky.Rovne
+    else -> {
+        val vpravoSvisle = when {
+            ulice.zacatek == pristiUlice.konec -> false
+            ulice.zacatek == pristiUlice.zacatek -> true
+            ulice.konec == pristiUlice.konec -> true
+            ulice.konec == pristiUlice.zacatek -> false
+            else -> throw IllegalStateException("WTF")
+        }
+
+        val vpravo =
+            if (ulice.orientace == Orientace.Svisle) vpravoSvisle else !vpravoSvisle
+        if (vpravo) TypKrizovatky.Vpravo else TypKrizovatky.Vlevo
+    }
+}
+
+inline fun <T> Iterable<T>.sumOfIndexed(selector: (Int, T) -> Int): Int {
+    var index = 0
+    var sum = 0
+    for (element in this) {
+        sum += selector(index++, element)
     }
     return sum
 }

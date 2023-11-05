@@ -1,7 +1,6 @@
 package cz.jaro.dopravnipodniky.data
 
 import android.util.Log
-import androidx.compose.ui.unit.times
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
@@ -22,11 +21,10 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlovac
 import cz.jaro.dopravnipodniky.shared.BusID
-import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.Smer
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.Text
-import cz.jaro.dopravnipodniky.shared.TypKrizovatky
+import cz.jaro.dopravnipodniky.shared.delkaKrizovatky
 import cz.jaro.dopravnipodniky.shared.delkaUlice
 import cz.jaro.dopravnipodniky.shared.delkaZastavky
 import cz.jaro.dopravnipodniky.shared.dobaPobytuNaZastavce
@@ -47,13 +45,13 @@ import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toDuration
 import cz.jaro.dopravnipodniky.shared.nahodnostProjetiZastavky
 import cz.jaro.dopravnipodniky.shared.nasobitelZisku
-import cz.jaro.dopravnipodniky.shared.odsazeniBusu
 import cz.jaro.dopravnipodniky.shared.odsazeniZastavky
 import cz.jaro.dopravnipodniky.shared.predsazeniKrizovatky
-import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.shared.sumOfDp
+import cz.jaro.dopravnipodniky.shared.sumOfIndexed
 import cz.jaro.dopravnipodniky.shared.times
 import cz.jaro.dopravnipodniky.shared.toText
+import cz.jaro.dopravnipodniky.shared.typKrizovatky
 import cz.jaro.dopravnipodniky.shared.udrzbaTroleje
 import cz.jaro.dopravnipodniky.shared.udrzbaZastavky
 import cz.jaro.dopravnipodniky.shared.vecne
@@ -133,42 +131,8 @@ private fun update(
                         Smer.Pozitivni -> ulicove.getOrNull(indexUliceNaLince + 1)
                         Smer.Negativni -> ulicove.getOrNull(indexUliceNaLince - 1)
                     }
-                    val krizovatka = when {
-                        pristiUlice == null -> TypKrizovatky.Otocka
-                        pristiUlice.orientace == ulice.orientace -> TypKrizovatky.Rovne
-                        else -> {
-                            val vpravoSvisle = when {
-                                ulice.zacatek == pristiUlice.konec -> false
-                                ulice.zacatek == pristiUlice.zacatek -> true
-                                ulice.konec == pristiUlice.konec -> true
-                                ulice.konec == pristiUlice.zacatek -> false
-                                else -> throw IllegalStateException("WTF")
-                            }
-
-                            val vpravo = if (ulice.orientace == Orientace.Svisle) vpravoSvisle else !vpravoSvisle
-                            if (vpravo) TypKrizovatky.Vpravo else TypKrizovatky.Vlevo
-                        }
-                    }
-                    val delkaKrizovatky = when (krizovatka) {
-                        TypKrizovatky.Otocka -> {
-                            val r = sirkaUlice / 2 - odsazeniBusu - bus.typBusu.sirka.toDp() / 2
-                            val theta = Math.PI
-                            predsazeniKrizovatky + theta * r + predsazeniKrizovatky
-                        }
-
-                        TypKrizovatky.Rovne -> predsazeniKrizovatky + sirkaUlice + predsazeniKrizovatky
-                        TypKrizovatky.Vpravo -> {
-                            val r = predsazeniKrizovatky + odsazeniBusu + bus.typBusu.sirka.toDp() / 2
-                            val theta = Math.PI / 2
-                            theta * r
-                        }
-
-                        TypKrizovatky.Vlevo -> {
-                            val r = predsazeniKrizovatky + sirkaUlice - odsazeniBusu - bus.typBusu.sirka.toDp() / 2
-                            val theta = Math.PI / 2
-                            theta * r
-                        }
-                    }
+                    val krizovatka = typKrizovatky(ulice, pristiUlice)
+                    val delkaKrizovatky = krizovatka.delkaKrizovatky(bus.typBusu.sirka.toDp())
 
                     if (poziceVUlici >= (delkaUlice - predsazeniKrizovatky) + delkaKrizovatky) {  // odjel mimo ulici
                         poziceVUlici = predsazeniKrizovatky
@@ -228,7 +192,9 @@ private fun update(
 
                                 if (cloveciNaZastavce > ulice.kapacitaZastavky())
                                     cloveciVUlici +=
-                                        (cloveciNaZastavce - ulice.kapacitaZastavky()).coerceAtMost(ulice.kapacita - ulice.cloveci)
+                                        (cloveciNaZastavce - ulice.kapacitaZastavky()).coerceAtMost(
+                                            ulice.kapacita - ulice.cloveci
+                                        )
 
                                 Log.i(
                                     "Přesunuti lidé",
@@ -486,7 +452,8 @@ private fun detailZisku(
 
     return buildList {
         this += listOf(
-            R.string.celkove_prijmy.toText(puvodniDp.busy.sumOfPenizZaminutu { vydelky[it.id]!! }.formatovat()),
+            R.string.celkove_prijmy.toText(puvodniDp.busy.sumOfPenizZaminutu { vydelky[it.id]!! }
+                .formatovat()),
             "\n".toText(),
             R.string.celkove_vydaje.toText((puvodniDp.busy.sumOfPenizZaminutu { it.naklady } + vydajeZaInfrastrukturu).formatovat()),
             "\n".toText(),
@@ -514,7 +481,8 @@ private fun detailZisku(
             listOf(
                 R.string.linka_vydelava_tohle.toText(
                     linka.cislo.toText(),
-                    linka.busy(puvodniDp).sumOfPenizZaminutu { vydelky[it.id]!! - it.naklady }.formatovat()
+                    linka.busy(puvodniDp).sumOfPenizZaminutu { vydelky[it.id]!! - it.naklady }
+                        .formatovat()
                 ),
                 "\n".toText(),
             )
@@ -573,6 +541,7 @@ else {
     val pocetLinekVUlici = ulice.pocetLinek(linky)
 
     val maximumLidiCoMuzeVystoupit = min(cloveci, zbyvajiciKapacitaZastavky)
+
     /**
      * @see <a href="https://www.desmos.com/calculator/7n8wgwxdle">Desmos</a>
      */
@@ -747,7 +716,10 @@ fun Bus.vydelkuj(
 
     val ziskZaKolo = puvodniDp.info.jizdne * nastupujicichZaKolo * nasobitelZisku
 
-    val dobaUlic = (delkaUlice - predsazeniKrizovatky * 2) * linka.ulice.size * 2 / typBusu.maxRychlost.coerceAtMost(50.kilometruZaHodinu)
+    val dobaUlic =
+        (delkaUlice - predsazeniKrizovatky * 2) * linka.ulice.size * 2 / typBusu.maxRychlost.coerceAtMost(
+            50.kilometruZaHodinu
+        )
 
     val dobaKrizovatek = ulicove.windowed(
         2, partialWindows = true
@@ -755,42 +727,8 @@ fun Bus.vydelkuj(
         val ulice = dvojice.first()
         val pristiUlice = dvojice.getOrNull(1)
 
-        val krizovatka = when {
-            pristiUlice == null -> TypKrizovatky.Otocka
-            pristiUlice.orientace == ulice.orientace -> TypKrizovatky.Rovne
-            else -> {
-                val vpravoSvisle = when {
-                    ulice.zacatek == pristiUlice.konec -> false
-                    ulice.zacatek == pristiUlice.zacatek -> true
-                    ulice.konec == pristiUlice.konec -> true
-                    ulice.konec == pristiUlice.zacatek -> false
-                    else -> throw IllegalStateException("WTF")
-                }
-
-                val vpravo = if (ulice.orientace == Orientace.Svisle) vpravoSvisle else !vpravoSvisle
-                if (vpravo) TypKrizovatky.Vpravo else TypKrizovatky.Vlevo
-            }
-        }
-        val delkaKrizovatky = when (krizovatka) {
-            TypKrizovatky.Otocka -> {
-                val r = sirkaUlice / 2 - odsazeniBusu - typBusu.sirka.toDp() / 2
-                val theta = Math.PI
-                predsazeniKrizovatky + theta * r + predsazeniKrizovatky
-            }
-
-            TypKrizovatky.Rovne -> predsazeniKrizovatky + sirkaUlice + predsazeniKrizovatky
-            TypKrizovatky.Vpravo -> {
-                val r = predsazeniKrizovatky + odsazeniBusu + typBusu.sirka.toDp() / 2
-                val theta = Math.PI / 2
-                theta * r
-            }
-
-            TypKrizovatky.Vlevo -> {
-                val r = predsazeniKrizovatky + sirkaUlice - (odsazeniBusu + typBusu.sirka.toDp() / 2)
-                val theta = Math.PI / 2
-                theta * r
-            }
-        }
+        val krizovatka = typKrizovatky(ulice, pristiUlice)
+        val delkaKrizovatky = krizovatka.delkaKrizovatky(typBusu.sirka.toDp())
 
         delkaKrizovatky
     } * 2 / typBusu.maxRychlost.coerceAtMost(50.kilometruZaHodinu)
@@ -798,17 +736,4 @@ fun Bus.vydelkuj(
     val dobaKola = dobaUlic + dobaKrizovatek
 
     return ziskZaKolo / dobaKola
-}
-//
-//private fun Long.hezky() = (div(1_000.0).minus(div(1_000_000).times(1_000)).formatovat() as Text.Plain).value
-//
-//private fun Tik.hezky() = ((System.currentTimeMillis() / millisPerTik - value).formatovat() as Text.Plain).value
-
-inline fun <T> Iterable<T>.sumOfIndexed(selector: (Int, T) -> Int): Int {
-    var index = 0
-    var sum = 0
-    for (element in this) {
-        sum += selector(index++, element)
-    }
-    return sum
 }

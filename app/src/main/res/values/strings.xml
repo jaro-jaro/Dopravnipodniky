@@ -62,7 +62,7 @@
     <string name="automaticky_prirazovat_ev_c">Automaticky přidělovat evidenční čísla</string>
     <string name="vicenasobne_kupovani">Kupovat více busů najednou</string>
     <string name="bohuzel_dlouho_neaktivni">\n\nBohužel jste byl/a moc dlouho neaktivní, proto se Vám výdělek snížil tak, aby odpovídal výdělku za 8 hodin.</string>
-    <string name="vyuctovani">Doba neaktivity: %1$s\nZískané peníze: %2$s\n\n%3$s\n* %4$s min\n* %5$s %\n—————————————\n%6$s%7$s</string>
+    <string name="vyuctovani">Doba neaktivity: %1$s\nZískané peníze: %2$s\n\n%3$s\n* %4$s min\n* %5$s %%\n—————————————\n%6$s%7$s</string>
     <plurals name="min">
         <item quantity="one">%d minuta</item>
         <item quantity="few">%d minuty</item>

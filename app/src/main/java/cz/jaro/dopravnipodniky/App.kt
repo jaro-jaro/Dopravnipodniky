@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.preferencesDataStoreFile
+import cz.jaro.dopravnipodniky.migrations.BarakyNemajiBarvuMigration
 import cz.jaro.dopravnipodniky.migrations.NovySystemGeneratoruMigration
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -22,7 +23,8 @@ class App : Application() {
                 single {
                     PreferenceDataStoreFactory.create(
                         migrations = listOf(
-                            NovySystemGeneratoruMigration
+                            NovySystemGeneratoruMigration,
+                            BarakyNemajiBarvuMigration,
                         )
                     ) {
                         get<Context>().preferencesDataStoreFile("DopravniPodniky_DataStore")

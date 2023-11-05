@@ -2,7 +2,6 @@ package cz.jaro.dopravnipodniky.ui.dopravnipodniky
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -15,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCartCheckout
 import androidx.compose.material3.AlertDialog
@@ -362,8 +362,6 @@ fun DopravniPodnikyScreen(
                     val expanded = otevreno == dp.info.id.toString()
                     Column(
                         Modifier
-                            .animateItemPlacement()
-                            .animateContentSize()
                             .clickable {
                                 otevreno = if (expanded) null else dp.info.id.toString()
                             },
@@ -383,6 +381,9 @@ fun DopravniPodnikyScreen(
                                 ) {
                                     Icon(if (Random.nextFloat() <= .01F) Icons.Default.ShoppingCartCheckout else Icons.AutoMirrored.Filled.Login, null)
                                 }
+                            },
+                            leadingContent = {
+                                Icon(Icons.Default.Circle, null, tint = dp.info.tema.barva)
                             },
                         )
                         AnimatedVisibility(expanded) {

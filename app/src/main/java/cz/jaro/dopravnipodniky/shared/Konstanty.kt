@@ -48,6 +48,7 @@ val sirkaCary = .2.dp
 
 // Bus
 val odsazeniBusu = sirkaChodniku + .75.m
+val zakladniSirkaBusu = 2.500.metru
 
 // Troleje
 val sirkaTroleje = .2.dp
@@ -80,7 +81,7 @@ const val TPS = 90
 const val millisPerTik = 1000L / TPS
 var zrychlovacHry by mutableFloatStateOf(/*480F*//*.25F*/1F/*60F*/)
 
-// generace
+// Generace
 
 val minimumInvestice = 1_000_000L.penez
 val pocatecniCenaMesta = 1_200_000L.penez/*3_141_592.penez*//*10_000_000.penez*/

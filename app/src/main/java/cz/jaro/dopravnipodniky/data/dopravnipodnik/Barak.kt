@@ -9,7 +9,6 @@ data class Barak(
     val typ: TypBaraku,
     val cisloPopisne: Int,
     val cisloOrientacni: Int,
-    val barvicka: Int,
     val kapacita: Int,
 ) {
     companion object {
@@ -18,12 +17,11 @@ data class Barak(
             cisloPopisne: Int,
             cisloOrientacni: Int,
         ): Barak {
-            val kapacita = typ.getKapacita()
+            val kapacita = typ.kapacita.random()
             return Barak(
                 typ = typ,
                 cisloPopisne = cisloPopisne,
                 cisloOrientacni = cisloOrientacni,
-                barvicka = typ.getBarva(),
                 kapacita = kapacita,
             )
         }
