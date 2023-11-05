@@ -12,212 +12,123 @@ import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toTiky
 import cz.jaro.dopravnipodniky.ui.theme.green800
 import kotlinx.serialization.json.Json
-import kotlin.math.PI
 import kotlin.time.Duration.Companion.seconds
 
-
-/**
- * 0.1 Busy HOTOVO
- *
- * 0.2 Obchod HOTOVO
- *
- * 0.3 Začátky s penízkama HOTOVO
- *
- * 0.4 Zastávky HOTOVO
- *
- * 0.5 Vytváření linek  HOTOVO
- *
- * 0.5.1 Vybírání a zobrazování linek HOTOVO
- *
- * 0.6 Ježdění busíků HOTOVO
- *
- * 0.7 Další penízky HOTOVO
- *
- * 0.8 Priblizovani, oddalovani, posouvání, nuda, hodne chyb HOTOVO
- *
- * 0.9 Generování města ZATÍM SNAD HOTOVO
- *
- * 0.10 Zastavování na zastávkách + Projíždění (ne to, co už tam je) HOTOVO
- *
- * 0.11 Dopravní podniky HOTOVO
- *
- * 0.11.1 zastavky na LongClick (EDIT: Ten nakonec ne, nahradil ho Editor) a s dialogem HOTOVO
- *
- * 0.12 Detaily zisku HOTOVO
- *
- * 0.13 Už zas penízky HOTOVO
- *
- * 1.0 Dodělat všechna todocka, Hotovo? Hotovo!!
- *
- * 1.1 Trolejové tratě
- *
- * 1.1.1 Vícenásobné kupování busů
- *
- * 1.1.2 Editor a rozprostření busů na lince
- *
- * 1.2 Material You
- *
- * 1.2.1 Achievementy + Platba za zastávky a troleje
- *
- * 1.3 Filtrování obchodu
- *
- * 1.3.1 Táhnutí linky
- *
- * 1.4 Tutoriál
- *
- * 1.4.1 Propojení trolejí
- *
- *
- * 1.5 Mimořádnosti
- *
- * 1.6 Dodělat všechna todočka, Hotová základní hra
- *
- * 2.0 Domy
- *
- * 2.0.1 Řazení obchodu
- *
- * 2.0.2 Animace kalibrace
- *
- * 2.0.3 Středové domy
- *
- * 2.1 Ceny jízdenek
- *
- * 2.2 Cestující, Kapacity zastávek
- *
- * 2.2.1 Kalibrace busu
- *
- * 2.2.2 Překlad do angličtiny
- *
- * 2.3 Sídliště
- *
- * 2.4 Rozšiřování města
- *
- * 2.? Dodělat všechna todočka, Hotový "Město update"
- *
- * 3.0 Čas
- *
- * 3.1 Zdražování busů
- *
- * 3.? Servis + pohonné hmoty
- *
- * 3.? Dodělat všechna todočka, Hotový "Čas update"
- *
- * 4.? Questy
- *
- * 4.? Minihry
- *
- * 4.? Statistiky
- *
- * 4.? Porovnávání s kámíkama
- *
- * 4.? Trendy
- *
- * 4.? Dodělat všechna todočka, Hotový "Porovnávání update"
- *
- *
- * ?.? Custom barvy
- *
- */
-
-const val todocka = 0
-
-val minimumInvestice = 1_000_000L.penez
-
-// vykreslovani
+private val Double.m get() = metru.toDp()
+private val Int.m get() = metru.toDp()
 
 const val oddalenyRezim = 1.2F
 const val maximalniOddaleni = .1F
 
-val ulicovyBlok = 72.metru.toDp()
+val pocatecniObnosPenez = /*Double.POSITIVE_INFINITY.penez*/150_000.penez/*5_000_000.penez*//*5_000_000_000.penez*/
 
+// Velikosti
+
+// Ulice
+val ulicovyBlok = 72.m
 val delkaUlice = ulicovyBlok
-val sirkaUlice = 10.metru.toDp()
-val odsazeniZastavky = 1.metru.toDp()
-val odsazeniBaraku = 1.metru.toDp()
+val sirkaUlice = 10.m
+val sirkaChodniku = 1.m
+val predsazeniKrizovatky = 5.dp
+
+// Barák
+val odsazeniBaraku = 1.m
 const val barakuVUlici = 5
 val velikostBaraku = (ulicovyBlok - odsazeniBaraku * (barakuVUlici + 1)) / barakuVUlici
-val sirkaChodniku = 1.metru.toDp()
-val zaobleniBaraku = 5.dp
-val predsazeniKrizovatky = zaobleniBaraku
+val zaobleniBaraku = predsazeniKrizovatky
 
-val delkaZastavky = 18.metru.toDp()
-val sirkaZastavky = 3.metru.toDp()
-val tloustkaSloupku = .1.metru.toDp()
-val sirkaSloupku = .4.metru.toDp()
-val odsazeniSloupku = sirkaChodniku - .1.metru.toDp() - sirkaSloupku
+// Zastávka
+val sirkaZastavky = 3.m
+val delkaZastavky = 18.m
+val odsazeniZastavky = 1.m
+val sirkaSloupku = .4.m
+val tloustkaSloupku = .1.m
+val odsazeniSloupku = sirkaChodniku - .1.m - sirkaSloupku
 val sirkaCary = .2.dp
 
-//val sirkaBusu = 10.dp
-val odsazeniBusu = sirkaChodniku + .75.metru.toDp()
+// Bus
+val odsazeniBusu = sirkaChodniku + .75.m
 
+// Troleje
 val sirkaTroleje = .2.dp
-val predsazeniTrolejiS = predsazeniKrizovatky - 1.dp//1.dp
-val predsazeniTrolejiL = predsazeniKrizovatky + 1.dp//6.dp
-val rozchodTroleji = .5.metru.toDp()
-val odsazeniTroleje = sirkaChodniku + 1.5.metru.toDp()
+val predsazeniTrolejiS = predsazeniKrizovatky - 1.dp
+val predsazeniTrolejiL = predsazeniKrizovatky + 1.dp
+val rozchodTroleji = .5.m
+val odsazeniTroleje = sirkaChodniku + 1.5.m
 val odsazeniPrvniTroleje = odsazeniTroleje
 val odsazeniDruheTroleje = odsazeniTroleje + rozchodTroleji
 val odsazeniCtvrteTroleje = sirkaUlice - odsazeniPrvniTroleje
 val odsazeniTretiTroleje = sirkaUlice - odsazeniDruheTroleje
 val odsazeniTroleji = listOf(odsazeniPrvniTroleje, odsazeniDruheTroleje, odsazeniTretiTroleje, odsazeniCtvrteTroleje)
 
-// CCCC|---BBBTB|BTBBB---|---BBBTB|BTBBB---|CCCC
+// Barvy
 
+// Dosáhlosti
 val barvaSecretDosahlosti = Color(0xFF101010)
 val barvaDosahnuteDosahlosti = green800
+
+// Vykreslování
 val barvaUlice = Color(135, 135, 135)
 val barvaPozadi = Color(16, 16, 16)
 val barvaNepouzivanehoBusu = Color(100, 100, 100)
 val barvaChodniku = Color(200, 200, 200)
 val barvaTroleje = Color(32, 32, 32)
 
-// další konstanty
+// Rychlost hry
 
 const val TPS = 90
-const val TPM = TPS * 60
-
+const val millisPerTik = 1000L / TPS
 var zrychlovacHry by mutableFloatStateOf(/*480F*//*.25F*/1F/*60F*/)
 
-const val millisPerTik = 1000L / TPS
+// generace
 
+val minimumInvestice = 1_000_000L.penez
 val pocatecniCenaMesta = 1_200_000L.penez/*3_141_592.penez*//*10_000_000.penez*/
-const val nasobitelInvestice = (1 / 2.0) / 65536.0
+const val nasobitelInvesticeProHloubkuRekurce = (1 / 2.0) / 65536.0
 const val nahodnostStaveniKOkupantum = .6F
 const val nahodnostStaveniKNeokupantum = 1.1F
-const val nahodnostPoObnoveni = .35F
 const val nahodnostNaZacatku = .5F
 const val rozdilNahodnosti = .05F
+const val nahodnostPoObnoveni = .35F
 const val nasobitelRedukce = .75F
 
-const val nasobitelDelkyBusu = 2F
-//val delkaUlice = 100.metru
-val pocatecniObnosPenez = /*Double.POSITIVE_INFINITY.penez*/150_000.penez/*5_000_000.penez*//*5_000_000_000.penez*/
-const val nasobitelZiskuPoOffline = 1 / 5.0
+// Zisk
+
+const val nasobitelZiskuPoOffline = .20
 const val nasobitelZisku = 5
-const val nasobitelRozsahlosti = 200.0
-const val nasobitelMaxCloveku = PI / 2
-const val nahodnostVymreniKazdouMinutu = 30
-const val nahodnostVymreniKazdyTik = nahodnostVymreniKazdouMinutu * TPM
-const val nahodnostNarozeniKazdyTik = (1.5 * nahodnostVymreniKazdyTik).toInt()
-val dobaPobytuNaZastavce = 1.seconds.toTiky()
+const val idealniInterval = 3.5
+
+// Ceny
+
 val cenaZastavky = 5_000.penez
 val cenaTroleje = 20_000.penez
 val udrzbaZastavky = 100.penezZaMin
 val udrzbaTroleje = 1_000.penezZaMin
 val bonusoveVydajeZaNeekologickeBusy = 800.penezZaMin
 val bonusoveVydajeZaPoloekologickeBusy = 400.penezZaMin
-const val nahodnostProjetiZastavky = 200
-const val nahodnostKamionuKazdouMinutu = 45
-const val nahodnostKamionuKazdyTik = nahodnostKamionuKazdouMinutu * TPM
-const val nahodnostSebevrazdyKazdouMinutu = 10
-const val nahodnostSebevrazdyKazdyTik = nahodnostSebevrazdyKazdouMinutu * TPM
 val cenaPruzkumuVerejnehoMineni = 50_000.penez
 val prodejniCenaCloveka = 256.penez // Ano, jsou to otroci
 
+// Náhodnosti
+
+const val nahodnostProjetiZastavky = 200
+const val nahodnostKamionuKazdouMinutu = 45
+const val nahodnostSebevrazdyKazdouMinutu = 10
+const val nahodnostVymreniKazdouMinutu = 30
+const val nahodnostNarozeniKazdouMinutu = (1.5 * nahodnostVymreniKazdouMinutu).toInt()
+
+// Zastávky
+
+const val nasobitelKapacityZastavky = Math.PI / 2
+val dobaPobytuNaZastavce = 1.seconds.toTiky()
+
+// Čísla
+
 val hezkaCisla =
     Json.decodeFromString<List<Int>>("[1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30,32,36,40,45,48,50,54,60,64,72,75,80,81,90,96,100,108,120,125,128,135,144,150,160,162,180,192,200,216,225,240,243,250,256,270,288,300,320,324,360,375,384,400,405]")
-const val idealniInterval = 3.5
+val vecneLinky = setOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 21, 34, 44, 71, 72, 73)
+
+// Města
 
 const val kremze = "Křemže"
 const val vecne = "Věčné"
-val vecneLinky = setOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 21, 34, 44, 71, 72, 73)

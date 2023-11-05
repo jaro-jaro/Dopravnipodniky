@@ -233,7 +233,7 @@ class MainActivity : ComponentActivity() {
                                 (dpInfo!!.zisk * nasobitelZiskuPoOffline * vyuctovani!!).asString(),
                                 (dpInfo!!.zisk).asString(),
                                 vyuctovani!!.inWholeMinutes.formatovat(0).composeString(),
-                                nasobitelZiskuPoOffline.formatovat().composeString(),
+                                nasobitelZiskuPoOffline.times(100).formatovat(0).composeString(),
                                 (dpInfo!!.zisk * nasobitelZiskuPoOffline * vyuctovani!!).asString(),
                                 if (vyuctovani!! >= 8.hours)
                                     getString(R.string.bohuzel_dlouho_neaktivni)

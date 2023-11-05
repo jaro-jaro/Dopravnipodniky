@@ -336,7 +336,7 @@ private fun update(
 
         val vydelky = puvodniDp.busy.associate { it.id to it.vydelkuj(puvodniDp) }
 
-        val casti = casti(puvodniDp, vydelky)
+        val casti = detailZisku(puvodniDp, vydelky)
 
         puvodniDp.busy.forEach { bus ->
 
@@ -476,7 +476,7 @@ private fun update(
     }
 }
 
-private fun casti(
+private fun detailZisku(
     puvodniDp: DopravniPodnik,
     vydelky: Map<BusID, PenizZaMinutu>
 ): List<Text> {

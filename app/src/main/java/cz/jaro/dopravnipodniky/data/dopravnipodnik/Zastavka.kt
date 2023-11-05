@@ -1,6 +1,6 @@
 package cz.jaro.dopravnipodniky.data.dopravnipodnik
 
-import cz.jaro.dopravnipodniky.shared.nasobitelMaxCloveku
+import cz.jaro.dopravnipodniky.shared.nasobitelKapacityZastavky
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.math.roundToInt
@@ -23,4 +23,4 @@ value class Zastavka(
 //            Log.i("Vytvořena zastávka", "Byla vytvořena zastávka na ulici ${ulice.id}.")
 //        }
 
-fun Ulice.kapacitaZastavky() = (kapacita * nasobitelMaxCloveku).roundToInt()
+fun Ulice.kapacitaZastavky() = (kapacita * nasobitelKapacityZastavky).roundToInt()
