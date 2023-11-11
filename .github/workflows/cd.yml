@@ -1,0 +1,32 @@
+name: Build Signed Release APK
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - name: set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+      - name: Build Signed APK
+        uses: victorbnl/build-signed-apk@main
+        with:
+          keystore_b64: ${{ secrets.keystore }}
+          keystore_password: ${{ secrets.keystore_password }}
+          key_alias: ${{ secrets.key_alias }}
+          key_password: ${{ secrets.key_password }}
+          java_version: 17
+      - name: Rename APK
+        run: mv app/build/outputs/apk/release/app-release.apk "app/build/outputs/apk/release/Lepší-DPMCB-v${{ github.event.release.tag_name }}.apk"
+        shell: bash
+      - name: Publish release
+        run: gh release upload $GITHUB_REF app/build/outputs/apk/release/Dopravni-podniky-*.apk
