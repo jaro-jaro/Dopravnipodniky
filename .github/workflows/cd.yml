@@ -26,7 +26,7 @@ jobs:
           key_password: ${{ secrets.key_password }}
           java_version: 17
       - name: Rename APK
-        run: mv app/build/outputs/apk/release/app-release.apk "app/build/outputs/apk/release/Lepší-DPMCB-v${{ github.event.release.tag_name }}.apk"
+        run: mv app/build/outputs/apk/release/app-release.apk "app/build/outputs/apk/release/Dopravni-podniky-v${{ github.event.release.tag_name }}.apk"
         shell: bash
       - name: Publish release
         run: gh release upload $GITHUB_REF app/build/outputs/apk/release/Dopravni-podniky-*.apk
