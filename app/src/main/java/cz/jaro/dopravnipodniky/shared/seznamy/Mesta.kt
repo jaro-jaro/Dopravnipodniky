@@ -410,7 +410,7 @@ Hodkovice nad Mohelkou
 Rtyně v Podkrkonoší
 Teplá
 Morkovice-Slížany
-Loštice
+Joštice
 Slušovice
 Úštěk
 Chvaletice

@@ -30,6 +30,7 @@ data class DopravniPodnik(
     val busy: List<Bus>,
     val ulice: List<Ulice>,
     val info: DPInfo,
+    val krizovatky: List<Krizovatka>
 ) {
     constructor(
         jmenoMesta: String,
@@ -40,6 +41,7 @@ data class DopravniPodnik(
         linky = listOf(),
         busy = listOf(),
         ulice = ulicove,
+        krizovatky = listOf(),
         info = DPInfo(
             jmenoMesta = jmenoMesta,
             jizdne = 10.penez,

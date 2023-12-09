@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Krizovatka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
@@ -58,6 +59,8 @@ class PreferencesDataSource(
     val linky = _linky.filterNotNull()
     private val _ulice = MutableStateFlow(null as List<Ulice>?)
     val ulice = _ulice.filterNotNull()
+    private val _krizovatky = MutableStateFlow(null as List<Krizovatka>?)
+    val krizovatky = _krizovatky.filterNotNull()
     private val _dpInfo = MutableStateFlow(null as DPInfo?)
     val dpInfo = _dpInfo.filterNotNull()
     private val _prachy = MutableStateFlow(null as Peniz?)
@@ -73,17 +76,20 @@ class PreferencesDataSource(
         busy,
         linky,
         ulice,
+        krizovatky,
         dpInfo,
     ) {
             busy: List<Bus>,
             linky: List<Linka>,
             ulice: List<Ulice>,
+            krizovatky: List<Krizovatka>,
             dpInfo: DPInfo,
         ->
         DopravniPodnik(
             linky = linky,
             busy = busy,
             ulice = ulice,
+            krizovatky = krizovatky,
             info = dpInfo,
         )
     }.filter { !LOCK }
@@ -139,6 +145,7 @@ class PreferencesDataSource(
         _busy.value = dp.busy
         _linky.value = dp.linky
         _ulice.value = dp.ulice
+        _krizovatky.value = dp.krizovatky
         _dpInfo.value = dp.info
     }
 
@@ -152,6 +159,7 @@ class PreferencesDataSource(
                                 linky = _linky.value ?: return@edit,
                                 busy = _busy.value ?: return@edit,
                                 ulice = _ulice.value ?: return@edit,
+                                krizovatky = _krizovatky.value ?: return@edit,
                                 info = _dpInfo.value ?: return@edit,
                             )
                         ).plus(_ostatniPodniky.value ?: return@edit).distinctBy { it.info.id },
