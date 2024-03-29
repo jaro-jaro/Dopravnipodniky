@@ -18,6 +18,7 @@ sealed interface Dosahlost {
             Kocka(),
             BusNaLince(),
             BusNaZastavce(),
+            DopravniPodniky(),
             Bus1(),
             Bus2(),
             Bus12(),
@@ -144,6 +145,17 @@ sealed interface Dosahlost {
         override val jmeno get() = R.string.d_n_kocka1
         override val popis get() = R.string.d_p_kocka1
         override val odmena get() = 100_000.0.penez
+    }
+
+    @Serializable
+    @SerialName("DopravniPodnikyDosahlost")
+    data class DopravniPodniky(
+        override val stav: Stav = Stav.Nesplneno,
+    ) : NeSecret {
+        override fun kopirovat(stav: Stav) = copy(stav = stav)
+        override val jmeno get() = R.string.app_name
+        override val popis get() = R.string.d_p_dp
+        override val odmena get() = 500_000.0.penez
     }
 
     @Serializable
@@ -410,4 +422,82 @@ sealed interface Dosahlost {
     // tady to končí doopravdy
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Jsem to říkal
 }

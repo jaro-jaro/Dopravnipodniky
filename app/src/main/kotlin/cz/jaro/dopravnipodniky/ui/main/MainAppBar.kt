@@ -13,6 +13,7 @@ import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LocationCity
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
@@ -45,9 +46,9 @@ import cz.jaro.compose_dialog.show
 import cz.jaro.dopravnipodniky.BuildConfig
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
-import cz.jaro.dopravnipodniky.data.generace.DetailGeneraceV2
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
+import cz.jaro.dopravnipodniky.data.generace.DetailGeneraceV2
 import cz.jaro.dopravnipodniky.data.generace.Generator
 import cz.jaro.dopravnipodniky.dialogState
 import cz.jaro.dopravnipodniky.shared.Menic
@@ -108,7 +109,23 @@ fun MainAppBar(
                 },
             )
         }) {
-            navigate(DopravniPodnikyScreenDestination)
+        },
+        navigationIcon = {
+
+            if (
+                !(vse.tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                !(vse.tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                !(vse.tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
+                !(vse.tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                !(vse.tutorial je StavTutorialu.Tutorialujeme.Obchod) &&
+                !(vse.tutorial je StavTutorialu.Tutorialujeme.Vypraveni)
+            ) IconButton(
+                onClick = {
+                    navigate(DopravniPodnikyScreenDestination)
+                }
+            ) {
+                Icon(Icons.Default.LocationCity, stringResource(R.string.dopravni_podniky))
+            }
         },
         actions = {
             if (

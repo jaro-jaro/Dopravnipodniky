@@ -353,7 +353,7 @@ private fun update(
         // tutorial
 
         dataSource.upravitTutorial {
-            if (it == StavTutorialu.Odkliknuto(StavTutorialu.Tutorialujeme.Vypraveni) && puvodniVse.prachy + deltaPrachy >= 1_500_000.penez)
+            if (it == StavTutorialu.Odkliknuto(StavTutorialu.Tutorialujeme.Vypraveni) && puvodniVse.prachy + deltaPrachy >= 1_000_000.penez)
                 StavTutorialu.Tutorialujeme.NovejDp
             else it
         }
