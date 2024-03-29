@@ -97,7 +97,9 @@
     <string name="schovat_razeni">Schovat řazení</string>
     <string name="radit">Řadit</string>
     <string name="vytvorit_zastavku">Vytvořit zastávku za %s</string>
+    <string name="vytvorit_kruhac">Postavit kruhový objezd za %s</string>
     <string name="odstranit_zastavku">Odstranit zastávku za %s</string>
+    <string name="odstranit_kruhac">Odstranit kruhový objezd za %s</string>
     <string name="postavit_troleje">Postavit trolejovou trať za %s</string>
     <string name="odstranit_troleje">Odstranit trolejovou trať za %s</string>
     <string name="zrusit">Zrušit</string>
@@ -126,6 +128,7 @@
     <string name="ev_c_busu">Evidenční číslo %su</string>
     <string name="vyberte_ev_c">Vyberte evidenční číslo</string>
     <string name="upravit_ulici">Upravit ulici</string>
+    <string name="upravit_krizovatku">Upravit křižovatku</string>
     <string name="prodat_dp">Prodat dopravní podnik</string>
     <string name="za_prodej_dp_dostanete">Prodáním dopravního podniku získáte peníze odpovídající hodnotě Vašeho vozového parku a přibližnou hodnotu města. Protože je prodej vždy riskantní, ne vždy musí být úplně úspěšný. Nevíte jistě, kolik peněz získáte, očekávaná částka je %s, což se ale může lišit až o 50 %%!.</string>
     <string name="prodat">Prodat</string>
@@ -363,7 +366,30 @@
     <string name="nemate_zadny_bus">nemáte žádné vozidlo</string>
     <string name="resetovat_tutorial">Resetovat tutoriál</string>
     <string name="tri_mesta_se_nasla">Za vaši částku, která vám byla odečtena jsme úspěšně nalezli tři města. Nyní si je můžete prohlédnout a vybrat si to pravé!</string>
-    <plurals name="vozidlo">
+    <string name="opravdu_chcete_odstranit_kruhovy_objezd">Odstranit kruhový objezd?</string>
+    <string name="jeliko_na_t_to_k_i_ovatce_kon">Jelikož na této křižovatce končí %1$s %2$s, odstraněním způsobíte, že se busy na %3$s nebudou moci obrátit, a tudíž nebudou moci obsluhovat další cestující dokud kruhový objezd nepřidáte zpět nebo dokud nezměníte trasu %4$s.</string>
+    <plurals name="linka1p">
+        <item quantity="one">linka</item>
+        <item quantity="two">linky</item>
+        <item quantity="few">linky</item>
+        <item quantity="many">linky</item>
+        <item quantity="other">linky</item>
+    </plurals>
+    <plurals name="linka2p">
+        <item quantity="one">linky</item>
+        <item quantity="two">linek</item>
+        <item quantity="few">linek</item>
+        <item quantity="many">linkk</item>
+        <item quantity="other">linek</item>
+    </plurals>
+    <plurals name="tato_linka6p">
+        <item quantity="one">této lince</item>
+        <item quantity="two">těchto linkách</item>
+        <item quantity="few">těchto linkách</item>
+        <item quantity="many">těchto linkách</item>
+        <item quantity="other">těchto linkách</item>
+    </plurals>
+    <plurals name="vozidlo2p">
         <item quantity="zero">vozidel</item>
         <item quantity="one">vozidlo</item>
         <item quantity="two">vozidla</item>
