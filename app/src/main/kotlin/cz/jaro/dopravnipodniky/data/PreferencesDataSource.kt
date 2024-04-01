@@ -21,13 +21,13 @@ import cz.jaro.dopravnipodniky.shared.mutate
 import cz.jaro.dopravnipodniky.zobrazitLoading
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
@@ -49,7 +49,7 @@ class PreferencesDataSource(
         val VSE = stringPreferencesKey("vse")
     }
 
-    private val puvodniVse = flow { emit(Vse(Generator.vygenerujMiPrvniMesto())) }
+    private val puvodniVse = scope.async { Vse(Generator.vygenerujMiPrvniMesto()) }
 
     private val _ostatniPodniky = MutableStateFlow(null as List<DopravniPodnik>?)
     private val ostatniPodniky = _ostatniPodniky.filterNotNull()
@@ -131,7 +131,7 @@ class PreferencesDataSource(
 
     init {
         scope.launch(Dispatchers.IO) {
-            val vse = dataStore.data.first()[PreferenceKeys.VSE]?.let { json.decodeFromString<Vse?>(it) } ?: puvodniVse.first()
+            val vse = dataStore.data.first()[PreferenceKeys.VSE]?.let { json.decodeFromString<Vse?>(it) } ?: puvodniVse.await()
             setup(vse)
         }
     }

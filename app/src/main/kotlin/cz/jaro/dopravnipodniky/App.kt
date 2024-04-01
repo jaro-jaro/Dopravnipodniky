@@ -35,13 +35,5 @@ class App : Application() {
             })
             defaultModule()
         }
-
-//        runBlocking {
-//            dataSource.zmenitDp {
-//                it.copy(
-//                    busy = emptyList()
-//                )
-//            }
-//        }
     }
 }

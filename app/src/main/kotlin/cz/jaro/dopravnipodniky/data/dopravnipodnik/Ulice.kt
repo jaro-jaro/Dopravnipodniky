@@ -77,12 +77,19 @@ data class Ulice(
 }
 
 fun Ulice.zacatekKonecNaLince(linka: List<Ulice>): Pair<Pozice<UlicovyBlok>, Pozice<UlicovyBlok>> {
-    val dalsiUlice = linka.getOrNull(linka.indexOfFirst { it.id == id } + 1) ?: return zacatek to konec
-    return if (zacatek in dalsiUlice) konec to zacatek
-    else zacatek to konec
+    val i = linka.indexOfFirst { it.id == id }
+    val dalsiUlice = linka.getOrNull(i + 1)
+    val minulaUlice = linka.getOrNull(i - 1)
+    return when {
+        dalsiUlice != null && zacatek in dalsiUlice -> konec to zacatek
+        dalsiUlice != null && konec in dalsiUlice -> zacatek to konec
+        minulaUlice != null && konec in minulaUlice -> konec to zacatek
+        minulaUlice != null && zacatek in minulaUlice -> zacatek to konec
+        else -> zacatek to konec
+    }
 }
 
-fun List<Ulice>.poziceKrizovatekNaLince() =
+fun List<Ulice>.krizovatkyNaLince() =
     flatMap { it.zacatekKonecNaLince(this).toList() }.distinct()
 
 fun Ulice.zasebevrazdujZastavku() = copy(
@@ -90,7 +97,11 @@ fun Ulice.zasebevrazdujZastavku() = copy(
     zastavka = null,
 )
 
+val Ulice.krizovatky get() = listOf(zacatek, konec)
+
 operator fun Ulice.contains(other: Pozice<UlicovyBlok>) = other == zacatek || other == konec
+
+infix fun Ulice.x(other: Ulice) = krizovatky.find { it in other.krizovatky }
 
 fun Ulice.pocetLinek(dp: DopravniPodnik) = dp.linky.count { id in it.ulice }
 fun Ulice.pocetLinek(linky: List<Linka>) = linky.count { id in it.ulice }

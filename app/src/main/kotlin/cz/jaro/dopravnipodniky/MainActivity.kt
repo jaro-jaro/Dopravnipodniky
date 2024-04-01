@@ -8,6 +8,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -15,7 +16,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.Euro
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -35,6 +38,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.ramcosta.composedestinations.DestinationsNavHost
@@ -42,20 +46,20 @@ import cz.jaro.compose_dialog.AlertDialogState
 import cz.jaro.dopravnipodniky.data.Hodiny
 import cz.jaro.dopravnipodniky.data.PreferencesDataSource
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.dobaOdPoslednihoHrani
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.nevyzvednuto
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlovac
+import cz.jaro.dopravnipodniky.shared.StavHry
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.je
-import cz.jaro.dopravnipodniky.shared.jednotky.asString
-import cz.jaro.dopravnipodniky.shared.jednotky.times
-import cz.jaro.dopravnipodniky.shared.nasobitelZiskuPoOffline
+import cz.jaro.dopravnipodniky.shared.stavHry
+import cz.jaro.dopravnipodniky.shared.zpomalit
 import cz.jaro.dopravnipodniky.ui.Loading
 import cz.jaro.dopravnipodniky.ui.NavGraphs
 import cz.jaro.dopravnipodniky.ui.theme.DpTheme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
@@ -68,11 +72,15 @@ var zobrazitLoading by mutableStateOf(true)
 var uplnePoprve = true
 var snackbarHostState = SnackbarHostState()
 var dialogState = AlertDialogState()
+var lifecycleState: StateFlow<Lifecycle.State>? = null
 
 class MainActivity : ComponentActivity() {
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        lifecycleState = lifecycle.currentStateFlow
 
         val dosahlovac = get<Dosahlovac>()
         val hodiny = get<Hodiny>()
@@ -100,43 +108,80 @@ class MainActivity : ComponentActivity() {
                 val scope = rememberCoroutineScope()
                 var vyuctovani by remember { mutableStateOf(null as Duration?) }
                 LaunchedEffect(Unit) {
-                    hodiny.registerListener(1.seconds) { _ ->
+                    hodiny.registerListener(.1.seconds) { ubehlo ->
                         // zistovani jestli nejses moc dlouho pryc
                         val posledniId = dpInfo!!.id
 
                         val dobaOdPosledniNavstevy = dpInfo!!.dobaOdPoslednihoHrani
+//                        println(ubehlo)
+//                        println(dobaOdPosledniNavstevy)
+//                        println(stavHry)
 
-                        if (dobaOdPosledniNavstevy < 0.milliseconds) {
-                            dosahlovac.dosahni(Dosahlost.Citer::class)
-                        }
+                        when (val stav = stavHry) {
+                            is StavHry.Hra -> {
+                                if (dobaOdPosledniNavstevy < 0.milliseconds) {
+                                    dosahlovac.dosahni(Dosahlost.Citer::class)
+//                                    stavHry = StavHry.Dohaneni(zbyva = -dobaOdPosledniNavstevy)
 
-                        if (dobaOdPosledniNavstevy > 10.seconds) {
-
-                            dataSource.upravitBusy {
-                                forEachIndexed { i, bus ->
-                                    this[i] = bus.copy(
-                                        najeto = bus.najeto + dobaOdPosledniNavstevy
-                                    )
+                                    dataSource.upravitDPInfo { info ->
+                                        if (posledniId != info.id) info
+                                        else info.copy(
+                                            casPosledniNavstevy = System.currentTimeMillis(),
+                                        )
+                                    }
+                                    return@registerListener
+                                } else if (dobaOdPosledniNavstevy > 250.seconds) {
+                                    stavHry = StavHry.RychlaSimulace(zbyva = dobaOdPosledniNavstevy)
+                                    if (
+                                        tutorial != null &&
+                                        !(tutorial!! je StavTutorialu.Tutorialujeme.Uvod) &&
+                                        !(tutorial!! je StavTutorialu.Tutorialujeme.Linky) &&
+                                        !(tutorial!! je StavTutorialu.Tutorialujeme.Zastavky) &&
+                                        !(tutorial!! je StavTutorialu.Tutorialujeme.Garaz) &&
+                                        !(tutorial!! je StavTutorialu.Tutorialujeme.Obchod)
+                                    ) vyuctovani = dobaOdPosledniNavstevy//todo.coerceAtMost(8.hours)
+                                } else if (dobaOdPosledniNavstevy > 10.seconds) {
+                                    stavHry = StavHry.PomalaSimulace(zbyva = dobaOdPosledniNavstevy)
+                                    if (
+                                        tutorial != null &&
+                                        !(tutorial!! je StavTutorialu.Tutorialujeme.Uvod) &&
+                                        !(tutorial!! je StavTutorialu.Tutorialujeme.Linky) &&
+                                        !(tutorial!! je StavTutorialu.Tutorialujeme.Zastavky) &&
+                                        !(tutorial!! je StavTutorialu.Tutorialujeme.Garaz) &&
+                                        !(tutorial!! je StavTutorialu.Tutorialujeme.Obchod)
+                                    ) vyuctovani = dobaOdPosledniNavstevy
                                 }
                             }
 
-                            dataSource.upravitPrachy {
-                                it + dpInfo!!.nevyzvednuto
+                            is StavHry.RychlaSimulace -> {
+                                stavHry = stav.copy(zbyva = stav.zbyva - ubehlo)
+                                if (stav.zbyva < 100.seconds) {
+                                    stavHry = stav.zpomalit()
+                                }
                             }
 
-                            if (
-                                tutorial != null &&
-                                !(tutorial!! je StavTutorialu.Tutorialujeme.Uvod) &&
-                                !(tutorial!! je StavTutorialu.Tutorialujeme.Linky) &&
-                                !(tutorial!! je StavTutorialu.Tutorialujeme.Zastavky) &&
-                                !(tutorial!! je StavTutorialu.Tutorialujeme.Garaz) &&
-                                !(tutorial!! je StavTutorialu.Tutorialujeme.Obchod)
-                            ) vyuctovani = dobaOdPosledniNavstevy.coerceAtMost(8.hours)
+                            is StavHry.PomalaSimulace -> {
+                                stavHry = stav.copy(zbyva = stav.zbyva - ubehlo)
+                                if (stav.zbyva < 10.seconds) {
+                                    vyuctovani = null
+                                    stavHry = StavHry.Hra
+                                }
+                            }
+
+//                            is StavHry.Dohaneni -> {
+//                                stavHry = stav.copy(zbyva = stav.zbyva - ubehlo / stavHry.zrychleni.toDouble())
+//                                if (stav.zbyva < 1.seconds) {
+//                                    stavHry = StavHry.Hra
+//                                }
+//                            }
                         }
-                        dataSource.upravitDPInfo {
-                            if (posledniId != it.id) it
-                            else it.copy(
-                                casPosledniNavstevy = System.currentTimeMillis()
+                        dataSource.upravitDPInfo { info ->
+                            if (posledniId != info.id) info
+                            else info.copy(
+                                casPosledniNavstevy = info.casPosledniNavstevy + ubehlo.let {
+                                    if (stavHry is StavHry.Simulace) it// / stavHry.zrychleni.toDouble()
+                                    else it
+                                }.inWholeMilliseconds
                             )
                         }
                     }
@@ -195,11 +240,9 @@ class MainActivity : ComponentActivity() {
                     },
                 )
 
-                if (vyuctovani != null && !zobrazitLoading) AlertDialog(
-                    onDismissRequest = {
-                        vyuctovani = null
-                    },
-                    confirmButton = {
+                if (stavHry is StavHry.Simulace && vyuctovani != null && !zobrazitLoading) AlertDialog(
+                    onDismissRequest = {},
+                    confirmButton = {/*
                         TextButton(
                             onClick = {
                                 vyuctovani = null
@@ -207,6 +250,7 @@ class MainActivity : ComponentActivity() {
                         ) {
                             Text(stringResource(android.R.string.ok))
                         }
+                    */
                     },
                     icon = {
                         Icon(Icons.Default.Euro, null)
@@ -215,34 +259,83 @@ class MainActivity : ComponentActivity() {
                         Text(stringResource(R.string.slovo_vyuctovani))
                     },
                     text = {
-                        Text(
-                            stringResource(
-                                R.string.vyuctovani,
-                                if (vyuctovani!! < 2.hours)
-                                    pluralStringResource(
-                                        R.plurals.min,
-                                        vyuctovani!!.inWholeMinutes.toInt(),
-                                        vyuctovani!!.inWholeMinutes,
-                                    )
-                                else
-                                    pluralStringResource(
-                                        R.plurals.hod,
-                                        vyuctovani!!.inWholeHours.toInt(),
-                                        vyuctovani!!.inWholeHours,
-                                    ),
-                                (dpInfo!!.zisk * nasobitelZiskuPoOffline * vyuctovani!!).asString(),
-                                (dpInfo!!.zisk).asString(),
-                                vyuctovani!!.inWholeMinutes.formatovat(0).composeString(),
-                                nasobitelZiskuPoOffline.times(100).formatovat(0).composeString(),
-                                (dpInfo!!.zisk * nasobitelZiskuPoOffline * vyuctovani!!).asString(),
-                                if (vyuctovani!! >= 8.hours)
-                                    getString(R.string.bohuzel_dlouho_neaktivni)
-                                else ""
-                            ),
-                            Modifier.verticalScroll(rememberScrollState()),
-                        )
-                    }
+                        Column {
+                            val stav = stavHry as StavHry.Simulace
+                            val celkem = vyuctovani!!
+                            Text(
+//                            stringResource(
+//                                R.string.vyuctovani,
+//                                if (vyuctovani!! < 2.hours)
+//                                    pluralStringResource(
+//                                        R.plurals.min,
+//                                        vyuctovani!!.inWholeMinutes.toInt(),
+//                                        vyuctovani!!.inWholeMinutes,
+//                                    )
+//                                else
+//                                    pluralStringResource(
+//                                        R.plurals.hod,
+//                                        vyuctovani!!.inWholeHours.toInt(),
+//                                        vyuctovani!!.inWholeHours,
+//                                    ),
+//                                (dpInfo!!.zisk * nasobitelZiskuPoOffline * vyuctovani!!).asString(),
+//                                (dpInfo!!.zisk).asString(),
+//                                vyuctovani!!.inWholeMinutes.formatovat(0).composeString(),
+//                                nasobitelZiskuPoOffline.times(100).formatovat(0).composeString(),
+//                                (dpInfo!!.zisk * nasobitelZiskuPoOffline * vyuctovani!!).asString(),
+//                                if (vyuctovani!! >= 8.hours)
+//                                    getString(R.string.bohuzel_dlouho_neaktivni)
+//                                else ""
+//                            ),
+                                stringResource(
+                                    R.string.vyuctovani,
+                                    if (celkem < 2.hours)
+                                        pluralStringResource(
+                                            R.plurals.min,
+                                            celkem.inWholeMinutes.toInt(),
+                                            celkem.inWholeMinutes,
+                                        )
+                                    else
+                                        pluralStringResource(
+                                            R.plurals.hod,
+                                            celkem.inWholeHours.toInt(),
+                                            celkem.inWholeHours,
+                                        ),
+                                    if ((celkem - stav.zbyva) < 2.hours)
+                                        pluralStringResource(
+                                            R.plurals.min,
+                                            (celkem - stav.zbyva).inWholeMinutes.toInt(),
+                                            (celkem - stav.zbyva).inWholeMinutes,
+                                        )
+                                    else
+                                        pluralStringResource(
+                                            R.plurals.hod,
+                                            (celkem - stav.zbyva).inWholeHours.toInt(),
+                                            (celkem - stav.zbyva).inWholeHours,
+                                        ),
+                                    (1 - stav.zbyva / celkem).times(100).formatovat(0).composeString(),
+                                ),
+                                Modifier.verticalScroll(rememberScrollState()),
+                            )
+                            LinearProgressIndicator(
+                                progress = {
+                                    (1 - stav.zbyva / celkem).toFloat()
+                                },
+                            )
+                        }
+                    },
                 )
+
+//                if (stavHry is StavHry.Dohaneni && !zobrazitLoading) AlertDialog(
+//                    onDismissRequest = { },
+//                    confirmButton = { },
+//                    icon = {
+//                        Icon(Icons.Default.WarningAmber, null)
+//                    },
+//                    title = {
+//                        Text(stringResource(R.string.citer))
+//                    },
+//                    text = { },
+//                )
 
                 Scaffold(
                     snackbarHost = {

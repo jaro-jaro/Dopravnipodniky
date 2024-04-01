@@ -2,11 +2,16 @@ package cz.jaro.dopravnipodniky.ui.main
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
@@ -17,6 +22,7 @@ import androidx.compose.material.icons.filled.LocationCity
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,20 +30,27 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,6 +79,48 @@ import kotlin.math.pow
 import kotlin.random.Random
 import kotlin.reflect.KClass
 
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun CombinedIconButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    onLongClick: (() -> Unit)? = null,
+    onDoubleClick: (() -> Unit)? = null,
+    onClickLabel: String? = null,
+    onLongClickLabel: String? = null,
+    enabled: Boolean = true,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    content: @Composable () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .minimumInteractiveComponentSize()
+            .size(40.0.dp)
+            .clip(CircleShape)
+            .background(color = if (enabled) colors.containerColor else colors.disabledContainerColor)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick,
+                onDoubleClick = onDoubleClick,
+                onClickLabel = onClickLabel,
+                onLongClickLabel = onLongClickLabel,
+                enabled = enabled,
+                role = Role.Button,
+                interactionSource = interactionSource,
+                indication = rememberRipple(
+                    bounded = false,
+                    radius = 20.0.dp
+                )
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        val contentColor = if (enabled) colors.contentColor else colors.disabledContentColor
+        CompositionLocalProvider(LocalContentColor provides contentColor, content = content)
+    }
+}
+
 @Composable
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 fun MainAppBar(
@@ -80,38 +135,7 @@ fun MainAppBar(
 //                    Text("${dp.info.jmenoMesta} — $seed")
             Text(dp.info.jmenoMesta)
         },
-        Modifier.combinedClickable(onLongClick = {
-
-            dosahni(Dosahlost.Kocka::class)
-
-            dialogState.show(
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            hide()
-
-                            menic.zmenitPrachy {
-                                if (it < Double.POSITIVE_INFINITY.penez)
-                                    Double.POSITIVE_INFINITY.penez
-                                else
-                                    12.0.pow(6).penez
-                            }
-                        }
-                    ) {
-                        Text(stringResource(R.string.kocka))
-                    }
-                },
-                content = {
-                    Image(
-                        painterResource(R.drawable.super_tajna_vec_doopravdy_na_me_neklikej),
-                        stringResource(R.string.kocka),
-                    )
-                },
-            )
-        }) {
-        },
         navigationIcon = {
-
             if (
                 !(vse.tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
                 !(vse.tutorial je StavTutorialu.Tutorialujeme.Linky) &&
@@ -119,10 +143,38 @@ fun MainAppBar(
                 !(vse.tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
                 !(vse.tutorial je StavTutorialu.Tutorialujeme.Obchod) &&
                 !(vse.tutorial je StavTutorialu.Tutorialujeme.Vypraveni)
-            ) IconButton(
+            ) CombinedIconButton(
                 onClick = {
                     navigate(DopravniPodnikyScreenDestination)
-                }
+                },
+                onLongClick = {
+
+                    dosahni(Dosahlost.Kocka::class)
+
+                    dialogState.show(
+                        confirmButton = {
+                            TextButton(
+                                onClick = ::hide
+                            ) {
+                                Text(stringResource(R.string.kocka))
+                            }
+                        },
+                        content = {
+                            Image(
+                                painterResource(R.drawable.super_tajna_vec_doopravdy_na_me_neklikej),
+                                stringResource(R.string.kocka),
+                                Modifier.clickable {
+                                    menic.zmenitPrachy {
+                                        if (it < Double.POSITIVE_INFINITY.penez)
+                                            Double.POSITIVE_INFINITY.penez
+                                        else
+                                            12.0.pow(6).penez
+                                    }
+                                }
+                            )
+                        },
+                    )
+                },
             ) {
                 Icon(Icons.Default.LocationCity, stringResource(R.string.dopravni_podniky))
             }
@@ -208,7 +260,7 @@ fun MainAppBar(
                 Icon(Icons.AutoMirrored.Filled.Help, stringResource(R.string.tutorial))
             }
             var show by remember { mutableStateOf(false) }
-            var debug by remember { mutableStateOf(DEBUG_TEXT) }
+            var debug by remember { mutableStateOf(DEBUG_MODE) }
             var evc by remember { mutableStateOf(vse.nastaveni.automatickyUdelovatEvC) }
             var multi by remember { mutableStateOf(vse.nastaveni.vicenasobnyKupovani) }
             var tema by remember { mutableStateOf(dp.info.tema) }
@@ -381,8 +433,8 @@ fun MainAppBar(
                                     Switch(
                                         checked = debug,
                                         onCheckedChange = {
-                                            DEBUG_TEXT = !DEBUG_TEXT
-                                            debug = DEBUG_TEXT
+                                            DEBUG_MODE = !DEBUG_MODE
+                                            debug = DEBUG_MODE
                                         }
                                     )
                                 }

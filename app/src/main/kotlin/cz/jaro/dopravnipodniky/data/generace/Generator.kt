@@ -12,8 +12,6 @@ object Generator {
 
     suspend fun vygenerujMiPrvniMesto(): DopravniPodnik = withContext(Dispatchers.IO) {
 
-        val seed = 19250533
-
         Generator(
             detailGenerace = pocatecniDeatilGenerace,
             tema = Theme.Jantarove,

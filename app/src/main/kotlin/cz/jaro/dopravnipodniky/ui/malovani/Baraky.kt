@@ -2,7 +2,6 @@ package cz.jaro.dopravnipodniky.ui.malovani
 
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.translate
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Barak
@@ -12,10 +11,9 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.barva
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.kapacita
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.barvaTematu
-import cz.jaro.dopravnipodniky.shared.convert
+import cz.jaro.dopravnipodniky.shared.map
 import cz.jaro.dopravnipodniky.shared.odsazeniBaraku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
-import cz.jaro.dopravnipodniky.shared.toArgb2
 import cz.jaro.dopravnipodniky.shared.translate
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
 import cz.jaro.dopravnipodniky.shared.velikostBaraku
@@ -40,7 +38,7 @@ fun Barak.draw(
 
     val odsazeni = odsazeniBaraku.toPx()
 
-    val barvicka = convert(kapacita, typ.kapacita, typ.barva.barvaTematu(tema))
+    val barvicka = kapacita.map(typ.kapacita, typ.barva.barvaTematu(tema))
 //    val barvicka = Color(tema.barva.toArgb2())
 
 //    println(tema.barva.toArgb2())

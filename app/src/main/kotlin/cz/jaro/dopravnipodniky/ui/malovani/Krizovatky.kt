@@ -66,7 +66,7 @@ fun namalovatKrizovatku(
         )
 
         // kreslení chodníku okolo kruháče
-        if (krizovatka != null && krizovatka.typ == TypKrizovatky.Kruhac) {
+        if (krizovatka?.typ == TypKrizovatky.Kruhac) {
             translate(
                 left = sirkaUlice / 2,
                 top = sirkaUlice / 2,
@@ -74,8 +74,6 @@ fun namalovatKrizovatku(
                 val rVnejsi =
                     .5 * sqrt(2.0) * sirkaUlice + predsazeniKrizovatky * sqrt(2.0) - predsazeniKrizovatky - sirkaChodniku / 2
                 val rVnitrni = rVnejsi - sirkaUlice / 2
-                println(rVnejsi)
-                println(rVnitrni)
 
                 drawCircle(
                     color = barvaChodniku,
@@ -112,7 +110,7 @@ fun namalovatKrizovatku(
         }
 
         // Kreslení rovných chodníků
-        if (krizovatka == null || krizovatka.typ != TypKrizovatky.Kruhac) sousediUhly.filter { (soused1, soused2, soused3, soused4, _) ->
+        if (krizovatka?.typ != TypKrizovatky.Kruhac) sousediUhly.filter { (soused1, soused2, soused3, soused4, _) ->
             !soused1 && !soused3 || !soused1 && soused2 == soused4
         }.forEach { (_, soused2, _, soused4, uhel) ->
             rotate(
@@ -139,7 +137,7 @@ fun namalovatKrizovatku(
         }
 
         // Kreslení vnějšího oblouku u křižovatky typu L
-        if (krizovatka == null || krizovatka.typ != TypKrizovatky.Kruhac) sousediUhly
+        if (krizovatka?.typ != TypKrizovatky.Kruhac) sousediUhly
             .filter { (soused1, soused2, soused3, soused4, _) ->
                 soused4 && soused1 && !soused2 && !soused3
             }
@@ -237,7 +235,7 @@ fun namalovatKrizovatku(
             }
 
         // Kreslení napojení na kruháč
-        if (krizovatka != null && krizovatka.typ == TypKrizovatky.Kruhac) sousediUhly
+        if (krizovatka?.typ == TypKrizovatky.Kruhac) sousediUhly
             .filter { (soused1, _, _, _, _) ->
                 soused1
             }
@@ -284,7 +282,7 @@ fun namalovatKrizovatku(
             }
 
         // Kreslení napojení na kruháč
-        if (krizovatka != null && krizovatka.typ == TypKrizovatky.Kruhac) sousediUhly
+        if (krizovatka?.typ == TypKrizovatky.Kruhac) sousediUhly
             .filter { (_, _, _, soused4, _) ->
                 soused4
             }
@@ -331,7 +329,7 @@ fun namalovatKrizovatku(
             }
 
         // Kreslení kruháče
-        if (krizovatka != null && krizovatka.typ == TypKrizovatky.Kruhac) {
+        if (krizovatka?.typ == TypKrizovatky.Kruhac) {
             translate(
                 left = sirkaUlice / 2,
                 top = sirkaUlice / 2,
@@ -339,8 +337,6 @@ fun namalovatKrizovatku(
                 val rVnejsi =
                     .5 * sqrt(2.0) * sirkaUlice + predsazeniKrizovatky * sqrt(2.0) - predsazeniKrizovatky - sirkaChodniku
                 val rVnitrni = rVnejsi - sirkaUlice / 2
-                println(rVnejsi)
-                println(rVnitrni)
 
                 drawCircle(
                     color = barvaUlice,

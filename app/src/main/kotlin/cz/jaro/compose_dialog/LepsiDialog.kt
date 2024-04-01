@@ -4,17 +4,22 @@ import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.DialogProperties
 
-sealed interface AlertDialogInfo {
+sealed interface AlertDialogStyle {
     data class Material(
         val confirmButton: @Composable context(AlertDialogScope) () -> Unit,
         val modifier: Modifier = Modifier,
@@ -24,14 +29,26 @@ sealed interface AlertDialogInfo {
         val title: @Composable (context(AlertDialogScope) () -> Unit)? = null,
         val content: @Composable (context(ColumnScope, AlertDialogScope) () -> Unit)? = null,
         val properties: DialogProperties = DialogProperties(),
-    ) : AlertDialogInfo
+    ) : AlertDialogStyle
 
-    data class Plain(
+    data class Simple(
+        val confirmButtonText: String,
+        val onConfirmed: () -> Unit,
+        val modifier: Modifier = Modifier,
+        val dismissButtonText: String? = null,
+        val onDismissed: (() -> Unit)? = null,
+        val icon: ImageVector? = null,
+        val titleText: String? = null,
+        val contentText: String? = null,
+        val properties: DialogProperties = DialogProperties(),
+    ) : AlertDialogStyle
+
+    data class Basic(
         val modifier: Modifier = Modifier,
         val onDismissed: (() -> Unit)? = null,
         val content: @Composable (AlertDialogScope.() -> Unit)? = null,
         val properties: DialogProperties = DialogProperties(),
-    ) : AlertDialogInfo
+    ) : AlertDialogStyle
 }
 
 interface AlertDialogScope {
@@ -41,22 +58,22 @@ interface AlertDialogScope {
 }
 
 interface AlertDialogState {
-    fun show(info: AlertDialogInfo)
+    fun show(style: AlertDialogStyle)
 }
 
 fun AlertDialogState(): AlertDialogState = AlertDialogStateImpl()
 
 private class AlertDialogStateImpl : AlertDialogState {
 
-    var infos: List<AlertDialogInfo> by mutableStateOf(emptyList())
+    var dialogStyles: List<AlertDialogStyle> by mutableStateOf(emptyList())
         private set
 
-    override fun show(info: AlertDialogInfo) {
-        this.infos += info
+    override fun show(style: AlertDialogStyle) {
+        this.dialogStyles += style
     }
 
     fun hideTopMost() {
-        this.infos = this.infos.dropLast(1)
+        this.dialogStyles = this.dialogStyles.dropLast(1)
     }
 }
 
@@ -70,8 +87,24 @@ fun AlertDialogState.show(
     content: @Composable (context(ColumnScope, AlertDialogScope) () -> Unit)? = null,
     properties: DialogProperties = DialogProperties(),
 ) = show(
-    AlertDialogInfo.Material(
+    AlertDialogStyle.Material(
         confirmButton, modifier, dismissButton, onDismissed, icon, title, content, properties
+    )
+)
+
+fun AlertDialogState.show(
+    confirmButtonText: String,
+    onConfirmed: () -> Unit,
+    modifier: Modifier = Modifier,
+    dismissButtonText: String? = null,
+    onDismissed: (() -> Unit)? = null,
+    icon: ImageVector? = null,
+    titleText: String? = null,
+    contentText: String? = null,
+    properties: DialogProperties = DialogProperties(),
+) = show(
+    AlertDialogStyle.Simple(
+        confirmButtonText, onConfirmed, modifier, dismissButtonText, onDismissed, icon, titleText, contentText, properties
     )
 )
 
@@ -81,11 +114,14 @@ fun AlertDialogState.show(
     content: @Composable (AlertDialogScope.() -> Unit)? = null,
     properties: DialogProperties = DialogProperties(),
 ) = show(
-    AlertDialogInfo.Plain(
+    AlertDialogStyle.Basic(
         modifier, onDismissed, content, properties
     )
 )
 
+/**
+ * Verze: 2.0
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlertDialog(
@@ -102,28 +138,28 @@ fun AlertDialog(
             override val context: Context get() = ctx
         }
     }
-    state.infos.forEach { info ->
+    state.dialogStyles.forEach { info ->
         when(info) {
-            is AlertDialogInfo.Material -> androidx.compose.material3.AlertDialog(
+            is AlertDialogStyle.Material -> androidx.compose.material3.AlertDialog(
                 onDismissRequest = {
-                    state.hideTopMost()
+                    scope.hide()
                     info.onDismissed?.invoke()
                 },
                 confirmButton = {
                     info.confirmButton(scope)
                 },
                 modifier = info.modifier,
-                dismissButton = {
-                    info.dismissButton?.invoke(scope)
+                dismissButton = info.dismissButton?.let {
+                    { it(scope) }
                 },
-                icon = {
-                    info.icon?.invoke(scope)
+                icon = info.icon?.let {
+                    { it(scope) }
                 },
-                title = {
-                    info.title?.invoke(scope)
+                title = info.title?.let {
+                    { it(scope) }
                 },
-                text = {
-                    info.content?.let {
+                text = info.content?.let {
+                    {
                         Column(
                             Modifier.fillMaxWidth()
                         ) {
@@ -133,9 +169,67 @@ fun AlertDialog(
                 },
                 properties = info.properties
             )
-            is AlertDialogInfo.Plain -> androidx.compose.material3.AlertDialog(
+
+            is AlertDialogStyle.Simple -> androidx.compose.material3.AlertDialog(
                 onDismissRequest = {
-                    state.hideTopMost()
+                    scope.hide()
+                    info.onDismissed?.invoke()
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            scope.hide()
+                            info.onConfirmed.invoke()
+                        }
+                    ) {
+                        Text(
+                            text = info.confirmButtonText
+                        )
+                    }
+                },
+                modifier = info.modifier,
+                dismissButton = info.dismissButtonText?.let {
+                    {
+                        TextButton(
+                            onClick = {
+                                scope.hide()
+                                info.onDismissed?.invoke()
+                            }
+                        ) {
+                            Text(
+                                text = it
+                            )
+                        }
+                    }
+                },
+                icon = info.icon?.let {
+                    {
+                        Icon(
+                            imageVector = it,
+                            contentDescription = null,
+                        )
+                    }
+                },
+                title = info.titleText?.let {
+                    {
+                        Text(
+                            text = it,
+                        )
+                    }
+                },
+                text = info.contentText?.let {
+                    {
+                        Text(
+                            text = it,
+                        )
+                    }
+                },
+                properties = info.properties
+            )
+
+            is AlertDialogStyle.Basic -> BasicAlertDialog(
+                onDismissRequest = {
+                    scope.hide()
                     info.onDismissed?.invoke()
                 },
                 modifier = info.modifier,

@@ -1,7 +1,7 @@
 package cz.jaro.dopravnipodniky.shared
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -80,9 +80,11 @@ val barvaTroleje = Color(32, 32, 32)
 
 // Rychlost hry
 
-const val TPS = 90
-const val millisPerTik = 1000L / TPS
-var zrychlovacHry by mutableFloatStateOf(/*480F*//*.25F*/1F/*60F*/)
+//const val FPS = 60
+var stavHry by mutableStateOf<StavHry>(StavHry.Hra)
+val TPS get() = stavHry.tps
+val millisPerTik get() = 1000L / TPS
+val zrychlovacHry get() = stavHry.zrychleni
 
 // Generace
 

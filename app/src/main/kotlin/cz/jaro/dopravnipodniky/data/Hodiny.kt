@@ -1,5 +1,7 @@
 package cz.jaro.dopravnipodniky.data
 
+import androidx.lifecycle.Lifecycle
+import cz.jaro.dopravnipodniky.lifecycleState
 import cz.jaro.dopravnipodniky.shared.jednotky.Tik
 import cz.jaro.dopravnipodniky.shared.jednotky.tiku
 import cz.jaro.dopravnipodniky.shared.jednotky.toTiky
@@ -63,6 +65,7 @@ class Hodiny {
     init {
         scope.launch(Dispatchers.IO) {
             cas.collect { tik ->
+                if (lifecycleState?.value?.isAtLeast(Lifecycle.State.RESUMED)?.not() == true) return@collect
                 val l = listeners.toList()
                 l
                     .mapIndexed { i, (every, listener) -> Triple(i, every, listener) }

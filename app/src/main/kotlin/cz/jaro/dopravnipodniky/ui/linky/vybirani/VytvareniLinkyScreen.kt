@@ -66,7 +66,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypKrizovatky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.poziceKrizovatekNaLince
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.krizovatkyNaLince
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.rohyMesta
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.seznamPozicKrizovatek
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
@@ -151,7 +151,7 @@ fun VytvareniLinkyScreen(
     var kliklyKrizovatky by remember {
         mutableStateOf(upravovani?.let { linkaID ->
             val uliceNaLince = dp.linka(linkaID).ulice(dp)
-            uliceNaLince.poziceKrizovatekNaLince()
+            uliceNaLince.krizovatkyNaLince()
         } ?: emptyList())
     }
 

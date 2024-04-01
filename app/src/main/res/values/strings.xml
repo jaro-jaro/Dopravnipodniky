@@ -62,7 +62,8 @@
     <string name="automaticky_prirazovat_ev_c">Automaticky přidělovat evidenční čísla</string>
     <string name="vicenasobne_kupovani">Kupovat více busů najednou</string>
     <string name="bohuzel_dlouho_neaktivni">\n\nBohužel jste byl/a moc dlouho neaktivní, proto se Vám výdělek snížil tak, aby odpovídal výdělku za 8 hodin.</string>
-    <string name="vyuctovani">Doba neaktivity: %1$s\nZískané peníze: %2$s\n\n%3$s\n* %4$s min\n* %5$s %%\n—————————————\n%6$s%7$s</string>
+<!--    <string name="vyuctovani">Doba neaktivity: %1$s\nZískané peníze: %2$s\n\n%3$s\n* %4$s min\n* %5$s %%\n—————————————\n%6$s%7$s</string>-->
+    <string name="vyuctovani">Doba neaktivity: %1$s\nSimulovaná doba: %2$s (%3$s %%)</string>
     <plurals name="min">
         <item quantity="one">%d minuta</item>
         <item quantity="few">%d minuty</item>
@@ -369,6 +370,7 @@
     <string name="tri_mesta_se_nasla">Za vaši částku, která vám byla odečtena jsme úspěšně nalezli tři města. Nyní si je můžete prohlédnout a vybrat si to pravé!</string>
     <string name="opravdu_chcete_odstranit_kruhovy_objezd">Odstranit kruhový objezd?</string>
     <string name="jeliko_na_t_to_k_i_ovatce_kon">Jelikož na této křižovatce končí %1$s %2$s, odstraněním způsobíte, že se busy na %3$s nebudou moci obrátit, a tudíž nebudou moci obsluhovat další cestující dokud kruhový objezd nepřidáte zpět nebo dokud nezměníte trasu %4$s.</string>
+    <string name="citer">Čekáme, než se dožene náskok</string>
     <plurals name="linka1p">
         <item quantity="one">linka</item>
         <item quantity="two">linky</item>

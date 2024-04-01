@@ -35,7 +35,6 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.dobaOdPoslednihoHrani
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.jsouVsechnyZatrolejovane
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.nevyzvednuto
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.plocha
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.typMesta
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
@@ -52,7 +51,7 @@ import cz.jaro.dopravnipodniky.shared.minutes
 import cz.jaro.dopravnipodniky.shared.prodejniCenaCloveka
 import cz.jaro.dopravnipodniky.shared.vecne
 import cz.jaro.dopravnipodniky.snackbarHostState
-import cz.jaro.dopravnipodniky.ui.main.DEBUG_TEXT
+import cz.jaro.dopravnipodniky.ui.main.DEBUG_MODE
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
@@ -71,7 +70,7 @@ fun DopravniPodnik(
     val scope = rememberCoroutineScope()
 
     if (tentoDP.info.id != dp.info.id) Text(
-        text = stringResource(R.string.nevyzvednuto, dp.info.nevyzvednuto.asString()),
+        text = stringResource(R.string.nevyzvednuto, dp.info.casPosledniNavstevy.toString()), // todo
         Modifier
             .fillMaxWidth()
             .padding(all = 8.dp),
@@ -121,7 +120,7 @@ fun DopravniPodnik(
             .fillMaxWidth()
             .padding(all = 8.dp),
     )
-    if (DEBUG_TEXT) {
+    if (DEBUG_MODE) {
         Text(
             text = "Potenciál města: ${dp.ulice.sumOf { it.potencial }.formatovat(0).composeString()}",
             Modifier

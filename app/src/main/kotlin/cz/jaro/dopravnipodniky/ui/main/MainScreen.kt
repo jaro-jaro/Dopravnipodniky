@@ -74,8 +74,8 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.Krizovatka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypKrizovatky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Zastavka
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.krizovatkyNaLince
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.poziceKrizovatekNaLince
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.rohyMesta
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.seznamKrizovatek
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
@@ -85,6 +85,7 @@ import cz.jaro.dopravnipodniky.data.dosahlosti.DosahlostCallback
 import cz.jaro.dopravnipodniky.dialogState
 import cz.jaro.dopravnipodniky.shared.Menic
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
+import cz.jaro.dopravnipodniky.shared.StavHry
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.cenaKruhace
 import cz.jaro.dopravnipodniky.shared.cenaTroleje
@@ -105,6 +106,7 @@ import cz.jaro.dopravnipodniky.shared.oddalenyRezim
 import cz.jaro.dopravnipodniky.shared.predsazeniKrizovatky
 import cz.jaro.dopravnipodniky.shared.replaceBy
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
+import cz.jaro.dopravnipodniky.shared.stavHry
 import cz.jaro.dopravnipodniky.shared.toOffsetSPriblizenim
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
 import cz.jaro.dopravnipodniky.snackbarHostState
@@ -153,7 +155,7 @@ fun MainScreen(
     else LinearProgressIndicator(Modifier.fillMaxWidth())
 }
 
-var DEBUG_TEXT by mutableStateOf(false)
+var DEBUG_MODE by mutableStateOf(false)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -234,7 +236,7 @@ fun MainScreen(
                 .fillMaxSize()
         ) {
 
-            val malovatBusy = !editor && priblizeni > oddalenyRezim
+            val malovatBusy = stavHry != StavHry.Hra || !editor && priblizeni > oddalenyRezim
             val mestoModifier = Modifier
                 .fillMaxSize()
                 .pointerInput(Unit) {
@@ -410,7 +412,7 @@ fun MainScreen(
                     ) Text(
                         text = dp.info.zisk.asString(),
                         Modifier
-                            .padding(all = 16.dp)
+                            .padding(top = 16.dp, end = 16.dp, bottom = 16.dp)
                             .padding(start = 0.dp),
                         textAlign = TextAlign.End,
                     )
@@ -665,7 +667,7 @@ private fun kliklNaKrizovatku(
                     }
 
                     val spatneLinky = dp.linky.filter { linka ->
-                        linka.ulice(dp).poziceKrizovatekNaLince().let {
+                        linka.ulice(dp).krizovatkyNaLince().let {
                             it.first() == pozice || it.last() == pozice
                         }
                     }

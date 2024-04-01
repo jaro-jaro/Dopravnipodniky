@@ -1,6 +1,7 @@
 package cz.jaro.dopravnipodniky.ui.dopravnipodniky
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -13,7 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Login
-import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.LocationCity
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCartCheckout
 import androidx.compose.material3.AlertDialog
@@ -48,9 +49,9 @@ import com.ramcosta.composedestinations.spec.Direction
 import cz.jaro.compose_dialog.show
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
-import cz.jaro.dopravnipodniky.data.generace.DetailGenerace
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
+import cz.jaro.dopravnipodniky.data.generace.DetailGenerace
 import cz.jaro.dopravnipodniky.data.generace.Generator
 import cz.jaro.dopravnipodniky.dialogState
 import cz.jaro.dopravnipodniky.shared.Menic
@@ -63,7 +64,7 @@ import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.minimumInvestice
 import cz.jaro.dopravnipodniky.snackbarHostState
 import cz.jaro.dopravnipodniky.ui.destinations.NovyDopravniPodnikScreenDestination
-import cz.jaro.dopravnipodniky.ui.main.DEBUG_TEXT
+import cz.jaro.dopravnipodniky.ui.main.DEBUG_MODE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -138,7 +139,7 @@ fun DopravniPodnikyScreen(
                     Icon(Icons.Default.Search, null)
                 },
                 onClick = {
-                    if (DEBUG_TEXT) dialogState.show(
+                    if (DEBUG_MODE) dialogState.show(
                         confirmButton = {
                             val ctx = LocalContext.current
                             TextButton(
@@ -382,18 +383,18 @@ fun DopravniPodnikyScreen(
                                 }
                             },
                             leadingContent = {
-                                Icon(Icons.Default.Circle, null, tint = dp.info.tema.barva)
+                                Icon(Icons.Default.LocationCity, null, tint = dp.info.tema.barva)
                             },
                         )
-//                        AnimatedVisibility(expanded) {
-//                            Column(
-//                                Modifier
-//                                    .fillMaxWidth()
-//                                    .padding(8.dp)
-//                            ) {
+                        AnimatedVisibility(expanded) {
+                            Column(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                            ) {
                                 DopravniPodnik(tentoDP, dp, menic)
-//                            }
-//                        }
+                            }
+                        }
                         HorizontalDivider()
                     }
                 }

@@ -1,5 +1,6 @@
 package cz.jaro.dopravnipodniky.shared
 
+import android.graphics.Paint
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -9,7 +10,10 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -17,18 +21,24 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.unit.toOffset
 import cz.jaro.dopravnipodniky.R
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Krizovatka
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypKrizovatky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.zacatekKonecNaLince
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toPx
+import cz.jaro.dopravnipodniky.ui.main.DEBUG_MODE
 import cz.jaro.dopravnipodniky.ui.theme.Theme
 import kotlinx.coroutines.flow.Flow
+import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.roundToLong
+import kotlin.math.sin
+import kotlin.math.sqrt
 import kotlin.time.Duration
 
 
@@ -40,7 +50,7 @@ fun Double.formatovat(decimalPlaces: Int = 2): Text {
     if (this == Double.NEGATIVE_INFINITY) return R.string.nekonecne_malo.toText()
 
     return this
-        .zaokrouhlit(decimalPlaces)
+        .zaokrouhlit(decimalPlaces = decimalPlaces)
         .toBigDecimal()
         .toPlainString()
         .split(".")
@@ -57,11 +67,15 @@ fun Double.formatovat(decimalPlaces: Int = 2): Text {
         .toText()
 }
 
-fun Double.zaokrouhlit(decimalPlaces: Int = 0) = this
-    .times(10F.pow(decimalPlaces))
-    .roundToLong()
-    .toDouble()
-    .div(10F.pow(decimalPlaces))
+fun Double.zaokrouhlit(decimalPlaces: Int = 0) = zaokrouhlit(na = 10F.pow(decimalPlaces))
+
+fun Double.zaokrouhlit(na: Float = 1F) = this
+    .takeUnless { it.isNaN() }
+    ?.times(na)
+    ?.roundToLong()
+    ?.toDouble()
+    ?.div(na)
+    ?: this
 
 private fun String.formatovatTrojice() = toList()
     .reversed()
@@ -189,6 +203,22 @@ inline fun DrawScope.translate(
     top = offset.y,
     block = block,
 )
+
+fun DrawScope.translate(
+    radius: Float,
+    degrees: Float,
+    pivot: Offset,
+    isTurnRight: Boolean,
+    block: DrawScope.() -> Unit,
+) = translate(pivot) {
+    val x = radius * sin(Math.toRadians(degrees.toDouble())).toFloat()
+    val y = radius * cos(Math.toRadians(degrees.toDouble())).toFloat()
+    translate(
+        left = x * if (isTurnRight) 1 else -1,
+        top = y * if (isTurnRight) -1 else 1,
+        block = block,
+    )
+}
 
 fun <T, K> MutableList<T>.replaceBy(newValue: T, selector: (T) -> K) {
     val i = indexOfFirst { selector(it) == selector(newValue) }
@@ -364,6 +394,43 @@ fun <A, B, C, Z> zip(
     return list
 }
 
+fun <A, B, C, D, E> zip(
+    iterableA: Iterable<A>,
+    iterableB: Iterable<B>,
+    iterableC: Iterable<C>,
+    iterableD: Iterable<D>,
+    iterableE: Iterable<E>,
+) = zip(iterableA, iterableB, iterableC, iterableD, iterableE) { a, b, c, d, e -> Quintuple(a, b, c, d, e) }
+
+fun <A, B, C, D, E, Z> zip(
+    iterableA: Iterable<A>,
+    iterableB: Iterable<B>,
+    iterableC: Iterable<C>,
+    iterableD: Iterable<D>,
+    iterableE: Iterable<E>,
+    transform: (a: A, b: B, c: C, d: D, e: E) -> Z
+): ArrayList<Z> {
+    val a = iterableA.iterator()
+    val b = iterableB.iterator()
+    val c = iterableC.iterator()
+    val d = iterableD.iterator()
+    val e = iterableE.iterator()
+
+    val list = ArrayList<Z>(
+        minOf(
+            iterableA.collectionSizeOrDefault(10),
+            iterableB.collectionSizeOrDefault(10),
+            iterableC.collectionSizeOrDefault(10),
+            iterableD.collectionSizeOrDefault(10),
+            iterableE.collectionSizeOrDefault(10),
+        )
+    )
+    while (a.hasNext() && b.hasNext() && c.hasNext() && d.hasNext() && e.hasNext()) {
+        list.add(transform(a.next(), b.next(), c.next(), d.next(), e.next()))
+    }
+    return list
+}
+
 fun <Z> zip(
     iterables: List<Iterable<Any?>>,
     transform: (List<Any?>) -> Z
@@ -405,83 +472,102 @@ val ClosedFloatingPointRange<Double>.size get() = endInclusive - start
 fun IntRange.toClosedDoubleRange() = first.toDouble()..last.toDouble()
 fun ClosedFloatingPointRange<Float>.toDoubleRange() = start.toDouble()..endInclusive.toDouble()
 
-fun convert(
-    value: Int,
+fun Int.map(
     from: IntRange,
     to: ClosedFloatingPointRange<Float>,
-) = convert(
-    value = value.toDouble(),
+) = toDouble().map(
     from = from.toClosedDoubleRange(),
     to = to.toDoubleRange(),
 ).toFloat()
 
-fun convert(
-    value: Int,
+fun Dp.map(
+    from: Pair<Dp, Dp>,
+    to: ClosedFloatingPointRange<Float>,
+) = value.toDouble().map(
+    from = (from.first.value..from.second.value).toDoubleRange(),
+    to = to.toDoubleRange(),
+).toFloat()
+
+fun Int.map(
     from: IntRange,
     to: Pair<Color, Color>,
 ): Color {
-    val r = convert(
-        value = value,
+    val r = this@map.map(
         from = from,
         to = to.first.red..to.second.red,
     )
-    val g = convert(
-        value = value,
+    val g = this@map.map(
         from = from,
         to = to.first.green..to.second.green,
     )
-    val b =convert(
-        value = value,
+    val b = this@map.map(
         from = from,
         to = to.first.blue..to.second.blue,
     )
-    val a =convert(
-        value = value,
+    val a = this@map.map(
         from = from,
         to = to.first.alpha..to.second.alpha,
     )
     return Color(r, g, b, a)
 }
 
-fun convert(
-    value: Double,
+fun Double.map(
     from: ClosedFloatingPointRange<Double>,
     to: ClosedFloatingPointRange<Double>,
 ): Double {
-    val localValue = value - from.start
+    val localValue = this - from.start
     val relativeValue = (localValue / from.size)
     val newLocalValue = relativeValue * to.size
     return newLocalValue + to.start
 }
 
-fun TypKrizovatky.delkaKrizovatky(sirkaBusu: Dp) = when (this) {
-    TypKrizovatky.Otocka -> {
-        val r = sirkaUlice / 2 - odsazeniBusu - sirkaBusu / 2
-        val theta = Math.PI
-        predsazeniKrizovatky + theta * r + predsazeniKrizovatky
-    }
+fun TypZatoceni.delkaZatoceni(sirkaBusu: Dp) = delkyCastiZatoceni(sirkaBusu).sumOfDp { it }
 
-    TypKrizovatky.Rovne -> predsazeniKrizovatky + sirkaUlice + predsazeniKrizovatky
-    TypKrizovatky.Vpravo -> {
+fun TypZatoceni.delkyCastiZatoceni(sirkaBusu: Dp) = when (this) {
+    TypZatoceni.Rovne -> listOf(predsazeniKrizovatky + sirkaUlice + predsazeniKrizovatky)
+    TypZatoceni.Vpravo -> {
         val r = predsazeniKrizovatky + odsazeniBusu + sirkaBusu / 2
         val theta = Math.PI / 2
-        theta * r
+        listOf(theta * r)
     }
 
-    TypKrizovatky.Vlevo -> {
+    TypZatoceni.Vlevo -> {
         val r =
             predsazeniKrizovatky + sirkaUlice - (odsazeniBusu + sirkaBusu / 2)
         val theta = Math.PI / 2
-        theta * r
+        listOf(theta * r)
     }
+
+    is TypZatoceni.Kruhac -> {
+        val delkaCtvrtnyKruhace = delkaCtvrtnyKruhace(sirkaBusu)
+        val delkaNajezduNaKruhac = delkaNajezduNaKruhac(sirkaBusu)
+        listOf(delkaNajezduNaKruhac, delkaCtvrtnyKruhace * ctvrtin, delkaNajezduNaKruhac)
+    }
+
+    TypZatoceni.Spatne -> listOf(0.dp)
 }
 
-fun typKrizovatky(
+fun delkaNajezduNaKruhac(sirkaBusu: Dp) = run {
+    val r = predsazeniKrizovatky + odsazeniBusu + sirkaBusu / 2
+    val theta = Math.PI / 4
+    theta * r
+}
+
+fun delkaCtvrtnyKruhace(sirkaBusu: Dp) = run {
+    val r = .5 * sqrt(2.0) * sirkaUlice + predsazeniKrizovatky * sqrt(2.0) - predsazeniKrizovatky - odsazeniBusu - sirkaBusu / 2
+    val theta = Math.PI / 2
+    theta * r
+}
+
+fun typZatoceni(
+    krizovatka: Krizovatka?,
     ulice: Ulice,
-    pristiUlice: Ulice?
+    pristiUlice: Ulice?,
 ) = when {
-    pristiUlice == null -> TypKrizovatky.Otocka
-    pristiUlice.orientace == ulice.orientace -> TypKrizovatky.Rovne
+    pristiUlice == null && krizovatka?.typ == TypKrizovatky.Kruhac -> TypZatoceni.KruhacOtocka
+    pristiUlice == null -> TypZatoceni.Spatne
+    pristiUlice.orientace == ulice.orientace && krizovatka?.typ == TypKrizovatky.Kruhac -> TypZatoceni.KruhacRovne
+    pristiUlice.orientace == ulice.orientace -> TypZatoceni.Rovne
     else -> {
         val vpravoSvisle = when {
             ulice.zacatek == pristiUlice.konec -> false
@@ -493,9 +579,17 @@ fun typKrizovatky(
 
         val vpravo =
             if (ulice.orientace == Orientace.Svisle) vpravoSvisle else !vpravoSvisle
-        if (vpravo) TypKrizovatky.Vpravo else TypKrizovatky.Vlevo
+
+        when {
+            vpravo && krizovatka?.typ == TypKrizovatky.Kruhac -> TypZatoceni.KruhacVpravo
+            vpravo -> TypZatoceni.Vpravo
+            krizovatka?.typ == TypKrizovatky.Kruhac -> TypZatoceni.KruhacVlevo
+            else -> TypZatoceni.Vlevo
+        }
     }
 }
+
+operator fun Dp.times(other: Double) = times(other.toFloat())
 
 inline fun <T> Iterable<T>.sumOfIndexed(selector: (Int, T) -> Int): Int {
     var index = 0
@@ -507,3 +601,21 @@ inline fun <T> Iterable<T>.sumOfIndexed(selector: (Int, T) -> Int): Int {
 }
 
 fun all(vararg vec: Boolean) = vec.all { it }
+fun DrawScope.drawText(
+    text: String,
+    position: Offset,
+    fontSize: Float = 14.sp.toPx(),
+    color: Color = Color.White,
+) {
+    if (DEBUG_MODE) drawIntoCanvas {
+        it.nativeCanvas.drawText(
+            text,
+            position.x,
+            position.y,
+            Paint().apply {
+                this.color = color.toArgb()
+                this.textSize = fontSize
+            }
+        )
+    }
+}

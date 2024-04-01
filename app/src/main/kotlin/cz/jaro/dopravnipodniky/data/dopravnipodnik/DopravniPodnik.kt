@@ -14,14 +14,12 @@ import cz.jaro.dopravnipodniky.shared.jednotky.penezZaMin
 import cz.jaro.dopravnipodniky.shared.jednotky.times
 import cz.jaro.dopravnipodniky.shared.jednotky.to
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
-import cz.jaro.dopravnipodniky.shared.nasobitelZiskuPoOffline
 import cz.jaro.dopravnipodniky.shared.toText
 import cz.jaro.dopravnipodniky.shared.vecne
 import cz.jaro.dopravnipodniky.ui.theme.Theme
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 
 @Serializable
@@ -100,7 +98,7 @@ val DopravniPodnik.typMesta
         else -> R.string.vesnice.toText()
     }
 
-val DPInfo.nevyzvednuto get() = (zisk * dobaOdPoslednihoHrani.coerceAtMost(8.hours)) * nasobitelZiskuPoOffline
+//val DPInfo.nevyzvednuto get() = (zisk * dobaOdPoslednihoHrani.coerceAtMost(8.hours)) * nasobitelZiskuPoOffline
 
 val DopravniPodnik.stred
     get() = rohyMesta.let { (min, max) ->

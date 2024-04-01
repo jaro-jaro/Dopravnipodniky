@@ -9,32 +9,31 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
-import cz.jaro.dopravnipodniky.shared.typKrizovatky
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.zacatekKonecNaLince
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.Smer
-import cz.jaro.dopravnipodniky.shared.TypKrizovatky.Otocka
-import cz.jaro.dopravnipodniky.shared.TypKrizovatky.Rovne
-import cz.jaro.dopravnipodniky.shared.TypKrizovatky.Vlevo
-import cz.jaro.dopravnipodniky.shared.TypKrizovatky.Vpravo
-import cz.jaro.dopravnipodniky.shared.delkaKrizovatky
+import cz.jaro.dopravnipodniky.shared.TypZatoceni
+import cz.jaro.dopravnipodniky.shared.TypZatoceni.Rovne
+import cz.jaro.dopravnipodniky.shared.TypZatoceni.Vlevo
+import cz.jaro.dopravnipodniky.shared.TypZatoceni.Vpravo
 import cz.jaro.dopravnipodniky.shared.delkaUlice
+import cz.jaro.dopravnipodniky.shared.delkyCastiZatoceni
 import cz.jaro.dopravnipodniky.shared.jednotky.metru
 import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.odsazeniBusu
 import cz.jaro.dopravnipodniky.shared.predsazeniKrizovatky
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
+import cz.jaro.dopravnipodniky.shared.sumOfDp
+import cz.jaro.dopravnipodniky.shared.translate
+import cz.jaro.dopravnipodniky.shared.typZatoceni
 import cz.jaro.dopravnipodniky.shared.zip
-import cz.jaro.dopravnipodniky.ui.main.DEBUG_TEXT
-import java.lang.Math.toRadians
-import kotlin.math.abs
-import kotlin.math.cos
-import kotlin.math.sin
+import cz.jaro.dopravnipodniky.ui.main.DEBUG_MODE
+import kotlin.math.sqrt
 
 fun getNamalovatBus(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
     if (bus.linka == null) return {}
@@ -45,6 +44,8 @@ fun getNamalovatBus(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
     } else {
         linka.ulice.reversed()
     }
+
+    val ulicove = dp.ulice.filter { it.id in seznamUlic }.sortedBy { seznamUlic.indexOf(it.id) }
 
     val ulice = dp.ulice(seznamUlic[bus.poziceNaLince])
     val pristiUlice = seznamUlic.getOrNull(bus.poziceNaLince + 1)?.let { dp.ulice(it) }
@@ -73,16 +74,28 @@ fun getNamalovatBus(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
         Smer.Negativni -> 180F
     }
 
-    val krizovatka = typKrizovatky(ulice, pristiUlice)
+    val orientovanaUlice = ulice.zacatekKonecNaLince(ulicove)
 
-    val uhelZatoceni = when (krizovatka) {
-        Otocka -> -180F
-        Rovne -> 0F
-        Vpravo -> 90F
-        Vlevo -> -90F
-    }
+    val krizovatka = dp.krizovatky.find { it.pozice == orientovanaUlice.second }
 
-    val delkaKrizovatky = krizovatka.delkaKrizovatky(bus.typBusu.sirka.toDp())
+    println(orientovanaUlice to krizovatka)
+
+    val zatoceni = typZatoceni(krizovatka, ulice, pristiUlice)
+
+    val castiZatoceni = when(zatoceni) {
+        Rovne -> listOf(0F, 0F)
+        Vlevo -> listOf(0F, -90F)
+        Vpravo -> listOf(0F, 90F)
+        TypZatoceni.Spatne -> listOf(0F, -180F)
+        TypZatoceni.KruhacVpravo -> listOf(0F, 45F, 45F, 90F)
+        TypZatoceni.KruhacRovne -> listOf(0F, 45F, -45F, 0F)
+        TypZatoceni.KruhacVlevo -> listOf(0F, 45F, -135F, -90F)
+        TypZatoceni.KruhacOtocka -> listOf(0F, 45F, -225F, -180F)
+    }.windowed(2)
+
+    val delkyCastiZatoceni = zatoceni.delkyCastiZatoceni(bus.typBusu.sirka.toDp())
+
+    val delkaKrizovatky = delkyCastiZatoceni.sumOfDp { it }
 
     val clanekClanky = bus.typBusu.clanky.scan(0.metru to 0.metru) { (konecPredminulyho, minuly), clanek ->
         konecPredminulyho + minuly to clanek
@@ -94,8 +107,31 @@ fun getNamalovatBus(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
         poziceKonceVKrizovatce + bus.typBusu.delka.toDp() - konecMinulyho.toDp() - clanek.toDp() / 2
     }
 
-    val natoceniClanku = poziceClankuVKrizovatce.map { pozice ->
-        (pozice.coerceIn(0.dp, delkaKrizovatky) / delkaKrizovatky) * uhelZatoceni
+    val indexCasti = poziceClankuVKrizovatce.map { pozice ->
+        delkyCastiZatoceni.runningReduce { acc, delka -> delka + acc }.let {
+            it.indexOfFirst { pozice < it }.takeUnless { it == -1 } ?: it.lastIndex
+        }
+    }
+
+    val uhelCastiZatoceni = indexCasti.map { i ->
+        castiZatoceni[i]
+    }
+
+    val delkaCastiZatoceni = indexCasti.map { i ->
+        delkyCastiZatoceni[i]
+    }
+
+    val posunutiCastiZatoceni = indexCasti.map { i ->
+        (listOf(0.dp) + delkyCastiZatoceni.runningReduce { acc, delka -> delka + acc })[i]
+    }
+
+    val poziceVCasti = posunutiCastiZatoceni.zip(poziceClankuVKrizovatce) { posunuti, pozice ->
+        pozice - posunuti
+    }
+
+    val natoceniClanku = zip(poziceVCasti, delkaCastiZatoceni, uhelCastiZatoceni) { pozice, delka, uhel ->
+        (pozice.coerceIn(0.dp, delka) / delka) * (uhel.last() - uhel.first()) + uhel.first()
+//        pozice.coerceIn(0.dp, delka).map(0.dp to delka, uhel.first()..uhel.last())
     }
 
 //    println(poziceKonceVKrizovatce)
@@ -165,11 +201,28 @@ fun getNamalovatBus(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
 //                                ),
 //                                cornerRadius = CornerRadius(3F.dp.toPx()),
 //                            )
-                            if (jePrvni && DEBUG_TEXT) drawIntoCanvas {
+                            /*if (jePrvni) drawIntoCanvas {
                                 it.nativeCanvas.drawText(
-                                    bus.cloveci.toString(),
+//                                    uhelCastiZatoceni[0].joinToString { it.toDouble().zaokrouhlit(1).toString() },
+//                                    castiZatoceni.joinToString { it.joinToString { it.toDouble().zaokrouhlit(1).toString() } },
+//                                    poziceVCasti.joinToString { it.value.toDouble().zaokrouhlit(1).toString() },
+//                                    posunutiCastiZatoceni.joinToString { it.value.toDouble().zaokrouhlit(1).toString() },
+//                                    delkyCastiZatoceni.runningReduce { acc, delka -> delka + acc }.joinToString { it.value.toDouble().zaokrouhlit(1).toString() },
+//                                    delkyCastiZatoceni.joinToString { it.value.toDouble().zaokrouhlit(1).toString() },
+                                    "${poziceClankuVKrizovatce[0].value.toDouble().zaokrouhlit(1)} ${natoceniClanku[0].toDouble().zaokrouhlit(1)} $indexCasti",
+//                                    delkyCastiZatoceni.runningReduce { acc, delka -> delka + acc }.joinToString { it.value.toDouble().zaokrouhlit(1).toString() },
                                     0F,
                                     5.dp.toPx(),
+                                    Paint().apply {
+                                        color = android.graphics.Color.WHITE
+                                    }
+                                )
+                            }*/
+                            if (jePrvni && DEBUG_MODE) drawIntoCanvas {
+                                it.nativeCanvas.drawText(
+                                    "${bus.cloveci}/${bus.typBusu.kapacita}",
+                                    0F,
+                                    7.dp.toPx(),
                                     Paint().apply {
                                         color = android.graphics.Color.WHITE
                                     }
@@ -177,7 +230,8 @@ fun getNamalovatBus(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
                             }
                         }
                     }
-                    zip(poziceClankuVKrizovatce, natoceniClanku, clanky).forEachIndexed { i, (pozice, natoceni, clanek) ->
+                    // --->
+                    zip(poziceClankuVKrizovatce, natoceniClanku, clanky, indexCasti, posunutiCastiZatoceni).forEachIndexed { i, (pozice, natoceni, clanek, index, delka) ->
                         when {
                             pozice < 0.dp -> translate(
                                 left = delkaUlice - predsazeniKrizovatky.toPx() + pozice.toPx(),
@@ -186,14 +240,27 @@ fun getNamalovatBus(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
                                 malovat(clanek, natoceni, i)
                             }
 
-                            krizovatka == Rovne -> translate(
+                            zatoceni == Rovne -> translate(
                                 left = delkaUlice - predsazeniKrizovatky.toPx() + pozice.toPx(),
                                 top = sirkaUlice - odsazeni - sirkaBusu / 2,
                             ) {
                                 malovat(clanek, natoceni, i)
                             }
 
-                            pozice > delkaKrizovatky && krizovatka == Vpravo -> translate(
+                            pozice > delkaKrizovatky && zatoceni == TypZatoceni.KruhacRovne -> translate(
+                                left = delkaUlice + sirkaUlice + predsazeniKrizovatky.toPx(),
+                                top = sirkaUlice + predsazeniKrizovatky.toPx(),
+                            ) {
+                                val r = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2
+                                translate(
+                                    left = pozice.toPx() - delkaKrizovatky.toPx(),
+                                    top = -r,
+                                ) {
+                                    malovat(clanek, natoceni, i)
+                                }
+                            }
+
+                            pozice > delkaKrizovatky && zatoceni in listOf(Vpravo, TypZatoceni.KruhacVpravo) -> translate(
                                 left = delkaUlice - predsazeniKrizovatky.toPx(),
                                 top = sirkaUlice + predsazeniKrizovatky.toPx(),
                             ) {
@@ -206,22 +273,19 @@ fun getNamalovatBus(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
                                 }
                             }
 
-                            krizovatka == Vpravo -> translate(
-                                left = delkaUlice - predsazeniKrizovatky.toPx(),
-                                top = sirkaUlice + predsazeniKrizovatky.toPx(),
+                            zatoceni == Vpravo -> translate(
+                                pivot = Offset(
+                                    x = delkaUlice - predsazeniKrizovatky.toPx(),
+                                    y = sirkaUlice + predsazeniKrizovatky.toPx(),
+                                ),
+                                radius = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2,
+                                degrees = natoceni,
+                                isTurnRight = true,
                             ) {
-                                val r = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2
-                                val x = r * sin(toRadians(natoceni.toDouble())).toFloat()
-                                val y = -r * cos(toRadians(natoceni.toDouble())).toFloat()
-                                translate(
-                                    left = x,
-                                    top = y,
-                                ) {
-                                    malovat(clanek, natoceni, i)
-                                }
+                                malovat(clanek, natoceni, i)
                             }
 
-                            pozice > delkaKrizovatky && krizovatka == Vlevo -> translate(
+                            pozice > delkaKrizovatky && zatoceni in listOf(Vlevo, TypZatoceni.KruhacVlevo) -> translate(
                                 left = delkaUlice - predsazeniKrizovatky.toPx(),
                                 top = -predsazeniKrizovatky.toPx(),
                             ) {
@@ -234,22 +298,19 @@ fun getNamalovatBus(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
                                 }
                             }
 
-                            krizovatka == Vlevo -> translate(
-                                left = delkaUlice - predsazeniKrizovatky.toPx(),
-                                top = -predsazeniKrizovatky.toPx(),
+                            zatoceni == Vlevo -> translate(
+                                pivot = Offset(
+                                    x = delkaUlice - predsazeniKrizovatky.toPx(),
+                                    y = -predsazeniKrizovatky.toPx(),
+                                ),
+                                radius = predsazeniKrizovatky.toPx() + sirkaUlice - odsazeni - sirkaBusu / 2,
+                                degrees = natoceni,
+                                isTurnRight = false,
                             ) {
-                                val r = predsazeniKrizovatky.toPx() + sirkaUlice - odsazeni - sirkaBusu / 2
-                                val x = r * sin(abs(toRadians(natoceni.toDouble()))).toFloat()
-                                val y = r * cos(toRadians(natoceni.toDouble())).toFloat()
-                                translate(
-                                    left = x,
-                                    top = y,
-                                ) {
-                                    malovat(clanek, natoceni, i)
-                                }
+                                malovat(clanek, natoceni, i)
                             }
 
-                            pozice > delkaKrizovatky/* && krizovatka == Otocka*/ -> translate(
+                            pozice > delkaKrizovatky && zatoceni == TypZatoceni.KruhacOtocka -> translate(
                                 left = delkaUlice - predsazeniKrizovatky.toPx(),
                                 top = sirkaUlice / 2,
                             ) {
@@ -262,19 +323,73 @@ fun getNamalovatBus(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
                                 }
                             }
 
-                            else/*krizovatka == Otocka*/ -> translate(
-                                left = delkaUlice - predsazeniKrizovatky.toPx(),
-                                top = sirkaUlice / 2,
+                            zatoceni is TypZatoceni.Kruhac && index == 0 -> translate(
+                                pivot = Offset(
+                                    x = delkaUlice - predsazeniKrizovatky.toPx(),
+                                    y = sirkaUlice + predsazeniKrizovatky.toPx(),
+                                ),
+                                radius = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2,
+                                degrees = natoceni,
+                                isTurnRight = true,
                             ) {
-                                val r = sirkaUlice / 2 - odsazeni - sirkaBusu / 2
-                                val x = -r * sin(toRadians(natoceni.toDouble())).toFloat()
-                                val y = r * cos(toRadians(natoceni.toDouble())).toFloat()
-                                translate(
-                                    left = x,
-                                    top = y,
-                                ) {
-                                    malovat(clanek, natoceni, i)
-                                }
+                                malovat(clanek, natoceni, i)
+                            }
+
+                            zatoceni is TypZatoceni.Kruhac && index == 1 -> translate(
+                                pivot = Offset(
+                                    x = delkaUlice + sirkaUlice / 2,
+                                    y = sirkaUlice / 2,
+                                ),
+                                radius = .5F * sqrt(2F) * sirkaUlice + predsazeniKrizovatky.toPx() * sqrt(2F) - predsazeniKrizovatky.toPx() - odsazeni - sirkaBusu / 2,
+                                degrees = natoceni,
+                                isTurnRight = false,
+                            ) {
+                                malovat(clanek, natoceni, i)
+                            }
+
+                            zatoceni == TypZatoceni.KruhacVpravo && index == 2 -> translate(
+                                pivot = Offset(
+                                    x = delkaUlice - predsazeniKrizovatky.toPx(),
+                                    y = sirkaUlice + predsazeniKrizovatky.toPx(),
+                                ),
+                                radius = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2,
+                                degrees = natoceni,
+                                isTurnRight = true,
+                            ) {
+                                malovat(clanek, natoceni, i)
+                            }
+                            zatoceni == TypZatoceni.KruhacRovne && index == 2 -> translate(
+                                pivot = Offset(
+                                    x = delkaUlice + sirkaUlice + predsazeniKrizovatky.toPx(),
+                                    y = sirkaUlice + predsazeniKrizovatky.toPx(),
+                                ),
+                                radius = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2,
+                                degrees = natoceni,
+                                isTurnRight = true,
+                            ) {
+                                malovat(clanek, natoceni, i)
+                            }
+                            zatoceni == TypZatoceni.KruhacVlevo && index == 2 -> translate(
+                                pivot = Offset(
+                                    x = delkaUlice + sirkaUlice + predsazeniKrizovatky.toPx(),
+                                    y = -predsazeniKrizovatky.toPx(),
+                                ),
+                                radius = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2,
+                                degrees = natoceni,
+                                isTurnRight = true,
+                            ) {
+                                malovat(clanek, natoceni, i)
+                            }
+                            zatoceni == TypZatoceni.KruhacOtocka && index == 2 -> translate(
+                                pivot = Offset(
+                                    x = delkaUlice - predsazeniKrizovatky.toPx(),
+                                    y = -predsazeniKrizovatky.toPx(),
+                                ),
+                                radius = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2,
+                                degrees = natoceni,
+                                isTurnRight = true,
+                            ) {
+                                malovat(clanek, natoceni, i)
                             }
                         }
                     }

@@ -33,6 +33,7 @@ data class Pozice<T : Comparable<T>>(
 
 operator fun Pozice<Dp>.minus(other: Dp) = Pozice(x - other, y - other)
 operator fun Pozice<Dp>.plus(other: Dp) = Pozice(x + other, y + other)
+operator fun Pozice<Dp>.plus(other: Pozice<Dp>) = Pozice(x + other.x, y + other.y)
 
 fun Pozice<UlicovyBlok>.sousedi() = listOf(
     x - 1.ulicovychBloku to y,

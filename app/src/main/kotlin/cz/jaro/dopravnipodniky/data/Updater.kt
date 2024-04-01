@@ -1,5 +1,6 @@
 package cz.jaro.dopravnipodniky.data
 
+import android.annotation.SuppressLint
 import android.util.Log
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
@@ -8,25 +9,28 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.StavZastavky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Trakce
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypKrizovatky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Zastavka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.bonusoveVydajeZaNeekologicnost
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.busy
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.jsouVsechnyZatrolejovane
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.kapacitaZastavky
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.krizovatkyNaLince
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.pocetLinek
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.zacatekKonecNaLince
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlovac
 import cz.jaro.dopravnipodniky.shared.BusID
 import cz.jaro.dopravnipodniky.shared.Smer
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.Text
-import cz.jaro.dopravnipodniky.shared.delkaKrizovatky
 import cz.jaro.dopravnipodniky.shared.delkaUlice
 import cz.jaro.dopravnipodniky.shared.delkaZastavky
+import cz.jaro.dopravnipodniky.shared.delkaZatoceni
 import cz.jaro.dopravnipodniky.shared.dobaPobytuNaZastavce
 import cz.jaro.dopravnipodniky.shared.hezkaCisla
 import cz.jaro.dopravnipodniky.shared.idealniInterval
@@ -51,7 +55,7 @@ import cz.jaro.dopravnipodniky.shared.sumOfDp
 import cz.jaro.dopravnipodniky.shared.sumOfIndexed
 import cz.jaro.dopravnipodniky.shared.times
 import cz.jaro.dopravnipodniky.shared.toText
-import cz.jaro.dopravnipodniky.shared.typKrizovatky
+import cz.jaro.dopravnipodniky.shared.typZatoceni
 import cz.jaro.dopravnipodniky.shared.udrzbaTroleje
 import cz.jaro.dopravnipodniky.shared.udrzbaZastavky
 import cz.jaro.dopravnipodniky.shared.vecne
@@ -97,7 +101,6 @@ private fun update(
         }
     }
 
-
     hodiny.registerListener(1.tiku) { ubehlo ->
 
         val puvodniDp = dataSource.dp.first()
@@ -122,6 +125,12 @@ private fun update(
                 }
                 val ulice = ulicove[indexUliceNaLince]
 
+                if (
+                    indexUliceNaLince == linka.ulice.lastIndex && ulice.zacatekKonecNaLince(ulicove.otocit(smerNaLince)).second.let { pozice ->
+                        puvodniDp.krizovatky.find { it.pozice == pozice }
+                    }?.typ != TypKrizovatky.Kruhac
+                ) return@upravitBusy
+
                 if (bus.stavZastavky !is StavZastavky.Na) {
                     // posouvani busu po mape
 
@@ -131,8 +140,16 @@ private fun update(
                         Smer.Pozitivni -> ulicove.getOrNull(indexUliceNaLince + 1)
                         Smer.Negativni -> ulicove.getOrNull(indexUliceNaLince - 1)
                     }
-                    val krizovatka = typKrizovatky(ulice, pristiUlice)
-                    val delkaKrizovatky = krizovatka.delkaKrizovatky(bus.typBusu.sirka.toDp())
+
+                    val orientovanaUlice = ulice.zacatekKonecNaLince(ulicove)
+
+                    val krizovatka = when (smerNaLince) {
+                        Smer.Pozitivni -> puvodniDp.krizovatky.find { it.pozice == orientovanaUlice.second }
+                        Smer.Negativni -> puvodniDp.krizovatky.find { it.pozice == orientovanaUlice.first }
+                    }
+
+                    val zatoceni = typZatoceni(krizovatka, ulice, pristiUlice)
+                    val delkaKrizovatky = zatoceni.delkaZatoceni(bus.typBusu.sirka.toDp())
 
                     if (poziceVUlici >= (delkaUlice - predsazeniKrizovatky) + delkaKrizovatky) {  // odjel mimo ulici
                         poziceVUlici = predsazeniKrizovatky
@@ -353,8 +370,10 @@ private fun update(
         // tutorial
 
         dataSource.upravitTutorial {
-            if (it == StavTutorialu.Odkliknuto(StavTutorialu.Tutorialujeme.Vypraveni) && puvodniVse.prachy + deltaPrachy >= 1_000_000.penez)
+            if (it == StavTutorialu.Odkliknuto(StavTutorialu.Tutorialujeme.Vypraveni) && puvodniVse.prachy + deltaPrachy >= 1_000_000.penez) {
+                dosahlovac.dosahni(Dosahlost.DopravniPodniky::class)
                 StavTutorialu.Tutorialujeme.NovejDp
+            }
             else it
         }
 
@@ -442,6 +461,12 @@ private fun update(
     }
 }
 
+private fun List<Ulice>.otocit(smer: Smer) = when (smer) {
+    Smer.Pozitivni -> this
+    Smer.Negativni -> this.asReversed()
+}
+
+@SuppressLint("BuildListAdds")
 private fun detailZisku(
     puvodniDp: DopravniPodnik,
     vydelky: Map<BusID, PenizZaMinutu>
@@ -624,6 +649,12 @@ fun Bus.vydelkuj(
 
     if (typBusu.trakce is Trakce.Trolejbus && !ulicove.jsouVsechnyZatrolejovane()) return 0.penezZaMin
 
+    if (ulicove.krizovatkyNaLince().let {
+            listOf(it.first(), it.last())
+        }.any { pozice ->
+            puvodniDp.krizovatky.find { it.pozice == pozice }?.typ != TypKrizovatky.Kruhac
+        }) return 0.penezZaMin
+
     var cloveci = 0
 
     val nastupujicichZaJizdu = ulicove
@@ -727,8 +758,15 @@ fun Bus.vydelkuj(
         val ulice = dvojice.first()
         val pristiUlice = dvojice.getOrNull(1)
 
-        val krizovatka = typKrizovatky(ulice, pristiUlice)
-        val delkaKrizovatky = krizovatka.delkaKrizovatky(typBusu.sirka.toDp())
+        val orientovanaUlice = ulice.zacatekKonecNaLince(ulicove)
+
+        val krizovatka = when (smerNaLince) {
+            Smer.Pozitivni -> puvodniDp.krizovatky.find { it.pozice == orientovanaUlice.second }
+            Smer.Negativni -> puvodniDp.krizovatky.find { it.pozice == orientovanaUlice.first }
+        }
+
+        val zatoceni = typZatoceni(krizovatka, ulice, pristiUlice)
+        val delkaKrizovatky = zatoceni.delkaZatoceni(typBusu.sirka.toDp())
 
         delkaKrizovatky
     } * 2 / typBusu.maxRychlost.coerceAtMost(50.kilometruZaHodinu)
