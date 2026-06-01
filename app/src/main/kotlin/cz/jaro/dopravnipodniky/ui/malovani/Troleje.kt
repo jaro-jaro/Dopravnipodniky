@@ -15,6 +15,7 @@ import cz.jaro.dopravnipodniky.shared.Quintuple
 import cz.jaro.dopravnipodniky.shared.barvaTroleje
 import cz.jaro.dopravnipodniky.shared.drawArc
 import cz.jaro.dopravnipodniky.shared.existuje
+import cz.jaro.dopravnipodniky.shared.helpers.toPx
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
@@ -27,12 +28,13 @@ import cz.jaro.dopravnipodniky.shared.predsazeniTrolejiS
 import cz.jaro.dopravnipodniky.shared.sirkaTroleje
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.shared.stavTroleje
+import java.util.Collections.rotate
 import kotlin.math.sqrt
 
 private const val DEBUG_BARVY = false
 
-context (DrawScope)
-fun Ulice.nakreslitTroleje() {
+context (drawScope: DrawScope)
+fun Ulice.nakreslitTroleje() = with(drawScope) {
 
     val delkaUlice = delka.toPx()
     val sirka = sirkaTroleje.toPx()
@@ -70,12 +72,12 @@ fun Ulice.nakreslitTroleje() {
 
 }
 
-context(DrawScope)
+context(drawScope: DrawScope)
 fun nakreslitTrolejeNaKrizovatku(
     ulice: List<Ulice>,
     pozice: Pozice<UlicovyBlok>,
     krizovatka: Krizovatka?,
-) {
+) = with(drawScope) {
 
     val sousedVpravo = ulice.find {
         it.orientace == Orientace.Vodorovne && it.zacatek == pozice

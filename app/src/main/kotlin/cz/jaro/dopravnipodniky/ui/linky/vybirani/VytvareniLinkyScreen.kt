@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
@@ -57,21 +58,19 @@ import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import cz.jaro.compose_dialog.show
+import cz.jaro.better_dialog.AlertDialogManager
+import cz.jaro.better_dialog.showMaterial
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypKrizovatky
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.krizovatkyNaLince
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.rohyMesta
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.seznamPozicKrizovatek
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
-import cz.jaro.dopravnipodniky.dialogState
 import cz.jaro.dopravnipodniky.shared.LinkaID
 import cz.jaro.dopravnipodniky.shared.Menic
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
@@ -92,6 +91,7 @@ import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.shared.toOffsetSPriblizenim
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
 import cz.jaro.dopravnipodniky.ui.malovani.Mesto
+import cz.jaro.dopravnipodniky.ui.nav.Navigator
 import cz.jaro.dopravnipodniky.ui.theme.Barvicka
 import org.koin.androidx.compose.koinViewModel
 import java.util.UUID
@@ -99,10 +99,9 @@ import kotlin.math.min
 import kotlin.reflect.KClass
 
 @Composable
-@Destination
 fun VytvareniLinkyScreen(
     upravovani: LinkaID? = null,
-    navigator: DestinationsNavigator,
+    navigator: Navigator,
 ) {
     val viewModel = koinViewModel<SharedViewModel>()
 
@@ -125,7 +124,7 @@ fun VytvareniLinkyScreen(
         dp = dp!!,
         vse = vse!!,
         menic = viewModel.menic,
-        navigateUp = navigator::navigateUp,
+        navigateBack = navigator::pop,
         dosahni = viewModel.dosahni,
     )
 }
@@ -139,7 +138,7 @@ fun VytvareniLinkyScreen(
     dp: DopravniPodnik,
     vse: Vse,
     menic: Menic,
-    navigateUp: () -> Unit,
+    navigateBack: () -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
 ) {
     var size by remember { mutableStateOf(null as IntSize?) }
@@ -263,7 +262,7 @@ fun VytvareniLinkyScreen(
 
     LaunchedEffect(dp.linky, waitForExit) {
         if (waitForExit != null && dp.linky.any { it.id == waitForExit }) {
-            navigateUp()
+            navigateBack()
         }
     }
 
@@ -295,7 +294,7 @@ fun VytvareniLinkyScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            navigateUp()
+                            navigateBack()
                         }
                     ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.zpet))
@@ -423,8 +422,8 @@ fun VytvareniLinkyScreen(
                                         },
                                     )
                                 }
-                                navigateUp()
-                            } else dialogState.show(
+                                navigateBack()
+                            } else AlertDialogManager.Global.showMaterial(
                                 confirmButton = {
                                     TextButton(
                                         onClick = {
@@ -505,7 +504,7 @@ fun VytvareniLinkyScreen(
                                     ) {
                                         OutlinedTextField(
                                             modifier = Modifier
-                                                .menuAnchor()
+                                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                                                 .padding(top = 8.dp)
                                                 .fillMaxWidth(),
                                             readOnly = true,

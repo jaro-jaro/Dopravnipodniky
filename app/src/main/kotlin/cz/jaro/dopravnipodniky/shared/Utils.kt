@@ -28,6 +28,7 @@ import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Krizovatka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypKrizovatky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
+import cz.jaro.dopravnipodniky.shared.helpers.toPx
 import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
 import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toPx
@@ -251,10 +252,10 @@ fun <T1, T2, T3, T4, T5, T6, T7, T8, R> combine(
     )
 }
 
-context(Density)
+context(_: Density)
 fun DpOffset.toOffset() = Offset(x.toPx(), y.toPx())
 
-context(PointerInputScope)
+context(scope: PointerInputScope)
 fun <T> List<T>.najitObdelnikVeKteremJe(
     offset: Offset,
     tx: Float,
@@ -266,7 +267,7 @@ fun <T> List<T>.najitObdelnikVeKteremJe(
     tx = tx,
     ty = ty,
     priblizeni = priblizeni,
-    center = this@PointerInputScope.size.center.toOffset(),
+    center = scope.size.center.toOffset(),
     transform = transform,
 )
 
@@ -301,7 +302,7 @@ fun <T> List<T>.najitObdelnikVeKteremJe(
 //    transform = { it },
 //)
 
-context(Density)
+context(_: Density)
 fun <T> List<T>.najitObdelnikVeKteremJe(
     offset: Offset,
     tx: Float,
@@ -318,7 +319,7 @@ fun <T> List<T>.najitObdelnikVeKteremJe(
         this.getOrNull(i)
     }
 
-context(Density)
+context(_: Density)
 fun Offset.toDpSPosunutimAPriblizenim(
     tx: Float,
     ty: Float,
@@ -332,17 +333,17 @@ fun Offset.toDpSPosunutimAPriblizenim(
     .plus(center)
     .toDp()
 
-context(PointerInputScope)
+context(scope: PointerInputScope)
 fun Offset.toDpSPosunutimAPriblizenim(
     tx: Float,
     ty: Float,
     priblizeni: Float,
 ) = toDpSPosunutimAPriblizenim(
     tx = tx, ty = ty, priblizeni = priblizeni,
-    center = this@PointerInputScope.size.center.toOffset(),
+    center = scope.size.center.toOffset(),
 )
 
-context(Density)
+context(_: Density)
 fun Pozice<Dp>.toOffsetSPriblizenim(
     priblizeni: Float,
     center: Offset,
@@ -355,12 +356,12 @@ fun Pozice<Dp>.toOffsetSPriblizenim(
         center * priblizeni
     )
 
-context(PointerInputScope)
+context(scope: PointerInputScope)
 fun Pozice<Dp>.toOffsetSPriblizenim(
     priblizeni: Float,
 ) = toOffsetSPriblizenim(
     priblizeni = priblizeni,
-    center = this@PointerInputScope.size.center.toOffset(),
+    center = scope.size.center.toOffset(),
 )
 
 fun Offset.odNulaNula(priblizeni: Float) = -this / priblizeni

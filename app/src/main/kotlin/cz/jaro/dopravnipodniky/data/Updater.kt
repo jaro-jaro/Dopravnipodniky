@@ -63,14 +63,12 @@ import cz.jaro.dopravnipodniky.shared.vecneLinky
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Single
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 
-@Single(createdAtStart = true)
 class Updater(
     hodiny: Hodiny,
     dataSource: PreferencesDataSource,

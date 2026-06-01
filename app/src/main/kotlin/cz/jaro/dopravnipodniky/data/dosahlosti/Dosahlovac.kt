@@ -2,13 +2,11 @@ package cz.jaro.dopravnipodniky.data.dosahlosti
 
 import cz.jaro.dopravnipodniky.data.PreferencesDataSource
 import kotlinx.coroutines.flow.first
-import org.koin.core.annotation.Single
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.time.LocalDateTime
 import kotlin.reflect.KClass
 
-@Single
 class Dosahlovac(
     private val dataSource: PreferencesDataSource,
 ) : KoinComponent {

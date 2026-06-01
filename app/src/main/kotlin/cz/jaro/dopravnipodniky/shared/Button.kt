@@ -11,18 +11,19 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.StrokeCap.Companion.Butt
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -36,6 +37,7 @@ fun LongPressButton(
     onDoubleClick: () -> Unit = {},
     content: @Composable RowScope.() -> Unit
 ) {
+    Butt
     CompositionLocalProvider(
         LocalContentColor provides MaterialTheme.colorScheme.onPrimary,
     ) {
@@ -47,7 +49,7 @@ fun LongPressButton(
                 .clip(CircleShape)
                 .combinedClickable(
                     interactionSource = remember { MutableInteractionSource() },
-                    indication = rememberRipple(),
+                    indication = ripple(),
                     enabled = true,
                     role = Role.Button,
                     onClick = onClick,

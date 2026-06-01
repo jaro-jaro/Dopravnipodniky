@@ -50,8 +50,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -63,10 +63,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toOffset
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.spec.Direction
-import cz.jaro.compose_dialog.show
+import cz.jaro.better_dialog.AlertDialogManager
+import cz.jaro.better_dialog.showBasic
+import cz.jaro.better_dialog.showMaterial
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
@@ -82,7 +81,6 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.zasebevrazdujZastavku
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.dosahlosti.DosahlostCallback
-import cz.jaro.dopravnipodniky.dialogState
 import cz.jaro.dopravnipodniky.shared.Menic
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.StavHry
@@ -110,9 +108,9 @@ import cz.jaro.dopravnipodniky.shared.stavHry
 import cz.jaro.dopravnipodniky.shared.toOffsetSPriblizenim
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
 import cz.jaro.dopravnipodniky.snackbarHostState
-import cz.jaro.dopravnipodniky.ui.destinations.GarazScreenDestination
-import cz.jaro.dopravnipodniky.ui.destinations.LinkyScreenDestination
 import cz.jaro.dopravnipodniky.ui.malovani.Mesto
+import cz.jaro.dopravnipodniky.ui.nav.Navigator
+import cz.jaro.dopravnipodniky.ui.nav.Route
 import cz.jaro.dopravnipodniky.ui.theme.DpTheme
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -123,9 +121,8 @@ import kotlin.math.min
 import kotlin.reflect.KClass
 
 @Composable
-@Destination(start = true)
 fun MainScreen(
-    navigator: DestinationsNavigator,
+    navigator: Navigator,
 ) {
     val viewModel = koinViewModel<SharedViewModel>()
 
@@ -146,7 +143,7 @@ fun MainScreen(
         dp = dp!!,
         vse = vse!!,
         menic = viewModel.menic,
-        navigate = navigator::navigate,
+        navigate = navigator::push,
         ziskatDP = {
             dp!!
         },
@@ -163,7 +160,7 @@ fun MainScreen(
     dp: DopravniPodnik,
     vse: Vse,
     menic: Menic,
-    navigate: (Direction) -> Unit,
+    navigate: (Route) -> Unit,
     ziskatDP: () -> DopravniPodnik,
     dosahni: (KClass<out Dosahlost>) -> Unit,
 ) {
@@ -174,7 +171,7 @@ fun MainScreen(
     var priblizeni by remember { mutableFloatStateOf(1F) }
     var editor by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val res = LocalContext.current.resources
+    val res = LocalResources.current
 
     LaunchedEffect(dp.ulice.map { it.zacatek to it.konec }, size) {
         if (size == null) return@LaunchedEffect
@@ -357,7 +354,7 @@ fun MainScreen(
                         !(vse.tutorial je StavTutorialu.Tutorialujeme.Obchod)
                     ) IconButton(
                         onClick = {
-                            dialogState.show(
+                            AlertDialogManager.Global.showBasic(
                                 content = {
                                     DpTheme(
                                         useDynamicColor = false,
@@ -485,7 +482,7 @@ fun MainScreen(
                         !(vse.tutorial je StavTutorialu.Tutorialujeme.Obchod)
                     ) TextButton(
                         onClick = {
-                            navigate(LinkyScreenDestination)
+                            navigate(Route.Lines)
                         },
                         Modifier
                             .weight(1F)
@@ -505,7 +502,7 @@ fun MainScreen(
                         !(vse.tutorial je StavTutorialu.Tutorialujeme.Zastavky)
                     ) TextButton(
                         onClick = {
-                            navigate(GarazScreenDestination)
+                            navigate(Route.Fleet)
                         },
                         Modifier
                             .weight(1F)
@@ -530,7 +527,7 @@ private fun kliklNaUlici(
     staraUlice: Ulice,
     vse: Vse
 ) {
-    dialogState.show(
+    AlertDialogManager.Global.showMaterial(
         confirmButton = {},
         dismissButton = {
             TextButton(
@@ -626,7 +623,7 @@ private fun kliklNaKrizovatku(
     dp: DopravniPodnik,
     pozice: Pozice<UlicovyBlok>
 ) {
-    dialogState.show(
+    AlertDialogManager.Global.showMaterial(
         confirmButton = {},
         dismissButton = {
             TextButton(
@@ -671,7 +668,7 @@ private fun kliklNaKrizovatku(
                             it.first() == pozice || it.last() == pozice
                         }
                     }
-                    if (krizovatka != null && krizovatka.typ == TypKrizovatky.Kruhac && spatneLinky.isNotEmpty()) dialogState.show(
+                    if (krizovatka != null && krizovatka.typ == TypKrizovatky.Kruhac && spatneLinky.isNotEmpty()) AlertDialogManager.Global.showMaterial(
                         confirmButton = {
                             TextButton(
                                 onClick = {

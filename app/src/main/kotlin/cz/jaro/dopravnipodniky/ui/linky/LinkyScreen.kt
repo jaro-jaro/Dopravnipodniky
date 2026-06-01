@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -54,17 +55,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.spec.Direction
-import cz.jaro.compose_dialog.show
+import cz.jaro.better_dialog.AlertDialogManager
+import cz.jaro.better_dialog.showMaterial
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.busy
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.rozmistitBusy
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
-import cz.jaro.dopravnipodniky.dialogState
+import cz.jaro.dopravnipodniky.shared.LinkaID
 import cz.jaro.dopravnipodniky.shared.Menic
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
@@ -72,16 +71,16 @@ import cz.jaro.dopravnipodniky.shared.cenaTroleje
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.snackbarHostState
-import cz.jaro.dopravnipodniky.ui.destinations.VytvareniLinkyScreenDestination
+import cz.jaro.dopravnipodniky.ui.nav.Navigator
+import cz.jaro.dopravnipodniky.ui.nav.Route
 import cz.jaro.dopravnipodniky.ui.theme.Barvicka
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
-@Destination
 fun LinkyScreen(
-    navigator: DestinationsNavigator,
+    navigator: Navigator,
 ) {
     val viewModel = koinViewModel<SharedViewModel>()
 
@@ -95,8 +94,9 @@ fun LinkyScreen(
         dp = dp!!,
         vse = vse!!,
         menic = viewModel.menic,
-        navigate = navigator::navigate,
-        navigateBack = navigator::navigateUp
+        createLine = { navigator.push(Route.NewLine()) },
+        editLine = { navigator.push(Route.NewLine(it)) },
+        navigateBack = navigator::pop
     )
 }
 
@@ -106,7 +106,8 @@ fun LinkyScreen(
     dp: DopravniPodnik,
     vse: Vse,
     menic: Menic,
-    navigate: (Direction) -> Unit,
+    createLine: () -> Unit,
+    editLine: (lineID: LinkaID) -> Unit,
     navigateBack: () -> Unit,
 ) {
     Scaffold(
@@ -128,15 +129,9 @@ fun LinkyScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                text = {
-                    Text(stringResource(R.string.nova_linka))
-                },
-                icon = {
-                    Icon(Icons.Default.Add, null)
-                },
-                onClick = {
-                    navigate(VytvareniLinkyScreenDestination())
-                },
+                text = { Text(stringResource(R.string.nova_linka)) },
+                icon = { Icon(Icons.Default.Add, null) },
+                onClick = createLine,
             )
         },
         floatingActionButtonPosition = FabPosition.Center,
@@ -152,7 +147,7 @@ fun LinkyScreen(
             items(dp.linky, key = { it.cislo }) { linka ->
                 Column(
                     Modifier
-                        .animateItemPlacement()
+                        .animateItem()
                         .animateContentSize(),
                 ) {
                     ListItem(
@@ -169,6 +164,8 @@ fun LinkyScreen(
                                 !(vse.tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
                                 !(vse.tutorial je StavTutorialu.Tutorialujeme.Obchod)
                             ) Row {
+                                val spaceOutSnackbarText = stringResource(R.string.uspesne_rozmisteno)
+                                val addToLineSnackbarText = stringResource(R.string.pridejte_vozidla_na_linku)
                                 IconButton(
                                     onClick = {
                                         val pocetBusu = linka.busy(dp).size
@@ -176,7 +173,7 @@ fun LinkyScreen(
                                         if (pocetBusu == 0) {
                                             scope.launch {
                                                 snackbarHostState.showSnackbar(
-                                                    ctx.getString(R.string.pridejte_vozidla_na_linku),
+                                                    addToLineSnackbarText,
                                                     duration = SnackbarDuration.Short,
                                                     withDismissAction = true,
                                                 )
@@ -188,7 +185,7 @@ fun LinkyScreen(
 
                                         scope.launch {
                                             snackbarHostState.showSnackbar(
-                                                ctx.getString(R.string.uspesne_rozmisteno),
+                                                spaceOutSnackbarText,
                                                 duration = SnackbarDuration.Short,
                                                 withDismissAction = true,
                                             )
@@ -220,7 +217,7 @@ fun LinkyScreen(
                                             Text(stringResource(R.string.upravit_nazev))
                                         },
                                         onClick = {
-                                            dialogState.show(
+                                            AlertDialogManager.Global.showMaterial(
                                                 confirmButton = {
                                                     TextButton(
                                                         onClick = {
@@ -266,7 +263,7 @@ fun LinkyScreen(
                                                     ) {
                                                         OutlinedTextField(
                                                             modifier = Modifier
-                                                                .menuAnchor()
+                                                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                                                                 .padding(top = 8.dp)
                                                                 .fillMaxWidth(),
                                                             readOnly = true,
@@ -313,7 +310,7 @@ fun LinkyScreen(
                                             Text(stringResource(R.string.upravit_vedeni))
                                         },
                                         onClick = {
-                                            navigate(VytvareniLinkyScreenDestination(upravovani = linka.id))
+                                            editLine(linka.id)
                                             show = false
                                         },
                                         leadingIcon = {
@@ -325,14 +322,16 @@ fun LinkyScreen(
                                             Text(stringResource(R.string.pridat_troleje_linka))
                                         },
                                         onClick = {
-                                            dialogState.show(
+                                            AlertDialogManager.Global.showMaterial(
                                                 confirmButton = {
+                                                    val notEnoughMoneySnackbarText = stringResource(R.string.malo_penez)
+                                                    val overheadLineSnackbarText = stringResource(R.string.uspesne_pridany_troleje)
                                                     TextButton(
                                                         onClick = {
                                                             if (vse.prachy < cenaTroleje * linka.ulice(dp).count { !it.maTrolej }) {
                                                                 scope.launch {
                                                                     snackbarHostState.showSnackbar(
-                                                                        ctx.getString(R.string.malo_penez),
+                                                                        notEnoughMoneySnackbarText,
                                                                         duration = SnackbarDuration.Short,
                                                                         withDismissAction = true,
                                                                     )
@@ -357,7 +356,7 @@ fun LinkyScreen(
                                                             }
                                                             scope.launch {
                                                                 snackbarHostState.showSnackbar(
-                                                                    ctx.getString(R.string.uspesne_pridany_troleje),
+                                                                    overheadLineSnackbarText,
                                                                     duration = SnackbarDuration.Short,
                                                                     withDismissAction = true,
                                                                 )
@@ -392,7 +391,7 @@ fun LinkyScreen(
                                             Text(stringResource(R.string.odstranit_linku))
                                         },
                                         onClick = {
-                                            dialogState.show(
+                                            AlertDialogManager.Global.showMaterial(
                                                 confirmButton = {
                                                     TextButton(
                                                         onClick = {

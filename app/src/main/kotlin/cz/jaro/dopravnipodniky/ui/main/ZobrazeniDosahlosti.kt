@@ -22,16 +22,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import cz.jaro.compose_dialog.show
+import cz.jaro.better_dialog.AlertDialogManager
+import cz.jaro.better_dialog.showMaterial
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
-import cz.jaro.dopravnipodniky.dialogState
 import cz.jaro.dopravnipodniky.shared.barvaDosahnuteDosahlosti
 import cz.jaro.dopravnipodniky.shared.barvaSecretDosahlosti
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 
-fun zobrazitDosahlosti(dosahlosti: List<Dosahlost.NormalniDosahlost>) = dialogState.show(
+fun zobrazitDosahlosti(dosahlosti: List<Dosahlost.NormalniDosahlost>) = AlertDialogManager.Global.showMaterial(
     confirmButton = {
         TextButton(
             onClick = {

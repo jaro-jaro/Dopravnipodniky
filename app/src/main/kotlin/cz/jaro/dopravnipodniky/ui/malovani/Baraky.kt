@@ -20,11 +20,11 @@ import cz.jaro.dopravnipodniky.shared.velikostBaraku
 import cz.jaro.dopravnipodniky.shared.zaobleniBaraku
 import cz.jaro.dopravnipodniky.ui.theme.Theme
 
-context (DrawScope)
+context (drawScope: DrawScope)
 fun Barak.draw(
     tema: Theme,
     ulice: Ulice,
-) {
+) = with(drawScope) {
     val (i, barakJeNaDruheStraneUlice) = ulice.baraky.indexOf(this@draw).let { i ->
         val jeNaDruheStrane = i >= ulice.baraky.size / 2
 

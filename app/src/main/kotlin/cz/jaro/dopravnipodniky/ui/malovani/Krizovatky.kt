@@ -26,12 +26,12 @@ import cz.jaro.dopravnipodniky.shared.sirkaChodniku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import kotlin.math.sqrt
 
-context(DrawScope)
+context(drawScope: DrawScope)
 fun namalovatKrizovatku(
     ulice: List<Ulice>,
     pozice: Pozice<UlicovyBlok>,
     krizovatka: Krizovatka?,
-) {
+) = with(drawScope) {
     val (x, y) = pozice
 
     val zacatekX = x.toDpSKrizovatkama()

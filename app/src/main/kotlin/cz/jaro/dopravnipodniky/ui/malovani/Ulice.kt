@@ -20,8 +20,8 @@ import cz.jaro.dopravnipodniky.shared.sirkaChodniku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.ui.main.DEBUG_MODE
 
-context(DrawScope)
-fun Ulice.draw() {
+context(drawScope: DrawScope)
+fun Ulice.draw() = with(drawScope) {
 
     //fill(BARVICKY[ulice.potencial])
     //fill(ulice.potencial * 20)obrubnik

@@ -43,17 +43,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.spec.Direction
-import cz.jaro.compose_dialog.show
+import cz.jaro.better_dialog.AlertDialogManager
+import cz.jaro.better_dialog.showMaterial
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.generace.DetailGenerace
 import cz.jaro.dopravnipodniky.data.generace.Generator
-import cz.jaro.dopravnipodniky.dialogState
 import cz.jaro.dopravnipodniky.shared.Menic
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.composeString
@@ -63,8 +60,9 @@ import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.minimumInvestice
 import cz.jaro.dopravnipodniky.snackbarHostState
-import cz.jaro.dopravnipodniky.ui.destinations.NovyDopravniPodnikScreenDestination
 import cz.jaro.dopravnipodniky.ui.main.DEBUG_MODE
+import cz.jaro.dopravnipodniky.ui.nav.Navigator
+import cz.jaro.dopravnipodniky.ui.nav.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -76,9 +74,8 @@ import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-@Destination
 fun DopravniPodnikyScreen(
-    navigator: DestinationsNavigator,
+    navigator: Navigator,
 ) {
     val viewModel = koinViewModel<SharedViewModel>()
 
@@ -93,8 +90,8 @@ fun DopravniPodnikyScreen(
         vse = vse!!,
         menic = viewModel.menic,
         novaMesta = viewModel::najit3NovaMesta,
-        navigate = navigator::navigate,
-        navigateBack = navigator::navigateUp,
+        selectCity = { navigator.push(Route.NewTransportCompany) },
+        navigateBack = navigator::pop,
         dosahni = viewModel.dosahni,
     )
 }
@@ -105,7 +102,7 @@ fun DopravniPodnikyScreen(
     tentoDP: DopravniPodnik,
     vse: Vse,
     menic: Menic,
-    navigate: (Direction) -> Unit,
+    selectCity: () -> Unit,
     novaMesta: (Peniz, (Float) -> Unit, () -> Unit) -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
     navigateBack: () -> Unit,
@@ -139,7 +136,7 @@ fun DopravniPodnikyScreen(
                     Icon(Icons.Default.Search, null)
                 },
                 onClick = {
-                    if (DEBUG_MODE) dialogState.show(
+                    if (DEBUG_MODE) AlertDialogManager.Global.showMaterial(
                         confirmButton = {
                             val ctx = LocalContext.current
                             TextButton(
@@ -190,9 +187,10 @@ fun DopravniPodnikyScreen(
                             )
                         },
                     )
-                    else dialogState.show(
+                    else AlertDialogManager.Global.showMaterial(
                         confirmButton = {
                             val ctx = LocalContext.current
+                            val snackbarText = stringResource(R.string.nigdo_nebyl_ochoten)
                             TextButton(
                                 onClick = {
                                     val i = investice.toLongOrNull()?.penez ?: run {
@@ -215,7 +213,7 @@ fun DopravniPodnikyScreen(
                                             loading = null
 
                                             snackbarHostState.showSnackbar(
-                                                message = ctx.getString(R.string.nigdo_nebyl_ochoten),
+                                                message = snackbarText,
                                                 withDismissAction = true,
                                             )
                                         }
@@ -245,7 +243,7 @@ fun DopravniPodnikyScreen(
                                             }
                                         ) {
                                             loading = null
-                                            navigate(NovyDopravniPodnikScreenDestination)
+                                            selectCity()
                                         }
 
                                     } else {
@@ -256,19 +254,19 @@ fun DopravniPodnikyScreen(
                                             }
                                         ) {
                                             loading = null
-                                            dialogState.show(
+                                            AlertDialogManager.Global.showMaterial(
                                                 confirmButton = {
                                                     TextButton(
                                                         onClick = {
                                                             hide()
-                                                            navigate(NovyDopravniPodnikScreenDestination)
+                                                            selectCity()
                                                         }
                                                     ) {
                                                         Text(stringResource(android.R.string.ok))
                                                     }
                                                 },
                                                 onDismissed = {
-                                                    navigate(NovyDopravniPodnikScreenDestination)
+                                                    selectCity()
                                                 },
                                                 content = {
                                                     Text(stringResource(R.string.tri_mesta_se_nasla))

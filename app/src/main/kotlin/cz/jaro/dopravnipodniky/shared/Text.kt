@@ -29,16 +29,16 @@ sealed class Text {
         vararg val parts: Text,
     ) : Text()
 
-    context(Context)
+    context(ctx: Context)
     fun asString(): String = when (this) {
         is Plain -> value
-        is StringRes -> getString(id, *args.map { it.asString() }.toTypedArray())
+        is StringRes -> ctx.getString(id, *args.map { it.asString() }.toTypedArray())
         is Mix -> (parts.joinToString("") { it.asString() })
     }
-    context(Resources)
+    context(res: Resources)
     fun asString(): String = when (this) {
         is Plain -> value
-        is StringRes -> getString(id, *args.map { it.asString() }.toTypedArray())
+        is StringRes -> res.getString(id, *args.map { it.asString() }.toTypedArray())
         is Mix -> (parts.joinToString("") { it.asString() })
     }
 }

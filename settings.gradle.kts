@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Dopravní podniky"
 include(":app")
+include(":better_dialog")

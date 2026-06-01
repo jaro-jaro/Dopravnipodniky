@@ -32,11 +32,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.koin.core.annotation.Single
 import org.koin.core.time.measureDuration
 import kotlin.time.Duration.Companion.seconds
 
-@Single
 class PreferencesDataSource(
     private val dataStore: DataStore<Preferences>,
     hodiny: Hodiny,

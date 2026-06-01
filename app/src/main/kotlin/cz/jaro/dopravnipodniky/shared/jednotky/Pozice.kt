@@ -4,6 +4,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
+import cz.jaro.dopravnipodniky.shared.helpers.toDp
+import cz.jaro.dopravnipodniky.shared.helpers.toPx
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -47,10 +49,10 @@ fun Pozice<UlicovyBlok>.toDpSKrizovatkama() = Pozice(x.toDpSKrizovatkama(), y.to
 
 fun Pozice<Dp>.toDpOffset() = DpOffset(x, y)
 
-context(Density)
+context(_: Density)
 fun Pozice<Dp>.toPx() = Offset(x.toPx(), y.toPx())
 
-context(Density)
+context(_: Density)
 fun Offset.toDp() = Pozice(x.toDp(), y.toDp())
 
 infix fun UlicovyBlok.to(other: UlicovyBlok) = Pozice(this, other)

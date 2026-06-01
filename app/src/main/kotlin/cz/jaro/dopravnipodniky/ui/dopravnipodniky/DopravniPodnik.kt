@@ -21,13 +21,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import com.chargemap.compose.numberpicker.NumberPicker
-import cz.jaro.compose_dialog.show
+import cz.jaro.better_dialog.AlertDialogManager
+import cz.jaro.better_dialog.showMaterial
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Trakce
@@ -39,7 +40,6 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.plocha
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.typMesta
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.urovenMesta
-import cz.jaro.dopravnipodniky.dialogState
 import cz.jaro.dopravnipodniky.shared.LongPressButton
 import cz.jaro.dopravnipodniky.shared.Menic
 import cz.jaro.dopravnipodniky.shared.composeString
@@ -66,7 +66,7 @@ fun DopravniPodnik(
     dp: DopravniPodnik,
     menic: Menic,
 ) {
-    val res = LocalContext.current.resources
+    val res = LocalResources.current
     val scope = rememberCoroutineScope()
 
     if (tentoDP.info.id != dp.info.id) Text(
@@ -247,7 +247,7 @@ fun DopravniPodnik(
             Modifier
                 .padding(all = 8.dp),
             onClick = {
-                dialogState.show(
+                AlertDialogManager.Global.showMaterial(
                     confirmButton = {
                         TextButton(
                             onClick = {
@@ -264,17 +264,17 @@ fun DopravniPodnik(
 
                                     hide()
 
-                                    with(res) {
+                                    context(res) {
                                         if (dp.info.jmenoMesta == vecne) snackbarHostState.showSnackbar(
-                                            message = getString(R.string.vecne_neni_vecne),
+                                            message = res.getString(R.string.vecne_neni_vecne),
                                             duration = SnackbarDuration.Long,
                                             withDismissAction = true,
                                         )
                                         snackbarHostState.showSnackbar(
-                                            message = getString(
+                                            message = res.getString(
                                                 R.string.prodali_jste_dp,
                                                 dp.info.jmenoMesta,
-                                                getString(
+                                                res.getString(
                                                     R.string.kc,
                                                     actualCena.value.formatovat(0).asString()
                                                 )
@@ -327,7 +327,7 @@ fun DopravniPodnik(
         Spacer(modifier = Modifier.weight(1F))
         OutlinedButton(
             onClick = {
-                dialogState.show(
+                AlertDialogManager.Global.showMaterial(
                     confirmButton = {
                         TextButton(
                             onClick = {

@@ -1,41 +1,43 @@
 package cz.jaro.dopravnipodniky.shared
 
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import cz.jaro.dopravnipodniky.data.generace.Generator
 import cz.jaro.dopravnipodniky.data.Nastaveni
 import cz.jaro.dopravnipodniky.data.PreferencesDataSource
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
-import cz.jaro.dopravnipodniky.data.generace.DetailGenerace
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Krizovatka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlovac
+import cz.jaro.dopravnipodniky.data.generace.DetailGenerace
+import cz.jaro.dopravnipodniky.data.generace.Generator
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.ui.garaz.obchod.SkupinaFiltru
 import cz.jaro.dopravnipodniky.ui.garaz.obchod.SkupinaFiltru.Companion.filtrovat
+import cz.jaro.dopravnipodniky.ui.nav.LocalSharedViewModelStoreOwner
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.koin.android.annotation.KoinViewModel
+import org.koin.androidx.compose.koinViewModel
 import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.seconds
 
-private val _novePodniky = MutableStateFlow(null as Triple<DopravniPodnik, DopravniPodnik, DopravniPodnik>?)
-val novePodniky = _novePodniky.asStateFlow()
+val novePodniky: StateFlow<Triple<DopravniPodnik, DopravniPodnik, DopravniPodnik>?>
+    field = MutableStateFlow(null as Triple<DopravniPodnik, DopravniPodnik, DopravniPodnik>?)
 
-@KoinViewModel
+
 class SharedViewModel(
     private val preferencesDataSource: PreferencesDataSource,
     private val dosahlovac: Dosahlovac,
@@ -138,7 +140,7 @@ class SharedViewModel(
 //                it - investice
 //            }
 
-            _novePodniky.value = Triple(
+            novePodniky.value = Triple(
                 Generator(DetailGenerace(investice)) {
                     progress(it)
                 },
@@ -160,7 +162,7 @@ class SharedViewModel(
         id: DPID,
     ) {
         CoroutineScope(Dispatchers.IO).launch {
-            val dp = _novePodniky.value?.toList()?.singleOrNull { it.info.id == id } ?: return@launch
+            val dp = novePodniky.value?.toList()?.singleOrNull { it.info.id == id } ?: return@launch
             menic.zmenitOstatniDopravniPodniky {
                 add(dp)
             }
@@ -168,3 +170,7 @@ class SharedViewModel(
         }
     }
 }
+
+@Composable
+fun getSharedViewModel(): SharedViewModel =
+    koinViewModel<SharedViewModel>(viewModelStoreOwner = LocalSharedViewModelStoreOwner.current)

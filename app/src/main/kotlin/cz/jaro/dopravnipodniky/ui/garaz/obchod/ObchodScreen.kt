@@ -58,9 +58,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import cz.jaro.compose_dialog.show
+import cz.jaro.better_dialog.AlertDialogManager
+import cz.jaro.better_dialog.showMaterial
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
@@ -71,7 +70,6 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.ikonka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.jsouVsechnyZatrolejovane
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.nakladyTextem
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
-import cz.jaro.dopravnipodniky.dialogState
 import cz.jaro.dopravnipodniky.shared.LinkaID
 import cz.jaro.dopravnipodniky.shared.Menic
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
@@ -81,13 +79,13 @@ import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.toText
+import cz.jaro.dopravnipodniky.ui.nav.Navigator
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-@Destination
 fun ObchodScreen(
-    navigator: DestinationsNavigator,
+    navigator: Navigator,
 ) {
     val viewModel = koinViewModel<SharedViewModel>()
 
@@ -112,7 +110,7 @@ fun ObchodScreen(
         dp = dp!!,
         vse = vse!!,
         menic = viewModel.menic,
-        navigateBack = navigator::navigateUp,
+        navigateBack = navigator::pop,
     )
 }
 
@@ -298,7 +296,7 @@ fun ObchodScreen(
                     val expanded = otevreno == typBusu.model
                     Column(
                         Modifier
-                            .animateItemPlacement()
+                            .animateItem()
                             .animateContentSize()
                             .clickable {
                                 otevreno = if (expanded) null else typBusu.model
@@ -382,7 +380,7 @@ fun ObchodScreen(
 
                                 var pocet by rememberSaveable { mutableStateOf("") }
                                 fun zeptatSeNaPocet(callback: (String) -> Unit) {
-                                    dialogState.show(
+                                    AlertDialogManager.Global.showMaterial(
                                         confirmButton = {
                                             TextButton(
                                                 onClick = {
@@ -423,7 +421,7 @@ fun ObchodScreen(
                                     if (pouzitelneLinky.isEmpty()) {
                                         callback(null)
                                     }
-                                    else dialogState.show(
+                                    else AlertDialogManager.Global.showMaterial(
                                         confirmButton = {},
                                         dismissButton = {
                                             TextButton(
@@ -458,7 +456,7 @@ fun ObchodScreen(
                                 }
                                 var evc by rememberSaveable { mutableStateOf("") }
                                 fun zadejteEvC(callback: (String) -> Unit) {
-                                    dialogState.show(
+                                    AlertDialogManager.Global.showMaterial(
                                         confirmButton = {
                                             TextButton(
                                                 enabled = evc.isNotEmpty() && evc.toIntOrNull() != null && evc.toInt() >= 1,

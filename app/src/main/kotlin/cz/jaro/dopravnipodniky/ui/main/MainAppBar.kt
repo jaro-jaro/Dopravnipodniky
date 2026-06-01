@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.LocationCity
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -54,8 +54,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ramcosta.composedestinations.spec.Direction
-import cz.jaro.compose_dialog.show
+import cz.jaro.better_dialog.AlertDialogManager
+import cz.jaro.better_dialog.showMaterial
 import cz.jaro.dopravnipodniky.BuildConfig
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
@@ -63,12 +63,11 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.generace.DetailGeneraceV2
 import cz.jaro.dopravnipodniky.data.generace.Generator
-import cz.jaro.dopravnipodniky.dialogState
 import cz.jaro.dopravnipodniky.shared.Menic
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
-import cz.jaro.dopravnipodniky.ui.destinations.DopravniPodnikyScreenDestination
+import cz.jaro.dopravnipodniky.ui.nav.Route
 import cz.jaro.dopravnipodniky.ui.theme.Theme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -109,7 +108,7 @@ fun CombinedIconButton(
                 enabled = enabled,
                 role = Role.Button,
                 interactionSource = interactionSource,
-                indication = rememberRipple(
+                indication = ripple(
                     bounded = false,
                     radius = 20.0.dp
                 )
@@ -127,7 +126,7 @@ fun MainAppBar(
     dp: DopravniPodnik,
     dosahni: (KClass<out Dosahlost>) -> Unit,
     menic: Menic,
-    navigate: (Direction) -> Unit,
+    navigate: (Route) -> Unit,
     vse: Vse
 ) {
     TopAppBar(
@@ -145,13 +144,13 @@ fun MainAppBar(
                 !(vse.tutorial je StavTutorialu.Tutorialujeme.Vypraveni)
             ) CombinedIconButton(
                 onClick = {
-                    navigate(DopravniPodnikyScreenDestination)
+                    navigate(Route.TransportCompanies)
                 },
                 onLongClick = {
 
                     dosahni(Dosahlost.Kocka::class)
 
-                    dialogState.show(
+                    AlertDialogManager.Global.showMaterial(
                         confirmButton = {
                             TextButton(
                                 onClick = ::hide
@@ -308,7 +307,7 @@ fun MainAppBar(
                         Text(stringResource(R.string.nastaveni))
                     },
                     onClick = {
-                        dialogState.show(
+                        AlertDialogManager.Global.showMaterial(
                             confirmButton = {
                                 TextButton(
                                     onClick = {
@@ -451,7 +450,7 @@ fun MainAppBar(
                         Text(stringResource(R.string.o_aplikaci))
                     },
                     onClick = {
-                        dialogState.show(
+                        AlertDialogManager.Global.showMaterial(
                             confirmButton = {
                                 TextButton(
                                     onClick = {

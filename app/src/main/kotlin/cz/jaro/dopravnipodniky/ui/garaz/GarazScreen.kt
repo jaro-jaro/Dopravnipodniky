@@ -71,10 +71,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.spec.Direction
-import cz.jaro.compose_dialog.show
+import cz.jaro.better_dialog.AlertDialogManager
+import cz.jaro.better_dialog.showMaterial
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
@@ -86,7 +84,6 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.rozmistitBusy
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
-import cz.jaro.dopravnipodniky.dialogState
 import cz.jaro.dopravnipodniky.shared.BusID
 import cz.jaro.dopravnipodniky.shared.Menic
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
@@ -100,16 +97,16 @@ import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.jednotky.sumOfPeniz
 import cz.jaro.dopravnipodniky.shared.replaceBy
 import cz.jaro.dopravnipodniky.snackbarHostState
-import cz.jaro.dopravnipodniky.ui.destinations.ObchodScreenDestination
+import cz.jaro.dopravnipodniky.ui.nav.Navigator
+import cz.jaro.dopravnipodniky.ui.nav.Route
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import kotlin.reflect.KClass
 
 @Composable
-@Destination
 fun GarazScreen(
-    navigator: DestinationsNavigator,
+    navigator: Navigator,
 ) {
     val viewModel = koinViewModel<SharedViewModel>()
 
@@ -133,8 +130,8 @@ fun GarazScreen(
         dp = dp!!,
         vse = vse!!,
         menic = viewModel.menic,
-        navigate = navigator::navigate,
-        navigateBack = navigator::navigateUp,
+        buyNewBus = { navigator.push(Route.Shop) },
+        navigateBack = navigator::pop,
         dosahni = viewModel.dosahni,
         vybraneBusy = vybraneBusy,
         vybratBusy = scope@{ busy ->
@@ -163,7 +160,7 @@ fun GarazScreen(
     dp: DopravniPodnik,
     vse: Vse,
     menic: Menic,
-    navigate: (Direction) -> Unit,
+    buyNewBus: () -> Unit,
     navigateBack: () -> Unit,
     dosahni: (KClass<out Dosahlost>) -> Unit,
     vybraneBusy: Set<String>?,
@@ -252,7 +249,7 @@ fun GarazScreen(
                     Icon(Icons.Default.AddShoppingCart, null)
                 },
                 onClick = {
-                    navigate(ObchodScreenDestination)
+                    buyNewBus()
                 }
             )
         },
@@ -301,7 +298,7 @@ fun GarazScreen(
                     val expanded = otevreno == bus.evCislo
                     Column(
                         Modifier
-                            .animateItemPlacement()
+                            .animateItem()
                             .animateContentSize()
                             .combinedClickable(
                                 onLongClick = {
@@ -331,8 +328,9 @@ fun GarazScreen(
                                     val ctx = LocalContext.current
                                     if (expanded) IconButton(
                                         onClick = {
-                                            dialogState.show(
+                                            AlertDialogManager.Global.showMaterial(
                                                 confirmButton = {
+                                                    val toastText = stringResource(R.string.ev_c_existuje)
                                                     TextButton(
                                                         enabled = evc.isNotEmpty() && evc.toIntOrNull() != null && evc.toInt() >= 1,
                                                         onClick = {
@@ -344,7 +342,7 @@ fun GarazScreen(
                                                             if (dp.busy.any { it.evCislo == evc.toInt() }) {
                                                                 Toast.makeText(
                                                                     ctx,
-                                                                    ctx.getString(R.string.ev_c_existuje),
+                                                                    toastText,
                                                                     Toast.LENGTH_SHORT
                                                                 ).show()
                                                                 return@TextButton
@@ -470,7 +468,7 @@ fun GarazScreen(
 
                                             if (pouzitelneLinky.isEmpty()) {
                                                 Toast.makeText(ctx, R.string.nejprve_si_vytvorte_linku, Toast.LENGTH_SHORT).show()
-                                            } else dialogState.show(
+                                            } else AlertDialogManager.Global.showMaterial(
                                                 confirmButton = { },
                                                 dismissButton = {
                                                     TextButton(
@@ -526,7 +524,7 @@ fun GarazScreen(
                                     Spacer(modifier = Modifier.weight(1F))
                                     OutlinedButton(
                                         onClick = {
-                                            dialogState.show(
+                                            AlertDialogManager.Global.showMaterial(
                                                 confirmButton = {
                                                     val prodaciZprava = stringResource(
                                                         R.string.prodali_jste,
@@ -623,7 +621,7 @@ private fun CoMuzesDelatBusum(
 ) {
     IconButton(
         onClick = {
-            dialogState.show(
+            AlertDialogManager.Global.showMaterial(
                 confirmButton = {
                     val prodejniBusy = remember(dp.busy, vybraneBusy) {
                         dp.busy.filter { it.id.toString() in vybraneBusy }
@@ -726,7 +724,7 @@ private fun CoMuzesDelatBusum(
 
             if (pouzitelneLinky.isEmpty()) {
                 Toast.makeText(ctx, R.string.nejprve_si_vytvorte_linku, Toast.LENGTH_SHORT).show()
-            } else dialogState.show(
+            } else AlertDialogManager.Global.showMaterial(
                 confirmButton = { },
                 dismissButton = {
                     TextButton(

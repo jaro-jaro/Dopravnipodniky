@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
@@ -11,12 +10,12 @@ plugins {
 
 android {
     namespace = "cz.jaro.dopravnipodniky"
-    compileSdk = 34
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "cz.jaro.dopravnipodniky"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 37
         versionCode = 6
         versionName = "3.0.4"
 
@@ -48,32 +47,33 @@ android {
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_1_8)
-        freeCompilerArgs.addAll("-Xcontext-receivers")
+        freeCompilerArgs.addAll("-Xcontext-parameters", "-Xexplicit-backing-fields", "-XXLanguage:+ExplicitBackingFields")
     }
 }
 
 dependencies {
+    implementation(project(":better_dialog"))
     implementation(libs.core.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    implementation(libs.androidx.jetpack.compose.foundation)
-    implementation(libs.androidx.jetpack.compose.ui.graphics)
-    implementation(libs.androidx.jetpack.compose.ui)
-    implementation(libs.androidx.jetpack.compose.ui.tooling)
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.jetpack.navigation.compose)
-    implementation(libs.androidx.jetpack.compose.material3)
-    implementation(libs.androidx.jetpack.compose.material.icons.extended)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material3.adaptive.navigation3)
+    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
     implementation(libs.koin.android)
-    implementation(libs.koin.annotations)
     implementation(libs.koin.navigation)
     implementation(libs.koin.compose)
-    ksp(libs.koin.annotations.ksp)
-    implementation(libs.compose.destinations.core)
-    ksp(libs.compose.destinations.ksp)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization)

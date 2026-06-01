@@ -38,14 +38,11 @@ import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.spec.Route
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.rohyMesta
 import cz.jaro.dopravnipodniky.shared.DPID
-import cz.jaro.dopravnipodniky.shared.SharedViewModel
+import cz.jaro.dopravnipodniky.shared.getSharedViewModel
 import cz.jaro.dopravnipodniky.shared.jednotky.minus
 import cz.jaro.dopravnipodniky.shared.jednotky.plus
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
@@ -54,18 +51,16 @@ import cz.jaro.dopravnipodniky.shared.novePodniky
 import cz.jaro.dopravnipodniky.shared.odNulaNula
 import cz.jaro.dopravnipodniky.shared.toOffsetSPriblizenim
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
-import cz.jaro.dopravnipodniky.ui.destinations.MainScreenDestination
 import cz.jaro.dopravnipodniky.ui.malovani.Mesto
-import org.koin.androidx.compose.koinViewModel
+import cz.jaro.dopravnipodniky.ui.nav.Navigator
+import cz.jaro.dopravnipodniky.ui.nav.Route
 import kotlin.math.min
-import kotlin.reflect.KFunction1
 
 @Composable
-@Destination
 fun NovyDopravniPodnikScreen(
-    navigator: DestinationsNavigator,
+    navigator: Navigator,
 ) {
-    val viewModel = koinViewModel<SharedViewModel>()
+    val viewModel = getSharedViewModel()
 
     val podniky by novePodniky.collectAsStateWithLifecycle()
 
@@ -73,8 +68,7 @@ fun NovyDopravniPodnikScreen(
         podniky != null
     ) NovyDopravniPodnikScreen(
         podniky = podniky!!,
-        potvrdit = viewModel::vybratMesto,
-        pop = { direction: Route, inclusive: Boolean -> navigator.popBackStack(direction.route, inclusive) }
+        potvrdit = { dp -> viewModel.vybratMesto(dp); navigator.modifyBackStack { removeAll { it !is Route.Map } } },
     )
 }
 
@@ -82,8 +76,7 @@ fun NovyDopravniPodnikScreen(
 @Composable
 fun NovyDopravniPodnikScreen(
     podniky: Triple<DopravniPodnik, DopravniPodnik, DopravniPodnik>,
-    potvrdit: KFunction1<DPID, Unit>,
-    pop: (Route, Boolean) -> Unit,
+    potvrdit: (dp: DPID) -> Unit,
 ) {
     var dpId by rememberSaveable { mutableStateOf(podniky.first.info.id.toString()) }
     val dp by remember(dpId) { derivedStateOf { podniky.toList().single { it.info.id.toString() == dpId } } }
@@ -165,7 +158,9 @@ fun NovyDopravniPodnikScreen(
                     else CircularProgressIndicator()
                 }
                 Row(
-                    Modifier.fillMaxWidth().padding(all = 8.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(all = 8.dp),
                 ) {
                     IconButton(
                         onClick = {
@@ -182,7 +177,6 @@ fun NovyDopravniPodnikScreen(
                     Button(
                         onClick = {
                             potvrdit(dp.info.id)
-                            pop(MainScreenDestination, false)
                         }
                     ) {
                         Text(

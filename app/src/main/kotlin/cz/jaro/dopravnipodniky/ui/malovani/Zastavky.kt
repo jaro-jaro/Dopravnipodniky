@@ -20,8 +20,8 @@ import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.shared.sirkaZastavky
 import cz.jaro.dopravnipodniky.shared.tloustkaSloupku
 
-context(DrawScope)
-fun Ulice.namalovatZastavku() {
+context(drawScope: DrawScope)
+fun Ulice.namalovatZastavku() = with(drawScope) {
     translate(
         left = zacatekX.toPx(),
         top = zacatekY.toPx(),
