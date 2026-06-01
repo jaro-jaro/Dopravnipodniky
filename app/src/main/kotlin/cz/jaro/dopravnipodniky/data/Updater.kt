@@ -124,7 +124,7 @@ private fun update(
                 val ulice = ulicove[indexUliceNaLince]
 
                 if (
-                    indexUliceNaLince == linka.ulice.lastIndex && ulice.zacatekKonecNaLince(ulicove.otocit(smerNaLince)).second.let { pozice ->
+                    poziceNaLince == linka.ulice.lastIndex && ulice.zacatekKonecNaLince(ulicove.otocit(smerNaLince)).second.let { pozice ->
                         puvodniDp.krizovatky.find { it.pozice == pozice }
                     }?.typ != TypKrizovatky.Kruhac
                 ) return@upravitBusy
