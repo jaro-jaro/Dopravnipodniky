@@ -95,6 +95,7 @@ import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.jednotky.sumOfPeniz
+import cz.jaro.dopravnipodniky.shared.removeFirst
 import cz.jaro.dopravnipodniky.shared.replaceBy
 import cz.jaro.dopravnipodniky.snackbarHostState
 import cz.jaro.dopravnipodniky.ui.nav.Navigator
@@ -357,12 +358,15 @@ fun GarazScreen(
                                                                 )
                                                             }
                                                         }
-                                                    ) {
-                                                        Text(stringResource(android.R.string.ok))
-                                                    }
+                                                    ) { Text(stringResource(android.R.string.ok)) }
                                                 },
                                                 title = {
-                                                    Text(stringResource(R.string.upravte_ev_c, stringResource(bus.typBusu.trakce.jmeno)))
+                                                    Text(
+                                                        stringResource(
+                                                            R.string.upravte_ev_c,
+                                                            stringResource(bus.typBusu.trakce.jmeno)
+                                                        )
+                                                    )
                                                 },
                                                 content = {
                                                     OutlinedTextField(
@@ -442,7 +446,10 @@ fun GarazScreen(
                                         .padding(all = 8.dp),
                                 )
                                 Text(
-                                    text = stringResource(R.string.ponicenost, bus.ponicenost.times(100).formatovat().composeString()),
+                                    text = stringResource(
+                                        R.string.ponicenost,
+                                        bus.ponicenost.times(100).formatovat().composeString()
+                                    ),
                                     Modifier
                                         .fillMaxWidth()
                                         .padding(all = 8.dp),
@@ -471,56 +478,52 @@ fun GarazScreen(
                                             } else AlertDialogManager.Global.showMaterial(
                                                 confirmButton = { },
                                                 dismissButton = {
-                                                    TextButton(
-                                                        onClick = {
-                                                            menic.zmenitBusy {
-                                                                replaceBy(bus.copy(linka = null)) { it.id }
-                                                            }
-                                                            hide()
+                                                    TextButton(onClick = {
+                                                        menic.zmenitBusy {
+                                                            replaceBy(bus.copy(linka = null)) { it.id }
                                                         }
-                                                    ) {
-                                                        Text(stringResource(R.string.odebrat_bus_z_linek))
-                                                    }
+                                                        hide()
+                                                    }) { Text(stringResource(R.string.odebrat_bus_z_linek)) }
                                                 },
-                                                title = {
-                                                    Text(stringResource(R.string.vyberte_linku))
-                                                },
+                                                title = { Text(stringResource(R.string.vyberte_linku)) },
                                                 content = {
-                                                    pouzitelneLinky.forEach { linka ->
-                                                        ListItem(
-                                                            headlineContent = {
-                                                                Text(linka.cislo)
-                                                            },
-                                                            Modifier.clickable {
-                                                                menic.zmenitBusy {
-                                                                    replaceBy(
-                                                                        bus.copy(
-                                                                            linka = linka.id,
-                                                                            poziceNaLince = 0,
-                                                                            poziceVUlici = 0.dp,
-                                                                            smerNaLince = Smer.Pozitivni,
-                                                                            stavZastavky = StavZastavky.Pred
-                                                                        )
-                                                                    ) { it.id }
-                                                                }
-                                                                dosahni(Dosahlost.BusNaLince::class)
-                                                                hide()
-                                                            },
-                                                            leadingContent = {
-                                                                Icon(Icons.Default.Timeline, null, tint = linka.barvicka.barva)
-                                                            },
-                                                        )
+                                                    Column {
+                                                        pouzitelneLinky.forEach { linka ->
+                                                            ListItem(
+                                                                headlineContent = {
+                                                                    Text(linka.cislo)
+                                                                },
+                                                                Modifier.clickable {
+                                                                    menic.zmenitBusy {
+                                                                        replaceBy(
+                                                                            bus.copy(
+                                                                                linka = linka.id,
+                                                                                poziceNaLince = 0,
+                                                                                poziceVUlici = 0.dp,
+                                                                                smerNaLince = Smer.Pozitivni,
+                                                                                stavZastavky = StavZastavky.Pred
+                                                                            )
+                                                                        ) { it.id }
+                                                                    }
+                                                                    dosahni(Dosahlost.BusNaLince::class)
+                                                                    hide()
+                                                                },
+                                                                leadingContent = {
+                                                                    Icon(
+                                                                        Icons.Default.Timeline,
+                                                                        null,
+                                                                        tint = linka.barvicka.barva
+                                                                    )
+                                                                },
+                                                            )
+                                                        }
                                                     }
                                                 },
                                             )
                                         },
                                         Modifier
                                             .padding(all = 8.dp),
-                                    ) {
-                                        Text(
-                                            text = stringResource(if (bus.linka == null) R.string.vypravit else R.string.zmenit_linku)
-                                        )
-                                    }
+                                    ) { Text(stringResource(if (bus.linka == null) R.string.vypravit else R.string.zmenit_linku)) }
                                     Spacer(modifier = Modifier.weight(1F))
                                     OutlinedButton(
                                         onClick = {
@@ -531,75 +534,52 @@ fun GarazScreen(
                                                         stringResource(bus.typBusu.trakce.jmeno),
                                                         bus.prodejniCena.asString()
                                                     )
-                                                    TextButton(
-                                                        onClick = {
-                                                            MainScope().launch {
+                                                    TextButton(onClick = {
+                                                        MainScope().launch {
+                                                            menic.zmenitUlice {
+                                                                var cloveci = bus.cloveci
+                                                                val noveUlice = shuffled().map { ulice ->
+                                                                    var cloveciVUlici = ulice.cloveci
+                                                                    while (cloveciVUlici < ulice.kapacita && cloveci > 0) {
 
-                                                                menic.zmenitUlice {
-                                                                    var cloveci = bus.cloveci
-                                                                    val noveUlice = shuffled().map { ulice ->
-                                                                        var cloveciVUlici = ulice.cloveci
-                                                                        while (cloveciVUlici < ulice.kapacita && cloveci > 0) {
-
-                                                                            cloveci--
-                                                                            cloveciVUlici++
-                                                                        }
-
-                                                                        ulice.copy(
-                                                                            cloveci = cloveciVUlici
-                                                                        )
+                                                                        cloveci--
+                                                                        cloveciVUlici++
                                                                     }
 
-                                                                    clear()
-                                                                    addAll(noveUlice)
-                                                                }
-                                                                menic.zmenitBusy {
-                                                                    val i = indexOfFirst { it.id == bus.id }
-                                                                    removeAt(i)
-                                                                }
-                                                                menic.zmenitPrachy {
-                                                                    it + bus.prodejniCena
+                                                                    ulice.copy(
+                                                                        cloveci = cloveciVUlici
+                                                                    )
                                                                 }
 
-                                                                hide()
-
-                                                                snackbarHostState.showSnackbar(
-                                                                    message = prodaciZprava,
-                                                                    withDismissAction = true,
-                                                                )
+                                                                clear()
+                                                                addAll(noveUlice)
                                                             }
-                                                        }
-                                                    ) {
-                                                        Text(stringResource(android.R.string.ok))
-                                                    }
-                                                },
-                                                dismissButton = {
-                                                    TextButton(
-                                                        onClick = {
+                                                            menic.zmenitBusy {
+                                                                val i = indexOfFirst { it.id == bus.id }
+                                                                removeAt(i)
+                                                            }
+                                                            menic.zmenitPrachy {
+                                                                it + bus.prodejniCena
+                                                            }
+
                                                             hide()
+
+                                                            snackbarHostState.showSnackbar(
+                                                                message = prodaciZprava,
+                                                                withDismissAction = true,
+                                                            )
                                                         }
-                                                    ) {
-                                                        Text(stringResource(R.string.zrusit))
-                                                    }
+                                                    }) { Text(stringResource(android.R.string.ok)) }
                                                 },
-                                                icon = {
-                                                    Icon(Icons.Default.Euro, null)
-                                                },
-                                                title = {
-                                                    Text(stringResource(R.string.prodat))
-                                                },
-                                                content = {
-                                                    Text(stringResource(R.string.fakt_chcete_prodat_bus))
-                                                },
+                                                dismissButton = { TextButton(::hide) { Text(stringResource(R.string.zrusit)) } },
+                                                icon = { Icon(Icons.Default.Euro, null) },
+                                                title = { Text(stringResource(R.string.prodat)) },
+                                                content = { Text(stringResource(R.string.fakt_chcete_prodat_bus)) },
                                             )
                                         },
                                         Modifier
                                             .padding(all = 8.dp),
-                                    ) {
-                                        Text(
-                                            text = stringResource(R.string.prodat_za, bus.prodejniCena.asString())
-                                        )
-                                    }
+                                    ) { Text(stringResource(R.string.prodat_za, bus.prodejniCena.asString())) }
                                 }
                             }
                         }
@@ -636,72 +616,53 @@ private fun CoMuzesDelatBusum(
                         }",
                         prodejniCena.asString()
                     )
-                    TextButton(
-                        onClick = {
-                            MainScope().launch {
-                                menic.zmenitUlice {
-                                    prodejniBusy.forEach { bus ->
-                                        var cloveci = bus.cloveci
-                                        val noveUlice = shuffled().map { ulice ->
-                                            var cloveciVUlici = ulice.cloveci
-                                            while (cloveciVUlici < ulice.kapacita && cloveci > 0) {
+                    TextButton(onClick = {
+                        MainScope().launch {
+                            menic.zmenitUlice {
+                                prodejniBusy.forEach { bus ->
+                                    var cloveci = bus.cloveci
+                                    val noveUlice = shuffled().map { ulice ->
+                                        var cloveciVUlici = ulice.cloveci
+                                        while (cloveciVUlici < ulice.kapacita && cloveci > 0) {
 
-                                                cloveci--
-                                                cloveciVUlici++
-                                            }
-
-                                            ulice.copy(
-                                                cloveci = cloveciVUlici
-                                            )
+                                            cloveci--
+                                            cloveciVUlici++
                                         }
 
-                                        clear()
-                                        addAll(noveUlice)
+                                        ulice.copy(
+                                            cloveci = cloveciVUlici
+                                        )
                                     }
+
+                                    clear()
+                                    addAll(noveUlice)
                                 }
-                                menic.zmenitBusy {
-                                    prodejniBusy.forEach { bus ->
-                                        val i = indexOfFirst { it.id == bus.id }
-                                        removeAt(i)
-                                    }
-                                }
-
-                                menic.zmenitPrachy {
-                                    it + prodejniCena
-                                }
-
-                                hide()
-
-                                zavritVsechny()
-
-                                snackbarHostState.showSnackbar(
-                                    message = prodaciZprava,
-                                    withDismissAction = true,
-                                )
                             }
-                        }
-                    ) {
-                        Text(stringResource(android.R.string.ok))
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
+                            menic.zmenitBusy {
+                                prodejniBusy.forEach { bus ->
+                                    removeFirst { it.id == bus.id }
+                                }
+                            }
+
+                            menic.zmenitPrachy {
+                                it + prodejniCena
+                            }
+
                             hide()
+
+                            zavritVsechny()
+
+                            snackbarHostState.showSnackbar(
+                                message = prodaciZprava,
+                                withDismissAction = true,
+                            )
                         }
-                    ) {
-                        Text(stringResource(R.string.zrusit))
-                    }
+                    }) { Text(stringResource(android.R.string.ok)) }
                 },
-                icon = {
-                    Icon(Icons.Default.Euro, null)
-                },
-                title = {
-                    Text(stringResource(R.string.prodat))
-                },
-                content = {
-                    Text(stringResource(R.string.fakt_chcete_prodat_bus))
-                },
+                dismissButton = { TextButton(::hide) { Text(stringResource(R.string.zrusit)) } },
+                icon = { Icon(Icons.Default.Euro, null) },
+                title = { Text(stringResource(R.string.prodat)) },
+                content = { Text(stringResource(R.string.fakt_chcete_prodat_bus)) },
             )
         }
     ) {
@@ -727,65 +688,55 @@ private fun CoMuzesDelatBusum(
             } else AlertDialogManager.Global.showMaterial(
                 confirmButton = { },
                 dismissButton = {
-                    TextButton(
-                        onClick = {
-                            menic.zmenitBusy {
-                                val prodejniLinky = prodejniBusy.mapNotNull { it.linka }.distinct()
-                                prodejniBusy.forEach { bus ->
-                                    replaceBy(bus.copy(linka = null)) { it.id }
-                                }
-                                prodejniLinky.forEach {
-                                    apply(dp.linka(it).rozmistitBusy)
-                                }
+                    TextButton(onClick = {
+                        menic.zmenitBusy {
+                            val prodejniLinky = prodejniBusy.mapNotNull { it.linka }.distinct()
+                            prodejniBusy.forEach { bus ->
+                                replaceBy(bus.copy(linka = null)) { it.id }
                             }
-                            zavritVsechny()
-                            hide()
+                            prodejniLinky.forEach {
+                                apply(dp.linka(it).rozmistitBusy)
+                            }
                         }
-                    ) {
-                        Text(stringResource(R.string.odebrat_bus_z_linek))
-                    }
+                        zavritVsechny()
+                        hide()
+                    }) { Text(stringResource(R.string.odebrat_bus_z_linek)) }
                 },
-                title = {
-                    Text(stringResource(R.string.vyberte_linku))
-                },
+                title = { Text(stringResource(R.string.vyberte_linku)) },
                 content = {
-                    pouzitelneLinky.forEach { linka ->
-                        ListItem(
-                            headlineContent = {
-                                Text(linka.cislo)
-                            },
-                            Modifier.clickable {
-                                menic.zmenitBusy {
-                                    val prodejniLinky = prodejniBusy.mapNotNull { it.linka }.distinct()
-                                    prodejniBusy.forEach { bus ->
-                                        replaceBy(
-                                            bus.copy(
-                                                linka = linka.id,
-                                                poziceNaLince = 0,
-                                                poziceVUlici = 0.dp,
-                                                smerNaLince = Smer.Pozitivni,
-                                                stavZastavky = StavZastavky.Pred
-                                            )
-                                        ) { it.id }
+                    Column {
+                        pouzitelneLinky.forEach { linka ->
+                            ListItem(
+                                headlineContent = { Text(linka.cislo) },
+                                Modifier.clickable {
+                                    menic.zmenitBusy {
+                                        val prodejniLinky = prodejniBusy.mapNotNull { it.linka }.distinct()
+                                        prodejniBusy.forEach { bus ->
+                                            replaceBy(
+                                                bus.copy(
+                                                    linka = linka.id,
+                                                    poziceNaLince = 0,
+                                                    poziceVUlici = 0.dp,
+                                                    smerNaLince = Smer.Pozitivni,
+                                                    stavZastavky = StavZastavky.Pred
+                                                )
+                                            ) { it.id }
+                                        }
+                                        prodejniLinky.forEach {
+                                            apply(dp.linka(it).rozmistitBusy)
+                                        }
+                                        apply(linka.rozmistitBusy)
                                     }
-                                    prodejniLinky.forEach {
-                                        apply(dp.linka(it).rozmistitBusy)
-                                    }
-                                    apply(linka.rozmistitBusy)
-                                }
-                                dosahni(Dosahlost.BusNaLince::class)
-                                zavritVsechny()
-                                hide()
-                            },
-                            leadingContent = {
-                                Icon(Icons.Default.Timeline, null, tint = linka.barvicka.barva)
-                            },
-                        )
+                                    dosahni(Dosahlost.BusNaLince::class)
+                                    zavritVsechny()
+                                    hide()
+                                },
+                                leadingContent = { Icon(Icons.Default.Timeline, null, tint = linka.barvicka.barva) },
+                            )
+                        }
                     }
                 },
             )
         }
-    ) {
-        Icon(Icons.Default.Timeline, stringResource(R.string.vypravit))
-    }
+    ) { Icon(Icons.Default.Timeline, stringResource(R.string.vypravit)) }
 }

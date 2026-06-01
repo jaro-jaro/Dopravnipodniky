@@ -50,6 +50,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
@@ -57,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cz.jaro.better_dialog.AlertDialogManager
 import cz.jaro.better_dialog.showMaterial
+import cz.jaro.better_dialog.showSimple
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
@@ -156,6 +158,7 @@ fun LinkyScreen(
                         },
                         trailingContent = {
                             val ctx = LocalContext.current
+                            val res = LocalResources.current
                             val scope = rememberCoroutineScope()
                             if (
                                 !(vse.tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
@@ -213,87 +216,85 @@ fun LinkyScreen(
                                     var cisloLinky by remember { mutableStateOf(linka.cislo) }
                                     var barva by remember { mutableStateOf(linka.barvicka) }
                                     DropdownMenuItem(
-                                        text = {
-                                            Text(stringResource(R.string.upravit_nazev))
-                                        },
+                                        text = { Text(stringResource(R.string.upravit_nazev)) },
                                         onClick = {
                                             AlertDialogManager.Global.showMaterial(
                                                 confirmButton = {
-                                                    TextButton(
-                                                        onClick = {
-                                                            if (cisloLinky.isEmpty()) {
-                                                                Toast.makeText(ctx, R.string.spatne_cislo_linky, Toast.LENGTH_LONG).show()
-                                                                return@TextButton
-                                                            }
-                                                            if (dp.linky.any { it.cislo == cisloLinky && it.cislo != linka.cislo }) {
-                                                                Toast.makeText(ctx, R.string.linka_existuje, Toast.LENGTH_LONG).show()
-                                                                return@TextButton
-                                                            }
-
-                                                            menic.zmenitLinky {
-                                                                val i = indexOfFirst { it.id == linka.id }
-                                                                this[i] = this[i].copy(
-                                                                    cislo = cisloLinky,
-                                                                    barvicka = barva,
-                                                                )
-                                                            }
-
-                                                            hide()
+                                                    TextButton(onClick = {
+                                                        if (cisloLinky.isEmpty()) {
+                                                            Toast.makeText(
+                                                                ctx,
+                                                                R.string.spatne_cislo_linky,
+                                                                Toast.LENGTH_LONG
+                                                            ).show()
+                                                            return@TextButton
                                                         }
-                                                    ) {
-                                                        Text(stringResource(android.R.string.ok))
-                                                    }
-                                                },
-                                                title = {
-                                                    Text(stringResource(id = R.string.upravit_nazev2))
-                                                },
-                                                content = {
-                                                    OutlinedTextField(
-                                                        modifier = Modifier
-                                                            .fillMaxWidth(),
-                                                        value = cisloLinky,
-                                                        onValueChange = {
-                                                            cisloLinky = it
-                                                        },
-                                                        label = { Text(stringResource(R.string.zadejte_cislo_linky)) },
-                                                    )
-                                                    ExposedDropdownMenuBox(
-                                                        expanded = expanded,
-                                                        onExpandedChange = { expanded = !expanded },
-                                                    ) {
-                                                        OutlinedTextField(
-                                                            modifier = Modifier
-                                                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                                                                .padding(top = 8.dp)
-                                                                .fillMaxWidth(),
-                                                            readOnly = true,
-                                                            value = stringResource(barva.jmeno),
-                                                            leadingIcon = {
-                                                                Icon(Icons.Default.Circle, null, tint = barva.barva)
-                                                            },
-                                                            onValueChange = {},
-                                                            label = { Text(stringResource(R.string.barva_linky)) },
-                                                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                                                            keyboardOptions = KeyboardOptions(
-                                                                keyboardType = KeyboardType.Number,
+                                                        if (dp.linky.any { it.cislo == cisloLinky && it.cislo != linka.cislo }) {
+                                                            Toast.makeText(ctx, R.string.linka_existuje, Toast.LENGTH_LONG)
+                                                                .show()
+                                                            return@TextButton
+                                                        }
+
+                                                        menic.zmenitLinky {
+                                                            val i = indexOfFirst { it.id == linka.id }
+                                                            this[i] = this[i].copy(
+                                                                cislo = cisloLinky,
+                                                                barvicka = barva,
                                                             )
+                                                        }
+
+                                                        hide()
+                                                    }) { Text(stringResource(android.R.string.ok)) }
+                                                },
+                                                title = { Text(stringResource(R.string.upravit_nazev2)) },
+                                                content = {
+                                                    Column {
+                                                        OutlinedTextField(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            value = cisloLinky,
+                                                            onValueChange = { cisloLinky = it },
+                                                            label = { Text(stringResource(R.string.zadejte_cislo_linky)) },
                                                         )
-                                                        ExposedDropdownMenu(
+                                                        ExposedDropdownMenuBox(
                                                             expanded = expanded,
-                                                            onDismissRequest = { expanded = false },
+                                                            onExpandedChange = { expanded = !expanded },
                                                         ) {
-                                                            Barvicka.entries.forEach { tahleBarva ->
-                                                                DropdownMenuItem(
-                                                                    text = { Text(stringResource(tahleBarva.jmeno)) },
-                                                                    onClick = {
-                                                                        barva = tahleBarva
-                                                                        expanded = false
-                                                                    },
-                                                                    leadingIcon = {
-                                                                        Icon(Icons.Default.Circle, null, tint = tahleBarva.barva)
-                                                                    },
-                                                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                                                            OutlinedTextField(
+                                                                modifier = Modifier
+                                                                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                                                    .padding(top = 8.dp)
+                                                                    .fillMaxWidth(),
+                                                                readOnly = true,
+                                                                value = stringResource(barva.jmeno),
+                                                                leadingIcon = { Icon(Icons.Default.Circle, null, tint = barva.barva) },
+                                                                onValueChange = {},
+                                                                label = { Text(stringResource(R.string.barva_linky)) },
+                                                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                                                                keyboardOptions = KeyboardOptions(
+                                                                    keyboardType = KeyboardType.Number,
                                                                 )
+                                                            )
+                                                            ExposedDropdownMenu(
+                                                                expanded = expanded,
+                                                                onDismissRequest = { expanded = false },
+                                                            ) {
+                                                                Barvicka.entries.forEach { tahleBarva ->
+                                                                    DropdownMenuItem(
+                                                                        text = { Text(stringResource(tahleBarva.jmeno)) },
+                                                                        onClick = {
+                                                                            barva = tahleBarva
+                                                                            expanded = false
+                                                                        },
+                                                                        leadingIcon = {
+                                                                            Icon(
+                                                                                Icons.Default.Circle,
+                                                                                null,
+                                                                                tint = tahleBarva.barva
+                                                                            )
+                                                                        },
+                                                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                                                                    )
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -301,34 +302,29 @@ fun LinkyScreen(
                                             )
                                             show = false
                                         },
-                                        leadingIcon = {
-                                            Icon(Icons.Default.Edit, null)
-                                        }
+                                        leadingIcon = { Icon(Icons.Default.Edit, null) },
                                     )
                                     DropdownMenuItem(
-                                        text = {
-                                            Text(stringResource(R.string.upravit_vedeni))
-                                        },
+                                        text = { Text(stringResource(R.string.upravit_vedeni)) },
                                         onClick = {
                                             editLine(linka.id)
                                             show = false
                                         },
-                                        leadingIcon = {
-                                            Icon(Icons.Default.EditRoad, null)
-                                        }
+                                        leadingIcon = { Icon(Icons.Default.EditRoad, null) },
                                     )
                                     DropdownMenuItem(
-                                        text = {
-                                            Text(stringResource(R.string.pridat_troleje_linka))
-                                        },
+                                        text = { Text(stringResource(R.string.pridat_troleje_linka)) },
                                         onClick = {
                                             AlertDialogManager.Global.showMaterial(
                                                 confirmButton = {
                                                     val notEnoughMoneySnackbarText = stringResource(R.string.malo_penez)
-                                                    val overheadLineSnackbarText = stringResource(R.string.uspesne_pridany_troleje)
+                                                    val overheadLineSnackbarText =
+                                                        stringResource(R.string.uspesne_pridany_troleje)
                                                     TextButton(
                                                         onClick = {
-                                                            if (vse.prachy < cenaTroleje * linka.ulice(dp).count { !it.maTrolej }) {
+                                                            if (vse.prachy < cenaTroleje * linka.ulice(dp)
+                                                                    .count { !it.maTrolej }
+                                                            ) {
                                                                 scope.launch {
                                                                     snackbarHostState.showSnackbar(
                                                                         notEnoughMoneySnackbarText,
@@ -363,9 +359,7 @@ fun LinkyScreen(
                                                             }
                                                             hide()
                                                         }
-                                                    ) {
-                                                        Text(stringResource(android.R.string.ok))
-                                                    }
+                                                    ) { Text(stringResource(android.R.string.ok)) }
                                                 },
                                                 content = {
                                                     Text(
@@ -376,65 +370,37 @@ fun LinkyScreen(
                                                         )
                                                     )
                                                 },
-                                                title = {
-                                                    Text(stringResource(R.string.pridat_troleje_linka))
-                                                },
+                                                title = { Text(stringResource(R.string.pridat_troleje_linka)) },
                                             )
                                             show = false
                                         },
-                                        leadingIcon = {
-                                            Icon(Icons.Default.GridGoldenratio, null)
-                                        }
+                                        leadingIcon = { Icon(Icons.Default.GridGoldenratio, null) }
                                     )
                                     DropdownMenuItem(
-                                        text = {
-                                            Text(stringResource(R.string.odstranit_linku))
-                                        },
+                                        text = { Text(stringResource(R.string.odstranit_linku)) },
                                         onClick = {
-                                            AlertDialogManager.Global.showMaterial(
-                                                confirmButton = {
-                                                    TextButton(
-                                                        onClick = {
-                                                            menic.zmenitBusy {
-                                                                forEachIndexed { i, it ->
-                                                                    if (it.linka == linka.id) this[i] = it.copy(
-                                                                        linka = null
-                                                                    )
-                                                                }
-                                                            }
-                                                            menic.zmenitLinky {
-                                                                remove(linka)
-                                                            }
-                                                            hide()
+                                            AlertDialogManager.Global.showSimple(
+                                                confirmButtonText = res.getString(android.R.string.ok),
+                                                onConfirmed = {
+                                                    menic.zmenitBusy {
+                                                        forEachIndexed { i, it ->
+                                                            if (it.linka == linka.id) this[i] = it.copy(
+                                                                linka = null
+                                                            )
                                                         }
-                                                    ) {
-                                                        Text(stringResource(android.R.string.ok))
+                                                    }
+                                                    menic.zmenitLinky {
+                                                        remove(linka)
                                                     }
                                                 },
-                                                icon = {
-                                                    Icon(Icons.Default.Delete, null)
-                                                },
-                                                title = {
-                                                    Text(stringResource(R.string.odstranit_linku))
-                                                },
-                                                content = {
-                                                    Text(stringResource(R.string.jste_si_vedomi_odstraneni_linky))
-                                                },
-                                                dismissButton = {
-                                                    TextButton(
-                                                        onClick = {
-                                                            hide()
-                                                        }
-                                                    ) {
-                                                        Text(stringResource(R.string.zrusit))
-                                                    }
-                                                }
+                                                icon = Icons.Default.Delete,
+                                                titleText = res.getString(R.string.odstranit_linku),
+                                                contentText = res.getString(R.string.jste_si_vedomi_odstraneni_linky),
+                                                dismissButtonText = res.getString(R.string.zrusit),
                                             )
                                             show = false
                                         },
-                                        leadingIcon = {
-                                            Icon(Icons.Default.Delete, null)
-                                        }
+                                        leadingIcon = { Icon(Icons.Default.Delete, null) },
                                     )
                                 }
                             }

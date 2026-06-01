@@ -382,18 +382,11 @@ fun ObchodScreen(
                                 fun zeptatSeNaPocet(callback: (String) -> Unit) {
                                     AlertDialogManager.Global.showMaterial(
                                         confirmButton = {
-                                            TextButton(
-                                                onClick = {
-                                                    hide()
-                                                    callback(pocet)
-                                                }
-                                            ) {
+                                            TextButton(onClick = { hide(); callback(pocet) }) {
                                                 Text(stringResource(android.R.string.ok))
                                             }
                                         },
-                                        title = {
-                                            Text(stringResource(R.string.nadpis_vicenasobne_kupovani))
-                                        },
+                                        title = { Text(stringResource(R.string.nadpis_vicenasobne_kupovani)) },
                                         content = {
                                             OutlinedTextField(
                                                 value = pocet,
@@ -424,18 +417,11 @@ fun ObchodScreen(
                                     else AlertDialogManager.Global.showMaterial(
                                         confirmButton = {},
                                         dismissButton = {
-                                            TextButton(
-                                                onClick = {
-                                                    hide()
-                                                    callback(null)
-                                                }
-                                            ) {
+                                            TextButton(onClick = { hide(); callback(null) }) {
                                                 Text(stringResource(R.string.nepridavat))
                                             }
                                         },
-                                        title = {
-                                            Text(stringResource(R.string.vyberte_linku))
-                                        },
+                                        title = { Text(stringResource(R.string.vyberte_linku)) },
                                         content = {
                                             pouzitelneLinky.forEach {
                                                 ListItem(
@@ -460,17 +446,10 @@ fun ObchodScreen(
                                         confirmButton = {
                                             TextButton(
                                                 enabled = evc.isNotEmpty() && evc.toIntOrNull() != null && evc.toInt() >= 1,
-                                                onClick = {
-                                                    hide()
-                                                    callback(evc)
-                                                }
-                                            ) {
-                                                Text(stringResource(android.R.string.ok))
-                                            }
+                                                onClick = { hide(); callback(evc) },
+                                            ) { Text(stringResource(android.R.string.ok)) }
                                         },
-                                        title = {
-                                            Text(stringResource(R.string.zadejte_ev_c, stringResource(typBusu.trakce.jmeno)))
-                                        },
+                                        title = { Text(stringResource(R.string.zadejte_ev_c, stringResource(typBusu.trakce.jmeno))) },
                                         content = {
                                             OutlinedTextField(
                                                 value = evc,
@@ -492,7 +471,6 @@ fun ObchodScreen(
 
                                 Button(
                                     onClick = {
-
                                         when {
                                             vse.nastaveni.vicenasobnyKupovani && vse.nastaveni.automatickyUdelovatEvC -> {
                                                 zeptatSeNaPocet { pocet ->

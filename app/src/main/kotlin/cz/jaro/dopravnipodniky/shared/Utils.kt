@@ -446,6 +446,16 @@ fun <Z> zip(
 }
 
 fun <T> Iterable<T>.collectionSizeOrDefault(default: Int): Int = if (this is Collection<*>) this.size else default
+fun <T> MutableList<T>.removeFirst(predicate: (T) -> Boolean): Boolean {
+    val each: MutableIterator<T> = iterator()
+    while (each.hasNext()) {
+        if (predicate(each.next())) {
+            each.remove()
+            return true
+        }
+    }
+    return false
+}
 
 inline fun <T> Iterable<T>.sumOfDp(selector: (T) -> Dp): Dp {
     var sum = 0.dp

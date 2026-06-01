@@ -1,5 +1,6 @@
 package cz.jaro.dopravnipodniky.shared.jednotky
 
+import android.content.res.Resources
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import cz.jaro.dopravnipodniky.R
@@ -28,6 +29,8 @@ val Long.penez get() = Peniz(this.toDouble())
 
 @Composable
 fun Peniz.asString() = stringResource(R.string.kc, value.formatovat(0).composeString())
+
+fun Peniz.asString(res: Resources) = res.getString(R.string.kc, value.formatovat(0).asString(res))
 
 inline fun <T> Iterable<T>.sumOfPeniz(selector: (T) -> Peniz): Peniz {
     var sum = 0.penez

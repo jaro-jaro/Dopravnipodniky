@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.chargemap.compose.numberpicker.NumberPicker
 import cz.jaro.better_dialog.AlertDialogManager
 import cz.jaro.better_dialog.showMaterial
+import cz.jaro.better_dialog.showSimple
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Trakce
@@ -134,8 +135,7 @@ fun DopravniPodnik(
                     .fillMaxWidth()
                     .padding(all = 8.dp),
             )
-        }
-        else {
+        } else {
             Text(
                 text = "Typ generace města: ${dp.info.detailGenerace::class.simpleName}",
                 Modifier
@@ -247,63 +247,42 @@ fun DopravniPodnik(
             Modifier
                 .padding(all = 8.dp),
             onClick = {
-                AlertDialogManager.Global.showMaterial(
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                val actualCena = oddelavaciCena * Random.nextDouble(.5, 1.5)
-                                MainScope().launch {
+                AlertDialogManager.Global.showSimple(
+                    confirmButtonText = res.getString(R.string.prodat_dp),
+                    onConfirmed = {
+                        val actualCena = oddelavaciCena * Random.nextDouble(.5, 1.5)
+                        MainScope().launch {
 
-                                    menic.zmenitOstatniDopravniPodniky {
-                                        removeAt(indexOfFirst { it.info.id == dp.info.id })
-                                    }
-
-                                    menic.zmenitPrachy {
-                                        it + actualCena
-                                    }
-
-                                    hide()
-
-                                    context(res) {
-                                        if (dp.info.jmenoMesta == vecne) snackbarHostState.showSnackbar(
-                                            message = res.getString(R.string.vecne_neni_vecne),
-                                            duration = SnackbarDuration.Long,
-                                            withDismissAction = true,
-                                        )
-                                        snackbarHostState.showSnackbar(
-                                            message = res.getString(
-                                                R.string.prodali_jste_dp,
-                                                dp.info.jmenoMesta,
-                                                res.getString(
-                                                    R.string.kc,
-                                                    actualCena.value.formatovat(0).asString()
-                                                )
-                                            ),
-                                            duration = SnackbarDuration.Indefinite,
-                                            withDismissAction = true,
-                                        )
-                                    }
-                                }
+                            menic.zmenitOstatniDopravniPodniky {
+                                removeAt(indexOfFirst { it.info.id == dp.info.id })
                             }
-                        ) {
-                            Text(stringResource(R.string.prodat_dp))
+
+                            menic.zmenitPrachy {
+                                it + actualCena
+                            }
+
+                            if (dp.info.jmenoMesta == vecne) snackbarHostState.showSnackbar(
+                                message = res.getString(R.string.vecne_neni_vecne),
+                                duration = SnackbarDuration.Long,
+                                withDismissAction = true,
+                            )
+                            snackbarHostState.showSnackbar(
+                                message = res.getString(
+                                    R.string.prodali_jste_dp,
+                                    dp.info.jmenoMesta,
+                                    res.getString(
+                                        R.string.kc,
+                                        actualCena.value.formatovat(0).asString(res)
+                                    )
+                                ),
+                                duration = SnackbarDuration.Indefinite,
+                                withDismissAction = true,
+                            )
                         }
                     },
-                    dismissButton = {
-                        TextButton(
-                            onClick = {
-                                hide()
-                            }
-                        ) {
-                            Text(stringResource(R.string.zrusit))
-                        }
-                    },
-                    title = {
-                        Text(stringResource(R.string.prodat_dp))
-                    },
-                    content = {
-                        Text(stringResource(R.string.za_prodej_dp_dostanete, oddelavaciCena.asString()))
-                    },
+                    dismissButtonText = res.getString(R.string.zrusit),
+                    titleText = res.getString(R.string.prodat_dp),
+                    contentText = res.getString(R.string.za_prodej_dp_dostanete, oddelavaciCena.asString(res)),
                 )
             },
             onLongPress = {
@@ -329,44 +308,34 @@ fun DopravniPodnik(
             onClick = {
                 AlertDialogManager.Global.showMaterial(
                     confirmButton = {
-                        TextButton(
-                            onClick = {
-                                scope.launch {
-                                    when {
-                                        tentoDP.info.id == dp.info.id -> menic.zmenitDPInfo {
-                                            it.copy(
+                        TextButton(onClick = {
+                            scope.launch {
+                                when {
+                                    tentoDP.info.id == dp.info.id -> menic.zmenitDPInfo {
+                                        it.copy(
+                                            jizdne = vybraneJizdne.penez,
+                                        )
+                                    }
+
+                                    else -> menic.zmenitOstatniDopravniPodniky {
+                                        val i = indexOfFirst { it.info.id == dp.info.id }
+                                        this[i] = this[i].copy(
+                                            info = this[i].info.copy(
                                                 jizdne = vybraneJizdne.penez,
                                             )
-                                        }
-
-                                        else -> menic.zmenitOstatniDopravniPodniky {
-                                            val i = indexOfFirst { it.info.id == dp.info.id }
-                                            this[i] = this[i].copy(
-                                                info = this[i].info.copy(
-                                                    jizdne = vybraneJizdne.penez,
-                                                )
-                                            )
-                                        }
+                                        )
                                     }
                                 }
-                                hide()
                             }
-                        ) {
-                            Text(stringResource(R.string.potvrdit))
-                        }
+                            hide()
+                        }) { Text(stringResource(R.string.potvrdit)) }
                     },
                     dismissButton = {
-//                        TextButton(
-//                            onClick = {
+//                        TextButton(onClick = {
 //
-//                            }
-//                        ) {
-//                            Text(stringResource(R.string.pruzkum_mineni))
-//                        }
+//                        }) { Text(stringResource(R.string.pruzkum_mineni)) }
                     },
-                    title = {
-                        Text(stringResource(R.string.zmenit_jizdne))
-                    },
+                    title = { Text(stringResource(R.string.zmenit_jizdne)) },
                     content = {
                         Surface {
                             Box(
@@ -393,9 +362,7 @@ fun DopravniPodnik(
             Modifier
                 .padding(all = 8.dp),
         ) {
-            Text(
-                text = stringResource(R.string.zmenit_jizdne)
-            )
+            Text(stringResource(R.string.zmenit_jizdne))
         }
     }
 }

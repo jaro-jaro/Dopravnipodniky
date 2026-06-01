@@ -529,88 +529,77 @@ private fun kliklNaUlici(
 ) {
     AlertDialogManager.Global.showMaterial(
         confirmButton = {},
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    hide()
-                }
-            ) {
-                Text(stringResource(R.string.zrusit))
-            }
-        },
-        icon = {
-            Icon(Icons.Default.EditRoad, null)
-        },
-        title = {
-            Text(stringResource(R.string.upravit_ulici))
-        },
+        dismissButton = { TextButton(::hide) { Text(stringResource(R.string.zrusit)) } },
+        icon = { Icon(Icons.Default.EditRoad, null) },
+        title = { Text(stringResource(R.string.upravit_ulici)) },
         content = {
-            OutlinedButton(
-                onClick = {
-                    menic.zmenitUlice {
-                        if (staraUlice.maZastavku)
-                            replaceBy(staraUlice.zasebevrazdujZastavku()) { it.id }
-                        else
-                            replaceBy(staraUlice.copy(zastavka = Zastavka())) { it.id }
-                    }
-                    menic.zmenitPrachy {
-                        it - if (!staraUlice.maZastavku) cenaZastavky else cenaZastavky / 5
-                    }
-                    hide()
-                },
-                Modifier
-                    .padding(vertical = 4.dp)
-                    .fillMaxWidth(),
-            ) {
-
-                Text(
-                    text = if (!staraUlice.maZastavku)
-                        stringResource(
-                            R.string.vytvorit_zastavku,
-                            cenaZastavky.asString()
-                        )
-                    else stringResource(
-                        R.string.odstranit_zastavku,
-                        (cenaZastavky / 5).asString()
-                    ),
-                    textAlign = TextAlign.Center
-                )
-            }
-            if (
-                !(vse.tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
-                !(vse.tutorial je StavTutorialu.Tutorialujeme.Linky) &&
-                !(vse.tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
-                !(vse.tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
-                !(vse.tutorial je StavTutorialu.Tutorialujeme.Obchod)
-            ) OutlinedButton(
-                onClick = {
-                    menic.zmenitUlice {
-                        if (staraUlice.maTrolej)
-                            replaceBy(staraUlice.copy(maTrolej = false)) { it.id }
-                        else
-                            replaceBy(staraUlice.copy(maTrolej = true)) { it.id }
-                    }
-                    menic.zmenitPrachy {
-                        it - if (!staraUlice.maTrolej) cenaTroleje else cenaTroleje / 5
-                    }
-                    hide()
-                },
-                Modifier
-                    .padding(vertical = 4.dp)
-                    .fillMaxWidth(),
-            ) {
-                Text(
-                    text = if (!staraUlice.maTrolej)
-                        stringResource(
-                            R.string.postavit_troleje,
-                            cenaTroleje.asString()
-                        )
-                    else stringResource(
-                        R.string.odstranit_troleje,
-                        (cenaTroleje / 5).asString()
-                    ),
-                    textAlign = TextAlign.Justify
-                )
+            Column {
+                OutlinedButton(
+                    onClick = {
+                        menic.zmenitUlice {
+                            if (staraUlice.maZastavku)
+                                replaceBy(staraUlice.zasebevrazdujZastavku()) { it.id }
+                            else
+                                replaceBy(staraUlice.copy(zastavka = Zastavka())) { it.id }
+                        }
+                        menic.zmenitPrachy {
+                            it - if (!staraUlice.maZastavku) cenaZastavky else cenaZastavky / 5
+                        }
+                        hide()
+                    },
+                    Modifier
+                        .padding(vertical = 4.dp)
+                        .fillMaxWidth(),
+                ) {
+                    Text(
+                        text = if (!staraUlice.maZastavku)
+                            stringResource(
+                                R.string.vytvorit_zastavku,
+                                cenaZastavky.asString()
+                            )
+                        else stringResource(
+                            R.string.odstranit_zastavku,
+                            (cenaZastavky / 5).asString()
+                        ),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                if (
+                    !(vse.tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
+                    !(vse.tutorial je StavTutorialu.Tutorialujeme.Linky) &&
+                    !(vse.tutorial je StavTutorialu.Tutorialujeme.Zastavky) &&
+                    !(vse.tutorial je StavTutorialu.Tutorialujeme.Garaz) &&
+                    !(vse.tutorial je StavTutorialu.Tutorialujeme.Obchod)
+                ) OutlinedButton(
+                    onClick = {
+                        menic.zmenitUlice {
+                            if (staraUlice.maTrolej)
+                                replaceBy(staraUlice.copy(maTrolej = false)) { it.id }
+                            else
+                                replaceBy(staraUlice.copy(maTrolej = true)) { it.id }
+                        }
+                        menic.zmenitPrachy {
+                            it - if (!staraUlice.maTrolej) cenaTroleje else cenaTroleje / 5
+                        }
+                        hide()
+                    },
+                    Modifier
+                        .padding(vertical = 4.dp)
+                        .fillMaxWidth(),
+                ) {
+                    Text(
+                        text = if (!staraUlice.maTrolej)
+                            stringResource(
+                                R.string.postavit_troleje,
+                                cenaTroleje.asString()
+                            )
+                        else stringResource(
+                            R.string.odstranit_troleje,
+                            (cenaTroleje / 5).asString()
+                        ),
+                        textAlign = TextAlign.Justify
+                    )
+                }
             }
         }
     )
@@ -625,21 +614,9 @@ private fun kliklNaKrizovatku(
 ) {
     AlertDialogManager.Global.showMaterial(
         confirmButton = {},
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    hide()
-                }
-            ) {
-                Text(stringResource(R.string.zrusit))
-            }
-        },
-        icon = {
-            Icon(Icons.Default.EditRoad, null)
-        },
-        title = {
-            Text(stringResource(R.string.upravit_krizovatku))
-        },
+        dismissButton = { TextButton(::hide) { Text(stringResource(R.string.zrusit)) } },
+        icon = { Icon(Icons.Default.EditRoad, null) },
+        title = { Text(stringResource(R.string.upravit_krizovatku)) },
         content = {
             OutlinedButton(
                 onClick = {
@@ -710,7 +687,6 @@ private fun kliklNaKrizovatku(
                     .padding(vertical = 4.dp)
                     .fillMaxWidth(),
             ) {
-
                 Text(
                     text = if (krizovatka == null || krizovatka.typ != TypKrizovatky.Kruhac)
                         stringResource(

@@ -25,6 +25,7 @@ numberpicker = "1.0.3"
 androidx-navigation3 = "1.1.2"
 appcompat = "1.6.1"
 material = "1.10.0"
+browser = "1.10.0"
 
 [libraries]
 firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx", version.ref = "firebase-analytics-ktx" }
@@ -57,6 +58,7 @@ androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runt
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "androidx-navigation3" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

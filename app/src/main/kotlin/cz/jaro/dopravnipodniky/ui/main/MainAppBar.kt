@@ -1,5 +1,6 @@
 package cz.jaro.dopravnipodniky.ui.main
 
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -7,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -48,12 +50,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import cz.jaro.better_dialog.AlertDialogManager
 import cz.jaro.better_dialog.showMaterial
 import cz.jaro.dopravnipodniky.BuildConfig
@@ -324,118 +328,120 @@ fun MainAppBar(
                                 Text(stringResource(R.string.nastaveni))
                             },
                             content = {
-                                var expanded by remember { mutableStateOf(false) }
-                                ExposedDropdownMenuBox(
-                                    expanded = expanded,
-                                    onExpandedChange = { expanded = !expanded },
-                                ) {
-                                    OutlinedTextField(
-                                        modifier = Modifier
-                                            .menuAnchor()
-                                            .padding(vertical = 4.dp)
-                                            .fillMaxWidth(),
-                                        readOnly = true,
-                                        value = stringResource(tema.jmeno),
-                                        leadingIcon = {
-                                            Icon(Icons.Default.Circle, null, tint = tema.barva)
-                                        },
-                                        onValueChange = {},
-                                        label = { Text(stringResource(R.string.tema_aplikace)) },
-                                        trailingIcon = {
-                                            ExposedDropdownMenuDefaults.TrailingIcon(
-                                                expanded = expanded
-                                            )
-                                        },
-                                        keyboardOptions = KeyboardOptions(
-                                            keyboardType = KeyboardType.Number,
-                                        )
-                                    )
-                                    ExposedDropdownMenu(
+                                Column {
+                                    var expanded by remember { mutableStateOf(false) }
+                                    ExposedDropdownMenuBox(
                                         expanded = expanded,
-                                        onDismissRequest = { expanded = false },
+                                        onExpandedChange = { expanded = !expanded },
                                     ) {
-                                        Theme.entries.forEach { tohleTema ->
-                                            DropdownMenuItem(
-                                                text = { Text(stringResource(tohleTema.jmeno)) },
-                                                onClick = {
-                                                    menic.zmenitDPInfo {
-                                                        it.copy(
-                                                            tema = tohleTema
-                                                        )
-                                                    }
-                                                    tema = tohleTema
-                                                    expanded = false
-                                                },
-                                                leadingIcon = {
-                                                    Icon(
-                                                        Icons.Default.Circle,
-                                                        null,
-                                                        tint = tohleTema.barva
-                                                    )
-                                                },
-                                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                                        OutlinedTextField(
+                                            modifier = Modifier
+                                                .menuAnchor()
+                                                .padding(vertical = 4.dp)
+                                                .fillMaxWidth(),
+                                            readOnly = true,
+                                            value = stringResource(tema.jmeno),
+                                            leadingIcon = {
+                                                Icon(Icons.Default.Circle, null, tint = tema.barva)
+                                            },
+                                            onValueChange = {},
+                                            label = { Text(stringResource(R.string.tema_aplikace)) },
+                                            trailingIcon = {
+                                                ExposedDropdownMenuDefaults.TrailingIcon(
+                                                    expanded = expanded
+                                                )
+                                            },
+                                            keyboardOptions = KeyboardOptions(
+                                                keyboardType = KeyboardType.Number,
                                             )
+                                        )
+                                        ExposedDropdownMenu(
+                                            expanded = expanded,
+                                            onDismissRequest = { expanded = false },
+                                        ) {
+                                            Theme.entries.forEach { tohleTema ->
+                                                DropdownMenuItem(
+                                                    text = { Text(stringResource(tohleTema.jmeno)) },
+                                                    onClick = {
+                                                        menic.zmenitDPInfo {
+                                                            it.copy(
+                                                                tema = tohleTema
+                                                            )
+                                                        }
+                                                        tema = tohleTema
+                                                        expanded = false
+                                                    },
+                                                    leadingIcon = {
+                                                        Icon(
+                                                            Icons.Default.Circle,
+                                                            null,
+                                                            tint = tohleTema.barva
+                                                        )
+                                                    },
+                                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                                                )
+                                            }
                                         }
                                     }
-                                }
-                                Row(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Text(
-                                        stringResource(R.string.automaticky_prirazovat_ev_c),
-                                        Modifier.weight(1F)
-                                    )
-                                    Switch(
-                                        checked = evc,
-                                        onCheckedChange = {
-                                            menic.zmenitNastaveni { n ->
-                                                n.copy(
-                                                    automatickyUdelovatEvC = it
-                                                )
+                                    Row(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Text(
+                                            stringResource(R.string.automaticky_prirazovat_ev_c),
+                                            Modifier.weight(1F)
+                                        )
+                                        Switch(
+                                            checked = evc,
+                                            onCheckedChange = {
+                                                menic.zmenitNastaveni { n ->
+                                                    n.copy(
+                                                        automatickyUdelovatEvC = it
+                                                    )
+                                                }
+                                                evc = it
                                             }
-                                            evc = it
-                                        }
-                                    )
-                                }
-                                Row(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Text(
-                                        stringResource(R.string.vicenasobne_kupovani),
-                                        Modifier.weight(1F)
-                                    )
-                                    Switch(
-                                        checked = multi,
-                                        onCheckedChange = {
-                                            menic.zmenitNastaveni { n ->
-                                                n.copy(
-                                                    vicenasobnyKupovani = it
-                                                )
+                                        )
+                                    }
+                                    Row(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Text(
+                                            stringResource(R.string.vicenasobne_kupovani),
+                                            Modifier.weight(1F)
+                                        )
+                                        Switch(
+                                            checked = multi,
+                                            onCheckedChange = {
+                                                menic.zmenitNastaveni { n ->
+                                                    n.copy(
+                                                        vicenasobnyKupovani = it
+                                                    )
+                                                }
+                                                multi = it
                                             }
-                                            multi = it
-                                        }
-                                    )
-                                }
-                                Row(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Text("DEBUG MÓD", Modifier.weight(1F))
-                                    Switch(
-                                        checked = debug,
-                                        onCheckedChange = {
-                                            DEBUG_MODE = !DEBUG_MODE
-                                            debug = DEBUG_MODE
-                                        }
-                                    )
+                                        )
+                                    }
+                                    Row(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Text("DEBUG MÓD", Modifier.weight(1F))
+                                        Switch(
+                                            checked = debug,
+                                            onCheckedChange = {
+                                                DEBUG_MODE = !DEBUG_MODE
+                                                debug = DEBUG_MODE
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         )
@@ -451,29 +457,26 @@ fun MainAppBar(
                     },
                     onClick = {
                         AlertDialogManager.Global.showMaterial(
-                            confirmButton = {
-                                TextButton(
-                                    onClick = {
-                                        hide()
-                                    }
-                                ) {
-                                    Text(stringResource(android.R.string.ok))
-                                }
-                            },
-                            icon = {
-                                Icon(Icons.Default.Info, null)
-                            },
-                            title = {
-                                Text(stringResource(R.string.o_aplikaci))
-                            },
+                            confirmButton = { TextButton(::hide) { Text(stringResource(android.R.string.ok)) } },
+                            icon = { Icon(Icons.Default.Info, null) },
+                            title = { Text(stringResource(R.string.o_aplikaci)) },
                             content = {
-                                Text("Verze aplikace: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
-                                Text("2021-${LocalDate.now().year} RO studios, člen skupiny JARO")
-                                Text("2019-${LocalDate.now().year} JARO")
-                                Text("Všechna data o busech byla ukradena bez svolení majitelů. Na naše data není v žádném případě spolehnutí,")
-                                Text("Simulate crash...", Modifier.clickable {
-                                    throw RuntimeException("Test exception")
-                                }, fontSize = 10.sp)
+                                val ctx = LocalContext.current
+                                Column {
+                                    Text("Verze aplikace: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
+                                    TextButton(onClick = {
+                                        CustomTabsIntent.Builder()
+                                            .setShowTitle(true)
+                                            .build()
+                                            .launchUrl(ctx, "https://github.com/jaro-jaro/Dopravnipodniky".toUri())
+                                    }) { Text("GitHub") }
+                                    Text("2021-${LocalDate.now().year} RO studios, člen skupiny JARO")
+                                    Text("2019-${LocalDate.now().year} JARO")
+                                    Text("Všechna data o busech byla ukradena bez svolení majitelů. Na naše data není v žádném případě spolehnutí,")
+                                    Text("Simulate crash...", Modifier.clickable {
+                                        throw RuntimeException("Test exception")
+                                    }, fontSize = 10.sp)
+                                }
                             }
                         )
                         show = false

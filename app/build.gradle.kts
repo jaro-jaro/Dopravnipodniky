@@ -47,12 +47,13 @@ android {
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_1_8)
-        freeCompilerArgs.addAll("-Xcontext-parameters", "-Xexplicit-backing-fields", "-XXLanguage:+ExplicitBackingFields")
+        freeCompilerArgs.addAll("-Xcontext-parameters", "-Xexplicit-backing-fields", "-XXLanguage:+ExplicitBackingFields", "-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
     }
 }
 
 dependencies {
     implementation(project(":better_dialog"))
+    implementation(libs.androidx.browser)
     implementation(libs.core.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)

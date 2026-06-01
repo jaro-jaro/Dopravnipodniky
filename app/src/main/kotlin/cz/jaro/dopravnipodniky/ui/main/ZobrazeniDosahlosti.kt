@@ -31,26 +31,13 @@ import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 
-fun zobrazitDosahlosti(dosahlosti: List<Dosahlost.NormalniDosahlost>) = AlertDialogManager.Global.showMaterial(
-    confirmButton = {
-        TextButton(
-            onClick = {
-                hide()
-            }
-        ) {
-            Text(stringResource(android.R.string.ok))
-        }
-    },
-    title = {
-        Text(stringResource(cz.jaro.dopravnipodniky.R.string.uspechy))
-    },
-    icon = {
-        Icon(Icons.Default.EmojiEvents, null)
-    },
-    content = {
-        Dosahlosti(dosahlosti)
-    },
-)
+fun zobrazitDosahlosti(dosahlosti: List<Dosahlost.NormalniDosahlost>) =
+    AlertDialogManager.Global.showMaterial(
+        confirmButton = { TextButton(::hide) { Text(stringResource(android.R.string.ok)) } },
+        title = { Text(stringResource(cz.jaro.dopravnipodniky.R.string.uspechy)) },
+        icon = { Icon(Icons.Default.EmojiEvents, null) },
+        content = { Dosahlosti(dosahlosti) },
+    )
 
 @Composable
 fun Dosahlosti(

@@ -39,12 +39,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cz.jaro.better_dialog.AlertDialogManager
 import cz.jaro.better_dialog.showMaterial
+import cz.jaro.better_dialog.showSimple
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
@@ -109,6 +111,7 @@ fun DopravniPodnikyScreen(
 ) {
     var loading by rememberSaveable { mutableStateOf(null as Float?) }
     val scope = rememberCoroutineScope()
+    val res = LocalResources.current
     Scaffold(
         topBar = {
             TopAppBar(
@@ -129,61 +132,48 @@ fun DopravniPodnikyScreen(
         floatingActionButton = {
             var investice by rememberSaveable { mutableStateOf("") }
             ExtendedFloatingActionButton(
-                text = {
-                    Text(stringResource(R.string.najit_nove_mesto))
-                },
-                icon = {
-                    Icon(Icons.Default.Search, null)
-                },
+                text = { Text(stringResource(R.string.najit_nove_mesto)) },
+                icon = { Icon(Icons.Default.Search, null) },
                 onClick = {
                     if (DEBUG_MODE) AlertDialogManager.Global.showMaterial(
                         confirmButton = {
                             val ctx = LocalContext.current
-                            TextButton(
-                                onClick = {
-                                    val detailGenerace = try {
-                                        Json.decodeFromString<DetailGenerace>(investice)
-                                    } catch (_: IllegalArgumentException) {
-                                        Toast.makeText(ctx, "Toto není dobře", Toast.LENGTH_LONG).show()
-                                        return@TextButton
+                            TextButton(onClick = {
+                                val detailGenerace = try {
+                                    Json.decodeFromString<DetailGenerace>(investice)
+                                } catch (_: IllegalArgumentException) {
+                                    Toast.makeText(ctx, "Toto není dobře", Toast.LENGTH_LONG).show()
+                                    return@TextButton
+                                }
+                                hide()
+
+                                scope.launch {
+                                    val dp = Generator(detailGenerace) {
+                                        loading = it
                                     }
-                                    hide()
 
-                                    scope.launch {
-                                        val dp = Generator(detailGenerace) {
-                                            loading = it
+                                    loading = null
+
+                                    navigateBack()
+
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        menic.zmenitOstatniDopravniPodniky {
+                                            add(dp)
                                         }
-
-                                        loading = null
-
-                                        navigateBack()
-
-                                        CoroutineScope(Dispatchers.IO).launch {
-                                            menic.zmenitOstatniDopravniPodniky {
-                                                add(dp)
-                                            }
-                                            menic.zmenitDopravniPodnik(dp.info.id)
-                                        }
+                                        menic.zmenitDopravniPodnik(dp.info.id)
                                     }
                                 }
-                            ) {
+                            }) {
                                 Text(stringResource(android.R.string.ok))
                             }
                         },
-                        dismissButton = { },
-                        title = {
-                            Text(stringResource(R.string.novy_dp))
-                        },
+                        title = { Text(stringResource(R.string.novy_dp)) },
                         content = {
                             TextField(
                                 value = investice,
-                                onValueChange = {
-                                    investice = it
-                                },
+                                onValueChange = { investice = it },
                                 Modifier.fillMaxWidth(),
-                                label = {
-                                    Text("Detail generace")
-                                }
+                                label = { Text("Detail generace") },
                             )
                         },
                     )
@@ -191,111 +181,86 @@ fun DopravniPodnikyScreen(
                         confirmButton = {
                             val ctx = LocalContext.current
                             val snackbarText = stringResource(R.string.nigdo_nebyl_ochoten)
-                            TextButton(
-                                onClick = {
-                                    val i = investice.toLongOrNull()?.penez ?: run {
-                                        Toast.makeText(ctx, R.string.zadejte_validni_pocet, Toast.LENGTH_LONG).show()
-                                        return@TextButton
-                                    }
+                            TextButton(onClick = {
+                                val i = investice.toLongOrNull()?.penez ?: run {
+                                    Toast.makeText(ctx, R.string.zadejte_validni_pocet, Toast.LENGTH_LONG).show()
+                                    return@TextButton
+                                }
 
-                                    if (i > vse.prachy) {
-                                        Toast.makeText(ctx, R.string.malo_penez, Toast.LENGTH_LONG).show()
-                                        return@TextButton
-                                    }
+                                if (i > vse.prachy) {
+                                    Toast.makeText(ctx, R.string.malo_penez, Toast.LENGTH_LONG).show()
+                                    return@TextButton
+                                }
 
-                                    if (i < minimumInvestice && i != 69_420.penez) {
+                                if (i < minimumInvestice && i != 69_420.penez) {
 
-                                        scope.launch {
-                                            loading = 4F
+                                    scope.launch {
+                                        loading = 4F
 
-                                            delay(3.seconds)
+                                        delay(3.seconds)
 
-                                            loading = null
+                                        loading = null
 
-                                            snackbarHostState.showSnackbar(
-                                                message = snackbarText,
-                                                withDismissAction = true,
-                                            )
-                                        }
-
-                                        menic.zmenitPrachy {
-                                            it - i / 10
-                                        }
-
-                                        hide()
-                                        return@TextButton
+                                        snackbarHostState.showSnackbar(
+                                            message = snackbarText,
+                                            withDismissAction = true,
+                                        )
                                     }
 
                                     menic.zmenitPrachy {
-                                        it - i
+                                        it - i / 10
                                     }
 
                                     hide()
-                                    loading = 0F
+                                    return@TextButton
+                                }
 
-                                    if (i == 69_420.penez) {
-                                        dosahni(Dosahlost.JostoMesto::class)
+                                menic.zmenitPrachy {
+                                    it - i
+                                }
 
-                                        novaMesta(
-                                            i * 100,
-                                            {
-                                                loading = it
-                                            }
-                                        ) {
-                                            loading = null
-                                            selectCity()
+                                hide()
+                                loading = 0F
+
+                                if (i == 69_420.penez) {
+                                    dosahni(Dosahlost.JostoMesto::class)
+
+                                    novaMesta(
+                                        i * 100,
+                                        {
+                                            loading = it
                                         }
+                                    ) {
+                                        loading = null
+                                        selectCity()
+                                    }
 
-                                    } else {
-                                        novaMesta(
-                                            i,
-                                            {
-                                                loading = it
-                                            }
-                                        ) {
-                                            loading = null
-                                            AlertDialogManager.Global.showMaterial(
-                                                confirmButton = {
-                                                    TextButton(
-                                                        onClick = {
-                                                            hide()
-                                                            selectCity()
-                                                        }
-                                                    ) {
-                                                        Text(stringResource(android.R.string.ok))
-                                                    }
-                                                },
-                                                onDismissed = {
-                                                    selectCity()
-                                                },
-                                                content = {
-                                                    Text(stringResource(R.string.tri_mesta_se_nasla))
-                                                },
-                                                title = {
-                                                    Text(stringResource(R.string.novy_dp))
-                                                }
-                                            )
+                                } else {
+                                    novaMesta(
+                                        i,
+                                        {
+                                            loading = it
                                         }
+                                    ) {
+                                        loading = null
+                                        AlertDialogManager.Global.showSimple(
+                                            confirmButtonText = res.getString(android.R.string.ok),
+                                            onConfirmed = { hide(); selectCity() },
+                                            onDismissed = { selectCity() },
+                                            contentText = res.getString(R.string.tri_mesta_se_nasla),
+                                            titleText = res.getString(R.string.novy_dp),
+                                        )
                                     }
                                 }
-                            ) {
-                                Text(stringResource(android.R.string.ok))
-                            }
+                            }) { Text(stringResource(android.R.string.ok)) }
                         },
-                        dismissButton = { },
-                        title = {
-                            Text(stringResource(R.string.novy_dp))
-                        },
+                        title = { Text(stringResource(R.string.novy_dp)) },
                         content = {
                             TextField(
                                 value = investice,
-                                onValueChange = {
-                                    investice = it
-                                },
+                                onValueChange = { investice = it },
                                 Modifier.fillMaxWidth(),
-                                label = {
-                                    Text(stringResource(R.string.vyse_investice))
-                                }
+                                label = { Text(stringResource(R.string.vyse_investice)) },
                             )
                         },
                     )
@@ -320,13 +285,15 @@ fun DopravniPodnikyScreen(
                         loading!! == 4F -> {
                             LinearProgressIndicator(Modifier.fillMaxWidth())
                         }
+
                         loading!! != 3F -> {
                             Text("${loading!!.toInt() + 1}: ${((loading!! % 1) * 100).formatovat(2).composeString()} %")
                             LinearProgressIndicator(
-                                progress = loading!! % 1,
+                                progress = { loading!! % 1 },
                                 Modifier.fillMaxWidth()
                             )
                         }
+
                         else -> {
                             Text("Hotovo!")
                             LinearProgressIndicator(Modifier.fillMaxWidth())
@@ -377,7 +344,10 @@ fun DopravniPodnikyScreen(
                                         }
                                     }
                                 ) {
-                                    Icon(if (Random.nextFloat() <= .01F) Icons.Default.ShoppingCartCheckout else Icons.AutoMirrored.Filled.Login, null)
+                                    Icon(
+                                        if (Random.nextFloat() <= .01F) Icons.Default.ShoppingCartCheckout else Icons.AutoMirrored.Filled.Login,
+                                        null
+                                    )
                                 }
                             },
                             leadingContent = {
