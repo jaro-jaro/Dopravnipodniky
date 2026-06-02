@@ -64,7 +64,7 @@ import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypKrizovatky
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.IntersectionType
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.krizovatkyNaLince
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.rohyMesta
@@ -544,8 +544,8 @@ fun VytvareniLinkyScreen(
                             .padding(all = 8.dp),
                         enabled = all(
                             kliklyKrizovatky.size >= 2,
-                            dp.krizovatky.find { kliklyKrizovatky.firstOrNull() == it.pozice }?.typ == TypKrizovatky.Kruhac,
-                            dp.krizovatky.find { kliklyKrizovatky.lastOrNull() == it.pozice }?.typ == TypKrizovatky.Kruhac,
+                            dp.krizovatky.find { kliklyKrizovatky.firstOrNull() == it.pozice }?.type == IntersectionType.Roundabout,
+                            dp.krizovatky.find { kliklyKrizovatky.lastOrNull() == it.pozice }?.type == IntersectionType.Roundabout,
                         ),
                     ) {
                         Text(

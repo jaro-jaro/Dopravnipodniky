@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.translate
 import cz.jaro.dopravnipodniky.shared.drawRoundRect
-import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
+import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
@@ -13,7 +13,7 @@ import cz.jaro.dopravnipodniky.ui.malovani.Offset
 import kotlin.math.sqrt
 
 fun DrawScope.namalovatVybiraniLinky(
-    kliklyKrizovatky: List<Pozice<UlicovyBlok>>,
+    kliklyKrizovatky: List<Vector<UlicovyBlok>>,
     barva: Color,
 ) {
     if (kliklyKrizovatky.isEmpty()) return

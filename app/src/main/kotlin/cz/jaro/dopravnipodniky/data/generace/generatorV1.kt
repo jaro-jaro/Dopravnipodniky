@@ -5,7 +5,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.Barak
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypBaraku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.barakuVUlici
-import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
+import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.sousedi
 import cz.jaro.dopravnipodniky.shared.jednotky.to
@@ -39,7 +39,7 @@ fun generatorV1(
 
     tailrec fun opakovac(
         hloubka: Int,
-        posledniKrizovatky: List<Pozice<UlicovyBlok>>,
+        posledniKrizovatky: List<Vector<UlicovyBlok>>,
         sance: Float,
         step: (Float) -> Unit,
     ) {

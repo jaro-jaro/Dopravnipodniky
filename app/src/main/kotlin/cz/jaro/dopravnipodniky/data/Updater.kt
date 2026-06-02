@@ -6,10 +6,10 @@ import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.IntersectionType
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.StavZastavky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Trakce
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypKrizovatky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Zastavka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.bonusoveVydajeZaNeekologicnost
@@ -19,9 +19,9 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.kapacitaZastavky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.krizovatkyNaLince
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.orientedInLine
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.pocetLinek
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.zacatekKonecNaLince
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlovac
 import cz.jaro.dopravnipodniky.shared.BusID
@@ -30,7 +30,6 @@ import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.Text
 import cz.jaro.dopravnipodniky.shared.delkaUlice
 import cz.jaro.dopravnipodniky.shared.delkaZastavky
-import cz.jaro.dopravnipodniky.shared.delkaZatoceni
 import cz.jaro.dopravnipodniky.shared.dobaPobytuNaZastavce
 import cz.jaro.dopravnipodniky.shared.hezkaCisla
 import cz.jaro.dopravnipodniky.shared.idealniInterval
@@ -39,23 +38,25 @@ import cz.jaro.dopravnipodniky.shared.jednotky.coerceAtMost
 import cz.jaro.dopravnipodniky.shared.jednotky.div
 import cz.jaro.dopravnipodniky.shared.jednotky.formatovat
 import cz.jaro.dopravnipodniky.shared.jednotky.formatovatBezEura
-import cz.jaro.dopravnipodniky.shared.jednotky.kilometruZaHodinu
+import cz.jaro.dopravnipodniky.shared.jednotky.kilometersPerHour
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.penezZaMin
-import cz.jaro.dopravnipodniky.shared.jednotky.sumOfPenizZaminutu
+import cz.jaro.dopravnipodniky.shared.jednotky.sumOfPenizZaMinutu
 import cz.jaro.dopravnipodniky.shared.jednotky.tiku
 import cz.jaro.dopravnipodniky.shared.jednotky.times
 import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toDuration
+import cz.jaro.dopravnipodniky.shared.lengthOfTurn
 import cz.jaro.dopravnipodniky.shared.nahodnostProjetiZastavky
 import cz.jaro.dopravnipodniky.shared.nasobitelZisku
 import cz.jaro.dopravnipodniky.shared.odsazeniZastavky
 import cz.jaro.dopravnipodniky.shared.predsazeniKrizovatky
+import cz.jaro.dopravnipodniky.shared.reversedIfNegative
 import cz.jaro.dopravnipodniky.shared.sumOfDp
 import cz.jaro.dopravnipodniky.shared.sumOfIndexed
 import cz.jaro.dopravnipodniky.shared.times
 import cz.jaro.dopravnipodniky.shared.toText
-import cz.jaro.dopravnipodniky.shared.typZatoceni
+import cz.jaro.dopravnipodniky.shared.turnType
 import cz.jaro.dopravnipodniky.shared.udrzbaTroleje
 import cz.jaro.dopravnipodniky.shared.udrzbaZastavky
 import cz.jaro.dopravnipodniky.shared.vecne
@@ -124,30 +125,30 @@ private fun update(
                 val ulice = ulicove[indexUliceNaLince]
 
                 if (
-                    poziceNaLince == linka.ulice.lastIndex && ulice.zacatekKonecNaLince(ulicove.otocit(smerNaLince)).second.let { pozice ->
+                    poziceNaLince == linka.ulice.lastIndex && ulice.orientedInLine(ulicove.reversedIfNegative(smerNaLince)).second.let { pozice ->
                         puvodniDp.krizovatky.find { it.pozice == pozice }
-                    }?.typ != TypKrizovatky.Kruhac
+                    }?.type != IntersectionType.Roundabout
                 ) return@upravitBusy
 
                 if (bus.stavZastavky !is StavZastavky.Na) {
                     // posouvani busu po mape
 
-                    poziceVUlici += bus.typBusu.maxRychlost.coerceAtMost(50.kilometruZaHodinu) * ubehlo
+                    poziceVUlici += bus.typBusu.maxRychlost.coerceAtMost(50.kilometersPerHour) * ubehlo
 
                     val pristiUlice = when (smerNaLince) {
                         Smer.Pozitivni -> ulicove.getOrNull(indexUliceNaLince + 1)
                         Smer.Negativni -> ulicove.getOrNull(indexUliceNaLince - 1)
                     }
 
-                    val orientovanaUlice = ulice.zacatekKonecNaLince(ulicove)
+                    val orientovanaUlice = ulice.orientedInLine(ulicove)
 
                     val krizovatka = when (smerNaLince) {
                         Smer.Pozitivni -> puvodniDp.krizovatky.find { it.pozice == orientovanaUlice.second }
                         Smer.Negativni -> puvodniDp.krizovatky.find { it.pozice == orientovanaUlice.first }
                     }
 
-                    val zatoceni = typZatoceni(krizovatka, ulice, pristiUlice)
-                    val delkaKrizovatky = zatoceni.delkaZatoceni(bus.typBusu.sirka.toDp())
+                    val zatoceni = turnType(krizovatka, ulice, pristiUlice)
+                    val delkaKrizovatky = zatoceni.lengthOfTurn(bus.typBusu.sirka)
 
                     if (poziceVUlici >= (delkaUlice - predsazeniKrizovatky) + delkaKrizovatky) {  // odjel mimo ulici
                         poziceVUlici = predsazeniKrizovatky
@@ -239,7 +240,7 @@ private fun update(
 
                     if (
                         stavZastavky == StavZastavky.Pred &&
-                        poziceVUlici >= (delkaUlice + delkaZastavky) / 2 - bus.typBusu.delka.toDp() - odsazeniZastavky
+                        poziceVUlici >= (delkaUlice + delkaZastavky) / 2 - bus.typBusu.delka - odsazeniZastavky
                     ) {
                         stavZastavky = StavZastavky.Na(
                             if (Random.nextInt(0, nahodnostProjetiZastavky) == 0) {
@@ -459,11 +460,6 @@ private fun update(
     }
 }
 
-private fun List<Ulice>.otocit(smer: Smer) = when (smer) {
-    Smer.Pozitivni -> this
-    Smer.Negativni -> this.asReversed()
-}
-
 @SuppressLint("BuildListAdds")
 private fun detailZisku(
     puvodniDp: DopravniPodnik,
@@ -475,10 +471,9 @@ private fun detailZisku(
 
     return buildList {
         this += listOf(
-            R.string.celkove_prijmy.toText(puvodniDp.busy.sumOfPenizZaminutu { vydelky[it.id]!! }
-                .formatovat()),
+            R.string.celkove_prijmy.toText(puvodniDp.busy.sumOfPenizZaMinutu { vydelky[it.id]!! }.formatovat()),
             "\n".toText(),
-            R.string.celkove_vydaje.toText((puvodniDp.busy.sumOfPenizZaminutu { it.naklady } + vydajeZaInfrastrukturu).formatovat()),
+            R.string.celkove_vydaje.toText((puvodniDp.busy.sumOfPenizZaMinutu { it.naklady } + vydajeZaInfrastrukturu).formatovat()),
             "\n".toText(),
             R.string.celkovy_zisk.toText(puvodniDp.info.zisk.formatovat()),
             "\n".toText(),
@@ -492,7 +487,7 @@ private fun detailZisku(
             "\n".toText(),
             R.string.vydaje_za_ekologii.toText(),
             "\n".toText(),
-            R.string.vydaje_za_neekologicke_vozy.toText(puvodniDp.busy.sumOfPenizZaminutu { it.typBusu.trakce.bonusoveVydajeZaNeekologicnost() }
+            R.string.vydaje_za_neekologicke_vozy.toText(puvodniDp.busy.sumOfPenizZaMinutu { it.typBusu.trakce.bonusoveVydajeZaNeekologicnost() }
                 .formatovat()),
             "\n".toText(),
             "\n".toText(),
@@ -504,7 +499,7 @@ private fun detailZisku(
             listOf(
                 R.string.linka_vydelava_tohle.toText(
                     linka.cislo.toText(),
-                    linka.busy(puvodniDp).sumOfPenizZaminutu { vydelky[it.id]!! - it.naklady }
+                    linka.busy(puvodniDp).sumOfPenizZaMinutu { vydelky[it.id]!! - it.naklady }
                         .formatovat()
                 ),
                 "\n".toText(),
@@ -650,7 +645,7 @@ fun Bus.vydelkuj(
     if (ulicove.krizovatkyNaLince().let {
             listOf(it.first(), it.last())
         }.any { pozice ->
-            puvodniDp.krizovatky.find { it.pozice == pozice }?.typ != TypKrizovatky.Kruhac
+            puvodniDp.krizovatky.find { it.pozice == pozice }?.type != IntersectionType.Roundabout
         }) return 0.penezZaMin
 
     var cloveci = 0
@@ -747,7 +742,7 @@ fun Bus.vydelkuj(
 
     val dobaUlic =
         (delkaUlice - predsazeniKrizovatky * 2) * linka.ulice.size * 2 / typBusu.maxRychlost.coerceAtMost(
-            50.kilometruZaHodinu
+            50.kilometersPerHour
         )
 
     val dobaKrizovatek = ulicove.windowed(
@@ -756,18 +751,18 @@ fun Bus.vydelkuj(
         val ulice = dvojice.first()
         val pristiUlice = dvojice.getOrNull(1)
 
-        val orientovanaUlice = ulice.zacatekKonecNaLince(ulicove)
+        val orientovanaUlice = ulice.orientedInLine(ulicove)
 
         val krizovatka = when (smerNaLince) {
             Smer.Pozitivni -> puvodniDp.krizovatky.find { it.pozice == orientovanaUlice.second }
             Smer.Negativni -> puvodniDp.krizovatky.find { it.pozice == orientovanaUlice.first }
         }
 
-        val zatoceni = typZatoceni(krizovatka, ulice, pristiUlice)
-        val delkaKrizovatky = zatoceni.delkaZatoceni(typBusu.sirka.toDp())
+        val zatoceni = turnType(krizovatka, ulice, pristiUlice)
+        val delkaKrizovatky = zatoceni.lengthOfTurn(typBusu.sirka)
 
         delkaKrizovatky
-    } * 2 / typBusu.maxRychlost.coerceAtMost(50.kilometruZaHodinu)
+    } * 2 / typBusu.maxRychlost.coerceAtMost(50.kilometersPerHour)
 
     val dobaKola = dobaUlic + dobaKrizovatek
 

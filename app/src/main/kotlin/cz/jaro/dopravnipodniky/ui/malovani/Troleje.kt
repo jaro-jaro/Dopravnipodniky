@@ -8,15 +8,14 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Krizovatka
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypKrizovatky
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.IntersectionType
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.Quintuple
 import cz.jaro.dopravnipodniky.shared.barvaTroleje
 import cz.jaro.dopravnipodniky.shared.drawArc
 import cz.jaro.dopravnipodniky.shared.existuje
-import cz.jaro.dopravnipodniky.shared.helpers.toPx
-import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
+import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
 import cz.jaro.dopravnipodniky.shared.maTrolej
@@ -28,7 +27,6 @@ import cz.jaro.dopravnipodniky.shared.predsazeniTrolejiS
 import cz.jaro.dopravnipodniky.shared.sirkaTroleje
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.shared.stavTroleje
-import java.util.Collections.rotate
 import kotlin.math.sqrt
 
 private const val DEBUG_BARVY = false
@@ -75,7 +73,7 @@ fun Ulice.nakreslitTroleje() = with(drawScope) {
 context(drawScope: DrawScope)
 fun nakreslitTrolejeNaKrizovatku(
     ulice: List<Ulice>,
-    pozice: Pozice<UlicovyBlok>,
+    pozice: Vector<UlicovyBlok>,
     krizovatka: Krizovatka?,
 ) = with(drawScope) {
 
@@ -119,7 +117,7 @@ fun nakreslitTrolejeNaKrizovatku(
         )
 
         // Kreslení rovných trolejí
-        if (krizovatka == null || krizovatka.typ != TypKrizovatky.Kruhac) sousediUhly
+        if (krizovatka == null || krizovatka.type != IntersectionType.Roundabout) sousediUhly
             .filter { (soused1, _, soused3, _, _) ->
                 soused1.maTrolej && soused3.maTrolej
             }
@@ -140,7 +138,7 @@ fun nakreslitTrolejeNaKrizovatku(
             }
 
         // Kreslení oblouků
-        if (krizovatka == null || krizovatka.typ != TypKrizovatky.Kruhac) sousediUhly
+        if (krizovatka == null || krizovatka.type != IntersectionType.Roundabout) sousediUhly
             .filter { (soused1, _, _, soused4, _) ->
                 soused1.maTrolej && soused4.maTrolej
             }
@@ -168,7 +166,7 @@ fun nakreslitTrolejeNaKrizovatku(
             }
 
         // Kreslení otočky
-        if (krizovatka == null || krizovatka.typ != TypKrizovatky.Kruhac) sousediUhly
+        if (krizovatka == null || krizovatka.type != IntersectionType.Roundabout) sousediUhly
             .singleOrNull { (soused1, _, _, _, _) ->
                 soused1.maTrolej
             }
@@ -204,7 +202,7 @@ fun nakreslitTrolejeNaKrizovatku(
             }
 
         // Kreslení trolejí na kruháči
-        if (krizovatka != null && krizovatka.typ == TypKrizovatky.Kruhac && sousediUhly.any { it.first.maTrolej }) {
+        if (krizovatka != null && krizovatka.type == IntersectionType.Roundabout && sousediUhly.any { it.first.maTrolej }) {
             val rVnejsi =
                 .5 * sqrt(2.0) * sirkaUlice + predsazeniS * sqrt(2.0) - predsazeniS
 
@@ -223,7 +221,7 @@ fun nakreslitTrolejeNaKrizovatku(
         }
 
         // Kreslení napojení na kruháč
-        if (krizovatka != null && krizovatka.typ == TypKrizovatky.Kruhac) sousediUhly
+        if (krizovatka != null && krizovatka.type == IntersectionType.Roundabout) sousediUhly
             .filter { (soused1, _, _, _, _) ->
                 soused1.maTrolej
             }
@@ -249,7 +247,7 @@ fun nakreslitTrolejeNaKrizovatku(
             }
 
         // Kreslení napojení na kruháč
-        if (krizovatka != null && krizovatka.typ == TypKrizovatky.Kruhac) sousediUhly
+        if (krizovatka != null && krizovatka.type == IntersectionType.Roundabout) sousediUhly
             .filter { (_, _, _, soused4, _) ->
                 soused4.maTrolej
             }

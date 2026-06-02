@@ -12,6 +12,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.kapacita
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.barvaTematu
 import cz.jaro.dopravnipodniky.shared.map
+import cz.jaro.dopravnipodniky.shared.mezeraMeziBaraky
 import cz.jaro.dopravnipodniky.shared.odsazeniBaraku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.shared.translate
@@ -37,6 +38,7 @@ fun Barak.draw(
     val konecUliceY = ulice.konecY.toPx()
 
     val odsazeni = odsazeniBaraku.toPx()
+    val mezera = mezeraMeziBaraky.toPx()
 
     val barvicka = kapacita.map(typ.kapacita, typ.barva.barvaTematu(tema))
 //    val barvicka = Color(tema.barva.toArgb2())
@@ -80,7 +82,7 @@ fun Barak.draw(
             Orientace.Vodorovne to true -> drawRoundRect( // dole
                 color = barvicka,
                 topLeft = Offset(
-                    x = zacatekUliceX + odsazeni + (i + 1) * (velikost + odsazeni),
+                    x = zacatekUliceX + odsazeni + (i + 1) * (velikost + mezera),
                     y = konecUliceY + odsazeni,
                 ),
                 size = Size(
@@ -93,7 +95,7 @@ fun Barak.draw(
             Orientace.Vodorovne to false -> drawRoundRect( // nahore
                 color = barvicka,
                 topLeft = Offset(
-                    x = zacatekUliceX + odsazeni + i * (velikost + odsazeni),
+                    x = zacatekUliceX + odsazeni + i * (velikost + mezera),
                     y = zacatekUliceY - odsazeni - velikost,
                 ),
                 size = Size(
@@ -107,7 +109,7 @@ fun Barak.draw(
                 color = barvicka,
                 topLeft = Offset(
                     x = zacatekUliceX - odsazeni - velikost,
-                    y = zacatekUliceY + odsazeni + (i + 1) * (velikost + odsazeni),
+                    y = zacatekUliceY + odsazeni + (i + 1) * (velikost + mezera),
                 ),
                 size = Size(
                     width = velikost,
@@ -120,7 +122,7 @@ fun Barak.draw(
                 color = barvicka,
                 topLeft = Offset(
                     x = konecUliceX + odsazeni,
-                    y = zacatekUliceY + odsazeni + i * (velikost + odsazeni),
+                    y = zacatekUliceY + odsazeni + i * (velikost + mezera),
                 ),
                 size = Size(
                     width = velikost,

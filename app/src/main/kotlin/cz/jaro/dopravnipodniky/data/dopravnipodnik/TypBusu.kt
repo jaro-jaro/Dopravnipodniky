@@ -1,14 +1,16 @@
 package cz.jaro.dopravnipodniky.data.dopravnipodnik
 
+import androidx.compose.ui.unit.Dp
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.serializers.TypBusuSerializer
-import cz.jaro.dopravnipodniky.shared.jednotky.DpZaHodinu
 import cz.jaro.dopravnipodniky.shared.jednotky.Metr
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.PenizZaMinutu
+import cz.jaro.dopravnipodniky.shared.jednotky.Velocity
 import cz.jaro.dopravnipodniky.shared.zaokrouhlit
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.collections.isNotEmpty
 import kotlin.time.Duration
 
 @Serializable(with = TypBusuSerializer::class)
@@ -18,12 +20,12 @@ data class TypBusu(
     val trakce: Trakce,
     val vyrobce: Vyrobce,
     val kapacita: Int,
-    val maxRychlost: DpZaHodinu,
+    val maxRychlost: Velocity,
     val maxNaklady: PenizZaMinutu,
     val cena: Peniz,
-    val delka: Metr,
-    val clanky: List<Metr> = listOf(delka),
-    val sirka: Metr,
+    val delka: Dp,
+    val clanky: List<Dp> = listOf(delka),
+    val sirka: Dp,
     val vydrz: Duration,
     val popis: String,
 ) {

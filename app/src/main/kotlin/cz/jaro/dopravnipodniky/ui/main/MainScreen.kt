@@ -70,7 +70,7 @@ import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Krizovatka
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypKrizovatky
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.IntersectionType
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Zastavka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.krizovatkyNaLince
@@ -90,7 +90,7 @@ import cz.jaro.dopravnipodniky.shared.cenaTroleje
 import cz.jaro.dopravnipodniky.shared.cenaZastavky
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.je
-import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
+import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.jednotky.minus
@@ -610,7 +610,7 @@ private fun kliklNaKrizovatku(
     krizovatka: Krizovatka?,
     menic: Menic,
     dp: DopravniPodnik,
-    pozice: Pozice<UlicovyBlok>
+    pozice: Vector<UlicovyBlok>
 ) {
     AlertDialogManager.Global.showMaterial(
         confirmButton = {},
@@ -626,16 +626,16 @@ private fun kliklNaKrizovatku(
                                 add(
                                     Krizovatka(
                                         pozice = pozice,
-                                        typ = TypKrizovatky.Kruhac
+                                        type = IntersectionType.Roundabout
                                     )
                                 )
-                            else if (krizovatka.typ != TypKrizovatky.Kruhac)
-                                replaceBy(krizovatka.copy(typ = TypKrizovatky.Kruhac)) { it.id }
+                            else if (krizovatka.type != IntersectionType.Roundabout)
+                                replaceBy(krizovatka.copy(type = IntersectionType.Roundabout)) { it.id }
                             else
                                 remove(krizovatka)
                         }
                         menic.zmenitPrachy {
-                            it - if (krizovatka == null || krizovatka.typ != TypKrizovatky.Kruhac) cenaZastavky else cenaZastavky / 5
+                            it - if (krizovatka == null || krizovatka.type != IntersectionType.Roundabout) cenaZastavky else cenaZastavky / 5
                         }
                         hide()
                     }
@@ -645,7 +645,7 @@ private fun kliklNaKrizovatku(
                             it.first() == pozice || it.last() == pozice
                         }
                     }
-                    if (krizovatka != null && krizovatka.typ == TypKrizovatky.Kruhac && spatneLinky.isNotEmpty()) AlertDialogManager.Global.showMaterial(
+                    if (krizovatka != null && krizovatka.type == IntersectionType.Roundabout && spatneLinky.isNotEmpty()) AlertDialogManager.Global.showMaterial(
                         confirmButton = {
                             TextButton(
                                 onClick = {
@@ -688,7 +688,7 @@ private fun kliklNaKrizovatku(
                     .fillMaxWidth(),
             ) {
                 Text(
-                    text = if (krizovatka == null || krizovatka.typ != TypKrizovatky.Kruhac)
+                    text = if (krizovatka == null || krizovatka.type != IntersectionType.Roundabout)
                         stringResource(
                             R.string.vytvorit_kruhac,
                             cenaKruhace.asString()

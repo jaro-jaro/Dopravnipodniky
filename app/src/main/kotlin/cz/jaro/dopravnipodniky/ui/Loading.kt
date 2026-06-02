@@ -25,10 +25,8 @@ import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.shared.TPS
 import cz.jaro.dopravnipodniky.shared.barvaChodniku
 import cz.jaro.dopravnipodniky.shared.barvaUlice
-import cz.jaro.dopravnipodniky.shared.jednotky.kilometruZaHodinu
-import cz.jaro.dopravnipodniky.shared.jednotky.metru
+import cz.jaro.dopravnipodniky.shared.jednotky.kilometersPerHour
 import cz.jaro.dopravnipodniky.shared.jednotky.tiku
-import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toDuration
 import cz.jaro.dopravnipodniky.shared.millisPerTik
 import cz.jaro.dopravnipodniky.shared.odsazeniBusu
@@ -64,10 +62,10 @@ fun Loading() = DpTheme(
             Text("Hra se načítá...", Modifier.padding(all = 8.dp))
 
             var sirka by remember { mutableStateOf(Float.MAX_VALUE.dp) }
-            val delkaBusu = remember { 12.metru }
-            val sirkaBusu = remember { 2.5.metru }
-            var poloha by remember { mutableStateOf(-delkaBusu.toDp()) }
-            var poloha2 by remember { mutableStateOf(-delkaBusu.toDp()) }
+            val delkaBusu = remember { 12.dp }
+            val sirkaBusu = remember { 2.5.dp }
+            var poloha by remember { mutableStateOf(-delkaBusu) }
+            var poloha2 by remember { mutableStateOf(-delkaBusu) }
             val rychlostBusu = remember { 200 }
             val rychlostBusu2 = remember { 200 }
             var r1 = remember { 200 }
@@ -91,13 +89,13 @@ fun Loading() = DpTheme(
                                 r1 = Random.nextInt(rychlostBusu - 80, rychlostBusu + 80)
                                 r2 = Random.nextInt(rychlostBusu2 - 80, rychlostBusu2 + 80)
                             }
-                            poloha += r2.kilometruZaHodinu * 1.tiku.toDuration()
+                            poloha += r2.kilometersPerHour * 1.tiku.toDuration()
                             if (poloha > sirka) {
-                                poloha = -delkaBusu.toDp()
+                                poloha = -delkaBusu
                             }
-                            poloha2 += r1.kilometruZaHodinu * 1.tiku.toDuration()
+                            poloha2 += r1.kilometersPerHour * 1.tiku.toDuration()
                             if (poloha2 > sirka) {
-                                poloha2 = -delkaBusu.toDp()
+                                poloha2 = -delkaBusu
                             }
                         }
                 }
@@ -109,13 +107,13 @@ fun Loading() = DpTheme(
                     .height(sirkaUlice)
 //                    .onPlaced {
 //                        with(density) {
-//                            sirka = it.size.width.toDp()
+//                            sirka = it.size.width
 //                        }
 //                    }
             ) {
                 if (sirka == Float.MAX_VALUE.dp) {
                     sirka = size.width.toDp() / 2
-                    poloha2 = sirka / 2 - delkaBusu.toDp()
+                    poloha2 = sirka / 2 - delkaBusu
                 }
                 scale(
                     2F
@@ -142,11 +140,11 @@ fun Loading() = DpTheme(
                         color = Barvicka.Zluta.barva,
                         topLeft = Offset(
                             x = poloha.toPx() + sirka.toPx() / 2,
-                            y = sirkaUlice.toPx() - odsazeniBusu.toPx() - sirkaBusu.toDp().toPx()
+                            y = sirkaUlice.toPx() - odsazeniBusu.toPx() - sirkaBusu.toPx()
                         ),
                         size = Size(
-                            width = delkaBusu.toDp().toPx(),
-                            height = sirkaBusu.toDp().toPx(),
+                            width = delkaBusu.toPx(),
+                            height = sirkaBusu.toPx(),
                         ),
                         cornerRadius = CornerRadius(3F.dp.toPx())
                     )
@@ -154,11 +152,11 @@ fun Loading() = DpTheme(
                         color = Barvicka.Cervena.barva,
                         topLeft = Offset(
                             x = poloha2.toPx() + sirka.toPx() / 2,
-                            y = sirkaUlice.toPx() - odsazeniBusu.toPx() - sirkaBusu.toDp().toPx()
+                            y = sirkaUlice.toPx() - odsazeniBusu.toPx() - sirkaBusu.toPx()
                         ),
                         size = Size(
-                            width = delkaBusu.toDp().toPx(),
-                            height = sirkaBusu.toDp().toPx(),
+                            width = delkaBusu.toPx(),
+                            height = sirkaBusu.toPx(),
                         ),
                         cornerRadius = CornerRadius(3F.dp.toPx())
                     )

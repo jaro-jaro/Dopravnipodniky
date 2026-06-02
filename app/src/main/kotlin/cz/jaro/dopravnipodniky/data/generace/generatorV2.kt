@@ -4,10 +4,10 @@ import android.util.Log
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Barak
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Krizovatka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypBaraku
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypKrizovatky
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.IntersectionType
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.barakuVUlici
-import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
+import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.sousedi
 import cz.jaro.dopravnipodniky.shared.jednotky.to
@@ -44,7 +44,7 @@ fun generatorV2(
 
     tailrec fun opakovac(
         hloubka: Int,
-        posledniKrizovatky: List<Pozice<UlicovyBlok>>,
+        posledniKrizovatky: List<Vector<UlicovyBlok>>,
         sance: Float,
         step: (Float) -> Unit,
     ) {
@@ -162,7 +162,7 @@ fun generatorV2(
             }
 
             if (kruhaceRandom.nextFloat() < nahodnostVytvoreniKruhaceNaSouseda * sousedi.size) {
-                kruhace += Krizovatka(krizovatka, typ = TypKrizovatky.Kruhac)
+                kruhace += Krizovatka(krizovatka, type = IntersectionType.Roundabout)
             }
         }
     }

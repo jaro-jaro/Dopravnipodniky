@@ -25,11 +25,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.unit.toOffset
 import cz.jaro.dopravnipodniky.R
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.IntersectionType
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Krizovatka
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypKrizovatky
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.helpers.toPx
-import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
+import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toPx
 import cz.jaro.dopravnipodniky.ui.main.DEBUG_MODE
@@ -113,7 +113,7 @@ val Duration.seconds get() = milliseconds / 1_000.0
 val Duration.minutes get() = seconds / 60.0
 val Duration.hours get() = minutes / 60.0
 
-fun DpRect.contains(pozice: Pozice<Dp>): Boolean {
+fun DpRect.contains(pozice: Vector<Dp>): Boolean {
     return pozice.x >= left && pozice.x < right && pozice.y >= top && pozice.y < bottom
 }
 
@@ -344,7 +344,7 @@ fun Offset.toDpSPosunutimAPriblizenim(
 )
 
 context(_: Density)
-fun Pozice<Dp>.toOffsetSPriblizenim(
+fun Vector<Dp>.toOffsetSPriblizenim(
     priblizeni: Float,
     center: Offset,
 ) = this
@@ -357,7 +357,7 @@ fun Pozice<Dp>.toOffsetSPriblizenim(
     )
 
 context(scope: PointerInputScope)
-fun Pozice<Dp>.toOffsetSPriblizenim(
+fun Vector<Dp>.toOffsetSPriblizenim(
     priblizeni: Float,
 ) = toOffsetSPriblizenim(
     priblizeni = priblizeni,
@@ -465,6 +465,11 @@ inline fun <T> Iterable<T>.sumOfDp(selector: (T) -> Dp): Dp {
     return sum
 }
 
+inline fun <T> Iterable<T>.indexOfFirstOrElse(defaultValue: () -> Int, predicate: (T) -> Boolean): Int {
+    val i = indexOfFirst(predicate)
+    return if (i >= 0) i else defaultValue()
+}
+
 fun Color.toArgb2() = 0xFF000000 + ((red * 255) * 0x10000 + (green * 255) * 0x100 + (blue * 255)).toInt()
 
 fun IntRange.barvaTematu(tema: Theme): Pair<Color, Color> {
@@ -532,73 +537,72 @@ fun Double.map(
     return newLocalValue + to.start
 }
 
-fun TypZatoceni.delkaZatoceni(sirkaBusu: Dp) = delkyCastiZatoceni(sirkaBusu).sumOfDp { it }
+fun TurnType.lengthOfTurn(busWidth: Dp) = lengthsOfTurnParts(busWidth).sumOfDp { it }
 
-fun TypZatoceni.delkyCastiZatoceni(sirkaBusu: Dp) = when (this) {
-    TypZatoceni.Rovne -> listOf(predsazeniKrizovatky + sirkaUlice + predsazeniKrizovatky)
-    TypZatoceni.Vpravo -> {
-        val r = predsazeniKrizovatky + odsazeniBusu + sirkaBusu / 2
-        val theta = Math.PI / 2
-        listOf(theta * r)
+fun TurnType.lengthsOfTurnParts(busWidth: Dp) = when (this) {
+    TurnType.Straight -> listOf(predsazeniKrizovatky + sirkaUlice + predsazeniKrizovatky)
+    TurnType.Right -> listOf(
+        arcLength(
+            theta = Math.PI / 2,
+            r = predsazeniKrizovatky + odsazeniBusu + busWidth / 2
+        )
+    )
+
+    TurnType.Left -> listOf(
+        arcLength(
+            theta = Math.PI / 2,
+            r = predsazeniKrizovatky + sirkaUlice - (odsazeniBusu + busWidth / 2),
+        )
+    )
+
+    is TurnType.Roundabout -> {
+        val roundaboutQuarterLength = roundaboutQuarterLength(busWidth)
+        val roundaboutEntryLength = roundaboutEntryLength(busWidth)
+        listOf(roundaboutEntryLength, roundaboutQuarterLength * quadrants, roundaboutEntryLength)
     }
 
-    TypZatoceni.Vlevo -> {
-        val r =
-            predsazeniKrizovatky + sirkaUlice - (odsazeniBusu + sirkaBusu / 2)
-        val theta = Math.PI / 2
-        listOf(theta * r)
-    }
-
-    is TypZatoceni.Kruhac -> {
-        val delkaCtvrtnyKruhace = delkaCtvrtnyKruhace(sirkaBusu)
-        val delkaNajezduNaKruhac = delkaNajezduNaKruhac(sirkaBusu)
-        listOf(delkaNajezduNaKruhac, delkaCtvrtnyKruhace * ctvrtin, delkaNajezduNaKruhac)
-    }
-
-    TypZatoceni.Spatne -> listOf(0.dp)
+    TurnType.Return180 -> listOf(0.dp)
 }
 
-fun delkaNajezduNaKruhac(sirkaBusu: Dp) = run {
-    val r = predsazeniKrizovatky + odsazeniBusu + sirkaBusu / 2
-    val theta = Math.PI / 4
-    theta * r
-}
+fun roundaboutEntryLength(busWidth: Dp) = arcLength(
+    theta = Math.PI / 4,
+    r = predsazeniKrizovatky + odsazeniBusu + busWidth / 2,
+)
 
-fun delkaCtvrtnyKruhace(sirkaBusu: Dp) = run {
-    val r = .5 * sqrt(2.0) * sirkaUlice + predsazeniKrizovatky * sqrt(2.0) - predsazeniKrizovatky - odsazeniBusu - sirkaBusu / 2
-    val theta = Math.PI / 2
-    theta * r
-}
+fun roundaboutQuarterLength(busWidth: Dp) = arcLength(
+    theta = Math.PI / 2,
+    r = sirkaUlice * (sqrt(2.0) / 2) + predsazeniKrizovatky * (sqrt(2.0) - 1) - (odsazeniBusu + busWidth / 2),
+)
 
-fun typZatoceni(
-    krizovatka: Krizovatka?,
-    ulice: Ulice,
-    pristiUlice: Ulice?,
+fun arcLength(
+    /** In radians */
+    theta: Double,
+    r: Dp,
+) = theta * r
+
+fun turnType(
+    intersection: Krizovatka?,
+    streetBefore: Ulice,
+    streetAfter: Ulice?,
 ) = when {
-    pristiUlice == null && krizovatka?.typ == TypKrizovatky.Kruhac -> TypZatoceni.KruhacOtocka
-    pristiUlice == null -> TypZatoceni.Spatne
-    pristiUlice.orientace == ulice.orientace && krizovatka?.typ == TypKrizovatky.Kruhac -> TypZatoceni.KruhacRovne
-    pristiUlice.orientace == ulice.orientace -> TypZatoceni.Rovne
+    streetAfter?.orientace == null -> TurnType.Return180
+    streetAfter.orientace == streetBefore.orientace -> TurnType.Straight
     else -> {
-        val vpravoSvisle = when {
-            ulice.zacatek == pristiUlice.konec -> false
-            ulice.zacatek == pristiUlice.zacatek -> true
-            ulice.konec == pristiUlice.konec -> true
-            ulice.konec == pristiUlice.zacatek -> false
+        val isRightIfStartsVertical = when {
+            //                                                    V→H  H→V   V→H H→V
+            streetBefore.zacatek == streetAfter.zacatek -> true // ⮣ || ⮦ <=> R   L
+            streetBefore.konec == streetAfter.konec -> true //     ⮠ || ⮥ <=> R   L
+            streetBefore.zacatek == streetAfter.konec -> false //  ⮢ || ⮤ <=> L   R
+            streetBefore.konec == streetAfter.zacatek -> false //  ⮡ || ⮧ <=> L   R
             else -> throw IllegalStateException("WTF")
         }
 
-        val vpravo =
-            if (ulice.orientace == Orientace.Svisle) vpravoSvisle else !vpravoSvisle
+        val isRight =
+            if (streetBefore.orientace == Orientace.Svisle) isRightIfStartsVertical else !isRightIfStartsVertical
 
-        when {
-            vpravo && krizovatka?.typ == TypKrizovatky.Kruhac -> TypZatoceni.KruhacVpravo
-            vpravo -> TypZatoceni.Vpravo
-            krizovatka?.typ == TypKrizovatky.Kruhac -> TypZatoceni.KruhacVlevo
-            else -> TypZatoceni.Vlevo
-        }
+        if (isRight) TurnType.Right else TurnType.Left
     }
-}
+}.onRoundaboutIf(intersection?.type == IntersectionType.Roundabout)
 
 operator fun Dp.times(other: Double) = times(other.toFloat())
 
@@ -630,3 +634,9 @@ fun DrawScope.drawText(
         )
     }
 }
+
+fun <T> List<T>.reversedIfNegative(direction: Smer) =
+    reversedIf(direction == Smer.Negativni)
+
+fun <T> List<T>.reversedIf(reverse: Boolean): List<T> =
+    if (reverse) reversed() else toList()

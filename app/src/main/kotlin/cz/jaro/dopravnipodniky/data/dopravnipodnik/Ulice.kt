@@ -3,8 +3,9 @@ package cz.jaro.dopravnipodniky.data.dopravnipodnik
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.Orientace.Svisle
 import cz.jaro.dopravnipodniky.shared.Orientace.Vodorovne
+import cz.jaro.dopravnipodniky.shared.Smer
 import cz.jaro.dopravnipodniky.shared.UliceID
-import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
+import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
@@ -20,8 +21,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("Ulice")
 data class Ulice(
-    val zacatek: Pozice<UlicovyBlok>,
-    val konec: Pozice<UlicovyBlok>,
+    val zacatek: Vector<UlicovyBlok>,
+    val konec: Vector<UlicovyBlok>,
     val baraky: List<Barak> = listOf(),
     val potencial: Int = 1,
     val zastavka: Zastavka? = null,
@@ -30,7 +31,8 @@ data class Ulice(
     val cloveci: Int = 0,
 ) {
 
-    override fun toString() = "Ulice(zacatek=$zacatek,konec=$konec,baraky=List(${baraky.size}),zastavka=$zastavka,maTrolej=$maTrolej)"
+    override fun toString() =
+        "Ulice(zacatek=$zacatek,konec=$konec,baraky=List(${baraky.size}),zastavka=$zastavka,maTrolej=$maTrolej)"
 
     val kapacita get() = baraky.sumOf { it.kapacita }
 
@@ -53,7 +55,7 @@ data class Ulice(
             throw IllegalArgumentException("Vadná ulice")
         }
 
-        when(orientace) {
+        when (orientace) {
             Svisle -> {
                 zacatekX = zacatek.x.toDpSKrizovatkama()
                 zacatekY = zacatek.y.toDpSKrizovatkama() + sirkaUlice
@@ -63,6 +65,7 @@ data class Ulice(
                 sirka = konecX - zacatekX
                 delka = konecY - zacatekY
             }
+
             Vodorovne -> {
                 zacatekX = zacatek.x.toDpSKrizovatkama() + sirkaUlice
                 zacatekY = zacatek.y.toDpSKrizovatkama()
@@ -76,21 +79,30 @@ data class Ulice(
     }
 }
 
-fun Ulice.zacatekKonecNaLince(linka: List<Ulice>): Pair<Pozice<UlicovyBlok>, Pozice<UlicovyBlok>> {
-    val i = linka.indexOfFirst { it.id == id }
-    val dalsiUlice = linka.getOrNull(i + 1)
-    val minulaUlice = linka.getOrNull(i - 1)
+fun Ulice.orientedInLine(line: List<Ulice>) =
+    orientedInLine(directionInLine(line))
+
+fun Ulice.orientedInLine(streetDirectionInLine: Smer) =
+    when (streetDirectionInLine) {
+        Smer.Pozitivni -> zacatek to konec
+        Smer.Negativni -> konec to zacatek
+    }
+
+fun Ulice.directionInLine(line: List<Ulice>): Smer {
+    val i = line.indexOfFirst { it.id == id }
+    val nextStreet = line.getOrNull(i + 1)
+    val previousStreet = line.getOrNull(i - 1)
     return when {
-        dalsiUlice != null && zacatek in dalsiUlice -> konec to zacatek
-        dalsiUlice != null && konec in dalsiUlice -> zacatek to konec
-        minulaUlice != null && konec in minulaUlice -> konec to zacatek
-        minulaUlice != null && zacatek in minulaUlice -> zacatek to konec
-        else -> zacatek to konec
+        nextStreet != null && zacatek in nextStreet -> Smer.Negativni
+        nextStreet != null && konec in nextStreet -> Smer.Pozitivni
+        previousStreet != null && konec in previousStreet -> Smer.Negativni
+        previousStreet != null && zacatek in previousStreet -> Smer.Pozitivni
+        else -> Smer.Pozitivni // Linka má 1 ulici => směr linky v ulici pozitivní
     }
 }
 
 fun List<Ulice>.krizovatkyNaLince() =
-    flatMap { it.zacatekKonecNaLince(this).toList() }.distinct()
+    flatMap { it.orientedInLine(this).toList() }.distinct()
 
 fun Ulice.zasebevrazdujZastavku() = copy(
     cloveci = cloveci + (zastavka?.cloveci ?: 0),
@@ -99,7 +111,7 @@ fun Ulice.zasebevrazdujZastavku() = copy(
 
 val Ulice.krizovatky get() = listOf(zacatek, konec)
 
-operator fun Ulice.contains(other: Pozice<UlicovyBlok>) = other == zacatek || other == konec
+operator fun Ulice.contains(other: Vector<UlicovyBlok>) = other == zacatek || other == konec
 
 infix fun Ulice.x(other: Ulice) = krizovatky.find { it in other.krizovatky }
 

@@ -42,7 +42,7 @@ fun PenizZaMinutu.asString() = stringResource(R.string.zisk_penez, value.formato
 fun PenizZaMinutu.formatovat() = R.string.zisk_penez.toText(value.formatovat(if (value >= 10_000) 0 else 2))
 fun PenizZaMinutu.formatovatBezEura() = value.formatovat(if (value >= 10_000) 0 else 2)
 
-inline fun <T> Iterable<T>.sumOfPenizZaminutu(selector: (T) -> PenizZaMinutu): PenizZaMinutu {
+inline fun <T> Iterable<T>.sumOfPenizZaMinutu(selector: (T) -> PenizZaMinutu): PenizZaMinutu {
     var sum = 0.penezZaMin
     for (element in this) {
         sum += selector(element)

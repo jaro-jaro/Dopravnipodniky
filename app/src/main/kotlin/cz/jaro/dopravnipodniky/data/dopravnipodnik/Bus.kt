@@ -5,7 +5,13 @@ import cz.jaro.dopravnipodniky.shared.BusID
 import cz.jaro.dopravnipodniky.shared.LinkaID
 import cz.jaro.dopravnipodniky.shared.Smer
 import cz.jaro.dopravnipodniky.shared.Smer.Pozitivni
+import cz.jaro.dopravnipodniky.shared.jednotky.Angle
+import cz.jaro.dopravnipodniky.shared.jednotky.AngularVelocity
 import cz.jaro.dopravnipodniky.shared.jednotky.PenizZaMinutu
+import cz.jaro.dopravnipodniky.shared.jednotky.Velocity
+import cz.jaro.dopravnipodniky.shared.jednotky.kilometersPerHour
+import cz.jaro.dopravnipodniky.shared.jednotky.rad
+import cz.jaro.dopravnipodniky.shared.jednotky.radiansPerSecond
 import cz.jaro.dopravnipodniky.ui.malovani.SerializableDp
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -16,17 +22,20 @@ import kotlin.time.Duration.Companion.hours
 @Serializable
 @SerialName("Bus")
 data class Bus(
-    val evCislo: Int,
+    // Properties
     val typBusu: TypBusu,
+    val id: BusID = BusID.randomUUID(),
+    // Info state
+    val evCislo: Int,
     val najeto: Duration = 0.hours,
     val cloveci: Int = 0,
-    val stavZastavky: StavZastavky = StavZastavky.Pred,
-    /** Index ulice na lince */
+    val linka: LinkaID? = null,
+    // Driving state
+    val smerNaLince: Smer = Pozitivni,
+    /** Index ulice na lince v daném směru */
     val poziceNaLince: Int = 0,
     val poziceVUlici: SerializableDp = 0.dp,
-    val smerNaLince: Smer = Pozitivni,
-    val linka: LinkaID? = null,
-    val id: BusID = BusID.randomUUID(),
+    val stavZastavky: StavZastavky = StavZastavky.Pred,
 ) {
     override fun toString() = "Bus(evCislo=$evCislo,typBusu=$typBusu)"
 

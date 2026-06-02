@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("TypKrizovatky")
-enum class TypKrizovatky {
-    Kruhac
+enum class IntersectionType {
+    @SerialName("Kruhac")
+    Roundabout
 }

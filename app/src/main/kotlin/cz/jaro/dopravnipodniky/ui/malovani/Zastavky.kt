@@ -11,10 +11,10 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.delkaUlice
 import cz.jaro.dopravnipodniky.shared.delkaZastavky
-import cz.jaro.dopravnipodniky.shared.odsazeniBusu
+import cz.jaro.dopravnipodniky.shared.odsazeniCarZastavky
 import cz.jaro.dopravnipodniky.shared.odsazeniSloupku
+import cz.jaro.dopravnipodniky.shared.posunutiZastavky
 import cz.jaro.dopravnipodniky.shared.sirkaCary
-import cz.jaro.dopravnipodniky.shared.sirkaChodniku
 import cz.jaro.dopravnipodniky.shared.sirkaSloupku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.shared.sirkaZastavky
@@ -56,9 +56,10 @@ fun Ulice.namalovatZastavku() = with(drawScope) {
     }
 }
 
+// Směr dolů
 private fun DrawScope.zastavka() {
     translate(
-        top = delkaUlice.toPx() / 2 + delkaZastavky.toPx() / 2,
+        top = posunutiZastavky.toPx() + delkaZastavky.toPx(),
         left = odsazeniSloupku.toPx()
     ) {
         drawRect(
@@ -67,8 +68,8 @@ private fun DrawScope.zastavka() {
         )
     }
     translate(
-        top = delkaUlice.toPx() / 2 - delkaZastavky.toPx() / 2,
-        left = sirkaChodniku.toPx() + (odsazeniBusu - sirkaChodniku).toPx() / 2,
+        top = posunutiZastavky.toPx(),
+        left = odsazeniCarZastavky.toPx(),
     ) {
         drawRect(
             color = Color.Yellow,

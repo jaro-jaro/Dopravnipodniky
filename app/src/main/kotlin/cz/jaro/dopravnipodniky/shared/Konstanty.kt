@@ -6,17 +6,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.data.generace.DetailGeneraceV2
-import cz.jaro.dopravnipodniky.shared.jednotky.metru
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.penezZaMin
-import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toTiky
 import cz.jaro.dopravnipodniky.ui.theme.green800
 import kotlinx.serialization.json.Json
 import kotlin.time.Duration.Companion.seconds
-
-private val Double.m get() = metru.toDp()
-private val Int.m get() = metru.toDp()
 
 const val oddalenyRezim = 1.2F
 const val maximalniOddaleni = .1F
@@ -27,37 +22,40 @@ val pocatecniObnosPenez = /*Double.POSITIVE_INFINITY.penez*/
 // Velikosti
 
 // Ulice
-val ulicovyBlok = 72.m
+val ulicovyBlok = 80.dp
 val delkaUlice = ulicovyBlok
-val sirkaUlice = 10.m
-val sirkaChodniku = 1.m
-val predsazeniKrizovatky = 5.dp
+val sirkaUlice = 10.dp
+val sirkaChodniku = 2.dp
+val predsazeniKrizovatky = 15.dp
 
 // Barák
-val odsazeniBaraku = 1.m
+val odsazeniBaraku = 6.dp
+val mezeraMeziBaraky = 1.dp
 const val barakuVUlici = 5
-val velikostBaraku = (ulicovyBlok - odsazeniBaraku * (barakuVUlici + 1)) / barakuVUlici
-val zaobleniBaraku = predsazeniKrizovatky
+val velikostBaraku = (ulicovyBlok - mezeraMeziBaraky * (barakuVUlici - 1) - odsazeniBaraku * 2) / barakuVUlici
+val zaobleniBaraku = 5.dp
 
 // Zastávka
-val sirkaZastavky = 3.m
-val delkaZastavky = 18.m
-val odsazeniZastavky = 1.m
-val sirkaSloupku = .4.m
-val tloustkaSloupku = .1.m
-val odsazeniSloupku = sirkaChodniku - .1.m - sirkaSloupku
+val sirkaZastavky = 2.5.dp
+val delkaZastavky = 18.dp
+val posunutiZastavky = 41.dp
+val odsazeniZastavky = (-10).dp
+val odsazeniCarZastavky = sirkaChodniku + .25.dp
+val sirkaSloupku = .5.dp
+val tloustkaSloupku = .2.dp
+val odsazeniSloupku = sirkaChodniku - .25.dp - sirkaSloupku
 val sirkaCary = .2.dp
 
 // Bus
-val odsazeniBusu = sirkaChodniku + .75.m
-val zakladniSirkaBusu = 2.500.metru
+val odsazeniBusu = sirkaChodniku + .25.dp
+val zakladniSirkaBusu = 2.500.dp
 
 // Troleje
 val sirkaTroleje = .2.dp
 val predsazeniTrolejiS = predsazeniKrizovatky - 1.dp
 val predsazeniTrolejiL = predsazeniKrizovatky + 1.dp
-val rozchodTroleji = .5.m
-val odsazeniTroleje = sirkaChodniku + 1.5.m
+val rozchodTroleji = .5.dp
+val odsazeniTroleje = sirkaChodniku + 1.5.dp
 val odsazeniPrvniTroleje = odsazeniTroleje
 val odsazeniDruheTroleje = odsazeniTroleje + rozchodTroleji
 val odsazeniCtvrteTroleje = sirkaUlice - odsazeniPrvniTroleje
@@ -76,6 +74,7 @@ val barvaUlice = Color(135, 135, 135)
 val barvaPozadi = Color(16, 16, 16)
 val barvaNepouzivanehoBusu = Color(100, 100, 100)
 val barvaChodniku = Color(200, 200, 200)
+val barvaParku = Color(76, 175, 80)
 val barvaTroleje = Color(32, 32, 32)
 
 // Rychlost hry

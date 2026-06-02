@@ -11,18 +11,16 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.seznamKrizovatek
 import cz.jaro.dopravnipodniky.data.serializers.DpSerializer
 import cz.jaro.dopravnipodniky.shared.barvaPozadi
-import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
+import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
-import cz.jaro.dopravnipodniky.shared.jednotky.metru
 import cz.jaro.dopravnipodniky.shared.jednotky.plus
-import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
-import cz.jaro.dopravnipodniky.shared.jednotky.toPx
 import cz.jaro.dopravnipodniky.shared.jednotky.ulicovychBloku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.ui.linky.vybirani.namalovatVybiraniLinky
@@ -36,7 +34,7 @@ fun Mesto(
     malovatBusy: Boolean,
     malovatLinky: Boolean,
     malovatTroleje: Boolean,
-    kliklyKrizovatky: List<Pozice<UlicovyBlok>>?,
+    kliklyKrizovatky: List<Vector<UlicovyBlok>>?,
     dp: DopravniPodnik,
     modifier: Modifier,
     tx: Float,
@@ -82,10 +80,10 @@ fun Mesto(
             ) {
                 if (DEBUG_MODE) drawCircle(
                     color = Color.White,
-                    radius = 20.metru.toDp().toPx(),
-                    center = Pozice(0.ulicovychBloku).toDpSKrizovatkama().plus(sirkaUlice / 2).toPx(),
+                    radius = 20.dp.toDp().toPx(),
+                    center = Vector(0.ulicovychBloku).toDpSKrizovatkama().plus(sirkaUlice / 2).toPx(),
                     style = Stroke(
-                        width = 2.metru.toDp().toPx()
+                        width = 2.dp.toDp().toPx()
                     )
                 )
 

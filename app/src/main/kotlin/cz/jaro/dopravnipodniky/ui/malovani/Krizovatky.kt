@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Krizovatka
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypKrizovatky
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.IntersectionType
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.Quintuple
@@ -18,7 +18,7 @@ import cz.jaro.dopravnipodniky.shared.barvaChodniku
 import cz.jaro.dopravnipodniky.shared.barvaPozadi
 import cz.jaro.dopravnipodniky.shared.barvaUlice
 import cz.jaro.dopravnipodniky.shared.drawArc
-import cz.jaro.dopravnipodniky.shared.jednotky.Pozice
+import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
 import cz.jaro.dopravnipodniky.shared.predsazeniKrizovatky
@@ -29,7 +29,7 @@ import kotlin.math.sqrt
 context(drawScope: DrawScope)
 fun namalovatKrizovatku(
     ulice: List<Ulice>,
-    pozice: Pozice<UlicovyBlok>,
+    pozice: Vector<UlicovyBlok>,
     krizovatka: Krizovatka?,
 ) = with(drawScope) {
     val (x, y) = pozice
@@ -66,7 +66,7 @@ fun namalovatKrizovatku(
         )
 
         // kreslení chodníku okolo kruháče
-        if (krizovatka?.typ == TypKrizovatky.Kruhac) {
+        if (krizovatka?.type == IntersectionType.Roundabout) {
             translate(
                 left = sirkaUlice / 2,
                 top = sirkaUlice / 2,
@@ -110,7 +110,7 @@ fun namalovatKrizovatku(
         }
 
         // Kreslení rovných chodníků
-        if (krizovatka?.typ != TypKrizovatky.Kruhac) sousediUhly.filter { (soused1, soused2, soused3, soused4, _) ->
+        if (krizovatka?.type != IntersectionType.Roundabout) sousediUhly.filter { (soused1, soused2, soused3, soused4, _) ->
             !soused1 && !soused3 || !soused1 && soused2 == soused4
         }.forEach { (_, soused2, _, soused4, uhel) ->
             rotate(
@@ -137,7 +137,7 @@ fun namalovatKrizovatku(
         }
 
         // Kreslení vnějšího oblouku u křižovatky typu L
-        if (krizovatka?.typ != TypKrizovatky.Kruhac) sousediUhly
+        if (krizovatka?.type != IntersectionType.Roundabout) sousediUhly
             .filter { (soused1, soused2, soused3, soused4, _) ->
                 soused4 && soused1 && !soused2 && !soused3
             }
@@ -235,7 +235,7 @@ fun namalovatKrizovatku(
             }
 
         // Kreslení napojení na kruháč
-        if (krizovatka?.typ == TypKrizovatky.Kruhac) sousediUhly
+        if (krizovatka?.type == IntersectionType.Roundabout) sousediUhly
             .filter { (soused1, _, _, _, _) ->
                 soused1
             }
@@ -282,7 +282,7 @@ fun namalovatKrizovatku(
             }
 
         // Kreslení napojení na kruháč
-        if (krizovatka?.typ == TypKrizovatky.Kruhac) sousediUhly
+        if (krizovatka?.type == IntersectionType.Roundabout) sousediUhly
             .filter { (_, _, _, soused4, _) ->
                 soused4
             }
@@ -329,7 +329,7 @@ fun namalovatKrizovatku(
             }
 
         // Kreslení kruháče
-        if (krizovatka?.typ == TypKrizovatky.Kruhac) {
+        if (krizovatka?.type == IntersectionType.Roundabout) {
             translate(
                 left = sirkaUlice / 2,
                 top = sirkaUlice / 2,
