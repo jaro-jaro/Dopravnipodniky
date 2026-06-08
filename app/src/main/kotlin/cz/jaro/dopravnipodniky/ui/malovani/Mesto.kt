@@ -17,10 +17,11 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.seznamKrizovatek
 import cz.jaro.dopravnipodniky.data.serializers.DpSerializer
 import cz.jaro.dopravnipodniky.shared.barvaPozadi
-import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
+import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.plus
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
+import cz.jaro.dopravnipodniky.shared.jednotky.toPx
 import cz.jaro.dopravnipodniky.shared.jednotky.ulicovychBloku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.ui.linky.vybirani.namalovatVybiraniLinky
@@ -80,10 +81,10 @@ fun Mesto(
             ) {
                 if (DEBUG_MODE) drawCircle(
                     color = Color.White,
-                    radius = 20.dp.toDp().toPx(),
+                    radius = 20.dp.toPx(),
                     center = Vector(0.ulicovychBloku).toDpSKrizovatkama().plus(sirkaUlice / 2).toPx(),
                     style = Stroke(
-                        width = 2.dp.toDp().toPx()
+                        width = 2.dp.toPx()
                     )
                 )
 

@@ -29,17 +29,22 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.IntersectionType
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Krizovatka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.helpers.toPx
+import cz.jaro.dopravnipodniky.shared.jednotky.Angle
 import cz.jaro.dopravnipodniky.shared.jednotky.Vector
+import cz.jaro.dopravnipodniky.shared.jednotky.Velocity
+import cz.jaro.dopravnipodniky.shared.jednotky.dpPerSecond
+import cz.jaro.dopravnipodniky.shared.jednotky.radians
+import cz.jaro.dopravnipodniky.shared.jednotky.radiansPerSecond
 import cz.jaro.dopravnipodniky.shared.jednotky.toDp
 import cz.jaro.dopravnipodniky.shared.jednotky.toPx
 import cz.jaro.dopravnipodniky.ui.main.DEBUG_MODE
 import cz.jaro.dopravnipodniky.ui.theme.Theme
 import kotlinx.coroutines.flow.Flow
+import kotlin.math.absoluteValue
 import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.roundToLong
 import kotlin.math.sin
-import kotlin.math.sqrt
 import kotlin.time.Duration
 
 
@@ -108,7 +113,7 @@ fun Int.formatovat(decimalPlaces: Int = 2) = toDouble().formatovat(decimalPlaces
 //    return Color.rgb(vse.barva.red / delitel, vse.barva.green / delitel, vse.barva.blue / delitel)
 //}
 
-val Duration.milliseconds get() = inWholeMicroseconds / 1_000.0
+val Duration.milliseconds get() = inWholeNanoseconds / 1_000_000.0
 val Duration.seconds get() = milliseconds / 1_000.0
 val Duration.minutes get() = seconds / 60.0
 val Duration.hours get() = minutes / 60.0
@@ -537,55 +542,15 @@ fun Double.map(
     return newLocalValue + to.start
 }
 
-fun TurnType.lengthOfTurn(busWidth: Dp) = lengthsOfTurnParts(busWidth).sumOfDp { it }
-
-fun TurnType.lengthsOfTurnParts(busWidth: Dp) = when (this) {
-    TurnType.Straight -> listOf(predsazeniKrizovatky + sirkaUlice + predsazeniKrizovatky)
-    TurnType.Right -> listOf(
-        arcLength(
-            theta = Math.PI / 2,
-            r = predsazeniKrizovatky + odsazeniBusu + busWidth / 2
-        )
-    )
-
-    TurnType.Left -> listOf(
-        arcLength(
-            theta = Math.PI / 2,
-            r = predsazeniKrizovatky + sirkaUlice - (odsazeniBusu + busWidth / 2),
-        )
-    )
-
-    is TurnType.Roundabout -> {
-        val roundaboutQuarterLength = roundaboutQuarterLength(busWidth)
-        val roundaboutEntryLength = roundaboutEntryLength(busWidth)
-        listOf(roundaboutEntryLength, roundaboutQuarterLength * quadrants, roundaboutEntryLength)
-    }
-
-    TurnType.Return180 -> listOf(0.dp)
-}
-
-fun roundaboutEntryLength(busWidth: Dp) = arcLength(
-    theta = Math.PI / 4,
-    r = predsazeniKrizovatky + odsazeniBusu + busWidth / 2,
-)
-
-fun roundaboutQuarterLength(busWidth: Dp) = arcLength(
-    theta = Math.PI / 2,
-    r = sirkaUlice * (sqrt(2.0) / 2) + predsazeniKrizovatky * (sqrt(2.0) - 1) - (odsazeniBusu + busWidth / 2),
-)
-
-fun arcLength(
-    /** In radians */
-    theta: Double,
-    r: Dp,
-) = theta * r
+fun arcLength(angle: Angle, radius: Dp) = angle.radians.absoluteValue * radius
+fun angularSpeed(speed: Velocity, radius: Dp) = (speed.dpPerSecond / radius.value).radiansPerSecond
 
 fun turnType(
     intersection: Krizovatka?,
     streetBefore: Ulice,
     streetAfter: Ulice?,
 ) = when {
-    streetAfter?.orientace == null -> TurnType.Return180
+    streetAfter?.orientace == null -> null
     streetAfter.orientace == streetBefore.orientace -> TurnType.Straight
     else -> {
         val isRightIfStartsVertical = when {
@@ -605,6 +570,7 @@ fun turnType(
 }.onRoundaboutIf(intersection?.type == IntersectionType.Roundabout)
 
 operator fun Dp.times(other: Double) = times(other.toFloat())
+val Dp.absoluteValue get() = value.absoluteValue.dp
 
 inline fun <T> Iterable<T>.sumOfIndexed(selector: (Int, T) -> Int): Int {
     var index = 0

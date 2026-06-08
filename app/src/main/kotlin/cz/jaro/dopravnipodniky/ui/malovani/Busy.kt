@@ -19,22 +19,15 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.orientedInLine
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.Smer
 import cz.jaro.dopravnipodniky.shared.TurnType
-import cz.jaro.dopravnipodniky.shared.TurnType.Left
-import cz.jaro.dopravnipodniky.shared.TurnType.Right
-import cz.jaro.dopravnipodniky.shared.TurnType.Straight
 import cz.jaro.dopravnipodniky.shared.delkaUlice
-import cz.jaro.dopravnipodniky.shared.indexOfFirstOrElse
-import cz.jaro.dopravnipodniky.shared.lengthsOfTurnParts
+import cz.jaro.dopravnipodniky.shared.jednotky.degrees
 import cz.jaro.dopravnipodniky.shared.odsazeniBusu
 import cz.jaro.dopravnipodniky.shared.predsazeniKrizovatky
 import cz.jaro.dopravnipodniky.shared.reversedIfNegative
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
-import cz.jaro.dopravnipodniky.shared.times
-import cz.jaro.dopravnipodniky.shared.translate
 import cz.jaro.dopravnipodniky.shared.turnType
-import cz.jaro.dopravnipodniky.shared.zip
 import cz.jaro.dopravnipodniky.ui.main.DEBUG_MODE
-import kotlin.math.sqrt
+import cz.jaro.dopravnipodniky.ui.theme.orange600
 
 fun getNamalovatBus(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
     if (bus.linka == null) return {}
@@ -63,63 +56,48 @@ fun getNamalovatBus(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
 
     val turn = turnType(nextIntersection, street, nextStreet)
 
-    val turnsParts = when (turn) {
-        Right -> listOf(0F, 90F)
-        Straight -> listOf(0F, 0F)
-        Left -> listOf(0F, -90F)
-        TurnType.Return180 -> listOf(0F, -180F)
-        TurnType.RoundaboutRight -> listOf(0F, 45F, 45F, 90F)
-        TurnType.RoundaboutStraight -> listOf(0F, 45F, -45F, 0F)
-        TurnType.RoundaboutLeft -> listOf(0F, 45F, -135F, -90F)
-        TurnType.RoundaboutReturn -> listOf(0F, 45F, -225F, -180F)
-    }.windowed(2).map { it[0] to it[1] }
+    /*    val busSegmentOffset =
+            bus.typBusu.clanky.scan(0.dp to 0.dp) { (acc, lastSegment), segment ->
+                acc + lastSegment to segment
+            }.drop(1)
 
-    val lengthsOfTurnParts = turn.lengthsOfTurnParts(bus.typBusu.sirka)
-    val accumulativeTurnPartLengths = lengthsOfTurnParts.runningReduce { acc, length -> length + acc }
-    val turnLength = accumulativeTurnPartLengths.last()
+        val rearOffsetInIntersection = bus.poziceVUlici - (delkaUlice - predsazeniKrizovatky)
+        val frontOffsetInIntersection = rearOffsetInIntersection + bus.typBusu.clanky.first()
 
-    val busSegmentOffset =
-        bus.typBusu.clanky.scan(0.dp to 0.dp) { (acc, lastSegment), segment ->
-            acc + lastSegment to segment
-        }.drop(1)
-
-    val rearOffsetInIntersection = bus.poziceVUlici - (delkaUlice - predsazeniKrizovatky)
-    val frontOffsetInIntersection = rearOffsetInIntersection + bus.typBusu.clanky.first()
-
-    val segmentEndOffsetInIntersection = busSegmentOffset.map { (offset, segment) ->
-        frontOffsetInIntersection - (offset + segment * .75)
-    }
-
-    val turnPartIndexPerSegment = segmentEndOffsetInIntersection.map { offset ->
-        accumulativeTurnPartLengths.indexOfFirstOrElse(defaultValue = { turnsParts.lastIndex }) { offset < it }
-    }
-
-    val turnPartAnglesPerSegment = turnPartIndexPerSegment.map { i ->
-        turnsParts[i]
-    }
-
-    val turnPartLengthPerSegment = turnPartIndexPerSegment.map { i ->
-        lengthsOfTurnParts[i]
-    }
-
-    val turnPartOffsetPerSegment = turnPartIndexPerSegment.map { i ->
-        accumulativeTurnPartLengths.getOrElse(i - 1, defaultValue = { 0.dp })
-    }
-
-    val segmentEndOffsetInTurnPart =
-        turnPartOffsetPerSegment.zip(segmentEndOffsetInIntersection) { turnPart, segment ->
-            segment - turnPart
+        val segmentEndOffsetInIntersection = busSegmentOffset.map { (offset, segment) ->
+            frontOffsetInIntersection - (offset + segment * .75)
         }
 
-    val segmentEndPositionInTurnPart =
-        segmentEndOffsetInTurnPart.zip(turnPartLengthPerSegment) { offset, length ->
-            offset.coerceIn(0.dp, length) / length
+        val turnPartIndexPerSegment = segmentEndOffsetInIntersection.map { offset ->
+            accumulativeTurnPartLengths.indexOfFirstOrElse(defaultValue = { turnsParts.lastIndex }) { offset < it }
         }
 
-    val segmentRotation =
-        segmentEndPositionInTurnPart.zip(turnPartAnglesPerSegment) { position, angle ->
-            position * (angle.second - angle.first) + angle.first
+        val turnPartAnglesPerSegment = turnPartIndexPerSegment.map { i ->
+            turnsParts[i]
         }
+
+        val turnPartLengthPerSegment = turnPartIndexPerSegment.map { i ->
+            lengthsOfTurnParts[i]
+        }
+
+        val turnPartOffsetPerSegment = turnPartIndexPerSegment.map { i ->
+            accumulativeTurnPartLengths.getOrElse(i - 1, defaultValue = { 0.dp })
+        }
+
+        val segmentEndOffsetInTurnPart =
+            turnPartOffsetPerSegment.zip(segmentEndOffsetInIntersection) { turnPart, segment ->
+                segment - turnPart
+            }
+
+        val segmentEndPositionInTurnPart =
+            segmentEndOffsetInTurnPart.zip(turnPartLengthPerSegment) { offset, length ->
+                offset.coerceIn(0.dp, length) / length
+            }
+
+        val segmentRotation =
+            segmentEndPositionInTurnPart.zip(turnPartAnglesPerSegment) { position, angle ->
+                position * (angle.second - angle.first) + angle.first
+            }*/
 
     return {
         val zacatekX = street.zacatekX.toPx()
@@ -130,6 +108,8 @@ fun getNamalovatBus(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
         val odsazeni = odsazeniBusu.toPx()
         val sirkaUlice = sirkaUlice.toPx()
         val delkaUlice = delkaUlice.toPx()
+        val delka = bus.typBusu.delka.toPx()
+        val pozice = bus.poziceVUlici.toPx() - (delkaUlice - predsazeniKrizovatky.toPx())
 
         translate(
             left = zacatekX,
@@ -143,63 +123,26 @@ fun getNamalovatBus(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
                     degrees = centerRotation,
                     pivot = Offset(x = delkaUlice / 2, y = sirkaUlice / 2),
                 ) {
-                    val malovat: DrawScope.(clanek: Float, natoceni: Float, i: Int) -> Unit = { clanek, natoceni, i ->
+                    val malovat: DrawScope.() -> Unit = {
                         rotate(
-                            degrees = natoceni,
+                            degrees = bus.rotation.degrees.toFloat(),
                             pivot = Offset()
                         ) {
-                            val jePrvni = i == 0
-                            val jePosledni = i == busSegmentOffset.lastIndex
                             val zaobleni = sirkaBusu / 4
                             drawRoundRect(
                                 color = line.barvicka.barva,
                                 topLeft = Offset(
-                                    x = when {
-                                        !jePosledni -> -clanek * .25F - zaobleni
-                                        else -> -clanek * .25F + 0F
-                                    },
+                                    x = -delka * .25F + 0F,
                                     y = -sirkaBusu / 2,
                                 ),
                                 size = Size(
-                                    width = when {
-                                        jePrvni && jePosledni -> clanek
-                                        jePrvni || jePosledni -> clanek + zaobleni
-                                        else /*!jePrvni && !jePosledni*/ -> clanek + zaobleni * 2
-                                    },
+                                    width = delka,
                                     height = sirkaBusu,
                                 ),
                                 cornerRadius = CornerRadius(zaobleni * 2),
                             )
-//                            drawRoundRect(
-//                                color = Color.Green,
-//                                topLeft = Offset(
-//                                    x = -1.dp.toPx(),
-//                                    y = -1.dp.toPx(),
-//                                ),
-//                                size = Size(
-//                                    width = 2.dp.toPx(),
-//                                    height = 2.dp.toPx(),
-//                                ),
-//                                cornerRadius = CornerRadius(3F.dp.toPx()),
-//                            )
-                            /*if (jePrvni) drawIntoCanvas {
-                                it.nativeCanvas.drawText(
-//                                    uhelCastiZatoceni[0].joinToString { it.toDouble().zaokrouhlit(1).toString() },
-//                                    castiZatoceni.joinToString { it.joinToString { it.toDouble().zaokrouhlit(1).toString() } },
-//                                    poziceVCasti.joinToString { it.value.toDouble().zaokrouhlit(1).toString() },
-//                                    posunutiCastiZatoceni.joinToString { it.value.toDouble().zaokrouhlit(1).toString() },
-//                                    delkyCastiZatoceni.runningReduce { acc, delka -> delka + acc }.joinToString { it.value.toDouble().zaokrouhlit(1).toString() },
-//                                    delkyCastiZatoceni.joinToString { it.value.toDouble().zaokrouhlit(1).toString() },
-                                    "${poziceClankuVKrizovatce[0].value.toDouble().zaokrouhlit(1)} ${natoceniClanku[0].toDouble().zaokrouhlit(1)} $indexCasti",
-//                                    delkyCastiZatoceni.runningReduce { acc, delka -> delka + acc }.joinToString { it.value.toDouble().zaokrouhlit(1).toString() },
-                                    0F,
-                                    5.dp.toPx(),
-                                    Paint().apply {
-                                        color = android.graphics.Color.WHITE
-                                    }
-                                )
-                            }*/
-                            if (jePrvni && DEBUG_MODE) drawIntoCanvas {
+                            drawCircle(orange600, radius = 1.dp.toPx(), center = Offset())
+                            if (DEBUG_MODE) drawIntoCanvas {
                                 it.nativeCanvas.drawText(
                                     "${bus.cloveci}/${bus.typBusu.kapacita}",
                                     0F,
@@ -212,176 +155,108 @@ fun getNamalovatBus(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
                         }
                     }
                     // --->
-                    zip(
-                        segmentEndOffsetInIntersection,
-                        segmentRotation,
-                        clanky,
-                        turnPartIndexPerSegment,
-                        turnPartOffsetPerSegment
-                    ).forEachIndexed { i, (pozice, natoceni, clanek, index, delka) ->
-                        when {
-                            pozice < 0.dp -> translate(
-                                left = delkaUlice - predsazeniKrizovatky.toPx() + pozice.toPx(),
-                                top = sirkaUlice - odsazeni - sirkaBusu / 2,
-                            ) {
-                                malovat(clanek, natoceni, i)
-                            }
-
-                            turn == Straight -> translate(
-                                left = delkaUlice - predsazeniKrizovatky.toPx() + pozice.toPx(),
-                                top = sirkaUlice - odsazeni - sirkaBusu / 2,
-                            ) {
-                                malovat(clanek, natoceni, i)
-                            }
-
-                            pozice > turnLength && turn == TurnType.RoundaboutStraight -> translate(
-                                left = delkaUlice + sirkaUlice + predsazeniKrizovatky.toPx(),
-                                top = sirkaUlice + predsazeniKrizovatky.toPx(),
-                            ) {
-                                val r = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2
-                                translate(
-                                    left = pozice.toPx() - turnLength.toPx(),
-                                    top = -r,
-                                ) {
-                                    malovat(clanek, natoceni, i)
-                                }
-                            }
-
-                            pozice > turnLength && turn in listOf(Right, TurnType.RoundaboutRight) -> translate(
-                                left = delkaUlice - predsazeniKrizovatky.toPx(),
-                                top = sirkaUlice + predsazeniKrizovatky.toPx(),
-                            ) {
-                                val r = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2
-                                translate(
-                                    left = r,
-                                    top = pozice.toPx() - turnLength.toPx(),
-                                ) {
-                                    malovat(clanek, natoceni, i)
-                                }
-                            }
-
-                            turn == Right -> translate(
-                                pivot = Offset(
-                                    x = delkaUlice - predsazeniKrizovatky.toPx(),
-                                    y = sirkaUlice + predsazeniKrizovatky.toPx(),
-                                ),
-                                radius = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2,
-                                degrees = natoceni,
-                                isTurnRight = true,
-                            ) {
-                                malovat(clanek, natoceni, i)
-                            }
-
-                            pozice > turnLength && turn in listOf(Left, TurnType.RoundaboutLeft) -> translate(
-                                left = delkaUlice - predsazeniKrizovatky.toPx(),
-                                top = -predsazeniKrizovatky.toPx(),
-                            ) {
-                                val r = predsazeniKrizovatky.toPx() + sirkaUlice - odsazeni - sirkaBusu / 2
-                                translate(
-                                    left = r,
-                                    top = -(pozice.toPx() - turnLength.toPx()),
-                                ) {
-                                    malovat(clanek, natoceni, i)
-                                }
-                            }
-
-                            turn == Left -> translate(
-                                pivot = Offset(
-                                    x = delkaUlice - predsazeniKrizovatky.toPx(),
-                                    y = -predsazeniKrizovatky.toPx(),
-                                ),
-                                radius = predsazeniKrizovatky.toPx() + sirkaUlice - odsazeni - sirkaBusu / 2,
-                                degrees = natoceni,
-                                isTurnRight = false,
-                            ) {
-                                malovat(clanek, natoceni, i)
-                            }
-
-                            pozice > turnLength && turn == TurnType.RoundaboutReturn -> translate(
-                                left = delkaUlice - predsazeniKrizovatky.toPx(),
-                                top = sirkaUlice / 2,
-                            ) {
-                                val r = sirkaUlice / 2 - odsazeni - sirkaBusu / 2
-                                translate(
-                                    left = -(pozice.toPx() - turnLength.toPx()),
-                                    top = -r,
-                                ) {
-                                    malovat(clanek, natoceni, i)
-                                }
-                            }
-
-                            turn is TurnType.Roundabout && index == 0 -> translate(
-                                pivot = Offset(
-                                    x = delkaUlice - predsazeniKrizovatky.toPx(),
-                                    y = sirkaUlice + predsazeniKrizovatky.toPx(),
-                                ),
-                                radius = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2,
-                                degrees = natoceni,
-                                isTurnRight = true,
-                            ) {
-                                malovat(clanek, natoceni, i)
-                            }
-
-                            turn is TurnType.Roundabout && index == 1 -> translate(
-                                pivot = Offset(
-                                    x = delkaUlice + sirkaUlice / 2,
-                                    y = sirkaUlice / 2,
-                                ),
-                                radius = .5F * sqrt(2F) * sirkaUlice + predsazeniKrizovatky.toPx() * sqrt(2F) - predsazeniKrizovatky.toPx() - odsazeni - sirkaBusu / 2,
-                                degrees = natoceni,
-                                isTurnRight = false,
-                            ) {
-                                malovat(clanek, natoceni, i)
-                            }
-
-                            turn == TurnType.RoundaboutRight && index == 2 -> translate(
-                                pivot = Offset(
-                                    x = delkaUlice - predsazeniKrizovatky.toPx(),
-                                    y = sirkaUlice + predsazeniKrizovatky.toPx(),
-                                ),
-                                radius = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2,
-                                degrees = natoceni,
-                                isTurnRight = true,
-                            ) {
-                                malovat(clanek, natoceni, i)
-                            }
-
-                            turn == TurnType.RoundaboutStraight && index == 2 -> translate(
-                                pivot = Offset(
-                                    x = delkaUlice + sirkaUlice + predsazeniKrizovatky.toPx(),
-                                    y = sirkaUlice + predsazeniKrizovatky.toPx(),
-                                ),
-                                radius = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2,
-                                degrees = natoceni,
-                                isTurnRight = true,
-                            ) {
-                                malovat(clanek, natoceni, i)
-                            }
-
-                            turn == TurnType.RoundaboutLeft && index == 2 -> translate(
-                                pivot = Offset(
-                                    x = delkaUlice + sirkaUlice + predsazeniKrizovatky.toPx(),
-                                    y = -predsazeniKrizovatky.toPx(),
-                                ),
-                                radius = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2,
-                                degrees = natoceni,
-                                isTurnRight = true,
-                            ) {
-                                malovat(clanek, natoceni, i)
-                            }
-
-                            turn == TurnType.RoundaboutReturn && index == 2 -> translate(
-                                pivot = Offset(
-                                    x = delkaUlice - predsazeniKrizovatky.toPx(),
-                                    y = -predsazeniKrizovatky.toPx(),
-                                ),
-                                radius = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2,
-                                degrees = natoceni,
-                                isTurnRight = true,
-                            ) {
-                                malovat(clanek, natoceni, i)
-                            }
+                    when {
+                        pozice >= 0F && turn == TurnType.Straight -> translate(
+                            left = delkaUlice - predsazeniKrizovatky.toPx() + pozice,
+                            top = sirkaUlice - odsazeni - sirkaBusu / 2,
+                        ) {
+                            malovat()
                         }
+
+                        else -> translate(
+                            left = bus.position.x.toPx(),
+                            top = bus.position.y.toPx(),
+                        ) {
+                            malovat()
+                        }
+
+//                        pozice > turnLength.toPx() && turn == TurnType.RoundaboutStraight -> translate(
+//                            left = delkaUlice + sirkaUlice + predsazeniKrizovatky.toPx(),
+//                            top = sirkaUlice + predsazeniKrizovatky.toPx(),
+//                        ) {
+//                            val r = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2
+//                            translate(
+//                                left = pozice - turnLength.toPx(),
+//                                top = -r,
+//                            ) {
+//                                malovat()
+//                            }
+//                        }
+//
+//                        pozice > turnLength.toPx() && turn in listOf(TurnType.Right, TurnType.RoundaboutRight) -> translate(
+//                            left = delkaUlice - predsazeniKrizovatky.toPx(),
+//                            top = sirkaUlice + predsazeniKrizovatky.toPx(),
+//                        ) {
+//                            val r = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2
+//                            translate(
+//                                left = r,
+//                                top = pozice - turnLength.toPx(),
+//                            ) {
+//                                malovat()
+//                            }
+//                        }
+//
+//                        turn == TurnType.Right -> translate(
+//                            pivot = Offset(
+//                                x = delkaUlice - predsazeniKrizovatky.toPx(),
+//                                y = sirkaUlice + predsazeniKrizovatky.toPx(),
+//                            ),
+//                            radius = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2,
+//                            degrees = bus.rotation.degrees.toFloat(),
+//                            isTurnRight = true,
+//                        ) {
+//                            malovat()
+//                        }
+//
+//                        pozice > turnLength.toPx() && turn in listOf(TurnType.Left, TurnType.RoundaboutLeft) -> translate(
+//                            left = delkaUlice - predsazeniKrizovatky.toPx(),
+//                            top = -predsazeniKrizovatky.toPx(),
+//                        ) {
+//                            val r = predsazeniKrizovatky.toPx() + sirkaUlice - odsazeni - sirkaBusu / 2
+//                            translate(
+//                                left = r,
+//                                top = -(pozice - turnLength.toPx()),
+//                            ) {
+//                                malovat()
+//                            }
+//                        }
+//
+//                        turn == TurnType.Left -> translate(
+//                            pivot = Offset(
+//                                x = delkaUlice - predsazeniKrizovatky.toPx(),
+//                                y = -predsazeniKrizovatky.toPx(),
+//                            ),
+//                            radius = predsazeniKrizovatky.toPx() + sirkaUlice - odsazeni - sirkaBusu / 2,
+//                            degrees = bus.rotation.degrees.toFloat(),
+//                            isTurnRight = false,
+//                        ) {
+//                            malovat()
+//                        }
+//
+//                        pozice > turnLength.toPx() && turn == TurnType.RoundaboutReturn -> translate(
+//                            left = delkaUlice - predsazeniKrizovatky.toPx(),
+//                            top = sirkaUlice / 2,
+//                        ) {
+//                            val r = sirkaUlice / 2 - odsazeni - sirkaBusu / 2
+//                            translate(
+//                                left = -(pozice - turnLength.toPx()),
+//                                top = -r,
+//                            ) {
+//                                malovat()
+//                            }
+//                        }
+//
+//                        turn is TurnType.Roundabout -> translate(
+//                            pivot = Offset(
+//                                x = delkaUlice - predsazeniKrizovatky.toPx(),
+//                                y = sirkaUlice + predsazeniKrizovatky.toPx(),
+//                            ),
+//                            radius = predsazeniKrizovatky.toPx() + odsazeni + sirkaBusu / 2,
+//                            degrees = bus.rotation.degrees.toFloat(),
+//                            isTurnRight = true,
+//                        ) {
+//                            malovat()
+//                        }
                     }
                 }
             }

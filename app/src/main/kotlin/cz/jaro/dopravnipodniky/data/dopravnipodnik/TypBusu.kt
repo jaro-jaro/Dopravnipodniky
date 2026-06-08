@@ -3,14 +3,13 @@ package cz.jaro.dopravnipodniky.data.dopravnipodnik
 import androidx.compose.ui.unit.Dp
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.serializers.TypBusuSerializer
-import cz.jaro.dopravnipodniky.shared.jednotky.Metr
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.PenizZaMinutu
 import cz.jaro.dopravnipodniky.shared.jednotky.Velocity
+import cz.jaro.dopravnipodniky.shared.sumOfDp
 import cz.jaro.dopravnipodniky.shared.zaokrouhlit
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlin.collections.isNotEmpty
 import kotlin.time.Duration
 
 @Serializable(with = TypBusuSerializer::class)
@@ -33,7 +32,7 @@ data class TypBusu(
 
     init {
         require(clanky.isNotEmpty())
-        require(clanky.sumOf { it.value }.zaokrouhlit(3) == delka.value.zaokrouhlit(3)) { "${clanky.sumOf { it.value }.zaokrouhlit(3)} != ${delka.value.zaokrouhlit(3)}" }
+        require(clanky.sumOfDp { it }.value.toDouble().zaokrouhlit(3) == delka.value.toDouble().zaokrouhlit(3)) { "${clanky.sumOfDp { it }.value.toDouble().zaokrouhlit(3)} != ${delka.value.toDouble().zaokrouhlit(3)}" }
     }
 }
 

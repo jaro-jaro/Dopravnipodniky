@@ -1,17 +1,16 @@
 package cz.jaro.dopravnipodniky.data.dopravnipodnik
 
-import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.shared.BusID
 import cz.jaro.dopravnipodniky.shared.LinkaID
 import cz.jaro.dopravnipodniky.shared.Smer
 import cz.jaro.dopravnipodniky.shared.Smer.Pozitivni
 import cz.jaro.dopravnipodniky.shared.jednotky.Angle
-import cz.jaro.dopravnipodniky.shared.jednotky.AngularVelocity
 import cz.jaro.dopravnipodniky.shared.jednotky.PenizZaMinutu
-import cz.jaro.dopravnipodniky.shared.jednotky.Velocity
-import cz.jaro.dopravnipodniky.shared.jednotky.kilometersPerHour
-import cz.jaro.dopravnipodniky.shared.jednotky.rad
-import cz.jaro.dopravnipodniky.shared.jednotky.radiansPerSecond
+import cz.jaro.dopravnipodniky.shared.jednotky.Vector
+import cz.jaro.dopravnipodniky.shared.jednotky.deg
+import cz.jaro.dopravnipodniky.shared.odsazeniBusu
+import cz.jaro.dopravnipodniky.shared.predsazeniKrizovatky
+import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.ui.malovani.SerializableDp
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -34,10 +33,13 @@ data class Bus(
     val smerNaLince: Smer = Pozitivni,
     /** Index ulice na lince v daném směru */
     val poziceNaLince: Int = 0,
-    val poziceVUlici: SerializableDp = 0.dp,
+    val poziceVUlici: SerializableDp = predsazeniKrizovatky,
     val stavZastavky: StavZastavky = StavZastavky.Pred,
+    /** Pozice zadní nápravy busu od počátku ulice ve směru doprava */
+    val position: Vector<SerializableDp> = Vector(predsazeniKrizovatky, sirkaUlice - odsazeniBusu - typBusu.sirka / 2),
+    val rotation: Angle = 0.deg,
 ) {
-    override fun toString() = "Bus(evCislo=$evCislo,typBusu=$typBusu)"
+//    override fun toString() = "Bus(evCislo=$evCislo,typBusu=$typBusu)"
 
     /**
      * @see <a href="https://www.desmos.com/calculator/0ezs54c4kg">Desmos</a>

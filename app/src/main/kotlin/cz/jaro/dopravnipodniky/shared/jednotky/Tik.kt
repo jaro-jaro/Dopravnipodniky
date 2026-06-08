@@ -5,22 +5,21 @@ import cz.jaro.dopravnipodniky.shared.millisPerTik
 import cz.jaro.dopravnipodniky.shared.seconds
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlin.math.roundToLong
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 @Serializable
 @SerialName("Tik")
 @JvmInline
-value class Tik(val value: Long) : Comparable<Tik> {
+value class Tik(val value: Double) : Comparable<Tik> {
     operator fun rem(other: Tik) = Tik(value % other.value)
     operator fun plus(other: Tik) = Tik(value + other.value)
 
     override fun compareTo(other: Tik) = value.compareTo(other.value)
 }
 
-val Int.tiku get() = Tik(this.toLong())
-val Long.tiku get() = Tik(this)
+val Int.tiku get() = Tik(this.toDouble())
+val Long.tiku get() = Tik(this.toDouble())
 
-fun Duration.toTiky() = Tik((seconds * TPS).roundToLong())
+fun Duration.toTiky() = Tik(seconds * TPS)
 fun Tik.toDuration() = (value * millisPerTik).milliseconds

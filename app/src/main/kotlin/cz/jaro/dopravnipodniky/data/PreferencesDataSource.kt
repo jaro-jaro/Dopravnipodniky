@@ -125,6 +125,7 @@ class PreferencesDataSource(
 
     private val json = Json {
         allowSpecialFloatingPointValues = true
+        ignoreUnknownKeys = true
     }
 
     init {

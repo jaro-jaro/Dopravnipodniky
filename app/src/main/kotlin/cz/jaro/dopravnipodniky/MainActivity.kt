@@ -54,6 +54,7 @@ import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.stavHry
+import cz.jaro.dopravnipodniky.shared.vychoziStavHry
 import cz.jaro.dopravnipodniky.shared.zpomalit
 import cz.jaro.dopravnipodniky.ui.Loading
 import cz.jaro.dopravnipodniky.ui.nav.NavDisplay
@@ -68,10 +69,12 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
 import org.koin.dsl.module
+import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
 
 var zobrazitLoading by mutableStateOf(true)
 var uplnePoprve = true
@@ -80,7 +83,7 @@ var lifecycleState: StateFlow<Lifecycle.State>? = null
 
 class MainActivity : ComponentActivity() {
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -119,13 +122,13 @@ class MainActivity : ComponentActivity() {
                             // zistovani jestli nejses moc dlouho pryc
                             val posledniId = dpInfo!!.id
 
-                            val dobaOdPosledniNavstevy = dpInfo!!.dobaOdPoslednihoHrani
+                            val dobaOdPosledniNavstevy = dpInfo!!.dobaOdPoslednihoHrani.coerceAtMost(8.hours)
 //                        println(ubehlo)
 //                        println(dobaOdPosledniNavstevy)
 //                        println(stavHry)
 
                             when (val stav = stavHry) {
-                                is StavHry.Hra -> {
+                                is StavHry.Hra, is StavHry.PomalaHra -> {
                                     if (dobaOdPosledniNavstevy < 0.milliseconds) {
 //                                        dosahlovac.dosahni(Dosahlost.Citer::class) TODO
 //                                    stavHry = StavHry.Dohaneni(zbyva = -dobaOdPosledniNavstevy)
@@ -133,7 +136,7 @@ class MainActivity : ComponentActivity() {
                                         dataSource.upravitDPInfo { info ->
                                             if (posledniId != info.id) info
                                             else info.copy(
-                                                casPosledniNavstevy = System.currentTimeMillis(),
+                                                casPosledniNavstevy = Clock.System.now(),
                                             )
                                         }
                                         return@registerListener
@@ -174,7 +177,7 @@ class MainActivity : ComponentActivity() {
                                     stavHry = stav.copy(zbyva = stav.zbyva - ubehlo)
                                     if (stav.zbyva < 10.seconds) {
                                         vyuctovani = null
-                                        stavHry = StavHry.Hra
+                                        stavHry = vychoziStavHry
                                     }
                                 }
 
@@ -191,7 +194,7 @@ class MainActivity : ComponentActivity() {
                                     casPosledniNavstevy = info.casPosledniNavstevy + ubehlo.let {
                                         if (stavHry is StavHry.Simulace) it// / stavHry.zrychleni.toDouble()
                                         else it
-                                    }.inWholeMilliseconds
+                                    }
                                 )
                             }
                         }

@@ -58,9 +58,11 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.random.Random
+import kotlin.time.ExperimentalTime
 
 private val json = Json { prettyPrint = true }
 
+@OptIn(ExperimentalTime::class)
 @Composable
 fun DopravniPodnik(
     tentoDP: DopravniPodnik,
@@ -188,7 +190,7 @@ fun DopravniPodnik(
     Text(
         text = stringResource(
             R.string.rozloha,
-            dp.plocha.value.formatovat().composeString(),
+            dp.plocha.dpSquared.formatovat().composeString(),
         ),
         modifier = Modifier
             .fillMaxWidth()

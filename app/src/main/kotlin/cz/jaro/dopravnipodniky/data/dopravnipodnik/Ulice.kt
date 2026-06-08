@@ -5,8 +5,8 @@ import cz.jaro.dopravnipodniky.shared.Orientace.Svisle
 import cz.jaro.dopravnipodniky.shared.Orientace.Vodorovne
 import cz.jaro.dopravnipodniky.shared.Smer
 import cz.jaro.dopravnipodniky.shared.UliceID
-import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
+import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.ui.malovani.SerializableDp
@@ -114,8 +114,5 @@ val Ulice.krizovatky get() = listOf(zacatek, konec)
 operator fun Ulice.contains(other: Vector<UlicovyBlok>) = other == zacatek || other == konec
 
 infix fun Ulice.x(other: Ulice) = krizovatky.find { it in other.krizovatky }
-
-fun Ulice.pocetLinek(dp: DopravniPodnik) = dp.linky.count { id in it.ulice }
-fun Ulice.pocetLinek(linky: List<Linka>) = linky.count { id in it.ulice }
 
 val Ulice.maZastavku get() = zastavka != null

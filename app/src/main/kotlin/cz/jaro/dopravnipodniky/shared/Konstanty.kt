@@ -39,7 +39,6 @@ val zaobleniBaraku = 5.dp
 val sirkaZastavky = 2.5.dp
 val delkaZastavky = 18.dp
 val posunutiZastavky = 41.dp
-val odsazeniZastavky = (-10).dp
 val odsazeniCarZastavky = sirkaChodniku + .25.dp
 val sirkaSloupku = .5.dp
 val tloustkaSloupku = .2.dp
@@ -80,7 +79,8 @@ val barvaTroleje = Color(32, 32, 32)
 // Rychlost hry
 
 //const val FPS = 60
-var stavHry by mutableStateOf<StavHry>(StavHry.Hra)
+val vychoziStavHry = StavHry.Hra
+var stavHry by mutableStateOf<StavHry>(vychoziStavHry)
 val TPS get() = stavHry.tps
 val millisPerTik get() = 1000L / TPS
 val zrychlovacHry get() = stavHry.zrychleni
@@ -110,8 +110,8 @@ val pocatecniDeatilGenerace = DetailGeneraceV2(
 
 // Zisk
 
-const val nasobitelZiskuPoOffline = .20
 const val nasobitelZisku = 5
+const val nasobitelZiskuPoOffline = nasobitelZisku * .04
 const val idealniInterval = 3.5
 
 // Ceny

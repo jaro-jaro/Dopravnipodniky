@@ -27,8 +27,7 @@ data class Linka(
 fun Linka.busy(dp: DopravniPodnik) = busy(dp.busy)
 fun Linka.busy(busy: List<Bus>) = busy.filter { it.linka == id }
 
-fun Linka.ulice(dp: DopravniPodnik) =
-    dp.ulice.filter { it.id in ulice }.sortedBy { ulice.indexOf(it.id) }
+fun Linka.ulice(dp: DopravniPodnik) = dp.getStreets(ulice)
 
 fun List<Ulice>.jsouVsechnyZatrolejovane() = all { it.maTrolej }
 

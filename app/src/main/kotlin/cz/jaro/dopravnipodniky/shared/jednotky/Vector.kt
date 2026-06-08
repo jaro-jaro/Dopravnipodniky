@@ -4,6 +4,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.times
 import cz.jaro.dopravnipodniky.shared.helpers.toDp
 import cz.jaro.dopravnipodniky.shared.helpers.toPx
 import kotlinx.serialization.SerialName
@@ -36,6 +37,7 @@ data class Vector<T : Comparable<T>>(
 operator fun Vector<Dp>.minus(other: Dp) = Vector(x - other, y - other)
 operator fun Vector<Dp>.plus(other: Dp) = Vector(x + other, y + other)
 operator fun Vector<Dp>.plus(other: Vector<Dp>) = Vector(x + other.x, y + other.y)
+operator fun Vector<Double>.times(other: Dp) = Vector(x * other, y * other)
 
 fun Vector<UlicovyBlok>.sousedi() = listOf(
     x - 1.ulicovychBloku to y,

@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationCity
 import androidx.compose.material.icons.filled.MoreVert
@@ -68,9 +69,11 @@ import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.generace.DetailGeneraceV2
 import cz.jaro.dopravnipodniky.data.generace.Generator
 import cz.jaro.dopravnipodniky.shared.Menic
+import cz.jaro.dopravnipodniky.shared.StavHry
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
+import cz.jaro.dopravnipodniky.shared.stavHry
 import cz.jaro.dopravnipodniky.ui.nav.Route
 import cz.jaro.dopravnipodniky.ui.theme.Theme
 import kotlinx.coroutines.CoroutineScope
@@ -81,6 +84,7 @@ import java.time.LocalDate
 import kotlin.math.pow
 import kotlin.random.Random
 import kotlin.reflect.KClass
+import kotlin.time.ExperimentalTime
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -125,7 +129,7 @@ fun CombinedIconButton(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, ExperimentalTime::class)
 fun MainAppBar(
     dp: DopravniPodnik,
     dosahni: (KClass<out Dosahlost>) -> Unit,
@@ -183,6 +187,14 @@ fun MainAppBar(
             }
         },
         actions = {
+            if (BuildConfig.DEBUG) IconButton(
+                onClick = {
+                    if (stavHry == StavHry.PomalaHra) stavHry = StavHry.Hra
+                    else if (stavHry == StavHry.Hra) stavHry = StavHry.PomalaHra
+                },
+            ) {
+                Icon(Icons.Default.FastForward, stringResource(R.string.uspechy))
+            }
             if (
                 !(vse.tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
                 !(vse.tutorial je StavTutorialu.Tutorialujeme.Linky) &&

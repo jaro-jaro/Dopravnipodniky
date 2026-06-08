@@ -8,6 +8,10 @@ sealed class StavHry(
     val tps: Int,
     val zrychleni: Float,
 ) {
+    data object PomalaHra : StavHry(
+        tps = 1,
+        zrychleni = 1 / 60F,
+    )
     data object Hra : StavHry(
         tps = 60,
         zrychleni = 1F,

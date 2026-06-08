@@ -6,8 +6,8 @@ import cz.jaro.dopravnipodniky.shared.BusID
 import cz.jaro.dopravnipodniky.shared.DPID
 import cz.jaro.dopravnipodniky.shared.LinkaID
 import cz.jaro.dopravnipodniky.shared.UliceID
-import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
+import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.dp2
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.penezZaMin
@@ -20,7 +20,8 @@ import cz.jaro.dopravnipodniky.ui.theme.Theme
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 @Serializable
 @SerialName("DopravniPodnik")
@@ -31,6 +32,7 @@ data class DopravniPodnik(
     val info: DPInfo,
     val krizovatky: List<Krizovatka>
 ) {
+    @OptIn(ExperimentalTime::class)
     constructor(
         jmenoMesta: String,
         ulicove: List<Ulice>,
@@ -76,7 +78,8 @@ fun DopravniPodnik.linka(id: LinkaID): Linka =
 
 fun DopravniPodnik.bus(id: BusID): Bus = busy.find { bus -> id == bus.id } ?: throw IndexOutOfBoundsException("tentoBusNeexistuje")
 
-val DPInfo.dobaOdPoslednihoHrani get() = (System.currentTimeMillis() - casPosledniNavstevy).milliseconds
+@OptIn(ExperimentalTime::class)
+val DPInfo.dobaOdPoslednihoHrani get() = (Clock.System.now() - casPosledniNavstevy)
 
 val DopravniPodnik.velikostMesta
     get() = Pair(
