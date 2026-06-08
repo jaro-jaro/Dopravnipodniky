@@ -16,8 +16,8 @@ android {
         applicationId = "cz.jaro.dopravnipodniky"
         minSdk = 26
         targetSdk = 37
-        versionCode = 7
-        versionName = "3.0.5"
+        versionCode = 8
+        versionName = "3.0.6-alpha.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
