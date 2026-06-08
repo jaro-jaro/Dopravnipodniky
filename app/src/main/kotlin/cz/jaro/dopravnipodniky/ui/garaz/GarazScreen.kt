@@ -81,6 +81,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.Trakce
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ikonka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.jsouVsechnyZatrolejovane
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.placeOnStreetBeginning
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.rozmistitBusy
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
@@ -496,12 +497,10 @@ fun GarazScreen(
                                                                 Modifier.clickable {
                                                                     menic.zmenitBusy {
                                                                         replaceBy(
-                                                                            bus.copy(
-                                                                                linka = linka.id,
-                                                                                poziceNaLince = 0,
-                                                                                poziceVUlici = 0.dp,
-                                                                                smerNaLince = Smer.Pozitivni,
-                                                                                stavZastavky = StavZastavky.Pred
+                                                                            bus.placeOnStreetBeginning(
+                                                                                line = linka.id,
+                                                                                directionOnLine = Smer.Pozitivni,
+                                                                                positionOnLine = 0,
                                                                             )
                                                                         ) { it.id }
                                                                     }

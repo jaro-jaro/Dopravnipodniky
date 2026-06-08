@@ -1,3 +1,5 @@
+@file:Suppress("DSL_MARKER_APPLIED_TO_WRONG_TARGET")
+
 package cz.jaro.dopravnipodniky.shared
 
 import android.graphics.Paint
@@ -8,10 +10,12 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.DrawScopeMarker
 import androidx.compose.ui.graphics.drawscope.DrawStyle
+import androidx.compose.ui.graphics.drawscope.DrawTransform
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.PointerInputScope
@@ -32,6 +36,7 @@ import cz.jaro.dopravnipodniky.shared.helpers.toPx
 import cz.jaro.dopravnipodniky.shared.jednotky.Angle
 import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.Velocity
+import cz.jaro.dopravnipodniky.shared.jednotky.degrees
 import cz.jaro.dopravnipodniky.shared.jednotky.dpPerSecond
 import cz.jaro.dopravnipodniky.shared.jednotky.radians
 import cz.jaro.dopravnipodniky.shared.jednotky.radiansPerSecond
@@ -201,30 +206,67 @@ fun DrawScope.drawArc(
     blendMode = blendMode,
 )
 
-inline fun DrawScope.translate(
+@DrawScopeMarker
+fun DrawTransform.translate(
     offset: Offset = Offset.Zero,
-    block: DrawScope.() -> Unit
 ) = translate(
     left = offset.x,
     top = offset.y,
-    block = block,
 )
 
-fun DrawScope.translate(
+@DrawScopeMarker
+fun DrawTransform.rotate(
+    angle: Angle,
+    pivot: Offset = Offset.Zero,
+) = rotate(
+    degrees = angle.degrees.toFloat(),
+    pivot = pivot,
+)
+
+@DrawScopeMarker
+fun DrawTransform.translate(
     radius: Float,
     degrees: Float,
     pivot: Offset,
     isTurnRight: Boolean,
-    block: DrawScope.() -> Unit,
-) = translate(pivot) {
+) {
+    translate(pivot)
     val x = radius * sin(Math.toRadians(degrees.toDouble())).toFloat()
     val y = radius * cos(Math.toRadians(degrees.toDouble())).toFloat()
     translate(
         left = x * if (isTurnRight) 1 else -1,
         top = y * if (isTurnRight) -1 else 1,
-        block = block,
     )
 }
+
+inline fun DrawScope.translate(
+    offset: Offset = Offset.Zero,
+    block: DrawScope.() -> Unit,
+) = withTransform({ translate(
+    offset = offset,
+) }, block)
+
+inline fun DrawScope.rotate(
+    angle: Angle,
+    pivot: Offset = Offset.Zero,
+    block: DrawScope.() -> Unit,
+) = withTransform({ rotate(
+    angle = angle,
+    pivot = pivot
+) }, block)
+
+inline fun DrawScope.translate(
+    radius: Float,
+    degrees: Float,
+    pivot: Offset,
+    isTurnRight: Boolean,
+    block: DrawScope.() -> Unit,
+) = withTransform({ translate(
+    radius = radius,
+    degrees = degrees,
+    pivot = pivot,
+    isTurnRight = isTurnRight,
+) }, block)
 
 fun <T, K> MutableList<T>.replaceBy(newValue: T, selector: (T) -> K) {
     val i = indexOfFirst { selector(it) == selector(newValue) }

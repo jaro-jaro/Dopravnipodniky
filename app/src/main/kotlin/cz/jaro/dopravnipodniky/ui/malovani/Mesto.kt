@@ -58,7 +58,7 @@ fun Mesto(
         dp.linky,
     ) {
         dp.busy.map { bus ->
-            getNamalovatBus(bus, dp)
+            getBusDrawFunction(bus, dp)
         }
     }
 

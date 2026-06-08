@@ -79,6 +79,8 @@ data class Ulice(
     }
 }
 
+val Ulice.origin get() = Vector(zacatekX, zacatekY)
+
 fun Ulice.orientedInLine(line: List<Ulice>) =
     orientedInLine(directionInLine(line))
 

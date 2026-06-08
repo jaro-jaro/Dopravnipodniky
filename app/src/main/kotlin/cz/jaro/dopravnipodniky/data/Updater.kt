@@ -1,6 +1,7 @@
 package cz.jaro.dopravnipodniky.data
 
 import android.util.Log
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
@@ -15,6 +16,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.Zastavka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.bonusoveVydajeZaNeekologicnost
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.busy
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.directionInLine
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.firstSegmentLength
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.getStreets
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.jsouVsechnyZatrolejovane
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.kapacitaZastavky
@@ -22,6 +24,7 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.krizovatkyNaLince
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.orientedInLine
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.placeOnStreetBeginning
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ulice
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlovac
@@ -31,6 +34,7 @@ import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.Text
 import cz.jaro.dopravnipodniky.shared.TurnType
 import cz.jaro.dopravnipodniky.shared.arcLength
+import cz.jaro.dopravnipodniky.shared.busRearAxlePosition
 import cz.jaro.dopravnipodniky.shared.delkaUlice
 import cz.jaro.dopravnipodniky.shared.delkaZastavky
 import cz.jaro.dopravnipodniky.shared.dobaPobytuNaZastavce
@@ -48,17 +52,20 @@ import cz.jaro.dopravnipodniky.shared.jednotky.div
 import cz.jaro.dopravnipodniky.shared.jednotky.formatovat
 import cz.jaro.dopravnipodniky.shared.jednotky.formatovatBezEura
 import cz.jaro.dopravnipodniky.shared.jednotky.kilometersPerHour
+import cz.jaro.dopravnipodniky.shared.jednotky.minus
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.jednotky.penezZaMin
+import cz.jaro.dopravnipodniky.shared.jednotky.plus
+import cz.jaro.dopravnipodniky.shared.jednotky.r
 import cz.jaro.dopravnipodniky.shared.jednotky.sin
 import cz.jaro.dopravnipodniky.shared.jednotky.sumOfPenizZaMinutu
+import cz.jaro.dopravnipodniky.shared.jednotky.theta
 import cz.jaro.dopravnipodniky.shared.jednotky.tiku
 import cz.jaro.dopravnipodniky.shared.jednotky.times
 import cz.jaro.dopravnipodniky.shared.jednotky.toDuration
 import cz.jaro.dopravnipodniky.shared.length
 import cz.jaro.dopravnipodniky.shared.nahodnostProjetiZastavky
 import cz.jaro.dopravnipodniky.shared.nasobitelZisku
-import cz.jaro.dopravnipodniky.shared.odsazeniBusu
 import cz.jaro.dopravnipodniky.shared.posunutiZastavky
 import cz.jaro.dopravnipodniky.shared.predsazeniKrizovatky
 import cz.jaro.dopravnipodniky.shared.reversedIfNegative
@@ -75,6 +82,7 @@ import cz.jaro.dopravnipodniky.shared.udrzbaTroleje
 import cz.jaro.dopravnipodniky.shared.udrzbaZastavky
 import cz.jaro.dopravnipodniky.shared.vecne
 import cz.jaro.dopravnipodniky.shared.vecneLinky
+import cz.jaro.dopravnipodniky.shared.zustaniVKrizovatce
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -342,20 +350,20 @@ private suspend fun updateBusAndPeopleMovement(
         val turn = turnType(nextIntersection, street, nextStreet)
 
         if (bus.poziceVUlici < (delkaUlice - predsazeniKrizovatky) || turn == TurnType.Straight) {
-
-
             bus = bus.copy(
-                poziceVUlici = bus.poziceVUlici,
-                position = Vector(
-                    bus.poziceVUlici,
-                    sirkaUlice - odsazeniBusu - bus.typBusu.sirka / 2,
+                position = bus.position.copy(
+                    x = bus.poziceVUlici,
                 ),
-                rotation = 0.deg,
+                segmentEndsPosition = bus.segmentEndsPosition.map { (oldPos) ->
+                    oldPos + Vector(x = ds) to 0.deg
+                },
             )
 
-            if (bus.poziceVUlici >= delkaUlice + sirkaUlice + predsazeniKrizovatky) // dokončil průjezd křižovatkou
+            if (bus.poziceVUlici >= delkaUlice + sirkaUlice + predsazeniKrizovatky + zustaniVKrizovatce)
+                // dokončil průjezd křižovatkou
                 bus = moveToNextStreet(bus, line)
-        } else { // Je v křižovatce
+        } else {
+            // Je v křižovatce
             var position = bus.position
             var rotation = bus.rotation
 
@@ -389,24 +397,23 @@ private suspend fun updateBusAndPeopleMovement(
                 rotation = turnPartRotationOffset + turnPart.entryAndExitAngle * step(positionInTurnSubPart)
                 val a = if (turnPart.entryAndExitAngle < 0.deg) 180.deg else 0.deg
 
-                position = Vector(
-                    position.x + turnPart.signedEntryAndExitLength * cos(rotation + a) * du,
-                    position.y + turnPart.signedEntryAndExitLength * sin(rotation + a) * du,
-                )
+                position += turnPart.signedEntryAndExitLength * Vector(
+                    x = cos(rotation + a),
+                    y = sin(rotation + a),
+                ) * du
 
             } else if (offsetInTurnPart < turnPart.entryLength + turnPart.arcLength) {
                 val positionInTurnSubPart = ((offsetInTurnPart - turnPart.entryLength) / turnPart.arcLength)
                     .coerceIn(0F, 1F).toDouble()
                 val du = ds / turnPart.arcLength
 
-                val newRotation = turnPartRotationOffset + turnPart.entryAngle + turnPart.arcAngle * positionInTurnSubPart
+                rotation = turnPartRotationOffset + turnPart.entryAngle + turnPart.arcAngle * positionInTurnSubPart
                 val a = if (turnPart.arcAngle < 0.deg) 180.deg else 0.deg
 
-                position = Vector(
-                    position.x + turnPart.signedArcLength * cos(rotation + a) * du,
-                    position.y + turnPart.signedArcLength * sin(rotation + a) * du,
-                )
-                rotation = newRotation
+                position += turnPart.signedArcLength * Vector(
+                    x = cos(rotation + a),
+                    y = sin(rotation + a),
+                ) * du
             } else {
                 val positionInTurnSubPart = ((offsetInTurnPart - turnPart.arcLength) / turnPart.entryAndExitLength)
                     .coerceIn(.5F, 1F).toDouble()
@@ -415,19 +422,44 @@ private suspend fun updateBusAndPeopleMovement(
                 rotation = turnPartRotationOffset + turnPart.arcAngle + turnPart.entryAndExitAngle * step(positionInTurnSubPart)
                 val a = if (turnPart.entryAndExitAngle < 0.deg) 180.deg else 0.deg
 
-                position = Vector(
-                    position.x + turnPart.signedEntryAndExitLength * cos(rotation + a) * du,
-                    position.y + turnPart.signedEntryAndExitLength * sin(rotation + a) * du,
-                )
+                position += turnPart.signedEntryAndExitLength * Vector(
+                    x = cos(rotation + a),
+                    y = sin(rotation + a),
+                ) * du
             }
 
+            val busVector = Vector(bus.firstSegmentLength, rotation)
+            val busCenterPosition = position - busRearAxlePosition * busVector + .5 * busVector
+
+            data class SegmentInfo(val center: Vector<Dp>, val vector: Vector<Dp>)
+
+            val info = bus.segmentEndsPosition.zip(bus.typBusu.clanky.drop(1)) {
+                    (oldPos, oldAngle), segmentLength,
+                ->
+                SegmentInfo(oldPos, Vector(segmentLength, oldAngle))
+            }
+
+            val segmentEndsPosition = info
+                .scan(SegmentInfo(busCenterPosition, busVector)) { previousNew, thisOld ->
+                    val thisOldBack = thisOld.center - .5 * thisOld.vector
+                    val previousNewBack = previousNew.center - .5 * previousNew.vector
+
+                    val newAngle = (previousNewBack - thisOld.center).theta
+                    val thisNewVector = Vector(thisOld.vector.r, newAngle)
+                    val thisNewCenter = previousNewBack - .5 * thisNewVector
+                    SegmentInfo(thisNewCenter, thisNewVector)
+                }
+                .drop(1)
+                .map { it.center to it.vector.theta }
+
             bus = bus.copy(
-                poziceVUlici = bus.poziceVUlici,
                 position = position,
                 rotation = rotation,
+                segmentEndsPosition = segmentEndsPosition,
             )
 
-            if (bus.poziceVUlici >= (delkaUlice - predsazeniKrizovatky) + turnLength) { // dokončil průjezd křižovatkou
+            if (bus.poziceVUlici >= (delkaUlice - predsazeniKrizovatky) + turnLength + zustaniVKrizovatce) {
+                // dokončil průjezd křižovatkou
                 bus = moveToNextStreet(bus, line)
             }
         }
@@ -449,12 +481,8 @@ private fun moveToNextStreet(
 ): Bus {
     var bus = oldBus
 
-    bus = bus.copy(
-        poziceVUlici = predsazeniKrizovatky,
-        position = Vector(predsazeniKrizovatky, sirkaUlice - odsazeniBusu - bus.typBusu.sirka / 2),
-        rotation = 0.deg,
-        stavZastavky = StavZastavky.Pred,
-        poziceNaLince = bus.poziceNaLince + 1,
+    bus = bus.placeOnStreetBeginning(
+        positionOnLine = bus.poziceNaLince + 1,
     )
 
     if (bus.poziceNaLince >= line.ulice.size) { // dojel na konec linky

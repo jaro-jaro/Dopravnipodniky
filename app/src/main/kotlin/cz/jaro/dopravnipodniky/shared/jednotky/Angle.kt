@@ -1,5 +1,6 @@
 package cz.jaro.dopravnipodniky.shared.jednotky
 
+import androidx.compose.ui.unit.Dp
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.math.cos
@@ -35,5 +36,9 @@ val Long.deg get() = Angle(this / 180.0)
 fun sin(angle: Angle) = sin(angle.radians)
 fun cos(angle: Angle) = cos(angle.radians)
 fun tan(angle: Angle) = tan(angle.radians)
+fun asin(number: Double) = kotlin.math.asin(number).rad
+fun acos(number: Double) = kotlin.math.acos(number).rad
+fun atan(number: Double) = kotlin.math.atan(number).rad
+fun atan2(y: Dp, x: Dp) = kotlin.math.atan2(y.value, x.value).rad
 
 operator fun Number.times(other: Angle) = Angle(toDouble() * other.straightAngles)

@@ -27,6 +27,7 @@ val delkaUlice = ulicovyBlok
 val sirkaUlice = 10.dp
 val sirkaChodniku = 2.dp
 val predsazeniKrizovatky = 15.dp
+val zustaniVKrizovatce = 30.dp
 
 // Barák
 val odsazeniBaraku = 6.dp
@@ -48,6 +49,7 @@ val sirkaCary = .2.dp
 // Bus
 val odsazeniBusu = sirkaChodniku + .25.dp
 val zakladniSirkaBusu = 2.500.dp
+const val busRearAxlePosition = .25F
 
 // Troleje
 val sirkaTroleje = .2.dp

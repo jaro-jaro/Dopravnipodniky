@@ -47,10 +47,10 @@ val Linka.rozmistitBusy: MutableList<Bus>.() -> Unit
 
             val index = indexOfFirst { it.id == bus.id }
 
-            this[index] = this[index].copy(
-                smerNaLince = if (!jeDruhySmer) Smer.Pozitivni else Smer.Negativni,
-                poziceNaLince = indexUlice.roundToInt() % ulice.size,
-                poziceVUlici = poziceVUlici,
+            this[index] = this[index].placeOnStreet(
+                directionOnLine = if (!jeDruhySmer) Smer.Pozitivni else Smer.Negativni,
+                positionOnLine = indexUlice.roundToInt() % ulice.size,
+                positionInStreet = poziceVUlici,
             )
         }
     }
