@@ -88,7 +88,7 @@ fun Mesto(
                     )
                 )
 
-                dp.seznamKrizovatek.forEach { (pozice, krizovatka) ->
+                dp.seznamKrizovatek.forEach { [pozice, krizovatka] ->
                     namalovatKrizovatku(dp.ulice, pozice, krizovatka)
                 }
 
@@ -119,7 +119,7 @@ fun Mesto(
                     dp.ulice.forEach { ulice ->
                         if (ulice.maTrolej) ulice.nakreslitTroleje()
                     }
-                    dp.seznamKrizovatek.forEach { (pozice, krizovatka) ->
+                    dp.seznamKrizovatek.forEach { [pozice, krizovatka] ->
                         nakreslitTrolejeNaKrizovatku(dp.ulice, pozice, krizovatka)
                     }
                 }

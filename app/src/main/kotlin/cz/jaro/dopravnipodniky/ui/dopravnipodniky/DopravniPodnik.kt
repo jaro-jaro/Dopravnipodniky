@@ -1,5 +1,6 @@
 package cz.jaro.dopravnipodniky.ui.dopravnipodniky
 
+import android.content.ClipData
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,11 +21,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import com.chargemap.compose.numberpicker.NumberPicker
 import cz.jaro.better_dialog.AlertDialogManager
@@ -55,7 +56,6 @@ import cz.jaro.dopravnipodniky.snackbarHostState
 import cz.jaro.dopravnipodniky.ui.main.DEBUG_MODE
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.random.Random
 import kotlin.time.ExperimentalTime
@@ -162,12 +162,17 @@ fun DopravniPodnik(
                     .fillMaxWidth()
                     .padding(all = 8.dp),
             )
-            val clipboardManager = LocalClipboardManager.current
+            val clipboard = LocalClipboard.current
             TextButton(
                 onClick = {
-                    clipboardManager.setText(buildAnnotatedString {
-                        append(json.encodeToString(dp.info.detailGenerace))
-                    })
+                    scope.launch {
+                        val clipData = ClipData(
+                            /* label = */ "Detail generace města",
+                            /* mimeTypes = */ arrayOf("application/json"),
+                            /* item = */ ClipData.Item(json.encodeToString(dp.info.detailGenerace))
+                        )
+                        clipboard.setClipEntry(ClipEntry(clipData))
+                    }
                 }
             ) {
                 Text("Zkopírovat detaily generace města")

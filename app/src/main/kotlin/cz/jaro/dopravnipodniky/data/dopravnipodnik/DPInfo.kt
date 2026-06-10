@@ -1,7 +1,7 @@
 package cz.jaro.dopravnipodniky.data.dopravnipodnik
 
 import cz.jaro.dopravnipodniky.data.generace.DetailGenerace
-import cz.jaro.dopravnipodniky.data.serializers.InstantSerializer
+import cz.jaro.dopravnipodniky.data.serializers.InstantMillisSerializer
 import cz.jaro.dopravnipodniky.shared.DPID
 import cz.jaro.dopravnipodniky.shared.Text
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
@@ -20,7 +20,7 @@ data class DPInfo(
     val jizdne: Peniz,
     val jmenoMesta: String,
     val tema: Theme,
-    @Serializable(with = InstantSerializer::class)
+    @Serializable(with = InstantMillisSerializer::class)
     val casPosledniNavstevy: Instant = Clock.System.now(),
     val zisk: PenizZaMinutu,
     val detailZisku: Text,

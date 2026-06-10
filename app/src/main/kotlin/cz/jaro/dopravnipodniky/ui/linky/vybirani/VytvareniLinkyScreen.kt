@@ -63,8 +63,8 @@ import cz.jaro.better_dialog.showMaterial
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.IntersectionType
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.krizovatkyNaLince
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.linka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.rohyMesta
@@ -161,7 +161,7 @@ fun VytvareniLinkyScreen(
     LaunchedEffect(dp.rohyMesta, size) {
         if (size == null) return@LaunchedEffect
         with(density) {
-            val (start, stop) = dp.rohyMesta
+            val [start, stop] = dp.rohyMesta
             val m = start
                 .toDpSKrizovatkama()
                 .minus(ulicovyBlok)
@@ -237,7 +237,7 @@ fun VytvareniLinkyScreen(
             ) {
                 // t - posunuti, p - prostředek, x - max, i - min
 
-                val (start, stop) = dp.rohyMesta
+                val [start, stop] = dp.rohyMesta
                 val m = start.toDpSKrizovatkama()
                     .minus(ulicovyBlok * 2)
                     .toOffsetSPriblizenim(priblizeni)
@@ -412,7 +412,7 @@ fun VytvareniLinkyScreen(
                                 menic.zmenitLinky {
                                     val i = indexOfFirst { it.id == upravovani }
                                     this[i] = this[i].copy(
-                                        ulice = kliklyKrizovatky.windowed(2).map { (prvni, druha) ->
+                                        ulice = kliklyKrizovatky.windowed(2).map { [prvni, druha] ->
                                             dp.ulice.first {
                                                 it.zacatek == minOf(
                                                     prvni,
@@ -454,7 +454,7 @@ fun VytvareniLinkyScreen(
                                         val linka = Linka(
                                             cislo = cisloLinky,
                                             ulice = kliklyKrizovatky.windowed(2)
-                                                .map { (prvni, druha) ->
+                                                .map { [prvni, druha] ->
                                                     dp.ulice.first {
                                                         it.zacatek == minOf(
                                                             prvni,

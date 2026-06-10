@@ -354,7 +354,7 @@ private suspend fun updateBusAndPeopleMovement(
                 position = bus.position.copy(
                     x = bus.poziceVUlici,
                 ),
-                segmentEndsPosition = bus.segmentEndsPosition.map { (oldPos) ->
+                segmentEndsPosition = bus.segmentEndsPosition.map { [oldPos] ->
                     oldPos + Vector(x = ds) to 0.deg
                 },
             )
@@ -434,14 +434,13 @@ private suspend fun updateBusAndPeopleMovement(
             data class SegmentInfo(val center: Vector<Dp>, val vector: Vector<Dp>)
 
             val info = bus.segmentEndsPosition.zip(bus.typBusu.clanky.drop(1)) {
-                    (oldPos, oldAngle), segmentLength,
+                    [oldPos, oldAngle], segmentLength,
                 ->
                 SegmentInfo(oldPos, Vector(segmentLength, oldAngle))
             }
 
             val segmentEndsPosition = info
                 .scan(SegmentInfo(busCenterPosition, busVector)) { previousNew, thisOld ->
-                    val thisOldBack = thisOld.center - .5 * thisOld.vector
                     val previousNewBack = previousNew.center - .5 * previousNew.vector
 
                     val newAngle = (previousNewBack - thisOld.center).theta

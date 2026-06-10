@@ -75,11 +75,11 @@ class Hodiny {
                 if (lifecycleState?.value?.isAtLeast(Lifecycle.State.RESUMED)?.not() == true) return@collect
                 val l1 = tickListeners.toList()
                 l1
-                    .mapIndexed { i, (every, listener) -> Triple(i, every, listener) }
-                    .filter { (i, every, _) ->
+                    .mapIndexed { i, [every, listener] -> Triple(i, every, listener) }
+                    .filter {  [i, every, _] ->
                         tik % every == 0.tiku
                     }
-                    .forEach { (i, _, listener) ->
+                    .forEach { [i, _, listener] ->
                         launch(Dispatchers.IO) {
                             val last = tickTimes[i]
                             val new = Clock.System.now()
@@ -91,11 +91,11 @@ class Hodiny {
                     }
                 val l2 = durationListeners.toList()
                 l2
-                    .mapIndexed { i, (every, listener) -> Triple(i, every, listener) }
-                    .filter { (i, every, _) ->
+                    .mapIndexed { i, [every, listener] -> Triple(i, every, listener) }
+                    .filter { [i, every, _] ->
                         tik % every.toTiky() == 0.tiku
                     }
-                    .forEach { (i, _, listener) ->
+                    .forEach { [i, _, listener] ->
                         launch(Dispatchers.IO) {
                             val last = durationTimes[i]
                             val new = Clock.System.now()

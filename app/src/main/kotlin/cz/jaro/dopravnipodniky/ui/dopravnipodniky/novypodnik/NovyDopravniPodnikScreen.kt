@@ -116,7 +116,7 @@ fun NovyDopravniPodnikScreen(
                         .onSizeChanged { size ->
                             with(density) {
 
-                                val (start, stop) = dp.rohyMesta
+                                val [start, stop] = dp.rohyMesta
                                 val m = start
                                     .toDpSKrizovatkama()
                                     .minus(ulicovyBlok * 2)

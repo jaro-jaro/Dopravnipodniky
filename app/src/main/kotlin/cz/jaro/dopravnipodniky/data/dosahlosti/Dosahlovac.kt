@@ -1,7 +1,10 @@
 package cz.jaro.dopravnipodniky.data.dosahlosti
 
 import cz.jaro.dopravnipodniky.data.PreferencesDataSource
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.time.LocalDateTime
@@ -47,18 +50,15 @@ class Dosahlovac(
         dosahlostCallback.zobrazitSnackbar(novaDosahlost, vse)
     }
 
-    private suspend fun ulozit(novaDosahlost: Dosahlost.NormalniDosahlost): List<Dosahlost.NormalniDosahlost> {
-        var vysledek: List<Dosahlost.NormalniDosahlost>? = null
+    private suspend fun ulozit(novaDosahlost: Dosahlost.NormalniDosahlost) = flow {
         dataSource.upravitDosahlosti {
             add(0, novaDosahlost)
             val ruzne = distinctBy { it::class }
             clear()
             addAll(ruzne)
-            vysledek = this
+            emit(this)
         }
-        while (vysledek == null) Unit
-        return vysledek!!
-    }
+    }.flowOn(Dispatchers.IO).first()
 
     suspend fun dosahni(dosahlostKlass: KClass<out Dosahlost>) {
 

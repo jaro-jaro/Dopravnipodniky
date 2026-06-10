@@ -5,8 +5,8 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.Barak
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypBaraku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.barakuVUlici
-import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
+import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.sousedi
 import cz.jaro.dopravnipodniky.shared.jednotky.to
 import cz.jaro.dopravnipodniky.shared.jednotky.ulicovychBloku
@@ -58,7 +58,7 @@ fun generatorV1(
                     sanceRandom.nextFloat() < novaSance
                 }
                 .map { soused ->
-                    val (zacatek, konec) =
+                    val [zacatek, konec] =
                         if (krizovatka.x < soused.x || krizovatka.y < soused.y) krizovatka to soused else soused to krizovatka
 
                     if (ulicove.none { it.zacatek == zacatek && it.konec == konec }) {

@@ -7,16 +7,16 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Krizovatka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.IntersectionType
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Krizovatka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.Quintuple
 import cz.jaro.dopravnipodniky.shared.barvaTroleje
 import cz.jaro.dopravnipodniky.shared.drawArc
 import cz.jaro.dopravnipodniky.shared.existuje
-import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
+import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
 import cz.jaro.dopravnipodniky.shared.maTrolej
 import cz.jaro.dopravnipodniky.shared.neexistuje
@@ -118,10 +118,10 @@ fun nakreslitTrolejeNaKrizovatku(
 
         // Kreslení rovných trolejí
         if (krizovatka == null || krizovatka.type != IntersectionType.Roundabout) sousediUhly
-            .filter { (soused1, _, soused3, _, _) ->
+            .filter { [soused1, _, soused3, _, _] ->
                 soused1.maTrolej && soused3.maTrolej
             }
-            .forEach { (_, _, _, _, uhel) ->
+            .forEach { [_, _, _, _, uhel] ->
                 rotate(
                     degrees = uhel,
                     pivot = Offset(sirkaUlice / 2F, sirkaUlice / 2F),
@@ -139,17 +139,17 @@ fun nakreslitTrolejeNaKrizovatku(
 
         // Kreslení oblouků
         if (krizovatka == null || krizovatka.type != IntersectionType.Roundabout) sousediUhly
-            .filter { (soused1, _, _, soused4, _) ->
+            .filter { [soused1, _, _, soused4, _] ->
                 soused1.maTrolej && soused4.maTrolej
             }
-            .forEach { (_, soused2, soused3, _, uhel) ->
+            .forEach { [_, soused2, soused3, _, uhel] ->
                 val zatacka = soused2.nemaTrolej && soused3.nemaTrolej
                 rotate(
                     degrees = uhel,
                     pivot = Offset(sirkaUlice / 2F, sirkaUlice / 2F),
                 ) {
                     val predsazeniM = if (zatacka) predsazeniS else predsazeniL
-                    troleje.zip(listOf(predsazeniS, predsazeniS, predsazeniM, predsazeniM)).forEach { (trolej, predsazeni) ->
+                    troleje.zip(listOf(predsazeniS, predsazeniS, predsazeniM, predsazeniM)).forEach { [trolej, predsazeni] ->
                         drawArc(
                             useCenter = false,
                             style = Stroke(
@@ -167,10 +167,10 @@ fun nakreslitTrolejeNaKrizovatku(
 
         // Kreslení otočky
         if (krizovatka == null || krizovatka.type != IntersectionType.Roundabout) sousediUhly
-            .singleOrNull { (soused1, _, _, _, _) ->
+            .singleOrNull { [soused1, _, _, _, _] ->
                 soused1.maTrolej
             }
-            ?.let { (_, soused2, soused3, soused4, uhel) ->
+            ?.let { [_, soused2, soused3, soused4, uhel] ->
                 val posunuti = if (soused3.neexistuje && soused2.existuje == soused4.neexistuje) -predsazeniS else sirkaUlice / 2
 
                 rotate(
@@ -222,10 +222,10 @@ fun nakreslitTrolejeNaKrizovatku(
 
         // Kreslení napojení na kruháč
         if (krizovatka != null && krizovatka.type == IntersectionType.Roundabout) sousediUhly
-            .filter { (soused1, _, _, _, _) ->
+            .filter { [soused1, _, _, _, _] ->
                 soused1.maTrolej
             }
-            .forEach { (_, _, _, _, uhel) ->
+            .forEach { [_, _, _, _, uhel] ->
                 rotate(
                     degrees = uhel,
                     pivot = Offset(sirkaUlice / 2F, sirkaUlice / 2F),
@@ -248,10 +248,10 @@ fun nakreslitTrolejeNaKrizovatku(
 
         // Kreslení napojení na kruháč
         if (krizovatka != null && krizovatka.type == IntersectionType.Roundabout) sousediUhly
-            .filter { (_, _, _, soused4, _) ->
+            .filter { [_, _, _, soused4, _] ->
                 soused4.maTrolej
             }
-            .forEach { (_, soused2, soused3, _, uhel) ->
+            .forEach { [_, soused2, soused3, _, uhel] ->
                 rotate(
                     degrees = uhel,
                     pivot = Offset(sirkaUlice / 2F, sirkaUlice / 2F),

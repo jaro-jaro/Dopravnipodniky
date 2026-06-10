@@ -18,7 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.unit.dp
@@ -46,6 +45,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun Loading() = DpTheme(
@@ -75,7 +75,7 @@ fun Loading() = DpTheme(
                     flow {
                         while (currentCoroutineContext().isActive) {
                             emit(System.currentTimeMillis())
-                            delay(0)
+                            delay(0.milliseconds)
                         }
                     }
                         .flowOn(Dispatchers.IO)
@@ -146,7 +146,7 @@ fun Loading() = DpTheme(
                             width = delkaBusu.toPx(),
                             height = sirkaBusu.toPx(),
                         ),
-                        cornerRadius = CornerRadius(3F.dp.toPx())
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(3F.dp.toPx())
                     )
                     drawRoundRect(
                         color = Barvicka.Cervena.barva,
@@ -158,7 +158,7 @@ fun Loading() = DpTheme(
                             width = delkaBusu.toPx(),
                             height = sirkaBusu.toPx(),
                         ),
-                        cornerRadius = CornerRadius(3F.dp.toPx())
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(3F.dp.toPx())
                     )
                 }
             }

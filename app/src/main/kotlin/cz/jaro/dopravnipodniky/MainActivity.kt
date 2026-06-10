@@ -65,9 +65,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
-import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
+import org.koin.core.module.dsl.viewModel
+import org.koin.dsl.koinConfiguration
 import org.koin.dsl.module
 import kotlin.time.Clock
 import kotlin.time.Duration
@@ -98,13 +99,15 @@ class MainActivity : ComponentActivity() {
                 val dataSource = koinInject<PreferencesDataSource>()
                 val dpInfoFlow = remember { dataSource.dpInfo }
                 val temaFlow = remember { dpInfoFlow.map { it.tema } }
-                val loading = remember { temaFlow.map {
-                    if (zobrazitLoading && uplnePoprve) {
-                        delay(5.seconds)
-                        uplnePoprve = false
-                        zobrazitLoading = false
+                val loading = remember {
+                    temaFlow.map {
+                        if (zobrazitLoading && uplnePoprve) {
+                            delay(5.seconds)
+                            uplnePoprve = false
+                            zobrazitLoading = false
+                        }
                     }
-                } }
+                }
 
                 val dpInfo by dpInfoFlow.collectAsStateWithLifecycle(null)
                 val tema by temaFlow.collectAsStateWithLifecycle(null)
@@ -122,7 +125,7 @@ class MainActivity : ComponentActivity() {
                             // zistovani jestli nejses moc dlouho pryc
                             val posledniId = dpInfo!!.id
 
-                            val dobaOdPosledniNavstevy = dpInfo!!.dobaOdPoslednihoHrani.coerceAtMost(8.hours)
+                            val dobaOdPosledniNavstevy = dpInfo!!.dobaOdPoslednihoHrani
 //                        println(ubehlo)
 //                        println(dobaOdPosledniNavstevy)
 //                        println(stavHry)
@@ -151,7 +154,7 @@ class MainActivity : ComponentActivity() {
                                             !(tutorial!! je StavTutorialu.Tutorialujeme.Garaz) &&
                                             !(tutorial!! je StavTutorialu.Tutorialujeme.Obchod)
                                         ) vyuctovani =
-                                            dobaOdPosledniNavstevy//todo.coerceAtMost(8.hours)
+                                            dobaOdPosledniNavstevy.coerceAtMost(8.hours)
                                     } else if (dobaOdPosledniNavstevy > 10.seconds) {
                                         stavHry =
                                             StavHry.PomalaSimulace(zbyva = dobaOdPosledniNavstevy)
@@ -194,7 +197,7 @@ class MainActivity : ComponentActivity() {
                                     casPosledniNavstevy = info.casPosledniNavstevy + ubehlo.let {
                                         if (stavHry is StavHry.Simulace) it// / stavHry.zrychleni.toDouble()
                                         else it
-                                    }
+                                    } + if (dobaOdPosledniNavstevy > 8.hours) (dobaOdPosledniNavstevy - 8.hours) else 0.hours
                                 )
                             }
                         }
@@ -355,32 +358,30 @@ class MainActivity : ComponentActivity() {
 private fun KoinApp(
     context: Context,
     content: @Composable () -> Unit,
-) {
-    KoinApplication(
-        application = {
-            androidContext(context)
-            androidLogger()
-            modules(module {
-                single {
-                    PreferenceDataStoreFactory.create(
-                        migrations = listOf(
-                            NovySystemGeneratoruMigration,
-                            BarakyNemajiBarvuMigration,
-                            NoveKrizovatkyMigration,
-                        )
-                    ) {
-                        get<Context>().preferencesDataStoreFile("DopravniPodniky_DataStore")
-                    }
+) = KoinApplication(
+    configuration = koinConfiguration {
+        androidContext(context)
+        androidLogger()
+        modules(module {
+            single {
+                PreferenceDataStoreFactory.create(
+                    migrations = listOf(
+                        NovySystemGeneratoruMigration,
+                        BarakyNemajiBarvuMigration,
+                        NoveKrizovatkyMigration,
+                    )
+                ) {
+                    get<Context>().preferencesDataStoreFile("DopravniPodniky_DataStore")
                 }
-            })
-            modules(module {
-                single { Hodiny() }
-                single { PreferencesDataSource(get(), get()) }
-                single { Dosahlovac(get()) }
-                single(createdAtStart = true) { Updater(get(), get(), get()) }
-                viewModel { SharedViewModel(get(), get()) }
-            })
-        },
-        content = content,
-    )
-}
+            }
+        })
+        modules(module {
+            single { Hodiny() }
+            single { PreferencesDataSource(get(), get()) }
+            single { Dosahlovac(get()) }
+            single(createdAtStart = true) { Updater(get(), get(), get()) }
+            viewModel { SharedViewModel(get(), get()) }
+        })
+    },
+    content = content,
+)

@@ -1,6 +1,5 @@
 package cz.jaro.dopravnipodniky.ui.garaz
 
-import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -59,9 +58,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -69,7 +66,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cz.jaro.better_dialog.AlertDialogManager
 import cz.jaro.better_dialog.showMaterial
@@ -170,20 +166,6 @@ fun GarazScreen(
     vybratBusy: (List<BusID>) -> Unit,
     zavritVsechny: () -> Unit,
 ) {
-
-    val bg = MaterialTheme.colorScheme.background
-    val sec = MaterialTheme.colorScheme.secondaryContainer
-
-    val view = LocalView.current
-
-    LaunchedEffect(vybraneBusy) {
-        if (!view.isInEditMode) {
-            val window = (view.context as? Activity)?.window ?: return@LaunchedEffect
-            window.statusBarColor = if (vybraneBusy == null) bg.toArgb() else sec.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
-        }
-    }
-
     BackHandler(vybraneBusy != null) {
         zavritVsechny()
     }

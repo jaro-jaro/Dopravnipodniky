@@ -27,11 +27,11 @@ fun getNamalovatLinky(
     val uliceSLinkama = ulicove.map { ulice ->
         ulice to linky.sortedBy { it.cislo }.mapIndexed { i, it -> it to i }.filter { ulice.id in it.first.ulice }
     }
-    return uliceSLinkama.flatMap { (ulice, linky) ->
+    return uliceSLinkama.flatMap { [ulice, linky] ->
         val zacatekX = ulice.zacatekX
         val zacatekY = ulice.zacatekY
 
-        linky.map { (linka, index) ->
+        linky.map { [linka, index] ->
 
             val indexUliceNaLince = linka.ulice.indexOf(ulice.id)
 

@@ -39,15 +39,27 @@ android {
         generateLocaleConfig = true
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 }
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_1_8)
-        freeCompilerArgs.addAll("-Xcontext-parameters", "-Xexplicit-backing-fields", "-XXLanguage:+ExplicitBackingFields", "-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
+        jvmTarget.set(JvmTarget.JVM_11)
+        freeCompilerArgs.add("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode") // For @StringRes
+        freeCompilerArgs.add("-Xallow-contracts-on-more-functions")
+        freeCompilerArgs.add("-Xallow-condition-implies-returns-contracts")
+        freeCompilerArgs.add("-Xallow-holdsin-contract")
+        freeCompilerArgs.add("-Xallow-returns-result-of")
+        freeCompilerArgs.add("-Xallow-reified-type-in-catch")
+        freeCompilerArgs.add("-Xcollection-literals")
+        freeCompilerArgs.add("-Xdata-flow-based-exhaustiveness")
+        freeCompilerArgs.add("-Xcontext-parameters")
+        freeCompilerArgs.add("-Xexplicit-context-arguments")
+        freeCompilerArgs.add("-Xintrinsic-const-evaluation")
+        freeCompilerArgs.add("-Xname-based-destructuring=complete")
+        freeCompilerArgs.add("-Xreturn-value-checker=check")
     }
 }
 
@@ -72,7 +84,6 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
-    implementation(libs.koin.android)
     implementation(libs.koin.navigation)
     implementation(libs.koin.compose)
     implementation(libs.kotlinx.coroutines.core)

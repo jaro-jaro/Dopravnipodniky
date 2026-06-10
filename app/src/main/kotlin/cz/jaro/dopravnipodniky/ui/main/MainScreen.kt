@@ -69,8 +69,8 @@ import cz.jaro.better_dialog.showMaterial
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.Vse
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Krizovatka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.IntersectionType
+import cz.jaro.dopravnipodniky.data.dopravnipodnik.Krizovatka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Zastavka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.krizovatkyNaLince
@@ -90,8 +90,8 @@ import cz.jaro.dopravnipodniky.shared.cenaTroleje
 import cz.jaro.dopravnipodniky.shared.cenaZastavky
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.je
-import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
+import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.jednotky.minus
 import cz.jaro.dopravnipodniky.shared.jednotky.plus
@@ -176,7 +176,7 @@ fun MainScreen(
     LaunchedEffect(dp.ulice.map { it.zacatek to it.konec }, size) {
         if (size == null) return@LaunchedEffect
         with(density) {
-            val (start, stop) = dp.rohyMesta
+            val [start, stop] = dp.rohyMesta
             val m = start
                 .toDpSKrizovatkama()
                 .minus(ulicovyBlok)
@@ -245,7 +245,7 @@ fun MainScreen(
                             .najitObdelnikVeKteremJe(
                                 offset = off,
                                 tx = tx, ty = ty, priblizeni = priblizeni
-                            ) { (pozice, _) ->
+                            ) { [pozice] ->
                                 DpRect(
                                     left = pozice.x.toDpSKrizovatkama() - predsazeniKrizovatky - sirkaUlice / 2,
                                     top = pozice.y.toDpSKrizovatkama() - predsazeniKrizovatky - sirkaUlice / 2,
@@ -253,7 +253,7 @@ fun MainScreen(
                                     bottom = pozice.y.toDpSKrizovatkama() + predsazeniKrizovatky + sirkaUlice * 3 / 2,
                                 )
                             }
-                            ?.let { (pozice, krizovatka) ->
+                            ?.let { [pozice, krizovatka] ->
                                 kliklNaKrizovatku(krizovatka, menic, dp, pozice)
                                 return@detectTapGestures
                             }
@@ -282,7 +282,7 @@ fun MainScreen(
                         scope.launch {
                             // t - posunuti, p - prostředek, x - max, i - min
 
-                            val (start, stop) = pitomyDP.rohyMesta
+                            val [start, stop] = pitomyDP.rohyMesta
                             val m = start
                                 .toDpSKrizovatkama()
                                 .minus(ulicovyBlok * 2)

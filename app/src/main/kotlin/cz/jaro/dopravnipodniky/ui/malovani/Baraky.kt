@@ -26,7 +26,7 @@ fun Barak.draw(
     tema: Theme,
     ulice: Ulice,
 ) = with(drawScope) {
-    val (i, barakJeNaDruheStraneUlice) = ulice.baraky.indexOf(this@draw).let { i ->
+    val [i, barakJeNaDruheStraneUlice] = ulice.baraky.indexOf(this@draw).let { i ->
         val jeNaDruheStrane = i >= ulice.baraky.size / 2
 
         (if (jeNaDruheStrane) i - ulice.baraky.size / 2 else i) to jeNaDruheStrane

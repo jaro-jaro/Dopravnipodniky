@@ -17,6 +17,7 @@ import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.Text
 import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
+import cz.jaro.dopravnipodniky.shared.milliseconds
 import cz.jaro.dopravnipodniky.shared.mutate
 import cz.jaro.dopravnipodniky.zobrazitLoading
 import kotlinx.coroutines.CoroutineScope
@@ -30,10 +31,9 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.koin.core.time.measureDuration
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.measureTime
 
 class PreferencesDataSource(
     private val dataStore: DataStore<Preferences>,
@@ -198,8 +198,8 @@ class PreferencesDataSource(
         if (!LOCK) _prachy.value = update(_prachy.value ?: return@withContext)
     }
 
-    suspend fun upravitDosahlosti(update: suspend MutableList<Dosahlost.NormalniDosahlost>.() -> Unit) = withContext(Dispatchers.IO) {
-        if (!LOCK) _dosahlosti.value = (_dosahlosti.value ?: return@withContext).mutate(update)
+    suspend fun upravitDosahlosti(update: suspend MutableList<Dosahlost.NormalniDosahlost>.() -> Unit) {
+        if (!LOCK) _dosahlosti.value = (_dosahlosti.value ?: return).mutate(update)
     }
 
     suspend fun upravitTutorial(update: suspend (StavTutorialu) -> StavTutorialu) = withContext(Dispatchers.IO) {
@@ -220,13 +220,13 @@ class PreferencesDataSource(
         zobrazitLoading = true
         delay(1.seconds)
         println("MĚNĚNÍ DOPRAVNÍHO PODNIKU!!! AKTUÁLNÍ DP: ${aktualniVse.aktualniDp.info.id}, NOVÉ DP: $dpID")
-        val millis = measureDuration {
+        val millis = measureTime {
             setup(
                 aktualniVse.copy(
                     aktualniDPID = dpID
                 )
             )
-        }
+        }.milliseconds
         println("MĚNĚNÍ DOPRAVNÍHO PODNIKU DOKONČENO ZA ${(millis.formatovat() as Text.Plain).value} ms")
         delay(1.seconds)
         LOCK = false

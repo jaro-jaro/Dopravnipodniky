@@ -1,12 +1,14 @@
 package cz.jaro.dopravnipodniky.ui.garaz.obchod
 
 import androidx.annotation.StringRes
+import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypBusu
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.getNakladyTextem
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.nakladyTextem
 import cz.jaro.dopravnipodniky.shared.Text
 import cz.jaro.dopravnipodniky.shared.toText
+import cz.jaro.dopravnipodniky.ui.malovani.SerializableDp
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Trakce as BusTrakce
@@ -79,38 +81,38 @@ sealed interface SkupinaFiltru<T : SkupinaFiltru.Filtr> {
         @Serializable
         @SerialName("DelkaFiltr")
         data class DelkaFiltr(
-            private val delkaMin: Double,
-            private val delkaMax: Double,
+            private val delkaMin: SerializableDp,
+            private val delkaMax: SerializableDp,
             override val nazevFiltru: Text,
         ) : Filtr {
-            override fun filtrovat(typBusu: TypBusu) = typBusu.delka.value.toFloat() in delkaMin..delkaMax
+            override fun filtrovat(typBusu: TypBusu) = typBusu.delka in delkaMin..delkaMax
         }
 
         override val nazev = R.string.dle_delky.toText()
         override val filtry = listOf(
             DelkaFiltr(
-                delkaMin = 0.0,
-                delkaMax = 11.0,
+                delkaMin = 0.dp,
+                delkaMax = 11.dp,
                 nazevFiltru = R.string.mene_nez_12_m.toText(),
             ),
             DelkaFiltr(
-                delkaMin = 11.0,
-                delkaMax = 14.0,
+                delkaMin = 11.dp,
+                delkaMax = 14.dp,
                 nazevFiltru = R.string._12_m.toText(),
             ),
             DelkaFiltr(
-                delkaMin = 14.0,
-                delkaMax = 17.0,
+                delkaMin = 14.dp,
+                delkaMax = 17.dp,
                 nazevFiltru = R.string._15_m.toText(),
             ),
             DelkaFiltr(
-                delkaMin = 17.0,
-                delkaMax = 19.0,
+                delkaMin = 17.dp,
+                delkaMax = 19.dp,
                 nazevFiltru = R.string._18_m.toText(),
             ),
             DelkaFiltr(
-                delkaMin = 19.0,
-                delkaMax = 119.0,
+                delkaMin = 19.dp,
+                delkaMax = 119.dp,
                 nazevFiltru = R.string.vice_nez_18_m.toText(),
             ),
         )

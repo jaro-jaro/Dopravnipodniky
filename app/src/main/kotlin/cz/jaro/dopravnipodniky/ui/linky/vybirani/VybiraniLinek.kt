@@ -5,8 +5,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.translate
 import cz.jaro.dopravnipodniky.shared.drawRoundRect
-import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
+import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.ui.malovani.Offset
@@ -36,7 +36,7 @@ fun DrawScope.namalovatVybiraniLinky(
         )
     }
 
-    kliklyKrizovatky.windowed(2).forEach { (prvniKrizovatka, druhaKrizovatka) ->
+    kliklyKrizovatky.windowed(2).forEach { [prvniKrizovatka, druhaKrizovatka] ->
 
         val zacatekXPrvni = prvniKrizovatka.x.toDpSKrizovatkama().toPx()
         val zacatekYPrvni = prvniKrizovatka.y.toDpSKrizovatkama().toPx()

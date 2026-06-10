@@ -57,7 +57,7 @@ fun getBusDrawFunction(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
 
     val segments = listOf(
         DrawSegmentInfo(bus.position, bus.rotation, bus.firstSegmentLength, busRearAxlePosition),
-        *bus.segmentEndsPosition.zip(bus.typBusu.clanky.drop(1)) { (position, rotation), length ->
+        *bus.segmentEndsPosition.zip(bus.typBusu.clanky.drop(1)) { [position, rotation], length ->
             DrawSegmentInfo(position, rotation, length, .5F)
         }.toTypedArray()
     )

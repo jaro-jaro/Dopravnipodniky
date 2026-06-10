@@ -10,8 +10,8 @@ import kotlin.time.Instant
 
 
 @OptIn(ExperimentalTime::class)
-object InstantSerializer : KSerializer<Instant> {
-    override val descriptor = PrimitiveSerialDescriptor("kotlin.time.Instant", PrimitiveKind.LONG)
+object InstantMillisSerializer : KSerializer<Instant> {
+    override val descriptor = PrimitiveSerialDescriptor("InstantMillisSerializer", PrimitiveKind.LONG)
     override fun serialize(encoder: Encoder, value: Instant) = encoder.encodeLong(value.toEpochMilliseconds())
     override fun deserialize(decoder: Decoder) = Instant.fromEpochMilliseconds(decoder.decodeLong())
 }

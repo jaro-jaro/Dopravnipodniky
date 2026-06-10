@@ -94,9 +94,9 @@ fun namalovatKrizovatku(
         )
 
         // Napojení křižovatky na sousedy
-        sousediUhly.filter { (soused1, _, _, _, _) ->
+        sousediUhly.filter { [soused1, _, _, _, _] ->
             soused1
-        }.forEach { (_, _, _, _, uhel) ->
+        }.forEach { [_, _, _, _, uhel] ->
             rotate(
                 degrees = uhel,
                 pivot = Offset(sirkaUlice / 2, sirkaUlice / 2),
@@ -110,9 +110,9 @@ fun namalovatKrizovatku(
         }
 
         // Kreslení rovných chodníků
-        if (krizovatka?.type != IntersectionType.Roundabout) sousediUhly.filter { (soused1, soused2, soused3, soused4, _) ->
+        if (krizovatka?.type != IntersectionType.Roundabout) sousediUhly.filter { [soused1, soused2, soused3, soused4, _] ->
             !soused1 && !soused3 || !soused1 && soused2 == soused4
-        }.forEach { (_, soused2, _, soused4, uhel) ->
+        }.forEach { [_, soused2, _, soused4, uhel] ->
             rotate(
                 degrees = uhel,
                 pivot = Offset(sirkaUlice / 2, sirkaUlice / 2),
@@ -138,10 +138,10 @@ fun namalovatKrizovatku(
 
         // Kreslení vnějšího oblouku u křižovatky typu L
         if (krizovatka?.type != IntersectionType.Roundabout) sousediUhly
-            .filter { (soused1, soused2, soused3, soused4, _) ->
+            .filter { [soused1, soused2, soused3, soused4, _] ->
                 soused4 && soused1 && !soused2 && !soused3
             }
-            .forEach { (_, _, _, _, uhel) ->
+            .forEach { [_, _, _, _, uhel] ->
                 rotate(
                     degrees = uhel,
                     pivot = Offset(sirkaUlice / 2F, sirkaUlice / 2F),
@@ -192,10 +192,10 @@ fun namalovatKrizovatku(
 
         // Kreslení vnitřního oblouku
         sousediUhly
-            .filter { (soused1, _, _, soused4, _) ->
+            .filter { [soused1, _, _, soused4, _] ->
                 soused1 && soused4
             }
-            .forEach { (_, _, _, _, uhel) ->
+            .forEach { [_, _, _, _, uhel] ->
                 rotate(
                     degrees = uhel,
                     pivot = Offset(sirkaUlice / 2F, sirkaUlice / 2F),
@@ -236,10 +236,10 @@ fun namalovatKrizovatku(
 
         // Kreslení napojení na kruháč
         if (krizovatka?.type == IntersectionType.Roundabout) sousediUhly
-            .filter { (soused1, _, _, _, _) ->
+            .filter { [soused1, _, _, _, _] ->
                 soused1
             }
-            .forEach { (_, _, _, _, uhel) ->
+            .forEach { [_, _, _, _, uhel] ->
                 rotate(
                     degrees = uhel,
                     pivot = Offset(sirkaUlice / 2F, sirkaUlice / 2F),
@@ -283,10 +283,10 @@ fun namalovatKrizovatku(
 
         // Kreslení napojení na kruháč
         if (krizovatka?.type == IntersectionType.Roundabout) sousediUhly
-            .filter { (_, _, _, soused4, _) ->
+            .filter { [_, _, _, soused4, _] ->
                 soused4
             }
-            .forEach { (_, _, _, _, uhel) ->
+            .forEach { [_, _, _, _, uhel] ->
                 rotate(
                     degrees = uhel,
                     pivot = Offset(sirkaUlice / 2F, sirkaUlice / 2F),

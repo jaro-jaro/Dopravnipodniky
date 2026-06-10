@@ -109,7 +109,7 @@ val DopravniPodnik.typMesta
 //val DPInfo.nevyzvednuto get() = (zisk * dobaOdPoslednihoHrani.coerceAtMost(8.hours)) * nasobitelZiskuPoOffline
 
 val DopravniPodnik.stred
-    get() = rohyMesta.let { (min, max) ->
+    get() = rohyMesta.let { [min, max] ->
         (min.x + max.x) / 2 to (min.y + max.y) / 2
     }
 
