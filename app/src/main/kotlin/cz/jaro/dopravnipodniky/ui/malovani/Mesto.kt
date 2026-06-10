@@ -112,7 +112,7 @@ fun Mesto(
 
                 if (kliklyKrizovatky != null) namalovatVybiraniLinky(
                     kliklyKrizovatky = kliklyKrizovatky,
-                    barva = dp.info.tema.barva,
+                    barva = dp.info.tema.mainColor,
                 )
 
                 if (malovatTroleje) {

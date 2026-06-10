@@ -316,7 +316,7 @@ fun ObchodScreen(
                                     Modifier
                                         .width(48.dp)
                                         .height(48.dp),
-                                    colorFilter = ColorFilter.tint(color = dp.info.tema.barva),
+                                    colorFilter = ColorFilter.tint(color = dp.info.tema.mainColor),
                                 )
                             },
                         )
@@ -433,7 +433,7 @@ fun ObchodScreen(
                                                         callback(it.id)
                                                     },
                                                     leadingContent = {
-                                                        Icon(Icons.Default.Timeline, null, tint = it.barvicka.barva)
+                                                        Icon(Icons.Default.Timeline, null, tint = it.barvicka.color)
                                                     },
                                                 )
                                             }

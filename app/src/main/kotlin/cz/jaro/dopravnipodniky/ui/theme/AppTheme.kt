@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
-fun DpTheme(
+fun AppTheme(
     useDynamicColor: Boolean,
     theme: Theme,
     content: @Composable () -> Unit,

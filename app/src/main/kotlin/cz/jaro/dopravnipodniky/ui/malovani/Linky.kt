@@ -80,7 +80,7 @@ fun getNamalovatLinky(
                             pivot = Offset(x = delkaUlice.toPx() / 2, y = sirkaUlice.toPx() / 2)
                         ) {
                             drawLine(
-                                color = linka.barvicka.barva.copy(alpha = if (jeVybiraniLinky) 2 / 3F else 1F),
+                                color = linka.color.color.copy(alpha = if (jeVybiraniLinky) 2 / 3F else 1F),
                                 start = Offset(
                                     x = -odsazeniVMensiUlici.toPx(),
                                     y = odsazeniOdBoku.toPx(),
@@ -93,7 +93,7 @@ fun getNamalovatLinky(
                                 cap = StrokeCap.Round,
                             )
                             drawLine(
-                                color = linka.barvicka.barva.copy(alpha = if (maPodSebouZastavku) 1 / 3F else if (jeVybiraniLinky) 2 / 3F else 1F),
+                                color = linka.color.color.copy(alpha = if (maPodSebouZastavku) 1 / 3F else if (jeVybiraniLinky) 2 / 3F else 1F),
                                 start = Offset(
                                     x = posunutiZastavky.toPx() - sirka.toPx() / 2,
                                     y = odsazeniOdBoku.toPx(),
@@ -106,7 +106,7 @@ fun getNamalovatLinky(
                                 cap = StrokeCap.Round,
                             )
                             drawLine(
-                                color = linka.barvicka.barva.copy(alpha = if (jeVybiraniLinky) 2 / 3F else 1F),
+                                color = linka.color.color.copy(alpha = if (jeVybiraniLinky) 2 / 3F else 1F),
                                 start = Offset(
                                     x = posunutiZastavky.toPx() + delkaZastavky.toPx() + sirka.toPx() / 2,
                                     y = odsazeniOdBoku.toPx(),

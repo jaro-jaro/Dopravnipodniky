@@ -7,7 +7,7 @@ import cz.jaro.dopravnipodniky.shared.UliceID
 import cz.jaro.dopravnipodniky.shared.delkaUlice
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.ui.linky.rem
-import cz.jaro.dopravnipodniky.ui.theme.Barvicka
+import cz.jaro.dopravnipodniky.ui.theme.LineColor
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.util.UUID
@@ -18,7 +18,7 @@ import kotlin.math.roundToInt
 data class Linka(
     val cislo: String,
     val ulice: List<UliceID> = listOf(),
-    val barvicka: Barvicka,
+    val color: LineColor = LineColor.Red,
     val id: LinkaID = UUID.randomUUID(),
 ) {
     override fun toString() = "Linka(cislo=$cislo,ulice=List(${ulice.size}))"

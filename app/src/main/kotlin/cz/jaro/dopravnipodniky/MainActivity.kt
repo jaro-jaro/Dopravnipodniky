@@ -58,7 +58,7 @@ import cz.jaro.dopravnipodniky.shared.vychoziStavHry
 import cz.jaro.dopravnipodniky.shared.zpomalit
 import cz.jaro.dopravnipodniky.ui.Loading
 import cz.jaro.dopravnipodniky.ui.nav.NavDisplay
-import cz.jaro.dopravnipodniky.ui.theme.DpTheme
+import cz.jaro.dopravnipodniky.ui.theme.AppTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -114,7 +114,7 @@ class MainActivity : ComponentActivity() {
                 loading.collectAsStateWithLifecycle(Unit)
                 val tutorial by dataSource.tutorial.collectAsStateWithLifecycle(null)
 
-                if (tema != null && dpInfo != null) DpTheme(
+                if (tema != null && dpInfo != null) AppTheme(
                     useDynamicColor = false,
                     theme = tema!!
                 ) {

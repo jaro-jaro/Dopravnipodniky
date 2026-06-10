@@ -75,7 +75,7 @@ import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.snackbarHostState
 import cz.jaro.dopravnipodniky.ui.nav.Navigator
 import cz.jaro.dopravnipodniky.ui.nav.Route
-import cz.jaro.dopravnipodniky.ui.theme.Barvicka
+import cz.jaro.dopravnipodniky.ui.theme.LineColor
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -214,7 +214,7 @@ fun LinkyScreen(
                                 ) {
                                     var expanded by remember { mutableStateOf(false) }
                                     var cisloLinky by remember { mutableStateOf(linka.cislo) }
-                                    var barva by remember { mutableStateOf(linka.barvicka) }
+                                    var barva by remember { mutableStateOf(linka.color) }
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.upravit_nazev)) },
                                         onClick = {
@@ -239,7 +239,7 @@ fun LinkyScreen(
                                                             val i = indexOfFirst { it.id == linka.id }
                                                             this[i] = this[i].copy(
                                                                 cislo = cisloLinky,
-                                                                barvicka = barva,
+                                                                color = barva,
                                                             )
                                                         }
 
@@ -265,8 +265,8 @@ fun LinkyScreen(
                                                                     .padding(top = 8.dp)
                                                                     .fillMaxWidth(),
                                                                 readOnly = true,
-                                                                value = stringResource(barva.jmeno),
-                                                                leadingIcon = { Icon(Icons.Default.Circle, null, tint = barva.barva) },
+                                                                value = stringResource(barva.label),
+                                                                leadingIcon = { Icon(Icons.Default.Circle, null, tint = barva.color) },
                                                                 onValueChange = {},
                                                                 label = { Text(stringResource(R.string.barva_linky)) },
                                                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
@@ -278,9 +278,9 @@ fun LinkyScreen(
                                                                 expanded = expanded,
                                                                 onDismissRequest = { expanded = false },
                                                             ) {
-                                                                Barvicka.entries.forEach { tahleBarva ->
+                                                                LineColor.entries.forEach { tahleBarva ->
                                                                     DropdownMenuItem(
-                                                                        text = { Text(stringResource(tahleBarva.jmeno)) },
+                                                                        text = { Text(stringResource(tahleBarva.label)) },
                                                                         onClick = {
                                                                             barva = tahleBarva
                                                                             expanded = false
@@ -289,7 +289,7 @@ fun LinkyScreen(
                                                                             Icon(
                                                                                 Icons.Default.Circle,
                                                                                 null,
-                                                                                tint = tahleBarva.barva
+                                                                                tint = tahleBarva.color
                                                                             )
                                                                         },
                                                                         contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
@@ -412,7 +412,7 @@ fun LinkyScreen(
                                 Modifier
                                     .width(40.dp)
                                     .height(40.dp),
-                                tint = linka.barvicka.barva,
+                                tint = linka.color.color,
                             )
                         },
                     )

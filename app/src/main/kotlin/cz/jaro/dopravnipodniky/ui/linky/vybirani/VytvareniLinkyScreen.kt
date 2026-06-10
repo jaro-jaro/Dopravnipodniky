@@ -92,7 +92,7 @@ import cz.jaro.dopravnipodniky.shared.toOffsetSPriblizenim
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
 import cz.jaro.dopravnipodniky.ui.malovani.Mesto
 import cz.jaro.dopravnipodniky.ui.nav.Navigator
-import cz.jaro.dopravnipodniky.ui.theme.Barvicka
+import cz.jaro.dopravnipodniky.ui.theme.LineColor
 import org.koin.androidx.compose.koinViewModel
 import java.util.UUID
 import kotlin.math.min
@@ -384,7 +384,7 @@ fun VytvareniLinkyScreen(
                     Spacer(modifier = Modifier.weight(1F))
                     var expanded by remember { mutableStateOf(false) }
                     var cisloLinky by remember { mutableStateOf("") }
-                    var barva by remember { mutableStateOf(Barvicka.Cervena) }
+                    var barva by remember { mutableStateOf(LineColor.Red) }
                     val ctx = LocalContext.current
                     Button(
                         onClick = {
@@ -465,7 +465,7 @@ fun VytvareniLinkyScreen(
                                                         )
                                                     }.id
                                                 },
-                                            barvicka = barva
+                                            color = barva
                                         )
 
                                         dosahni(Dosahlost.SkupinovaDosahlost.Linka::class)
@@ -500,8 +500,8 @@ fun VytvareniLinkyScreen(
                                                     .padding(top = 8.dp)
                                                     .fillMaxWidth(),
                                                 readOnly = true,
-                                                value = stringResource(barva.jmeno),
-                                                leadingIcon = { Icon(Icons.Default.Circle, null, tint = barva.barva) },
+                                                value = stringResource(barva.label),
+                                                leadingIcon = { Icon(Icons.Default.Circle, null, tint = barva.color) },
                                                 onValueChange = {},
                                                 label = { Text(stringResource(R.string.barva_linky)) },
                                                 trailingIcon = {
@@ -517,9 +517,9 @@ fun VytvareniLinkyScreen(
                                                 expanded = expanded,
                                                 onDismissRequest = { expanded = false },
                                             ) {
-                                                Barvicka.entries.forEach { tahleBarva ->
+                                                LineColor.entries.forEach { tahleBarva ->
                                                     DropdownMenuItem(
-                                                        text = { Text(stringResource(tahleBarva.jmeno)) },
+                                                        text = { Text(stringResource(tahleBarva.label)) },
                                                         onClick = {
                                                             barva = tahleBarva
                                                             expanded = false
@@ -528,7 +528,7 @@ fun VytvareniLinkyScreen(
                                                             Icon(
                                                                 Icons.Default.Circle,
                                                                 null,
-                                                                tint = tahleBarva.barva
+                                                                tint = tahleBarva.color
                                                             )
                                                         },
                                                         contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,

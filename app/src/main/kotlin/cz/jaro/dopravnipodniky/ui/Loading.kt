@@ -32,8 +32,8 @@ import cz.jaro.dopravnipodniky.shared.odsazeniBusu
 import cz.jaro.dopravnipodniky.shared.sirkaChodniku
 import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.ui.malovani.Offset
-import cz.jaro.dopravnipodniky.ui.theme.Barvicka
-import cz.jaro.dopravnipodniky.ui.theme.DpTheme
+import cz.jaro.dopravnipodniky.ui.theme.AppTheme
+import cz.jaro.dopravnipodniky.ui.theme.LineColor
 import cz.jaro.dopravnipodniky.ui.theme.Theme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
@@ -48,9 +48,9 @@ import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun Loading() = DpTheme(
-    useDynamicColor = true,
-    theme = Theme.Jantarove
+fun Loading() = AppTheme(
+    useDynamicColor = false,
+    theme = Theme.Amber
 ) {
     Surface {
         Column(
@@ -137,7 +137,7 @@ fun Loading() = DpTheme(
                         )
                     )
                     drawRoundRect(
-                        color = Barvicka.Zluta.barva,
+                        color = LineColor.Yellow.color,
                         topLeft = Offset(
                             x = poloha.toPx() + sirka.toPx() / 2,
                             y = sirkaUlice.toPx() - odsazeniBusu.toPx() - sirkaBusu.toPx()
@@ -149,7 +149,7 @@ fun Loading() = DpTheme(
                         cornerRadius = androidx.compose.ui.geometry.CornerRadius(3F.dp.toPx())
                     )
                     drawRoundRect(
-                        color = Barvicka.Cervena.barva,
+                        color = LineColor.Red.color,
                         topLeft = Offset(
                             x = poloha2.toPx() + sirka.toPx() / 2,
                             y = sirkaUlice.toPx() - odsazeniBusu.toPx() - sirkaBusu.toPx()

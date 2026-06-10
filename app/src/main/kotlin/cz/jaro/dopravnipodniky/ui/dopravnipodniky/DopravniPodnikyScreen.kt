@@ -351,7 +351,7 @@ fun DopravniPodnikyScreen(
                                 }
                             },
                             leadingContent = {
-                                Icon(Icons.Default.LocationCity, null, tint = dp.info.tema.barva)
+                                Icon(Icons.Default.LocationCity, null, tint = dp.info.tema.mainColor)
                             },
                         )
                         AnimatedVisibility(expanded) {

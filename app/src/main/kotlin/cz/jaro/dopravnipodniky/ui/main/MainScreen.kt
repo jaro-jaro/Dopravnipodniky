@@ -111,7 +111,7 @@ import cz.jaro.dopravnipodniky.snackbarHostState
 import cz.jaro.dopravnipodniky.ui.malovani.Mesto
 import cz.jaro.dopravnipodniky.ui.nav.Navigator
 import cz.jaro.dopravnipodniky.ui.nav.Route
-import cz.jaro.dopravnipodniky.ui.theme.DpTheme
+import cz.jaro.dopravnipodniky.ui.theme.AppTheme
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -356,7 +356,7 @@ fun MainScreen(
                         onClick = {
                             AlertDialogManager.Global.showBasic(
                                 content = {
-                                    DpTheme(
+                                    AppTheme(
                                         useDynamicColor = false,
                                         theme = dp.info.tema,
                                     ) {

@@ -405,7 +405,7 @@ fun GarazScreen(
                                                 otevreno = null
                                                 prepnoutBus(bus.id)
                                             },
-                                        colorFilter = ColorFilter.tint(color = linka?.barvicka?.barva ?: barvaNepouzivanehoBusu),
+                                        colorFilter = ColorFilter.tint(color = linka?.color?.color ?: barvaNepouzivanehoBusu),
                                     )
                                 }
                             },
@@ -493,7 +493,7 @@ fun GarazScreen(
                                                                     Icon(
                                                                         Icons.Default.Timeline,
                                                                         null,
-                                                                        tint = linka.barvicka.barva
+                                                                        tint = linka.color.color
                                                                     )
                                                                 },
                                                             )
@@ -712,7 +712,7 @@ private fun CoMuzesDelatBusum(
                                     zavritVsechny()
                                     hide()
                                 },
-                                leadingContent = { Icon(Icons.Default.Timeline, null, tint = linka.barvicka.barva) },
+                                leadingContent = { Icon(Icons.Default.Timeline, null, tint = linka.color.color) },
                             )
                         }
                     }

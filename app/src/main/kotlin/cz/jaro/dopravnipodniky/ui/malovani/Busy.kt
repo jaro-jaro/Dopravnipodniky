@@ -87,7 +87,7 @@ fun getBusDrawFunction(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
                 }) {
                     val zaobleni = busWidth / 4
                     drawRoundRect(
-                        color = line.barvicka.barva,
+                        color = line.color.color,
                         topLeft = Offset(
                             x = -it.length.toPx() * it.fractionBehind,
                             y = -busWidth / 2,

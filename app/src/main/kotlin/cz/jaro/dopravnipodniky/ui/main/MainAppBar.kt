@@ -224,7 +224,7 @@ fun MainAppBar(
                                 kapacitaSeed = 19250533,
                                 kruhaceSeed = Random.nextInt(),
                             ),
-                            tema = Theme.Zelene
+                            tema = Theme.Green
                         ) {}
                         menic.zmenitOstatniDopravniPodniky {
                             add(novyDP)
@@ -353,9 +353,9 @@ fun MainAppBar(
                                                 .padding(vertical = 4.dp)
                                                 .fillMaxWidth(),
                                             readOnly = true,
-                                            value = stringResource(tema.jmeno),
+                                            value = stringResource(tema.label),
                                             leadingIcon = {
-                                                Icon(Icons.Default.Circle, null, tint = tema.barva)
+                                                Icon(Icons.Default.Circle, null, tint = tema.mainColor)
                                             },
                                             onValueChange = {},
                                             label = { Text(stringResource(R.string.tema_aplikace)) },
@@ -374,7 +374,7 @@ fun MainAppBar(
                                         ) {
                                             Theme.entries.forEach { tohleTema ->
                                                 DropdownMenuItem(
-                                                    text = { Text(stringResource(tohleTema.jmeno)) },
+                                                    text = { Text(stringResource(tohleTema.label)) },
                                                     onClick = {
                                                         menic.zmenitDPInfo {
                                                             it.copy(
@@ -388,7 +388,7 @@ fun MainAppBar(
                                                         Icon(
                                                             Icons.Default.Circle,
                                                             null,
-                                                            tint = tohleTema.barva
+                                                            tint = tohleTema.mainColor
                                                         )
                                                     },
                                                     contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,

@@ -14,7 +14,7 @@ object Generator {
 
         Generator(
             detailGenerace = pocatecniDeatilGenerace,
-            tema = Theme.Jantarove,
+            tema = Theme.Amber,
         ) {}
     }
 

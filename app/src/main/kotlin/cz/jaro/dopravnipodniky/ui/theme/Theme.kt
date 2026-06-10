@@ -1,97 +1,79 @@
 package cz.jaro.dopravnipodniky.ui.theme
 
+import androidx.annotation.StringRes
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 import cz.jaro.dopravnipodniky.R
 
 enum class Theme(
     val darkColorScheme: ColorScheme,
-    val jmeno: Int,
-    val barva: Color,
+    @StringRes
+    val label: Int,
+    val mainColor: Color,
 ) {
-//    Cerne(
-//        darkColorScheme = colorsCerne,
-//        jmeno = R.string.cerne,
-//        barva = t0,
-//    ),
-    Cervene(
-        darkColorScheme = colorsCervene,
-        jmeno = R.string.cervene,
-        barva = t1,
+    Red(
+        darkColorScheme = redColors,
+        label = R.string.cervene,
+        mainColor = redA700,
     ),
-    Ruzove(
-        darkColorScheme = colorsRuzove,
-        jmeno = R.string.ruzove,
-        barva = t2,
+    Pink(
+        darkColorScheme = pinkColors,
+        label = R.string.ruzove,
+        mainColor = pinkA700,
     ),
-    Fialove(
-        darkColorScheme = colorsFialove,
-        jmeno = R.string.fialove,
-        barva = t3,
+    Purple(
+        darkColorScheme = purpleColors,
+        label = R.string.fialove,
+        mainColor = purpleA700,
     ),
-    SyteFialove(
-        darkColorScheme = colorsSyteFialove,
-        jmeno = R.string.syte_fialove,
-        barva = t4,
+    DeepPurple(
+        darkColorScheme = deepPurpleColors,
+        label = R.string.syte_fialove,
+        mainColor = deepPurpleA700,
     ),
-    Indigove(
-        darkColorScheme = colorsIndigove,
-        jmeno = R.string.indigove,
-        barva = t5,
+    Indigo(
+        darkColorScheme = indigoColors,
+        label = R.string.indigove,
+        mainColor = indigoA700,
     ),
-//    Modre(
-//        darkColorScheme = colorsModre,
-//        jmeno = R.string.modre,
-//        barva = t6,
-//    ),
-    SvetleModre(
-        darkColorScheme = colorsSvetleModre,
-        jmeno = R.string.svetle_modre,
-        barva = t7,
+    LightBlue(
+        darkColorScheme = lightBlueColors,
+        label = R.string.svetle_modre,
+        mainColor = lightBlueA700,
     ),
-    Tyrkysove(
-        darkColorScheme = colorsTyrkysove,
-        jmeno = R.string.tyrkysove,
-        barva = t8,
+    Cyan(
+        darkColorScheme = cyanColors,
+        label = R.string.tyrkysove,
+        mainColor = cyanA700,
     ),
-//    Modrozelene(
-//        darkColorScheme = colorsModrozelene,
-//        jmeno = R.string.modrozelene,
-//        barva = t9,
-//    ),
-    Zelene(
-        darkColorScheme = colorsZelene,
-        jmeno = R.string.zelene,
-        barva = t10,
+    Green(
+        darkColorScheme = greenColors,
+        label = R.string.zelene,
+        mainColor = greenA700,
     ),
-    SvetleZelene(
-        darkColorScheme = colorsSvetleZelene,
-        jmeno = R.string.svetle_zelene,
-        barva = t11,
+    LightGreen(
+        darkColorScheme = lightGreenColors,
+        label = R.string.svetle_zelene,
+        mainColor = lightGreenA700,
     ),
-    Limetkove(
-        darkColorScheme = colorsLimetkove,
-        jmeno = R.string.limetkove,
-        barva = t12,
+    Lime(
+        darkColorScheme = limeColors,
+        label = R.string.limetkove,
+        mainColor = limeA700,
     ),
-    Zlute(
-        darkColorScheme = colorsZlute,
-        jmeno = R.string.zlute,
-        barva = t13,
+    Yellow(
+        darkColorScheme = yellowColors,
+        label = R.string.zlute,
+        mainColor = yellowA700,
     ),
-    Jantarove(
-        darkColorScheme = colorsJantarove,
-        jmeno = R.string.jantarove,
-        barva = t14,
+    Amber(
+        darkColorScheme = amberColors,
+        label = R.string.jantarove,
+        mainColor = amberA700,
     ),
-    Oranzove(
-        darkColorScheme = colorsOranzove,
-        jmeno = R.string.oranzove,
-        barva = t15,
+    Orange(
+        darkColorScheme = orangeColors,
+        label = R.string.oranzove,
+        mainColor = orangeA700,
     ),
-//    SyteOranzove(
-//        darkColorScheme = colorsSyteOranzove,
-//        jmeno = R.string.syte_cervene,
-//        barva = t16,
-//    ),
 }

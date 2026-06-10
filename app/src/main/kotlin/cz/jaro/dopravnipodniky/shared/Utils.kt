@@ -525,8 +525,8 @@ fun IntRange.barvaTematu(tema: Theme): Pair<Color, Color> {
     val indexNoveBarvy2MoznaPretekly = indexZakladniBarvy + last
     val indexNoveBarvy1 = (indexNoveBarvy1MoznaPretekly + Theme.entries.size) % Theme.entries.size
     val indexNoveBarvy2 = (indexNoveBarvy2MoznaPretekly + Theme.entries.size) % Theme.entries.size
-    val barvicka1 = Theme.entries[indexNoveBarvy1].barva
-    val barvicka2 = Theme.entries[indexNoveBarvy2].barva
+    val barvicka1 = Theme.entries[indexNoveBarvy1].mainColor
+    val barvicka2 = Theme.entries[indexNoveBarvy2].mainColor
     return barvicka1 to barvicka2
 }
 
