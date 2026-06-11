@@ -57,6 +57,7 @@ import cz.jaro.dopravnipodniky.shared.stavHry
 import cz.jaro.dopravnipodniky.shared.vychoziStavHry
 import cz.jaro.dopravnipodniky.shared.zpomalit
 import cz.jaro.dopravnipodniky.ui.Loading
+import cz.jaro.dopravnipodniky.ui.fleet.shop.ShopViewModel
 import cz.jaro.dopravnipodniky.ui.nav.NavDisplay
 import cz.jaro.dopravnipodniky.ui.theme.AppTheme
 import kotlinx.coroutines.delay
@@ -362,7 +363,7 @@ private fun KoinApp(
     configuration = koinConfiguration {
         androidContext(context)
         androidLogger()
-        modules(module {
+        modules(module(createdAtStart = true) {
             single {
                 PreferenceDataStoreFactory.create(
                     migrations = listOf(
@@ -374,13 +375,14 @@ private fun KoinApp(
                     get<Context>().preferencesDataStoreFile("DopravniPodniky_DataStore")
                 }
             }
-        })
-        modules(module {
             single { Hodiny() }
             single { PreferencesDataSource(get(), get()) }
             single { Dosahlovac(get()) }
-            single(createdAtStart = true) { Updater(get(), get(), get()) }
+            single { Updater(get(), get(), get()) }
+        })
+        modules(module {
             viewModel { SharedViewModel(get(), get()) }
+            viewModel { ShopViewModel(it.get(), it.get()) }
         })
     },
     content = content,

@@ -113,38 +113,6 @@ class SharedViewModel(
         }
     }
 
-    private val shopSettings = vse.filterNotNull().map { vse ->
-        vse.nastaveni.shopSettings
-    }
-    private val money = vse.filterNotNull().map { vse ->
-        vse.prachy
-    }
-    private val setFiltersByGroup = shopSettings.map { shopSettings ->
-        shopSettings.filters.groupBy { it.group }
-    }
-    private val sortSetting = shopSettings.map { shopSettings ->
-        shopSettings.sort
-    }
-
-    private val onlyFilteredBusTypes = combine(setFiltersByGroup, money) { setFiltersByGroup, money ->
-        typyBusu.asSequence().filter { type ->
-            setFiltersByGroup.all { [group, filters] ->
-                filters.any { filter ->
-                    filter.predicate(type)
-                }
-            }
-        }.filter {
-            if (
-                FilterGroup.HaveEnoughMoneyGroup in setFiltersByGroup &&
-                ShopFilter.HaveEnoughMoney in setFiltersByGroup[FilterGroup.HaveEnoughMoneyGroup]!!
-            ) it.cena <= money else true
-        }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), emptySequence())
-
-    val sortedFilteredBusTypes = combine(onlyFilteredBusTypes, sortSetting) { types, sortSetting ->
-        types.sortedWith(sortSetting.comparator)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), emptySequence())
-
     val dosahni: (KClass<out Dosahlost>) -> Unit = {
         viewModelScope.launch {
             dosahlovac.dosahni(it)
