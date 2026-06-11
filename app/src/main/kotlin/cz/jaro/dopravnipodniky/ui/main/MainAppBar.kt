@@ -72,6 +72,7 @@ import cz.jaro.dopravnipodniky.data.generace.Generator
 import cz.jaro.dopravnipodniky.shared.Menic
 import cz.jaro.dopravnipodniky.shared.StavHry
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
+import cz.jaro.dopravnipodniky.shared.helpers.IconWithTooltip
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
 import cz.jaro.dopravnipodniky.shared.stavHry
@@ -156,7 +157,6 @@ fun MainAppBar(
                     navigate(Route.TransportCompanies)
                 },
                 onLongClick = {
-
                     dosahni(Dosahlost.Kocka::class)
 
                     AlertDialogManager.Global.showMaterial(
@@ -184,7 +184,7 @@ fun MainAppBar(
                     )
                 },
             ) {
-                Icon(Icons.Default.LocationCity, stringResource(R.string.dopravni_podniky))
+                IconWithTooltip(Icons.Default.LocationCity, stringResource(R.string.dopravni_podniky))
             }
         },
         actions = {
@@ -194,7 +194,7 @@ fun MainAppBar(
                     else if (stavHry == StavHry.Hra) stavHry = StavHry.PomalaHra
                 },
             ) {
-                Icon(Icons.Default.FastForward, stringResource(R.string.uspechy))
+                IconWithTooltip(Icons.Default.FastForward, "Zrychlit/zpomalit")
             }
             if (
                 !(vse.tutorial je StavTutorialu.Tutorialujeme.Uvod) &&
@@ -207,7 +207,7 @@ fun MainAppBar(
                     zobrazitDosahlosti(vse.dosahlosti)
                 }
             ) {
-                Icon(Icons.Default.EmojiEvents, stringResource(R.string.uspechy))
+                IconWithTooltip(Icons.Default.EmojiEvents, stringResource(R.string.uspechy))
             }
             if (BuildConfig.DEBUG) IconButton(
                 onClick = {
@@ -224,7 +224,7 @@ fun MainAppBar(
                                 kapacitaSeed = 19250533,
                                 kruhaceSeed = Random.nextInt(),
                             ),
-                            tema = Theme.Green
+                            tema = Theme.Default
                         ) {}
                         menic.zmenitOstatniDopravniPodniky {
                             add(novyDP)
@@ -234,20 +234,8 @@ fun MainAppBar(
                     }
                 }
             ) {
-                Icon(Icons.Default.Refresh, stringResource(R.string.uspechy))
+                IconWithTooltip(Icons.Default.Refresh, "Vytvořit nové úvodní město")
             }
-//            if (BuildConfig.DEBUG) IconButton(
-//                onClick = {
-//                    zrychlovacHry = if (zrychlovacHry == 1F) 60F else 1F
-//                }
-//            ) {
-//                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-//                    Icon(
-//                        if (zrychlovacHry == 1F) Icons.AutoMirrored.Filled.Accessible else Icons.AutoMirrored.Filled.AccessibleForward,
-//                        stringResource(R.string.uspechy)
-//                    )
-//                }
-//            }
             if (vse.tutorial je StavTutorialu.Tutorialujeme.Uvod) IconButton(
                 onClick = {
                     menic.zmenitTutorial {
@@ -255,7 +243,7 @@ fun MainAppBar(
                     }
                 }
             ) {
-                Icon(Icons.AutoMirrored.Filled.Help, stringResource(R.string.tutorial))
+                IconWithTooltip(Icons.AutoMirrored.Filled.Help, stringResource(R.string.tutorial))
             }
             if (vse.tutorial je StavTutorialu.Tutorialujeme.Zastavky) IconButton(
                 onClick = {
@@ -264,7 +252,7 @@ fun MainAppBar(
                     }
                 }
             ) {
-                Icon(Icons.AutoMirrored.Filled.Help, stringResource(R.string.tutorial))
+                IconWithTooltip(Icons.AutoMirrored.Filled.Help, stringResource(R.string.tutorial))
             }
             if (vse.tutorial je StavTutorialu.Tutorialujeme.Garaz) IconButton(
                 onClick = {
@@ -273,7 +261,7 @@ fun MainAppBar(
                     }
                 }
             ) {
-                Icon(Icons.AutoMirrored.Filled.Help, stringResource(R.string.tutorial))
+                IconWithTooltip(Icons.AutoMirrored.Filled.Help, stringResource(R.string.tutorial))
             }
             var show by remember { mutableStateOf(false) }
             var debug by remember { mutableStateOf(DEBUG_MODE) }
@@ -285,7 +273,7 @@ fun MainAppBar(
                     show = !show
                 }
             ) {
-                Icon(Icons.Default.MoreVert, null)
+                IconWithTooltip(Icons.Default.MoreVert, "Další možnosti")
             }
             DropdownMenu(
                 expanded = show,

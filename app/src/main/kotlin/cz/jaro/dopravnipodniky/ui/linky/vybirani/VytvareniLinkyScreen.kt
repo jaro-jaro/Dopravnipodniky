@@ -76,6 +76,7 @@ import cz.jaro.dopravnipodniky.shared.Menic
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.all
+import cz.jaro.dopravnipodniky.shared.helpers.IconWithTooltip
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.minus
 import cz.jaro.dopravnipodniky.shared.jednotky.plus
@@ -281,14 +282,14 @@ fun VytvareniLinkyScreen(
                             }
                         }
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.Help, stringResource(R.string.tutorial))
+                        IconWithTooltip(Icons.AutoMirrored.Filled.Help, stringResource(R.string.tutorial))
                     }
                     IconButton(
                         onClick = {
                             kliklyKrizovatky = emptyList()
                         }
                     ) {
-                        Icon(Icons.Default.Refresh, stringResource(R.string.vyresetovat))
+                        IconWithTooltip(Icons.Default.Refresh, stringResource(R.string.vyresetovat))
                     }
                 },
                 navigationIcon = {
@@ -297,7 +298,7 @@ fun VytvareniLinkyScreen(
                             navigateBack()
                         }
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.zpet))
+                        IconWithTooltip(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.zpet))
                     }
                 },
             )

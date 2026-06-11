@@ -75,5 +75,9 @@ enum class Theme(
         darkColorScheme = orangeColors,
         label = R.string.oranzove,
         mainColor = orangeA700,
-    ),
+    );
+
+    companion object {
+        val Default = Amber
+    }
 }

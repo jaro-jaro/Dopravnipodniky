@@ -27,9 +27,11 @@
     <string name="ev_c_existuje">Toto evidenční číslo již existuej!</string>
     <string name="zadejte_ev_c">Zadejte evidenční číslo nového %su:</string>
     <string name="upravte_ev_c">Upravte evidenční číslo Vašeho %su:</string>
+    <string name="upravit_evc">Upravit evidenční číslo</string>
     <string name="nova_linka">Nová linka</string>
     <string name="zobrazit_na_mape">Zobrazit na mapě</string>
-    <string name="upravit">Upravit</string>
+    <string name="upravit_mesto">Upravit město</string>
+    <string name="dokoncit">Dokončit</string>
     <string name="odstranit">Odstranit</string>
     <string name="hotovo">Hotovo</string>
     <string name="zadejte_cislo_linky">Zadejte číslo linky</string>
@@ -80,6 +82,7 @@
     <string name="potvrdit">Potvrdit</string>
     <string name="o_aplikaci">O aplikaci</string>
     <string name="doba_od_posledniho_otevreni">Od posledního otevření: %s min</string>
+    <string name="otevrit_dp">Otevřít dopravní podnik</string>
     <string name="m_ctverecnych">%s m²</string>
     <string name="obyvatel">%s obyvatel</string>
     <string name="zadna_linka">Bohužel nevlastníte žádnou linku, pro vytvoření stiskněte tlačítko Nová linka</string>
@@ -178,6 +181,7 @@
     <string name="pridat_troleje_nebo_zastavky_linka_dialog">Chcete doopravdy přidat %2$s na celou linku?\n\nCena: %1$s</string>
     <string name="uspesne_pridany_troleje">Úspěšně přidány troleje</string>
     <string name="uspesne_rozmisteno">Úspěšně rozmístěno</string>
+    <string name="rozmistit">Rozmístit vozidla na lince</string>
     <string name="bohuzel_ne_vic_nez_50">Bohužel si nemůžete koupit více než 50 vozidel najednou</string>
     <string name="pridat_zastavky_linka">Přidat zastávky na celou linku</string>
     <string name="troleje">troleje</string>

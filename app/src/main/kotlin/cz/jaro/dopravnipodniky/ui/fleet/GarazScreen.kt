@@ -89,6 +89,7 @@ import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.barvaNepouzivanehoBusu
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
+import cz.jaro.dopravnipodniky.shared.helpers.IconWithTooltip
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.jednotky.sumOfPeniz
@@ -183,7 +184,7 @@ fun GarazScreen(
                                 zavritVsechny()
                             }
                         ) {
-                            Icon(Icons.Default.Check, stringResource(R.string.zpet))
+                            IconWithTooltip(Icons.Default.Check, stringResource(R.string.zpet))
                         }
                     },
                     actions = {
@@ -192,7 +193,7 @@ fun GarazScreen(
                                 vybratBusy(dp.busy.map { it.id })
                             }
                         ) {
-                            Icon(Icons.Default.SelectAll, stringResource(R.string.vybrat_vse))
+                            IconWithTooltip(Icons.Default.SelectAll, stringResource(R.string.vybrat_vse))
                         }
 
                         CoMuzesDelatBusum(
@@ -218,7 +219,7 @@ fun GarazScreen(
                                 navigateBack()
                             }
                         ) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.zpet))
+                            IconWithTooltip(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.zpet))
                         }
                     },
                 )
@@ -375,7 +376,7 @@ fun GarazScreen(
                                             )
                                         }
                                     ) {
-                                        Icon(Icons.Default.Edit, null)
+                                        IconWithTooltip(Icons.Default.Edit, stringResource(R.string.upravit_evc))
                                     }
 //                                    Icon(Icons.Default.LocationSearching, null)
                                 }
@@ -388,9 +389,9 @@ fun GarazScreen(
                                             .height(48.dp),
                                         contentAlignment = Alignment.Center,
                                     ) {
-                                        Icon(
+                                        IconWithTooltip(
                                             if (bus.id.toString() in vybraneBusy) Icons.Outlined.CheckCircle else Icons.Outlined.Circle,
-                                            ""
+                                            if (bus.id.toString() in vybraneBusy) "Vybráno" else "Nevybráno"
                                         )
                                     }
                                 } else {
@@ -572,6 +573,7 @@ fun GarazScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CoMuzesDelatBusum(
     dp: DopravniPodnik,
@@ -647,7 +649,7 @@ private fun CoMuzesDelatBusum(
             )
         }
     ) {
-        Icon(Icons.Default.Euro, stringResource(R.string.prodat))
+        IconWithTooltip(Icons.Default.Euro, stringResource(R.string.prodat))
     }
 
     val ctx = LocalContext.current
@@ -719,5 +721,5 @@ private fun CoMuzesDelatBusum(
                 },
             )
         }
-    ) { Icon(Icons.Default.Timeline, stringResource(R.string.vypravit)) }
+    ) { IconWithTooltip(Icons.Default.Timeline, stringResource(R.string.vypravit)) }
 }

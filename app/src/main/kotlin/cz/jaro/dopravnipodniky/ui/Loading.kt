@@ -50,7 +50,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun Loading() = AppTheme(
     useDynamicColor = false,
-    theme = Theme.Amber
+    theme = Theme.Default,
 ) {
     Surface {
         Column(

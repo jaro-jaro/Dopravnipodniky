@@ -70,6 +70,7 @@ import cz.jaro.dopravnipodniky.shared.Menic
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.cenaTroleje
+import cz.jaro.dopravnipodniky.shared.helpers.IconWithTooltip
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.snackbarHostState
@@ -124,7 +125,7 @@ fun LinkyScreen(
                             navigateBack()
                         }
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.zpet))
+                        IconWithTooltip(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.zpet))
                     }
                 },
             )
@@ -195,7 +196,7 @@ fun LinkyScreen(
                                         }
                                     }
                                 ) {
-                                    Icon(Icons.Default.FormatLineSpacing, null)
+                                    IconWithTooltip(Icons.Default.FormatLineSpacing, stringResource(R.string.rozmistit))
                                 }
 
                                 var show by remember { mutableStateOf(false) }
@@ -204,7 +205,7 @@ fun LinkyScreen(
                                         show = !show
                                     }
                                 ) {
-                                    Icon(Icons.Default.MoreVert, null)
+                                    IconWithTooltip(Icons.Default.MoreVert, "Další možnosti")
                                 }
                                 DropdownMenu(
                                     expanded = show,
@@ -408,7 +409,7 @@ fun LinkyScreen(
                         leadingContent = {
                             Icon(
                                 Icons.Default.Timeline,
-                                stringResource(R.string.ikonka_busiku),
+                                null,
                                 Modifier
                                     .width(40.dp)
                                     .height(40.dp),

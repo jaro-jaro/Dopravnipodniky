@@ -57,6 +57,7 @@ import cz.jaro.dopravnipodniky.shared.Menic
 import cz.jaro.dopravnipodniky.shared.SharedViewModel
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
+import cz.jaro.dopravnipodniky.shared.helpers.IconWithTooltip
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
 import cz.jaro.dopravnipodniky.shared.jednotky.penez
@@ -124,7 +125,7 @@ fun DopravniPodnikyScreen(
                             navigateBack()
                         }
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.zpet))
+                        IconWithTooltip(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.zpet))
                     }
                 },
             )
@@ -344,9 +345,9 @@ fun DopravniPodnikyScreen(
                                         }
                                     }
                                 ) {
-                                    Icon(
+                                    IconWithTooltip(
                                         if (Random.nextFloat() <= .01F) Icons.Default.ShoppingCartCheckout else Icons.AutoMirrored.Filled.Login,
-                                        null
+                                        stringResource(R.string.otevrit_dp)
                                     )
                                 }
                             },

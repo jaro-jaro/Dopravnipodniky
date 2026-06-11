@@ -89,6 +89,7 @@ import cz.jaro.dopravnipodniky.shared.cenaKruhace
 import cz.jaro.dopravnipodniky.shared.cenaTroleje
 import cz.jaro.dopravnipodniky.shared.cenaZastavky
 import cz.jaro.dopravnipodniky.shared.composeString
+import cz.jaro.dopravnipodniky.shared.helpers.IconWithTooltip
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.Vector
@@ -372,9 +373,9 @@ fun MainScreen(
                                                                 hide()
                                                             }
                                                         ) {
-                                                            Icon(
+                                                            IconWithTooltip(
                                                                 Icons.AutoMirrored.Filled.ArrowBack,
-                                                                null
+                                                                stringResource(R.string.zpet)
                                                             )
                                                         }
                                                     }
@@ -397,7 +398,7 @@ fun MainScreen(
                             )
                         }
                     ) {
-                        Icon(Icons.Default.Info, stringResource(R.string.podrobnosti_o_zisku))
+                        IconWithTooltip(Icons.Default.Info, stringResource(R.string.podrobnosti_o_zisku))
                     }
 
                     if (
@@ -447,15 +448,15 @@ fun MainScreen(
                                 label = "Editor",
                             ) {
                                 if (!it)
-                                    Icon(
+                                    IconWithTooltip(
                                         Icons.Default.Edit,
-                                        null,
+                                        stringResource(R.string.upravit_mesto),
                                         Modifier.size(ButtonDefaults.IconSize)
                                     )
                                 else
-                                    Icon(
+                                    IconWithTooltip(
                                         Icons.Default.Done,
-                                        null,
+                                        stringResource(R.string.dokoncit),
                                         Modifier.size(ButtonDefaults.IconSize)
                                     )
                             }
