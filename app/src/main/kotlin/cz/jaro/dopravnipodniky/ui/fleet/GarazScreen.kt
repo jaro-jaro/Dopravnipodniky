@@ -1,4 +1,4 @@
-package cz.jaro.dopravnipodniky.ui.garaz
+package cz.jaro.dopravnipodniky.ui.fleet
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler

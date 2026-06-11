@@ -413,6 +413,8 @@ fun Vector<Dp>.toOffsetSPriblizenim(
 
 fun Offset.odNulaNula(priblizeni: Float) = -this / priblizeni
 
+fun <T> Iterable<T>.toggle(item: T) = if (item in this) this - item else this + item
+
 fun <A, B, C> zip(
     iterableA: Iterable<A>,
     iterableB: Iterable<B>,

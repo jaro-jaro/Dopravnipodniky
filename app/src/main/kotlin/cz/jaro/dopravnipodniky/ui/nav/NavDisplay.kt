@@ -10,8 +10,8 @@ import androidx.navigation3.runtime.serialization.NavBackStackSerializer
 import androidx.navigation3.ui.NavDisplay
 import cz.jaro.dopravnipodniky.ui.dopravnipodniky.DopravniPodnikyScreen
 import cz.jaro.dopravnipodniky.ui.dopravnipodniky.novypodnik.NovyDopravniPodnikScreen
-import cz.jaro.dopravnipodniky.ui.garaz.GarazScreen
-import cz.jaro.dopravnipodniky.ui.garaz.obchod.ObchodScreen
+import cz.jaro.dopravnipodniky.ui.fleet.GarazScreen
+import cz.jaro.dopravnipodniky.ui.fleet.shop.ShopScreen
 import cz.jaro.dopravnipodniky.ui.linky.LinkyScreen
 import cz.jaro.dopravnipodniky.ui.linky.vybirani.VytvareniLinkyScreen
 import cz.jaro.dopravnipodniky.ui.main.MainScreen
@@ -43,7 +43,7 @@ fun NavDisplay(
             entry<Route.Lines>(metadata = metadata) { LinkyScreen(navigator) }
             entry<Route.NewLine>(metadata = metadata) { VytvareniLinkyScreen(it.edit, navigator) }
             entry<Route.Fleet>(metadata = metadata) { GarazScreen(navigator) }
-            entry<Route.Shop>(metadata = metadata) { ObchodScreen(navigator) }
+            entry<Route.Shop>(metadata = metadata) { ShopScreen(navigator) }
             entry<Route.TransportCompanies>(metadata = metadata) { DopravniPodnikyScreen(navigator) }
             entry<Route.NewTransportCompany>(metadata = metadata) { NovyDopravniPodnikScreen(navigator) }
         },

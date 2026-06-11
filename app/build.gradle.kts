@@ -55,11 +55,13 @@ kotlin {
         freeCompilerArgs.add("-Xallow-reified-type-in-catch")
         freeCompilerArgs.add("-Xcollection-literals")
         freeCompilerArgs.add("-Xdata-flow-based-exhaustiveness")
-        freeCompilerArgs.add("-Xcontext-parameters")
         freeCompilerArgs.add("-Xexplicit-context-arguments")
         freeCompilerArgs.add("-Xintrinsic-const-evaluation")
         freeCompilerArgs.add("-Xname-based-destructuring=complete")
         freeCompilerArgs.add("-Xreturn-value-checker=check")
+
+        freeCompilerArgs.add("-Xcontext-parameters")
+        freeCompilerArgs.add("-Xexplicit-backing-fields")
     }
 }
 

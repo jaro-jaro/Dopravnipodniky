@@ -15,9 +15,9 @@ import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlost
 import cz.jaro.dopravnipodniky.data.dosahlosti.Dosahlovac
 import cz.jaro.dopravnipodniky.data.generace.DetailGenerace
 import cz.jaro.dopravnipodniky.data.generace.Generator
+import cz.jaro.dopravnipodniky.data.shop_settings.FilterGroup
+import cz.jaro.dopravnipodniky.data.shop_settings.ShopFilter
 import cz.jaro.dopravnipodniky.shared.jednotky.Peniz
-import cz.jaro.dopravnipodniky.ui.garaz.obchod.SkupinaFiltru
-import cz.jaro.dopravnipodniky.ui.garaz.obchod.SkupinaFiltru.Companion.filtrovat
 import cz.jaro.dopravnipodniky.ui.nav.LocalSharedViewModelStoreOwner
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -112,16 +113,37 @@ class SharedViewModel(
         }
     }
 
-    val filtrovaneBusy =
-        vse.filterNotNull().map { vse ->
-            SkupinaFiltru.skupinyFiltru.fold(typyBusu.asSequence()) { filtrovaneTypy, skupina ->
-                filtrovaneTypy.filtrovat(vse.nastaveni.filtry.filter { it in skupina.filtry })
-            }.filter {
-                if (SkupinaFiltru.Cena.MamNaTo in vse.nastaveni.filtry) it.cena <= vse.prachy
-                else true
-            }.sortedWith(vse.nastaveni.razeni.comparator)
+    private val shopSettings = vse.filterNotNull().map { vse ->
+        vse.nastaveni.shopSettings
+    }
+    private val money = vse.filterNotNull().map { vse ->
+        vse.prachy
+    }
+    private val setFiltersByGroup = shopSettings.map { shopSettings ->
+        shopSettings.filters.groupBy { it.group }
+    }
+    private val sortSetting = shopSettings.map { shopSettings ->
+        shopSettings.sort
+    }
+
+    private val onlyFilteredBusTypes = combine(setFiltersByGroup, money) { setFiltersByGroup, money ->
+        typyBusu.asSequence().filter { type ->
+            setFiltersByGroup.all { [group, filters] ->
+                filters.any { filter ->
+                    filter.predicate(type)
+                }
+            }
+        }.filter {
+            if (
+                FilterGroup.HaveEnoughMoneyGroup in setFiltersByGroup &&
+                ShopFilter.HaveEnoughMoney in setFiltersByGroup[FilterGroup.HaveEnoughMoneyGroup]!!
+            ) it.cena <= money else true
         }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), emptySequence())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), emptySequence())
+
+    val sortedFilteredBusTypes = combine(onlyFilteredBusTypes, sortSetting) { types, sortSetting ->
+        types.sortedWith(sortSetting.comparator)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), emptySequence())
 
     val dosahni: (KClass<out Dosahlost>) -> Unit = {
         viewModelScope.launch {
