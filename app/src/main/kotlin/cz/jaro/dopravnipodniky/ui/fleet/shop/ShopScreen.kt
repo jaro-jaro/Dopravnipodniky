@@ -90,8 +90,8 @@ fun ShopScreen(
 
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    ShopScreen(
-        state = state,
+    if (state != null) ShopScreen(
+        state = state!!,
         onEvent = viewModel::onEvent,
     )
 }
@@ -157,7 +157,7 @@ fun ShopScreen(
                 ) { Text(stringResource(if (state.showState == ShopViewModel.Show.Sort) R.string.schovat_razeni else R.string.radit)) }
             }
             LazyColumn(
-                Modifier.weight(1F)
+                Modifier.weight(1F),
             ) {
                 if (state.showState == ShopViewModel.Show.Filters) items(FilterDisplayOptionGroup.groups) { group ->
                     Text(
@@ -167,7 +167,6 @@ fun ShopScreen(
                     FlowRow(
                         Modifier.padding(horizontal = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         group.filters.forEach { filter ->
                             FilterChip(
@@ -186,7 +185,6 @@ fun ShopScreen(
                     FlowRow(
                         Modifier.padding(horizontal = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         SortDirection.entries.forEach { direction ->
                             val setting = remember {
@@ -198,10 +196,7 @@ fun ShopScreen(
                             FilterChip(
                                 selected = state.shopSettings.sort == setting,
                                 onClick = { onEvent(ShopEvent.SetSort(setting)) },
-                                label = {
-                                    Text(direction.label.composeString())
-                                },
-                                Modifier.padding(end = 8.dp, bottom = 8.dp),
+                                label = { Text(direction.label.composeString()) },
                             )
                         }
                     }

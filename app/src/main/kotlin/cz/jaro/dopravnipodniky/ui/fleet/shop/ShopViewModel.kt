@@ -90,9 +90,9 @@ class ShopViewModel(
     val state = combineStates(
         sortedFilteredBusTypes, vse, showState
     ) { sortedFilteredBusTypes, vse, showState ->
-        ShopState(
+        if (vse == null) null else ShopState(
             buses = sortedFilteredBusTypes.toList(),
-            tutorialState = vse!!.tutorial,
+            tutorialState = vse.tutorial,
             shopSettings = vse.nastaveni.shopSettings,
             money = vse.prachy,
             showState = showState,
