@@ -99,7 +99,7 @@ class MainActivity : ComponentActivity() {
                 val hodiny = koinInject<Hodiny>()
                 val dataSource = koinInject<PreferencesDataSource>()
                 val dpInfoFlow = remember { dataSource.dpInfo }
-                val temaFlow = remember { dpInfoFlow.map { it.tema } }
+                val temaFlow = remember { dpInfoFlow.map { it.theme } }
                 val loading = remember {
                     temaFlow.map {
                         if (zobrazitLoading && uplnePoprve) {

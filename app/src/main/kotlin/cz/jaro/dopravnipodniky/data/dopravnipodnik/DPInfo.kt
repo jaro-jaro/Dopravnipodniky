@@ -19,7 +19,7 @@ import kotlin.time.Instant
 data class DPInfo(
     val jizdne: Peniz,
     val jmenoMesta: String,
-    val tema: Theme,
+    val theme: Theme = Theme.Default,
     @Serializable(with = InstantMillisSerializer::class)
     val casPosledniNavstevy: Instant = Clock.System.now(),
     val zisk: PenizZaMinutu,

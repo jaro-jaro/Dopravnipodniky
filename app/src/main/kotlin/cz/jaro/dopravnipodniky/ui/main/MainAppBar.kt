@@ -267,7 +267,7 @@ fun MainAppBar(
             var debug by remember { mutableStateOf(DEBUG_MODE) }
             var evc by remember { mutableStateOf(vse.nastaveni.automatickyUdelovatEvC) }
             var multi by remember { mutableStateOf(vse.nastaveni.vicenasobnyKupovani) }
-            var tema by remember { mutableStateOf(dp.info.tema) }
+            var tema by remember { mutableStateOf(dp.info.theme) }
             IconButton(
                 onClick = {
                     show = !show
@@ -366,7 +366,7 @@ fun MainAppBar(
                                                     onClick = {
                                                         menic.zmenitDPInfo {
                                                             it.copy(
-                                                                tema = tohleTema
+                                                                theme = tohleTema
                                                             )
                                                         }
                                                         tema = tohleTema

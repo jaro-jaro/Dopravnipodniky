@@ -359,7 +359,7 @@ fun MainScreen(
                                 content = {
                                     AppTheme(
                                         useDynamicColor = false,
-                                        theme = dp.info.tema,
+                                        theme = dp.info.theme,
                                     ) {
                                         Scaffold(
                                             topBar = {

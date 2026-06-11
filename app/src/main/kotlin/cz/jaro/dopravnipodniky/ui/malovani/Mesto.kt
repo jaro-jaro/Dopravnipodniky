@@ -94,7 +94,7 @@ fun Mesto(
 
                 dp.ulice.forEach { ulice ->
                     ulice.baraky.forEach { barak ->
-                        barak.draw(dp.info.tema, ulice)
+                        barak.draw(dp.info.theme, ulice)
                     }
                 }
 
@@ -112,7 +112,7 @@ fun Mesto(
 
                 if (kliklyKrizovatky != null) namalovatVybiraniLinky(
                     kliklyKrizovatky = kliklyKrizovatky,
-                    barva = dp.info.tema.mainColor,
+                    barva = dp.info.theme.mainColor,
                 )
 
                 if (malovatTroleje) {

@@ -48,7 +48,7 @@ data class DopravniPodnik(
             jmenoMesta = jmenoMesta,
             jizdne = 10.penez,
             zisk = 0.penezZaMin,
-            tema = tema,
+            theme = tema,
             id = DPID.randomUUID(),
             detailZisku = "Zatím nemáte žádný detail, kušuj".toText(),
             detailGenerace = detailGenerace,
