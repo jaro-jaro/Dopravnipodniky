@@ -36,8 +36,8 @@ fun getBusDrawFunction(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
     if (bus.linka == null) return {}
     val line = dp.linka(bus.linka)
 
-    val streetIDs = line.ulice.reversedIfNegative(bus.smerNaLince)
-    val streets = dp.getStreets(streetIDs)
+    val streetIDs = line.ulice.reversedIfNegative(bus.smerNaLince).asSequence()
+    val streets = dp.getStreets(streetIDs).toList()
 
     val street = streets[bus.poziceNaLince]
 

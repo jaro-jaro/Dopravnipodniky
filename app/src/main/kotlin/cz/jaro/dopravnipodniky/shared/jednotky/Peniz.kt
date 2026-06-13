@@ -39,3 +39,11 @@ inline fun <T> Iterable<T>.sumOfPeniz(selector: (T) -> Peniz): Peniz {
     }
     return sum
 }
+
+inline fun <T> Sequence<T>.sumOfPeniz(selector: (T) -> Peniz): Peniz {
+    var sum = 0.penez
+    for (element in this) {
+        sum += selector(element)
+    }
+    return sum
+}

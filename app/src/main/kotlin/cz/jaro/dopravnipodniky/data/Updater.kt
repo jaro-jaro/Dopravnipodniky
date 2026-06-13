@@ -3,6 +3,7 @@ package cz.jaro.dopravnipodniky.data
 import android.util.Log
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastCoerceAtLeast
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Bus
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.DPInfo
@@ -129,8 +130,8 @@ private fun update(
 
         val puvodniDp = dataSource.dp.first()
 
-        dataSource.upravitBusy {
-            forEachIndexed { i, oldBus ->
+        puvodniDp.busy.forEach { oldBus ->
+            dataSource.upravitBusy {
                 val bus = updateBusAndPeopleMovement(
                     oldBus,
                     puvodniDp,
@@ -139,9 +140,10 @@ private fun update(
                     dataSource,
                     dosahlovac
                 )
-                this[i] = bus
-            }
+                val i = indexOfFirst { it.id == bus.id }
+                if (i > -1) this[i] = bus
 //                    Log.i("sekání", "tik: ${tik.hezky()}, čas: ${System.currentTimeMillis().hezky()}; Konec posouvání busů")
+            }
         }
     }
 
@@ -312,8 +314,8 @@ private suspend fun updateBusAndPeopleMovement(
     }
 
     val line = oldDP.linka(bus.linka)
-    val streetIDs = line.ulice.reversedIfNegative(bus.smerNaLince)
-    val streets = oldDP.getStreets(streetIDs)
+    val streetIDs = line.ulice.reversedIfNegative(bus.smerNaLince).asSequence()
+    val streets = oldDP.getStreets(streetIDs).toList()
 
     val street = streets[bus.poziceNaLince]
     val nextStreet = streets.getOrNull(bus.poziceNaLince + 1)
@@ -360,7 +362,7 @@ private suspend fun updateBusAndPeopleMovement(
             )
 
             if (bus.poziceVUlici >= delkaUlice + sirkaUlice + predsazeniKrizovatky + zustaniVKrizovatce)
-                // dokončil průjezd křižovatkou
+            // dokončil průjezd křižovatkou
                 bus = moveToNextStreet(bus, line)
         } else {
             // Je v křižovatce
@@ -392,7 +394,7 @@ private suspend fun updateBusAndPeopleMovement(
             if (offsetInTurnPart < turnPart.entryLength) {
                 val positionInTurnSubPart = (offsetInTurnPart / turnPart.entryAndExitLength)
                     .coerceIn(0F, .5F).toDouble()
-                val du = ds / turnPart.entryAndExitLength
+                val du = ds.value.toDouble() / turnPart.entryAndExitLength.value.toDouble()
 
                 rotation = turnPartRotationOffset + turnPart.entryAndExitAngle * step(positionInTurnSubPart)
                 val a = if (turnPart.entryAndExitAngle < 0.deg) 180.deg else 0.deg
@@ -400,12 +402,12 @@ private suspend fun updateBusAndPeopleMovement(
                 position += turnPart.signedEntryAndExitLength * Vector(
                     x = cos(rotation + a),
                     y = sin(rotation + a),
-                ) * du
+                ) integratePositionWithRespectTo du
 
             } else if (offsetInTurnPart < turnPart.entryLength + turnPart.arcLength) {
                 val positionInTurnSubPart = ((offsetInTurnPart - turnPart.entryLength) / turnPart.arcLength)
                     .coerceIn(0F, 1F).toDouble()
-                val du = ds / turnPart.arcLength
+                val du = ds.value.toDouble() / turnPart.arcLength.value.toDouble()
 
                 rotation = turnPartRotationOffset + turnPart.entryAngle + turnPart.arcAngle * positionInTurnSubPart
                 val a = if (turnPart.arcAngle < 0.deg) 180.deg else 0.deg
@@ -417,7 +419,7 @@ private suspend fun updateBusAndPeopleMovement(
             } else {
                 val positionInTurnSubPart = ((offsetInTurnPart - turnPart.arcLength) / turnPart.entryAndExitLength)
                     .coerceIn(.5F, 1F).toDouble()
-                val du = ds / turnPart.entryAndExitLength
+                val du = ds.value.toDouble() / turnPart.entryAndExitLength.value.toDouble()
 
                 rotation = turnPartRotationOffset + turnPart.arcAngle + turnPart.entryAndExitAngle * step(positionInTurnSubPart)
                 val a = if (turnPart.entryAndExitAngle < 0.deg) 180.deg else 0.deg
@@ -826,7 +828,7 @@ fun Bus.vydelkuj(
     if (linka == null) return 0.penezZaMin
 
     val linka = puvodniDp.linka(linka)
-    val ulicove = linka.ulice(puvodniDp)
+    val ulicove = linka.ulice(puvodniDp).toList()
 
     if (typBusu.trakce is Trakce.Trolejbus && !ulicove.jsouVsechnyZatrolejovane()) return 0.penezZaMin
 
@@ -955,4 +957,18 @@ fun Bus.vydelkuj(
     val dobaKola = dobaUlic + dobaKrizovatek
 
     return ziskZaKolo / dobaKola
+}
+
+const val idealIntegrationStep = 0.005
+
+infix fun Vector<Dp>.integratePositionWithRespectTo(
+    du: Double,
+): Vector<Dp> {
+    val iterationsNeeded = (du / idealIntegrationStep).toInt().fastCoerceAtLeast(1)
+    val step = du / iterationsNeeded
+    var result = Vector()
+    repeat(iterationsNeeded) {
+        result += this * step
+    }
+    return result
 }

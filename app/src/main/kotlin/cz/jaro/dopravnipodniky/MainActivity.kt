@@ -57,6 +57,7 @@ import cz.jaro.dopravnipodniky.shared.stavHry
 import cz.jaro.dopravnipodniky.shared.vychoziStavHry
 import cz.jaro.dopravnipodniky.shared.zpomalit
 import cz.jaro.dopravnipodniky.ui.Loading
+import cz.jaro.dopravnipodniky.ui.fleet.FleetViewModel
 import cz.jaro.dopravnipodniky.ui.fleet.shop.ShopViewModel
 import cz.jaro.dopravnipodniky.ui.nav.NavDisplay
 import cz.jaro.dopravnipodniky.ui.theme.AppTheme
@@ -383,6 +384,7 @@ private fun KoinApp(
         modules(module {
             viewModel { SharedViewModel(get(), get()) }
             viewModel { ShopViewModel(it.get(), it.get()) }
+            viewModel { FleetViewModel(it.get(), it.get()) }
         })
     },
     content = content,

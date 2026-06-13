@@ -150,7 +150,7 @@ fun VytvareniLinkyScreen(
     var priblizeni by remember { mutableFloatStateOf(1F) }
     var kliklyKrizovatky by remember {
         mutableStateOf(upravovani?.let { linkaID ->
-            val uliceNaLince = dp.linka(linkaID).ulice(dp)
+            val uliceNaLince = dp.linka(linkaID).ulice(dp).toList()
             uliceNaLince.krizovatkyNaLince()
         } ?: emptyList())
     }

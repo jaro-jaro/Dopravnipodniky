@@ -122,7 +122,7 @@ inline fun <reified T> Iterable<Flow<T>>.combineAll() = combine(this) { it.toLis
 
 
 @OptIn(ExperimentalTypeInference::class)
-fun <T : U, U, R> Flow<T>.compare(initial: U, @BuilderInference compare: suspend (oldValue: U, newValue: T) -> R): Flow<R> {
+fun <T : U, U, R> Flow<T>.compare(initial: U, compare: suspend (oldValue: U, newValue: T) -> R): Flow<R> {
     var oldValue: U = initial
     return flow {
         collect { newValue ->
@@ -133,7 +133,7 @@ fun <T : U, U, R> Flow<T>.compare(initial: U, @BuilderInference compare: suspend
 }
 
 @OptIn(ExperimentalTypeInference::class)
-fun <T, R> Flow<T>.compare(@BuilderInference compare: suspend (oldValue: T?, newValue: T) -> R): Flow<R> {
+fun <T, R> Flow<T>.compare(compare: suspend (oldValue: T?, newValue: T) -> R): Flow<R> {
     var oldValue: T? = null
     return flow {
         collect { newValue ->

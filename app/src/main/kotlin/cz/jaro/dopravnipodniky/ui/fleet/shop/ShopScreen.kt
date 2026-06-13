@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -49,7 +51,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cz.jaro.better_dialog.AlertDialogManager
@@ -71,7 +72,7 @@ import cz.jaro.dopravnipodniky.shared.getSharedViewModel
 import cz.jaro.dopravnipodniky.shared.helpers.IconWithTooltip
 import cz.jaro.dopravnipodniky.shared.je
 import cz.jaro.dopravnipodniky.shared.jednotky.asString
-import cz.jaro.dopravnipodniky.shared.toText
+import cz.jaro.dopravnipodniky.shared.validateRegistrationNumber
 import cz.jaro.dopravnipodniky.snackbarHostState
 import cz.jaro.dopravnipodniky.ui.nav.Navigator
 import cz.jaro.dopravnipodniky.ui.theme.themeColor
@@ -134,14 +135,8 @@ fun ShopScreen(
                     .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text(
-                    text = state.money.asString(),
-                    textAlign = TextAlign.Start,
-                )
-                Text(
-                    text = stringResource(R.string.zobrazeno, state.buses.count()),
-                    textAlign = TextAlign.End,
-                )
+                Text(state.money.asString())
+                Text(stringResource(R.string.zobrazeno, state.buses.count()))
             }
             Row(
                 Modifier
@@ -156,9 +151,7 @@ fun ShopScreen(
                     onClick = { onEvent(ShopEvent.SortButtonClicked) }
                 ) { Text(stringResource(if (state.showState == ShopViewModel.Show.Sort) R.string.schovat_razeni else R.string.radit)) }
             }
-            LazyColumn(
-                Modifier.weight(1F),
-            ) {
+            LazyColumn(Modifier.weight(1F)) {
                 if (state.showState == ShopViewModel.Show.Filters) items(FilterDisplayOptionGroup.groups) { group ->
                     Text(
                         text = group.name.composeString(),
@@ -202,18 +195,19 @@ fun ShopScreen(
                     }
                 }
                 if (state.showState == ShopViewModel.Show.Buses) {
+                    item {
+                        if (state.buses.isEmpty()) Text(
+                            text = stringResource(R.string.moc_filtru),
+                            Modifier.padding(horizontal = 16.dp),
+                        ) else HorizontalDivider()
+                    }
                     items(state.buses, key = { it.model }) { busType ->
                         val busExpanded by remember { derivedStateOf { openedBusModel == busType.model } }
                         BusTypeItem(
                             busType = busType,
                             expanded = busExpanded,
+                            onEvent = onEvent,
                             onClick = { openedBusModel = if (busExpanded) null else busType.model },
-                        )
-                    }
-                    if (state.buses.isEmpty()) item {
-                        Text(
-                            text = R.string.moc_filtru.toText().composeString(),
-                            Modifier.padding(horizontal = 8.dp),
                         )
                     }
                 }
@@ -222,16 +216,19 @@ fun ShopScreen(
     }
 }
 
-@Composable
-private fun LazyItemScope.BusTypeItem(
+context(lazyItemScope: LazyItemScope) @Composable
+private fun BusTypeItem(
     busType: TypBusu,
     expanded: Boolean,
-    onClick: () -> Unit
+    onEvent: (ShopEvent) -> Unit,
+    onClick: () -> Unit,
 ) = Column(
-    Modifier
-        .animateItem()
-        .animateContentSize()
-        .clickable(onClick = onClick),
+    with(lazyItemScope) {
+        Modifier
+            .animateItem()
+            .animateContentSize()
+            .clickable(onClick = onClick)
+    },
 ) {
     ListItem(
         headlineContent = { Text(busType.model) },
@@ -251,7 +248,7 @@ private fun LazyItemScope.BusTypeItem(
         Column(
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp),
+                .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(stringResource(busType.trakce.jmeno))
@@ -262,32 +259,34 @@ private fun LazyItemScope.BusTypeItem(
             val res = LocalResources.current
             Button(
                 onClick = {
-                    ShopEvent.BuyBus(
-                        busType = busType,
-                        callbacks = AskMoreCallbacks,
-                        onComplete = { result ->
-                            scope.launch {
-                                when (result) {
-                                    ShopViewModel.BuyResult.Success -> Unit
-//                                        snackbarHostState.showSnackbar(res.getString(R.string.uspesne_koupeno_tolik_busuu, seznamEvC.size, trakce))
+                    onEvent(
+                        ShopEvent.BuyBus(
+                            busType = busType,
+                            callbacks = AskMoreCallbacks,
+                            onComplete = { result ->
+                                scope.launch {
+                                    when (result) {
+                                        is ShopViewModel.BuyResult.Success -> snackbarHostState.showSnackbar(
+                                            res.getString(R.string.uspesne_koupeno_tolik_busuu, result.count, busType.trakce)
+                                        )
 
-                                    ShopViewModel.BuyResult.NotEnoughMoney ->
-                                        snackbarHostState.showSnackbar(res.getString(R.string.malo_penez))
+                                        ShopViewModel.BuyResult.NotEnoughMoney ->
+                                            snackbarHostState.showSnackbar(res.getString(R.string.malo_penez))
 
-                                    ShopViewModel.BuyResult.CountNotValid ->
-                                        snackbarHostState.showSnackbar(res.getString(R.string.zadejte_validni_pocet))
+                                        ShopViewModel.BuyResult.CountNotValid ->
+                                            snackbarHostState.showSnackbar(res.getString(R.string.zadejte_validni_pocet))
 
-                                    ShopViewModel.BuyResult.TooManyBuses ->
-                                        snackbarHostState.showSnackbar(res.getString(R.string.bohuzel_ne_vic_nez_50))
+                                        ShopViewModel.BuyResult.TooManyBuses ->
+                                            snackbarHostState.showSnackbar(res.getString(R.string.bohuzel_ne_vic_nez_50))
+                                    }
                                 }
                             }
-                        }
-                    )
+                        ))
                 },
-                Modifier
-                    .fillMaxWidth()
-                    .padding(all = 8.dp),
+                Modifier.fillMaxWidth(),
             ) { Text(stringResource(id = R.string.koupit, busType.cena.value.formatovat().composeString())) }
+
+            Spacer(Modifier.height(8.dp))
         }
     }
     HorizontalDivider()
@@ -348,13 +347,12 @@ private object AskMoreCallbacks : ShopViewModel.AskMoreCallbacks {
 
     override fun askForRegistrationNumber(
         busType: TypBusu,
-        validate: (enteredText: String) -> Int?,
         callback: (number: Int) -> Unit
     ) {
         var registrationNumberText by mutableStateOf("")
         AlertDialogManager.Global.showMaterial(
             confirmButton = {
-                val validated by remember { derivedStateOf { validate(registrationNumberText) } }
+                val validated by remember { derivedStateOf { validateRegistrationNumber(registrationNumberText) } }
                 TextButton(
                     enabled = validated != null,
                     onClick = { hide(); callback(validated!!) },

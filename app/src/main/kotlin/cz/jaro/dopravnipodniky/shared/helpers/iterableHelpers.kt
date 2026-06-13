@@ -72,6 +72,12 @@ fun <T> Iterable<T>.countMembers(): Map<T, Int> = fold(mapOf()) { result, elemen
     result.with(element, result.getOrElse(element) { 0 } + 1)
 }
 
+fun <K, V> Map<K, V>.getAll(keys: Sequence<K>): Sequence<V & Any> =
+    keys.mapNotNull(::get)
+
+fun <K, V> Map<K, V>.getAll(keys: Set<K>): Set<V & Any> =
+    keys.mapNotNullTo(mutableSetOf(), ::get)
+
 fun <T> Iterable<T>.takeOnly(n: Int, predicate: (T) -> Boolean): List<T> {
     require(n >= 0) { "Requested element count $n is less than zero." }
     var count = 0
@@ -100,3 +106,9 @@ fun <T> Sequence<T>.nthOrNull(n: Int, predicate: (T) -> Boolean): T? {
         if (predicate(item) && ++index == n) return item
     return null
 }
+
+fun <T> Iterable<Set<T>>.intersect(): Set<T> =
+    reduce(Set<T>::intersect)
+
+fun <T> Sequence<Set<T>>.intersect(): Set<T> =
+    reduce(Set<T>::intersect)

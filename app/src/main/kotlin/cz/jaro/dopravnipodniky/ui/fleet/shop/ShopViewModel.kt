@@ -153,7 +153,7 @@ class ShopViewModel(
             val allLines = dp.value!!.linky
             val lines = when (busType.trakce) {
                 is Trakce.Trolejbus ->
-                    allLines.filter { dp.value!!.getStreets(it.ulice).jsouVsechnyZatrolejovane() }
+                    allLines.filter { dp.value!!.getStreets(it.ulice.toSet()).jsouVsechnyZatrolejovane() }
 
                 else -> allLines
             }
@@ -169,7 +169,6 @@ class ShopViewModel(
         suspend fun askForRegistrationNumber() = suspendCancellableCoroutine { continuation ->
             callbacks.askForRegistrationNumber(
                 busType = busType,
-                validate = { text -> text.toIntOrNull()?.takeIf { it >= 1 } },
                 callback = continuation::resume,
             )
         }
@@ -205,11 +204,16 @@ class ShopViewModel(
         menic.zmenitBusy {
             addAll(newBuses)
         }
-        return BuyResult.Success
+        return BuyResult.Success(busCount)
     }
 
-    enum class BuyResult {
-        Success, NotEnoughMoney, CountNotValid, TooManyBuses,
+    sealed class BuyResult {
+        data class Success(
+            val count: Int,
+        ) : BuyResult()
+        data object NotEnoughMoney : BuyResult()
+        data object CountNotValid : BuyResult()
+        data object TooManyBuses : BuyResult()
     }
 
     interface AskMoreCallbacks {
@@ -226,7 +230,6 @@ class ShopViewModel(
 
         fun askForRegistrationNumber(
             busType: TypBusu,
-            validate: (enteredText: String) -> Int?,
             callback: (number: Int) -> Unit,
         )
     }

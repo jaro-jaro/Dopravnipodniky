@@ -27,9 +27,10 @@ data class Linka(
 fun Linka.busy(dp: DopravniPodnik) = busy(dp.busy)
 fun Linka.busy(busy: List<Bus>) = busy.filter { it.linka == id }
 
-fun Linka.ulice(dp: DopravniPodnik) = dp.getStreets(ulice)
+fun Linka.ulice(dp: DopravniPodnik) = dp.getStreets(ulice.asSequence())
 
-fun List<Ulice>.jsouVsechnyZatrolejovane() = all { it.maTrolej }
+fun Iterable<Ulice>.jsouVsechnyZatrolejovane() = all { it.maTrolej }
+fun Sequence<Ulice>.jsouVsechnyZatrolejovane() = all { it.maTrolej }
 
 val Linka.rozmistitBusy: MutableList<Bus>.() -> Unit
     get() = {

@@ -642,7 +642,7 @@ private fun kliklNaKrizovatku(
                     }
 
                     val spatneLinky = dp.linky.filter { linka ->
-                        linka.ulice(dp).krizovatkyNaLince().let {
+                        linka.ulice(dp).toList().krizovatkyNaLince().let {
                             it.first() == pozice || it.last() == pozice
                         }
                     }

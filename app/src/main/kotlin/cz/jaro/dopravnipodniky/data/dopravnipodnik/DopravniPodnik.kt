@@ -6,6 +6,7 @@ import cz.jaro.dopravnipodniky.shared.BusID
 import cz.jaro.dopravnipodniky.shared.DPID
 import cz.jaro.dopravnipodniky.shared.LinkaID
 import cz.jaro.dopravnipodniky.shared.UliceID
+import cz.jaro.dopravnipodniky.shared.helpers.getAll
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.dp2
@@ -65,18 +66,24 @@ data class DopravniPodnik(
     val kapacita = ulice.sumOf { it.kapacita }
 }
 
-fun DopravniPodnik.ulice(id: UliceID): Ulice =
-    ulice.find { ulice -> id == ulice.id } ?: throw IndexOutOfBoundsException("tatoUliceNeexistuje")
+fun DopravniPodnik.getStreet(id: UliceID): Ulice = ulice.find { it.id == id }
+    ?: throw IndexOutOfBoundsException("Street ID $id does not exist in DP ${info.id} (${info.jmenoMesta})")
 
-fun DopravniPodnik.getStreets(ids: List<UliceID>): List<Ulice> {
-    val streets = ulice.filter { it.id in ids }.associateBy { it.id }
-    return ids.map { streets.getValue(it) }
-}
+// Zachová původní pořadí
+fun DopravniPodnik.getStreets(ids: Sequence<UliceID>) = ulice
+    .filter { it.id in ids }
+    .associateBy { it.id }
+    .getAll(ids)
 
-fun DopravniPodnik.linka(id: LinkaID): Linka =
-    linky.find { linka -> id == linka.id } ?: throw IndexOutOfBoundsException("tatoLinkaNeexistuje")
+fun DopravniPodnik.getStreets(ids: Set<UliceID>): Set<Ulice> = ulice.filterTo(mutableSetOf()) { it.id in ids }
 
-fun DopravniPodnik.bus(id: BusID): Bus = busy.find { bus -> id == bus.id } ?: throw IndexOutOfBoundsException("tentoBusNeexistuje")
+fun DopravniPodnik.linka(id: LinkaID): Linka = linky.find { it.id == id }
+    ?: throw IndexOutOfBoundsException("Line ID $id does not exist in DP ${info.id} (${info.jmenoMesta})")
+
+fun DopravniPodnik.getLines(ids: Set<LinkaID>): Set<Linka> = linky.filterTo(mutableSetOf()) { it.id in ids }
+
+fun DopravniPodnik.getBus(id: BusID): Bus = busy.find { it.id == id }
+    ?: throw IndexOutOfBoundsException("Bus ID $id does not exist in DP ${info.id} (${info.jmenoMesta})")
 
 @OptIn(ExperimentalTime::class)
 val DPInfo.dobaOdPoslednihoHrani get() = (Clock.System.now() - casPosledniNavstevy)
@@ -137,6 +144,6 @@ val DopravniPodnik.seznamPozicKrizovatek
     }
 
 val DopravniPodnik.seznamKrizovatek
-    get () = seznamPozicKrizovatek.associateWith { pozice ->
+    get() = seznamPozicKrizovatek.associateWith { pozice ->
         krizovatky.find { it.pozice == pozice }
     }
