@@ -3,92 +3,151 @@ package cz.jaro.dopravnipodniky.ui.malovani
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
-import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
-import cz.jaro.dopravnipodniky.shared.Orientace
-import cz.jaro.dopravnipodniky.shared.delkaUlice
-import cz.jaro.dopravnipodniky.shared.delkaZastavky
-import cz.jaro.dopravnipodniky.shared.odsazeniCarZastavky
-import cz.jaro.dopravnipodniky.shared.odsazeniSloupku
-import cz.jaro.dopravnipodniky.shared.posunutiZastavky
-import cz.jaro.dopravnipodniky.shared.sirkaCary
-import cz.jaro.dopravnipodniky.shared.sirkaSloupku
-import cz.jaro.dopravnipodniky.shared.sirkaUlice
-import cz.jaro.dopravnipodniky.shared.sirkaZastavky
-import cz.jaro.dopravnipodniky.shared.tloustkaSloupku
+import cz.jaro.dopravnipodniky.shared.curbColor
+import cz.jaro.dopravnipodniky.shared.curbWidth
+import cz.jaro.dopravnipodniky.shared.markingWidth
+import cz.jaro.dopravnipodniky.shared.sidewalkColor
+import cz.jaro.dopravnipodniky.shared.sidewalkWidth
+import cz.jaro.dopravnipodniky.shared.stopEntryLength
+import cz.jaro.dopravnipodniky.shared.stopLength
+import cz.jaro.dopravnipodniky.shared.stopMarkingColor
+import cz.jaro.dopravnipodniky.shared.stopMarkingsOffset
+import cz.jaro.dopravnipodniky.shared.stopOffset
+import cz.jaro.dopravnipodniky.shared.stopPostOffset
+import cz.jaro.dopravnipodniky.shared.stopPostThickness
+import cz.jaro.dopravnipodniky.shared.stopPostWidth
+import cz.jaro.dopravnipodniky.shared.stopWidth
+import cz.jaro.dopravnipodniky.shared.streetColor
+import kotlin.math.sqrt
 
+// Směr vpravo, počátek na spodku ulice
 context(drawScope: DrawScope)
-fun Ulice.namalovatZastavku() = with(drawScope) {
+fun drawStop() = with(drawScope) {
+    val sidewalkWidth = sidewalkWidth.toPx()
+    val curbWidth = curbWidth.toPx()
+    val markingWidth = markingWidth.toPx()
+    val stopOffset = stopOffset.toPx()
+    val stopLength = stopLength.toPx()
+    val stopMarkingsOffset = stopMarkingsOffset.toPx()
+    val stopPostOffset = stopPostOffset.toPx()
+    val stopPostWidth = stopPostWidth.toPx()
+    val stopPostThickness = stopPostThickness.toPx()
+    val stopWidth = stopWidth.toPx()
+    val stopEntryLength = stopEntryLength.toPx()
     translate(
-        left = zacatekX.toPx(),
-        top = zacatekY.toPx(),
+        left = stopOffset,
     ) {
-        when (orientace) {
-            Orientace.Svisle -> {
-                zastavka()
-                rotate(
-                    degrees = 180F,
-                    pivot = Offset(sirkaUlice.toPx() / 2, delkaUlice.toPx() / 2)
-                ) {
-                    zastavka()
-                }
-            }
-            Orientace.Vodorovne -> rotate(
-                degrees = -90F,
-                pivot = Offset.Zero
+        drawRect(
+            color = streetColor,
+            topLeft = cz.jaro.dopravnipodniky.shared.Offset(x = -stopEntryLength),
+            size = Size(stopLength + stopEntryLength * 2, stopWidth),
+        )
+        // Obrubník + chodník pod zastávkou
+        drawRect(
+            color = curbColor,
+            topLeft = cz.jaro.dopravnipodniky.shared.Offset(y = stopWidth),
+            size = Size(stopLength, curbWidth),
+        )
+        drawRect(
+            color = sidewalkColor,
+            topLeft = cz.jaro.dopravnipodniky.shared.Offset(y = stopWidth + curbWidth),
+            size = Size(stopLength, sidewalkWidth),
+        )
+        // Vjezd + výjezd
+        translate(
+            left = -stopEntryLength,
+        ) {
+            drawStopEntry(curbWidth, stopEntryLength, stopWidth, sidewalkWidth)
+        }
+        translate(
+            left = stopLength + stopEntryLength,
+        ) {
+            scale(
+                scaleX = -1F,
+                scaleY = 1F,
+                pivot = cz.jaro.dopravnipodniky.shared.Offset(),
             ) {
-                translate(
-                    left = -sirkaUlice.toPx(),
-                ) {
-                    zastavka()
-                    rotate(
-                        degrees = 180F,
-                        pivot = Offset(sirkaUlice.toPx() / 2, delkaUlice.toPx() / 2)
-                    ) {
-                        zastavka()
-                    }
-                }
+                drawStopEntry(curbWidth, stopEntryLength, stopWidth, sidewalkWidth)
             }
+        }
+        // Čáry
+        translate(
+            left = markingWidth / 2 + stopMarkingsOffset,
+            top = markingWidth / 2 + stopMarkingsOffset,
+        ) {
+            val delkaMalovaneZastavky = stopLength - markingWidth - stopMarkingsOffset * 2
+            val sirkaMalovaneZastavky = stopWidth - markingWidth - stopMarkingsOffset * 2
+            drawRect(
+                color = stopMarkingColor,
+                size = Size(delkaMalovaneZastavky, sirkaMalovaneZastavky),
+                style = Stroke(
+                    width = markingWidth,
+                )
+            )
+            drawLine(
+                color = stopMarkingColor,
+                start = Offset.Zero,
+                end = Offset(delkaMalovaneZastavky, sirkaMalovaneZastavky),
+                strokeWidth = markingWidth
+            )
+            drawLine(
+                color = stopMarkingColor,
+                start = Offset(0F, sirkaMalovaneZastavky),
+                end = Offset(delkaMalovaneZastavky, 0F),
+                strokeWidth = markingWidth
+            )
+        }
+        // Sloupek
+        translate(
+            left = stopLength - stopPostOffset - stopPostThickness,
+            top = stopWidth + curbWidth + stopPostOffset
+        ) {
+            drawRect(
+                color = Color.Black,
+                size = Size(stopPostThickness, stopPostWidth)
+            )
         }
     }
 }
 
-// Směr dolů
-private fun DrawScope.zastavka() {
+private fun DrawScope.drawStopEntry(
+    sirkaObrubniku: Float,
+    delkaVyjezduZeZastavky: Float,
+    sirkaZastavky: Float,
+    sirkaChodniku: Float
+) {
+    drawPath(
+        path = StopEntry(sirkaObrubniku, delkaVyjezduZeZastavky, sirkaZastavky),
+        color = curbColor,
+    )
     translate(
-        top = posunutiZastavky.toPx() + delkaZastavky.toPx(),
-        left = odsazeniSloupku.toPx()
+        top = sirkaObrubniku,
     ) {
-        drawRect(
-            color = Color.Black,
-            size = Size(width = sirkaSloupku.toPx(), height = tloustkaSloupku.toPx())
+        drawPath(
+            path = StopEntry(sirkaChodniku, delkaVyjezduZeZastavky, sirkaZastavky),
+            color = sidewalkColor,
         )
     }
-    translate(
-        top = posunutiZastavky.toPx(),
-        left = odsazeniCarZastavky.toPx(),
-    ) {
-        drawRect(
-            color = Color.Yellow,
-            size = Size(sirkaZastavky.toPx(), delkaZastavky.toPx()),
-            style = Stroke(
-                width = sirkaCary.toPx(),
-            )
-        )
-        drawLine(
-            color = Color.Yellow,
-            start = Offset.Zero,
-            end = Offset(sirkaZastavky.toPx(), delkaZastavky.toPx()),
-            strokeWidth = sirkaCary.toPx()
-        )
-        drawLine(
-            color = Color.Yellow,
-            start = Offset(sirkaZastavky.toPx(), 0F),
-            end = Offset(0F, delkaZastavky.toPx()),
-            strokeWidth = sirkaCary.toPx()
-        )
-    }
+}
+
+@Suppress("FunctionName")
+fun StopEntry(
+    width: Float,
+    length: Float,
+    offset: Float,
+) = Path().apply {
+    val d = width * offset / (sqrt(offset * offset + length * length) + length)
+    relativeLineTo(dx = length, dy = offset)
+    relativeLineTo(dx = 1F, dy = 0F)
+    relativeLineTo(dx = 0F, dy = width)
+    relativeLineTo(dx = -1F, dy = 0F)
+    relativeLineTo(dx = -d, dy = 0F)
+    relativeLineTo(dx = -length, dy = -offset)
+    relativeLineTo(dx = d, dy = -width)
+    close()
 }

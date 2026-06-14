@@ -11,18 +11,18 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.contains
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
 import cz.jaro.dopravnipodniky.shared.Orientace
-import cz.jaro.dopravnipodniky.shared.delkaUlice
-import cz.jaro.dopravnipodniky.shared.delkaZastavky
-import cz.jaro.dopravnipodniky.shared.posunutiZastavky
-import cz.jaro.dopravnipodniky.shared.sirkaChodniku
-import cz.jaro.dopravnipodniky.shared.sirkaUlice
+import cz.jaro.dopravnipodniky.shared.streetLength
+import cz.jaro.dopravnipodniky.shared.stopLength
+import cz.jaro.dopravnipodniky.shared.stopOffset
+import cz.jaro.dopravnipodniky.shared.sidewalkWidth
+import cz.jaro.dopravnipodniky.shared.streetWidth
 
 fun getNamalovatLinky(
     linky: List<Linka>,
     ulicove: List<Ulice>,
 ): List<DrawScope.(Boolean) -> Unit> {
     val pocetLinek = linky.size
-    val sirka = (sirkaUlice - sirkaChodniku * 2) / pocetLinek
+    val sirka = (streetWidth - sidewalkWidth * 2) / pocetLinek
 
     val uliceSLinkama = ulicove.map { ulice ->
         ulice to linky.sortedBy { it.cislo }.mapIndexed { i, it -> it to i }.filter { ulice.id in it.first.ulice }
@@ -48,14 +48,14 @@ fun getNamalovatLinky(
                 else -> null
             }
 
-            val odsazeniOdBoku = sirkaChodniku + sirka * index + sirka / 2
+            val odsazeniOdBoku = sidewalkWidth + sirka * index + sirka / 2
 
             val odsazeniVMensiUlici =
-                if (mensiUlice?.orientace == ulice.orientace) sirkaUlice
-                else sirkaUlice - odsazeniOdBoku
+                if (mensiUlice?.orientace == ulice.orientace) streetWidth
+                else streetWidth - odsazeniOdBoku
 
             val odsazeniVeVetsiUlici =
-                if (vetsiUlice?.orientace == ulice.orientace) sirkaUlice
+                if (vetsiUlice?.orientace == ulice.orientace) streetWidth
                 else odsazeniOdBoku
 
             val maPodSebouZastavku = ulice.maZastavku
@@ -72,12 +72,12 @@ fun getNamalovatLinky(
                 ) {
                     rotate(
                         degrees = rohovaRotace,
-                        pivot = Offset(x = sirkaUlice.toPx() / 2, y = sirkaUlice.toPx() / 2),
+                        pivot = Offset(x = streetWidth.toPx() / 2, y = streetWidth.toPx() / 2),
                     ) {
                         scale(
                             scaleX = 1F,
                             scaleY = if (ulice.orientace == Orientace.Svisle) -1F else 1F,
-                            pivot = Offset(x = delkaUlice.toPx() / 2, y = sirkaUlice.toPx() / 2)
+                            pivot = Offset(x = streetLength.toPx() / 2, y = streetWidth.toPx() / 2)
                         ) {
                             drawLine(
                                 color = linka.color.color.copy(alpha = if (jeVybiraniLinky) 2 / 3F else 1F),
@@ -86,7 +86,7 @@ fun getNamalovatLinky(
                                     y = odsazeniOdBoku.toPx(),
                                 ),
                                 end = Offset(
-                                    x = posunutiZastavky.toPx() - sirka.toPx() / 2,
+                                    x = stopOffset.toPx() - sirka.toPx() / 2,
                                     y = odsazeniOdBoku.toPx(),
                                 ),
                                 strokeWidth = sirka.toPx(),
@@ -95,11 +95,11 @@ fun getNamalovatLinky(
                             drawLine(
                                 color = linka.color.color.copy(alpha = if (maPodSebouZastavku) 1 / 3F else if (jeVybiraniLinky) 2 / 3F else 1F),
                                 start = Offset(
-                                    x = posunutiZastavky.toPx() - sirka.toPx() / 2,
+                                    x = stopOffset.toPx() - sirka.toPx() / 2,
                                     y = odsazeniOdBoku.toPx(),
                                 ),
                                 end = Offset(
-                                    x = posunutiZastavky.toPx() + delkaZastavky.toPx() + sirka.toPx() / 2,
+                                    x = stopOffset.toPx() + stopLength.toPx() + sirka.toPx() / 2,
                                     y = odsazeniOdBoku.toPx(),
                                 ),
                                 strokeWidth = sirka.toPx(),
@@ -108,11 +108,11 @@ fun getNamalovatLinky(
                             drawLine(
                                 color = linka.color.color.copy(alpha = if (jeVybiraniLinky) 2 / 3F else 1F),
                                 start = Offset(
-                                    x = posunutiZastavky.toPx() + delkaZastavky.toPx() + sirka.toPx() / 2,
+                                    x = stopOffset.toPx() + stopLength.toPx() + sirka.toPx() / 2,
                                     y = odsazeniOdBoku.toPx(),
                                 ),
                                 end = Offset(
-                                    x = delkaUlice.toPx() + odsazeniVeVetsiUlici.toPx(),
+                                    x = streetLength.toPx() + odsazeniVeVetsiUlici.toPx(),
                                     y = odsazeniOdBoku.toPx(),
                                 ),
                                 strokeWidth = sirka.toPx(),

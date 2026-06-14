@@ -22,16 +22,16 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.unit.dp
 import cz.jaro.dopravnipodniky.shared.TPS
-import cz.jaro.dopravnipodniky.shared.barvaChodniku
-import cz.jaro.dopravnipodniky.shared.barvaUlice
+import cz.jaro.dopravnipodniky.shared.sidewalkColor
+import cz.jaro.dopravnipodniky.shared.streetColor
 import cz.jaro.dopravnipodniky.shared.jednotky.kilometersPerHour
 import cz.jaro.dopravnipodniky.shared.jednotky.tiku
 import cz.jaro.dopravnipodniky.shared.jednotky.toDuration
 import cz.jaro.dopravnipodniky.shared.millisPerTik
 import cz.jaro.dopravnipodniky.shared.odsazeniBusu
-import cz.jaro.dopravnipodniky.shared.sirkaChodniku
-import cz.jaro.dopravnipodniky.shared.sirkaUlice
-import cz.jaro.dopravnipodniky.ui.malovani.Offset
+import cz.jaro.dopravnipodniky.shared.sidewalkWidth
+import cz.jaro.dopravnipodniky.shared.streetWidth
+import cz.jaro.dopravnipodniky.shared.Offset
 import cz.jaro.dopravnipodniky.ui.theme.AppTheme
 import cz.jaro.dopravnipodniky.ui.theme.LineColor
 import cz.jaro.dopravnipodniky.ui.theme.Theme
@@ -104,7 +104,7 @@ fun Loading() = AppTheme(
             Canvas(
                 Modifier
                     .fillMaxWidth()
-                    .height(sirkaUlice)
+                    .height(streetWidth)
 //                    .onPlaced {
 //                        with(density) {
 //                            sirka = it.size.width
@@ -118,29 +118,29 @@ fun Loading() = AppTheme(
                 scale(
                     2F
                 ) {
-                    drawRect(color = barvaUlice)
+                    drawRect(color = streetColor)
                     drawRect(
-                        color = barvaChodniku,
+                        color = sidewalkColor,
                         size = Size(
                             width = size.width,
-                            height = sirkaChodniku.toPx()
+                            height = sidewalkWidth.toPx()
                         )
                     )
                     drawRect(
-                        color = barvaChodniku,
+                        color = sidewalkColor,
                         topLeft = Offset(
-                            y = sirkaUlice.toPx() - sirkaChodniku.toPx()
+                            y = streetWidth.toPx() - sidewalkWidth.toPx()
                         ),
                         size = Size(
                             width = size.width,
-                            height = sirkaChodniku.toPx()
+                            height = sidewalkWidth.toPx()
                         )
                     )
                     drawRoundRect(
                         color = LineColor.Yellow.color,
                         topLeft = Offset(
                             x = poloha.toPx() + sirka.toPx() / 2,
-                            y = sirkaUlice.toPx() - odsazeniBusu.toPx() - sirkaBusu.toPx()
+                            y = streetWidth.toPx() - odsazeniBusu.toPx() - sirkaBusu.toPx()
                         ),
                         size = Size(
                             width = delkaBusu.toPx(),
@@ -152,7 +152,7 @@ fun Loading() = AppTheme(
                         color = LineColor.Red.color,
                         topLeft = Offset(
                             x = poloha2.toPx() + sirka.toPx() / 2,
-                            y = sirkaUlice.toPx() - odsazeniBusu.toPx() - sirkaBusu.toPx()
+                            y = streetWidth.toPx() - odsazeniBusu.toPx() - sirkaBusu.toPx()
                         ),
                         size = Size(
                             width = delkaBusu.toPx(),

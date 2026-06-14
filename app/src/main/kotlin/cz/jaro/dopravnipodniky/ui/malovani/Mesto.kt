@@ -4,7 +4,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -16,14 +15,14 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.DopravniPodnik
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.maZastavku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.seznamKrizovatek
 import cz.jaro.dopravnipodniky.data.serializers.DpSerializer
-import cz.jaro.dopravnipodniky.shared.barvaPozadi
+import cz.jaro.dopravnipodniky.shared.backgroundColor
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.plus
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
 import cz.jaro.dopravnipodniky.shared.jednotky.toPx
 import cz.jaro.dopravnipodniky.shared.jednotky.ulicovychBloku
-import cz.jaro.dopravnipodniky.shared.sirkaUlice
+import cz.jaro.dopravnipodniky.shared.streetWidth
 import cz.jaro.dopravnipodniky.ui.linky.vybirani.namalovatVybiraniLinky
 import cz.jaro.dopravnipodniky.ui.main.DEBUG_MODE
 import kotlinx.serialization.Serializable
@@ -68,7 +67,7 @@ fun Mesto(
         drawRect(
 //            color = dp.tema.darkColorScheme.surface,
 //            color = dp.tema.darkColorScheme.surfaceVariant,
-            color = barvaPozadi,
+            color = backgroundColor,
             size = size
         )
 
@@ -82,7 +81,7 @@ fun Mesto(
                 if (DEBUG_MODE) drawCircle(
                     color = Color.White,
                     radius = 20.dp.toPx(),
-                    center = Vector(0.ulicovychBloku).toDpSKrizovatkama().plus(sirkaUlice / 2).toPx(),
+                    center = Vector(0.ulicovychBloku).toDpSKrizovatkama().plus(streetWidth / 2).toPx(),
                     style = Stroke(
                         width = 2.dp.toPx()
                     )
@@ -128,4 +127,3 @@ fun Mesto(
     }
 }
 
-fun Offset(x: Float = 0F, y: Float = 0F) = Offset(x, y)

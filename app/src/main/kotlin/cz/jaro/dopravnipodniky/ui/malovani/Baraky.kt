@@ -9,12 +9,13 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.TypBaraku
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.barva
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.kapacita
+import cz.jaro.dopravnipodniky.shared.Offset
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.barvaTematu
 import cz.jaro.dopravnipodniky.shared.map
 import cz.jaro.dopravnipodniky.shared.mezeraMeziBaraky
 import cz.jaro.dopravnipodniky.shared.odsazeniBaraku
-import cz.jaro.dopravnipodniky.shared.sirkaUlice
+import cz.jaro.dopravnipodniky.shared.streetWidth
 import cz.jaro.dopravnipodniky.shared.translate
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
 import cz.jaro.dopravnipodniky.shared.velikostBaraku
@@ -56,8 +57,8 @@ fun Barak.draw(
             top = zacatekUliceY,
         ) {
             val rohBloku = when (ulice.orientace) {
-                Orientace.Svisle -> Offset(x = sirkaUlice.toPx(), y = 0F)
-                Orientace.Vodorovne -> Offset(x = 0F, y = sirkaUlice.toPx())
+                Orientace.Svisle -> Offset(x = streetWidth.toPx(), y = 0F)
+                Orientace.Vodorovne -> Offset(x = 0F, y = streetWidth.toPx())
             }
             translate(
                 offset = rohBloku

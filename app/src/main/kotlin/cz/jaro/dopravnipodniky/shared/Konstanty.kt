@@ -21,46 +21,57 @@ val pocatecniObnosPenez = /*Double.POSITIVE_INFINITY.penez*/
 
 // Velikosti
 
-// Ulice
+// Ulice a křižovatka
 val ulicovyBlok = 80.dp
-val delkaUlice = ulicovyBlok
-val sirkaUlice = 10.dp
-val sirkaChodniku = 2.dp
-val predsazeniKrizovatky = 15.dp
-val zustaniVKrizovatce = 30.dp
+val streetLength = ulicovyBlok
+val markingWidth = .1.dp
+val laneWidth = 3.6.dp
+val streetWidth = laneWidth * 2 + markingWidth
+val roundaboutLaneWidth = laneWidth * 1.5F
+val curbWidth = .2.dp
+val sidewalkWidth = 2.7.dp
+
+val intersectionOffset = 15.dp
+val intersectionBeginning = streetLength - intersectionOffset
+val bareStreetLength = streetLength - intersectionOffset * 2
+val intersectionReach = 30.dp
+
+// Musí platit markingPartLength = bareStreetLength / (2n - 1), aby seděly fáze na okrajích křižovatek
+// Tento výraz zajistí aby markingPartLength ≈ 1.dp, v případě bareStreetLength=50.dp -> markingPartLength=(50/49).dp (n=25)
+val markingPartLength = (bareStreetLength / (bareStreetLength - 1.dp)).dp
+
+// Zastávka
+val stopWidth = 2.6.dp
+val stopLength = 18.dp
+val stopOffset = 41.dp
+val stopEntryLength = 6.dp
+val stopMarkingsOffset = .1.dp
+val stopPostWidth = .5.dp
+val stopPostThickness = .3.dp
+val stopPostOffset = .25.dp
+
+// Bus
+val odsazeniBusu = .25.dp
+val zakladniSirkaBusu = 2.500.dp
+const val busRearAxlePosition = .25F
 
 // Barák
-val odsazeniBaraku = 6.dp
+val odsazeniBaraku = 8.dp
 val mezeraMeziBaraky = 1.dp
 const val barakuVUlici = 5
 val velikostBaraku = (ulicovyBlok - mezeraMeziBaraky * (barakuVUlici - 1) - odsazeniBaraku * 2) / barakuVUlici
 val zaobleniBaraku = 5.dp
 
-// Zastávka
-val sirkaZastavky = 2.5.dp
-val delkaZastavky = 18.dp
-val posunutiZastavky = 41.dp
-val odsazeniCarZastavky = sirkaChodniku + .25.dp
-val sirkaSloupku = .5.dp
-val tloustkaSloupku = .2.dp
-val odsazeniSloupku = sirkaChodniku - .25.dp - sirkaSloupku
-val sirkaCary = .2.dp
-
-// Bus
-val odsazeniBusu = sirkaChodniku + .25.dp
-val zakladniSirkaBusu = 2.500.dp
-const val busRearAxlePosition = .25F
-
 // Troleje
 val sirkaTroleje = .2.dp
-val predsazeniTrolejiS = predsazeniKrizovatky - 1.dp
-val predsazeniTrolejiL = predsazeniKrizovatky + 1.dp
+val predsazeniTrolejiS = intersectionOffset - 1.dp
+val predsazeniTrolejiL = intersectionOffset + 1.dp
 val rozchodTroleji = .5.dp
-val odsazeniTroleje = sirkaChodniku + 1.5.dp
+val odsazeniTroleje = sidewalkWidth + 1.5.dp
 val odsazeniPrvniTroleje = odsazeniTroleje
 val odsazeniDruheTroleje = odsazeniTroleje + rozchodTroleji
-val odsazeniCtvrteTroleje = sirkaUlice - odsazeniPrvniTroleje
-val odsazeniTretiTroleje = sirkaUlice - odsazeniDruheTroleje
+val odsazeniCtvrteTroleje = streetWidth - odsazeniPrvniTroleje
+val odsazeniTretiTroleje = streetWidth - odsazeniDruheTroleje
 val odsazeniTroleji =
     listOf(odsazeniPrvniTroleje, odsazeniDruheTroleje, odsazeniTretiTroleje, odsazeniCtvrteTroleje)
 
@@ -71,16 +82,17 @@ val barvaSecretDosahlosti = Color(0xFF101010)
 val barvaDosahnuteDosahlosti = green800
 
 // Vykreslování
-val barvaUlice = Color(135, 135, 135)
-val barvaPozadi = Color(16, 16, 16)
-val barvaNepouzivanehoBusu = Color(100, 100, 100)
-val barvaChodniku = Color(200, 200, 200)
-val barvaParku = Color(76, 175, 80)
-val barvaTroleje = Color(32, 32, 32)
+val streetColor = Color(135, 135, 135)
+val unusedBusColor = Color(100, 100, 100)
+val curbColor = Color(170, 170, 170)
+val sidewalkColor = Color(200, 200, 200)
+val backgroundColor = Color(16, 16, 16)
+val overheadLineColor = Color(32, 32, 32)
+val lineMarkingColor = Color(255, 255, 255)
+val stopMarkingColor = Color(255, 255, 0)
 
 // Rychlost hry
 
-//const val FPS = 60
 val vychoziStavHry = StavHry.Hra
 var stavHry by mutableStateOf<StavHry>(vychoziStavHry)
 val TPS get() = stavHry.tps

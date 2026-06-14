@@ -11,10 +11,10 @@ import cz.jaro.dopravnipodniky.shared.jednotky.PenizZaMinutu
 import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.deg
 import cz.jaro.dopravnipodniky.shared.odsazeniBusu
-import cz.jaro.dopravnipodniky.shared.predsazeniKrizovatky
-import cz.jaro.dopravnipodniky.shared.sirkaUlice
+import cz.jaro.dopravnipodniky.shared.intersectionOffset
+import cz.jaro.dopravnipodniky.shared.streetWidth
 import cz.jaro.dopravnipodniky.shared.times
-import cz.jaro.dopravnipodniky.shared.zustaniVKrizovatce
+import cz.jaro.dopravnipodniky.shared.intersectionReach
 import cz.jaro.dopravnipodniky.ui.malovani.SerializableDp
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -71,7 +71,7 @@ fun Bus.placeOnStreetBeginning(
     line = line,
     directionOnLine = directionOnLine,
     positionOnLine = positionOnLine,
-    positionInStreet = predsazeniKrizovatky + zustaniVKrizovatce,
+    positionInStreet = intersectionOffset + intersectionReach,
 )
 
 fun Bus.placeOnStreet(
@@ -85,10 +85,10 @@ fun Bus.placeOnStreet(
     poziceNaLince = positionOnLine,
     stavZastavky = StavZastavky.Pred,
     poziceVUlici = positionInStreet,
-    position = Vector(positionInStreet, sirkaUlice - odsazeniBusu - typBusu.sirka / 2),
+    position = Vector(positionInStreet, streetWidth - odsazeniBusu - typBusu.sirka / 2),
     segmentEndsPosition = withSegmentOffsets { offsetFromFirstSegmentEnd, segmentLength ->
         val distance = firstSegmentLength * busRearAxlePosition + offsetFromFirstSegmentEnd - segmentLength * .5
-        Vector(positionInStreet - distance, sirkaUlice - odsazeniBusu - typBusu.sirka / 2) to 0.deg
+        Vector(positionInStreet - distance, streetWidth - odsazeniBusu - typBusu.sirka / 2) to 0.deg
     },
     rotation = 0.deg,
 )

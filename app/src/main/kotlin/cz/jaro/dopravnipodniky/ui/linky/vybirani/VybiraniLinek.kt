@@ -8,8 +8,8 @@ import cz.jaro.dopravnipodniky.shared.drawRoundRect
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
-import cz.jaro.dopravnipodniky.shared.sirkaUlice
-import cz.jaro.dopravnipodniky.ui.malovani.Offset
+import cz.jaro.dopravnipodniky.shared.streetWidth
+import cz.jaro.dopravnipodniky.shared.Offset
 import kotlin.math.sqrt
 
 fun DrawScope.namalovatVybiraniLinky(
@@ -28,10 +28,10 @@ fun DrawScope.namalovatVybiraniLinky(
     ) {
         drawCircle(
             color = fill.copy(alpha = 2 / 3F),
-            radius = (sirkaUlice * sqrt(2F)).toPx(),
+            radius = (streetWidth * sqrt(2F)).toPx(),
             center = Offset(
-                x = sirkaUlice.toPx() / 2,
-                y = sirkaUlice.toPx() / 2,
+                x = streetWidth.toPx() / 2,
+                y = streetWidth.toPx() / 2,
             )
         )
     }
@@ -40,27 +40,27 @@ fun DrawScope.namalovatVybiraniLinky(
 
         val zacatekXPrvni = prvniKrizovatka.x.toDpSKrizovatkama().toPx()
         val zacatekYPrvni = prvniKrizovatka.y.toDpSKrizovatkama().toPx()
-        val konecXPrvni = (prvniKrizovatka.x.toDpSKrizovatkama() + sirkaUlice).toPx()
-        val konecYPrvni = (prvniKrizovatka.y.toDpSKrizovatkama() + sirkaUlice).toPx()
+        val konecXPrvni = (prvniKrizovatka.x.toDpSKrizovatkama() + streetWidth).toPx()
+        val konecYPrvni = (prvniKrizovatka.y.toDpSKrizovatkama() + streetWidth).toPx()
 
         val zacatekXDruhy = druhaKrizovatka.x.toDpSKrizovatkama().toPx()
         val zacatekYDruhy = druhaKrizovatka.y.toDpSKrizovatkama().toPx()
-        val konecXDruhy = (druhaKrizovatka.x.toDpSKrizovatkama() + sirkaUlice).toPx()
-        val konecYDruhy = (druhaKrizovatka.y.toDpSKrizovatkama() + sirkaUlice).toPx()
+        val konecXDruhy = (druhaKrizovatka.x.toDpSKrizovatkama() + streetWidth).toPx()
+        val konecYDruhy = (druhaKrizovatka.y.toDpSKrizovatkama() + streetWidth).toPx()
 
         if (zacatekXPrvni < zacatekXDruhy || zacatekYPrvni < zacatekYDruhy) {
             drawRoundRect(
                 color = fill.copy(alpha = 4 / 5F),
                 topLeft = Offset(zacatekXPrvni, zacatekYPrvni),
                 bottomRight = Offset(konecXDruhy, konecYDruhy),
-                cornerRadius = CornerRadius(sirkaUlice.toPx() / 3)
+                cornerRadius = CornerRadius(streetWidth.toPx() / 3)
             )
         } else {
             drawRoundRect(
                 color = fill.copy(alpha = 4 / 5F),
                 topLeft = Offset(zacatekXDruhy, zacatekYDruhy),
                 bottomRight = Offset(konecXPrvni, konecYPrvni),
-                cornerRadius = CornerRadius(sirkaUlice.toPx() / 3)
+                cornerRadius = CornerRadius(streetWidth.toPx() / 3)
             )
         }
     }

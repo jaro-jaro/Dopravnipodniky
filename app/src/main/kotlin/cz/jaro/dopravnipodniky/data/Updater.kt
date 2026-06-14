@@ -35,15 +35,17 @@ import cz.jaro.dopravnipodniky.shared.StavTutorialu
 import cz.jaro.dopravnipodniky.shared.Text
 import cz.jaro.dopravnipodniky.shared.TurnType
 import cz.jaro.dopravnipodniky.shared.arcLength
+import cz.jaro.dopravnipodniky.shared.bareStreetLength
 import cz.jaro.dopravnipodniky.shared.busRearAxlePosition
-import cz.jaro.dopravnipodniky.shared.delkaUlice
-import cz.jaro.dopravnipodniky.shared.delkaZastavky
 import cz.jaro.dopravnipodniky.shared.dobaPobytuNaZastavce
 import cz.jaro.dopravnipodniky.shared.entryAndExitLength
 import cz.jaro.dopravnipodniky.shared.entryAngle
 import cz.jaro.dopravnipodniky.shared.entryLength
 import cz.jaro.dopravnipodniky.shared.idealniInterval
 import cz.jaro.dopravnipodniky.shared.indexOfFirstOrElse
+import cz.jaro.dopravnipodniky.shared.intersectionBeginning
+import cz.jaro.dopravnipodniky.shared.intersectionOffset
+import cz.jaro.dopravnipodniky.shared.intersectionReach
 import cz.jaro.dopravnipodniky.shared.jednotky.PenizZaMinutu
 import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.coerceAtMost
@@ -67,12 +69,13 @@ import cz.jaro.dopravnipodniky.shared.jednotky.toDuration
 import cz.jaro.dopravnipodniky.shared.length
 import cz.jaro.dopravnipodniky.shared.nahodnostProjetiZastavky
 import cz.jaro.dopravnipodniky.shared.nasobitelZisku
-import cz.jaro.dopravnipodniky.shared.posunutiZastavky
-import cz.jaro.dopravnipodniky.shared.predsazeniKrizovatky
 import cz.jaro.dopravnipodniky.shared.reversedIfNegative
 import cz.jaro.dopravnipodniky.shared.signedArcLength
 import cz.jaro.dopravnipodniky.shared.signedEntryAndExitLength
-import cz.jaro.dopravnipodniky.shared.sirkaUlice
+import cz.jaro.dopravnipodniky.shared.stopLength
+import cz.jaro.dopravnipodniky.shared.stopOffset
+import cz.jaro.dopravnipodniky.shared.streetLength
+import cz.jaro.dopravnipodniky.shared.streetWidth
 import cz.jaro.dopravnipodniky.shared.sumOfDp
 import cz.jaro.dopravnipodniky.shared.sumOfIndexed
 import cz.jaro.dopravnipodniky.shared.times
@@ -83,7 +86,6 @@ import cz.jaro.dopravnipodniky.shared.udrzbaTroleje
 import cz.jaro.dopravnipodniky.shared.udrzbaZastavky
 import cz.jaro.dopravnipodniky.shared.vecne
 import cz.jaro.dopravnipodniky.shared.vecneLinky
-import cz.jaro.dopravnipodniky.shared.zustaniVKrizovatce
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -351,7 +353,7 @@ private suspend fun updateBusAndPeopleMovement(
 
         val turn = turnType(nextIntersection, street, nextStreet)
 
-        if (bus.poziceVUlici < (delkaUlice - predsazeniKrizovatky) || turn == TurnType.Straight) {
+        if (bus.poziceVUlici < intersectionBeginning || turn == TurnType.Straight) {
             bus = bus.copy(
                 position = bus.position.copy(
                     x = bus.poziceVUlici,
@@ -361,7 +363,7 @@ private suspend fun updateBusAndPeopleMovement(
                 },
             )
 
-            if (bus.poziceVUlici >= delkaUlice + sirkaUlice + predsazeniKrizovatky + zustaniVKrizovatce)
+            if (bus.poziceVUlici >= streetLength + streetWidth + intersectionOffset + intersectionReach)
             // dokončil průjezd křižovatkou
                 bus = moveToNextStreet(bus, line)
         } else {
@@ -369,7 +371,7 @@ private suspend fun updateBusAndPeopleMovement(
             var position = bus.position
             var rotation = bus.rotation
 
-            val offsetInIntersection = bus.poziceVUlici - (delkaUlice - predsazeniKrizovatky)
+            val offsetInIntersection = bus.poziceVUlici - intersectionBeginning
 
             val turnParts = turn.turnParts(bus.typBusu.sirka)
             val lengthsOfTurnParts = turnParts.map { it.length }
@@ -459,7 +461,7 @@ private suspend fun updateBusAndPeopleMovement(
                 segmentEndsPosition = segmentEndsPosition,
             )
 
-            if (bus.poziceVUlici >= (delkaUlice - predsazeniKrizovatky) + turnLength + zustaniVKrizovatce) {
+            if (bus.poziceVUlici >= intersectionBeginning + turnLength + intersectionReach) {
                 // dokončil průjezd křižovatkou
                 bus = moveToNextStreet(bus, line)
             }
@@ -526,7 +528,7 @@ private suspend fun handleBusStop(
     // zastavení na zastávce
     if (
         stavZastavky == StavZastavky.Pred &&
-        bus.poziceVUlici >= posunutiZastavky + delkaZastavky - bus.typBusu.delka
+        bus.poziceVUlici >= stopOffset + stopLength - bus.typBusu.delka
     ) {
         stavZastavky = StavZastavky.Na(
             if (Random.nextInt(0, nahodnostProjetiZastavky) == 0) {
@@ -931,7 +933,7 @@ fun Bus.vydelkuj(
     val ziskZaKolo = puvodniDp.info.jizdne * nastupujicichZaKolo * nasobitelZisku
 
     val dobaUlic =
-        (delkaUlice - predsazeniKrizovatky * 2) * linka.ulice.size * 2 / typBusu.maxRychlost.coerceAtMost(
+        bareStreetLength * linka.ulice.size * 2 / typBusu.maxRychlost.coerceAtMost(
             50.kilometersPerHour
         )
 

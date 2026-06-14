@@ -21,13 +21,13 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.origin
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.Smer
 import cz.jaro.dopravnipodniky.shared.busRearAxlePosition
-import cz.jaro.dopravnipodniky.shared.delkaUlice
+import cz.jaro.dopravnipodniky.shared.streetLength
 import cz.jaro.dopravnipodniky.shared.jednotky.Angle
 import cz.jaro.dopravnipodniky.shared.jednotky.Vector
 import cz.jaro.dopravnipodniky.shared.jednotky.toPx
 import cz.jaro.dopravnipodniky.shared.reversedIfNegative
 import cz.jaro.dopravnipodniky.shared.rotate
-import cz.jaro.dopravnipodniky.shared.sirkaUlice
+import cz.jaro.dopravnipodniky.shared.streetWidth
 import cz.jaro.dopravnipodniky.shared.translate
 import cz.jaro.dopravnipodniky.ui.main.DEBUG_MODE
 import cz.jaro.dopravnipodniky.ui.theme.orange600
@@ -64,8 +64,8 @@ fun getBusDrawFunction(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
 
     return {
         val busWidth = bus.typBusu.sirka.toPx()
-        val streetWidth = sirkaUlice.toPx()
-        val streetLength = delkaUlice.toPx()
+        val streetWidth = streetWidth.toPx()
+        val streetLength = streetLength.toPx()
         val streetOrigin = street.origin.toPx()
 
         withTransform({
@@ -98,7 +98,7 @@ fun getBusDrawFunction(bus: Bus, dp: DopravniPodnik): DrawScope.() -> Unit {
                         ),
                         cornerRadius = CornerRadius(zaobleni * 2),
                     )
-                    drawCircle(orange600, radius = 1.dp.toPx(), center = Offset())
+                    drawCircle(orange600, radius = 1.dp.toPx(), center = cz.jaro.dopravnipodniky.shared.Offset())
                     if (DEBUG_MODE) drawIntoCanvas {
                         it.nativeCanvas.drawText(
                             "${bus.cloveci}/${bus.typBusu.kapacita}",

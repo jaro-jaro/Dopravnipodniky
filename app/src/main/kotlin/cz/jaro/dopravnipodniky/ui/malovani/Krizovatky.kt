@@ -1,30 +1,40 @@
 package cz.jaro.dopravnipodniky.ui.malovani
 
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.drawscope.translate
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.IntersectionType
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Krizovatka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
+import cz.jaro.dopravnipodniky.shared.Offset
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.Quintuple
-import cz.jaro.dopravnipodniky.shared.barvaChodniku
-import cz.jaro.dopravnipodniky.shared.barvaPozadi
-import cz.jaro.dopravnipodniky.shared.barvaUlice
+import cz.jaro.dopravnipodniky.shared.Size
+import cz.jaro.dopravnipodniky.shared.backgroundColor
+import cz.jaro.dopravnipodniky.shared.curbColor
+import cz.jaro.dopravnipodniky.shared.curbWidth
+import cz.jaro.dopravnipodniky.shared.drawAnnulus
+import cz.jaro.dopravnipodniky.shared.drawAnnulusSector
 import cz.jaro.dopravnipodniky.shared.drawArc
+import cz.jaro.dopravnipodniky.shared.helpers.countTrue
+import cz.jaro.dopravnipodniky.shared.intersectionOffset
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
 import cz.jaro.dopravnipodniky.shared.jednotky.Vector
+import cz.jaro.dopravnipodniky.shared.jednotky.deg
 import cz.jaro.dopravnipodniky.shared.jednotky.toDpSKrizovatkama
-import cz.jaro.dopravnipodniky.shared.predsazeniKrizovatky
-import cz.jaro.dopravnipodniky.shared.sirkaChodniku
-import cz.jaro.dopravnipodniky.shared.sirkaUlice
-import kotlin.math.sqrt
+import cz.jaro.dopravnipodniky.shared.jednotky.toPx
+import cz.jaro.dopravnipodniky.shared.lineMarkingColor
+import cz.jaro.dopravnipodniky.shared.markingWidth
+import cz.jaro.dopravnipodniky.shared.rotate
+import cz.jaro.dopravnipodniky.shared.roundaboutIslandRadius
+import cz.jaro.dopravnipodniky.shared.roundaboutStreetOuterRadius
+import cz.jaro.dopravnipodniky.shared.sidewalkColor
+import cz.jaro.dopravnipodniky.shared.sidewalkWidth
+import cz.jaro.dopravnipodniky.shared.streetColor
+import cz.jaro.dopravnipodniky.shared.streetWidth
+import cz.jaro.dopravnipodniky.shared.translate
+import cz.jaro.dopravnipodniky.shared.turnMarkingPartLength
 
 context(drawScope: DrawScope)
 fun namalovatKrizovatku(
@@ -34,12 +44,16 @@ fun namalovatKrizovatku(
 ) = with(drawScope) {
     val (x, y) = pozice
 
-    val zacatekX = x.toDpSKrizovatkama()
-    val zacatekY = y.toDpSKrizovatkama()
+    val origin = pozice.toDpSKrizovatkama()
 
-    val sirkaUlice = sirkaUlice.toPx()
-    val sirkaChodniku = sirkaChodniku.toPx()
-    val predsazeniKrizovatky = predsazeniKrizovatky.toPx()
+    val streetWidth = streetWidth.toPx()
+    val curbWidth = curbWidth.toPx()
+    val sidewalkWidth = sidewalkWidth.toPx()
+    val intersectionOffset = intersectionOffset.toPx()
+    val roundaboutStreetOuterRadius = roundaboutStreetOuterRadius.toPx()
+    val roundaboutIslandRadius = roundaboutIslandRadius.toPx()
+    val markingWidth = markingWidth.toPx()
+    val turnMarkingPartLength = turnMarkingPartLength.toPx()
 
     val sousedVpravo = ulice.find {
         it.orientace == Orientace.Vodorovne && it.zacatek == pozice
@@ -54,43 +68,38 @@ fun namalovatKrizovatku(
         it.orientace == Orientace.Svisle && it.konec == pozice
     } != null
 
+    val baseIntersectionSize = Size(streetWidth)
+    val intersectionSizeOffset = Offset(intersectionOffset + streetWidth + intersectionOffset)
     translate(
-        left = zacatekX.toPx(),
-        top = zacatekY.toPx(),
+        offset = origin.toPx() - Offset(intersectionOffset),
     ) {
-        drawRoundRect(
-            color = barvaUlice,
-            topLeft = Offset(),
-            size = Size(sirkaUlice, sirkaUlice),
-            cornerRadius = CornerRadius(sirkaChodniku),
+        drawRect(
+            color = streetColor,
+            topLeft = Offset(intersectionOffset),
+            size = baseIntersectionSize,
         )
 
         // kreslení chodníku okolo kruháče
-        if (krizovatka?.type == IntersectionType.Roundabout) {
-            translate(
-                left = sirkaUlice / 2,
-                top = sirkaUlice / 2,
-            ) {
-                val rVnejsi =
-                    .5 * sqrt(2.0) * sirkaUlice + predsazeniKrizovatky * sqrt(2.0) - predsazeniKrizovatky - sirkaChodniku / 2
-                val rVnitrni = rVnejsi - sirkaUlice / 2
-
-                drawCircle(
-                    color = barvaChodniku,
-                    radius = rVnejsi.toFloat(),
-                    style = Stroke(
-                        width = sirkaChodniku,
-                    ),
-                    center = Offset(),
-                )
-            }
+        if (krizovatka?.type == IntersectionType.Roundabout) translate(
+            offset = intersectionSizeOffset / 2F,
+        ) {
+            drawAnnulus(
+                color = curbColor,
+                innerRadius = roundaboutStreetOuterRadius,
+                width = curbWidth,
+            )
+            drawAnnulus(
+                color = sidewalkColor,
+                innerRadius = roundaboutStreetOuterRadius + curbWidth,
+                width = sidewalkWidth,
+            )
         }
 
         val sousediUhly = listOf(
-            Quintuple(sousedNahore, sousedVpravo, sousedDole, sousedVlevo, 0F),
-            Quintuple(sousedVpravo, sousedDole, sousedVlevo, sousedNahore, 90F),
-            Quintuple(sousedDole, sousedVlevo, sousedNahore, sousedVpravo, 180F),
-            Quintuple(sousedVlevo, sousedNahore, sousedVpravo, sousedDole, 270F),
+            Quintuple(sousedNahore, sousedVpravo, sousedDole, sousedVlevo, 0.deg),
+            Quintuple(sousedVpravo, sousedDole, sousedVlevo, sousedNahore, 90.deg),
+            Quintuple(sousedDole, sousedVlevo, sousedNahore, sousedVpravo, 180.deg),
+            Quintuple(sousedVlevo, sousedNahore, sousedVpravo, sousedDole, 270.deg),
         )
 
         // Napojení křižovatky na sousedy
@@ -98,13 +107,13 @@ fun namalovatKrizovatku(
             soused1
         }.forEach { [_, _, _, _, uhel] ->
             rotate(
-                degrees = uhel,
-                pivot = Offset(sirkaUlice / 2, sirkaUlice / 2),
+                angle = uhel,
+                pivot = intersectionSizeOffset / 2F,
             ) {
-                drawRoundRect(
-                    color = barvaUlice,
-                    topLeft = Offset(y = -predsazeniKrizovatky - 1F),
-                    size = Size(sirkaUlice, predsazeniKrizovatky + 2),
+                drawRect(
+                    color = streetColor,
+                    topLeft = Offset(x = intersectionOffset, y = -1F),
+                    size = Size(streetWidth, intersectionOffset + 2),
                 )
             }
         }
@@ -114,24 +123,20 @@ fun namalovatKrizovatku(
             !soused1 && !soused3 || !soused1 && soused2 == soused4
         }.forEach { [_, soused2, _, soused4, uhel] ->
             rotate(
-                degrees = uhel,
-                pivot = Offset(sirkaUlice / 2, sirkaUlice / 2),
+                angle = uhel,
+                pivot = intersectionSizeOffset / 2F,
             ) {
-                drawRoundRect(
-                    color = barvaChodniku,
-                    topLeft = Offset(),
-                    size = Size(sirkaUlice, sirkaChodniku),
-                    cornerRadius = CornerRadius(sirkaChodniku),
+                val left = if (soused4) 0F else intersectionOffset
+                val width = streetWidth + intersectionOffset * listOf(soused2, soused4).countTrue()
+                drawRect(
+                    color = curbColor,
+                    topLeft = Offset(x = left, y = intersectionOffset - curbWidth),
+                    size = Size(width, curbWidth),
                 )
-                if (soused4) drawRoundRect(
-                    color = barvaChodniku,
-                    topLeft = Offset(x = -predsazeniKrizovatky),
-                    size = Size(predsazeniKrizovatky + sirkaChodniku, sirkaChodniku),
-                )
-                if (soused2) drawRoundRect(
-                    color = barvaChodniku,
-                    topLeft = Offset(x = sirkaUlice - sirkaChodniku),
-                    size = Size(predsazeniKrizovatky + sirkaChodniku, sirkaChodniku),
+                drawRect(
+                    color = sidewalkColor,
+                    topLeft = Offset(x = left, y = intersectionOffset - curbWidth - sidewalkWidth),
+                    size = Size(width, sidewalkWidth),
                 )
             }
         }
@@ -143,47 +148,35 @@ fun namalovatKrizovatku(
             }
             .forEach { [_, _, _, _, uhel] ->
                 rotate(
-                    degrees = uhel,
-                    pivot = Offset(sirkaUlice / 2F, sirkaUlice / 2F),
+                    angle = uhel,
+                    pivot = intersectionSizeOffset / 2F,
                 ) {
                     drawRect(
-                        topLeft = Offset(
-                            x = -predsazeniKrizovatky + 1F,
-                            y = -predsazeniKrizovatky + 1F
-                        ),
-                        size = Size(
-                            predsazeniKrizovatky + sirkaUlice,
-                            predsazeniKrizovatky + sirkaUlice
-                        ),
-                        color = barvaPozadi,
+                        topLeft = Offset(1F),
+                        size = Size(intersectionOffset + streetWidth),
+                        color = backgroundColor,
                         style = Fill,
                     )
                     drawArc(
                         useCenter = true,
                         style = Fill,
-                        color = barvaUlice,
-                        center = Offset(
-                            x = -predsazeniKrizovatky + 0.5F,
-                            y = -predsazeniKrizovatky + 0.5F
-                        ),
-                        quadSize = Size(
-                            width = predsazeniKrizovatky + sirkaUlice - 0.5F,
-                            height = predsazeniKrizovatky + sirkaUlice - 0.5F
-                        ),
+                        color = streetColor,
+                        center = Offset(.5F),
+                        radius = intersectionOffset + streetWidth - .5F,
                         startAngle = 0F,
                         sweepAngle = 90F,
                     )
-                    drawArc(
-                        useCenter = false,
-                        style = Stroke(
-                            width = sirkaChodniku,
-                        ),
-                        color = barvaChodniku,
-                        center = Offset(x = -predsazeniKrizovatky, y = -predsazeniKrizovatky),
-                        quadSize = Size(
-                            width = predsazeniKrizovatky + sirkaUlice - sirkaChodniku / 2,
-                            height = predsazeniKrizovatky + sirkaUlice - sirkaChodniku / 2,
-                        ),
+                    drawAnnulusSector(
+                        width = curbWidth,
+                        color = curbColor,
+                        innerRadius = intersectionOffset + streetWidth,
+                        startAngle = 0F,
+                        sweepAngle = 90F,
+                    )
+                    drawAnnulusSector(
+                        width = sidewalkWidth,
+                        color = sidewalkColor,
+                        innerRadius = intersectionOffset + streetWidth + curbWidth,
                         startAngle = 0F,
                         sweepAngle = 90F,
                     )
@@ -197,37 +190,34 @@ fun namalovatKrizovatku(
             }
             .forEach { [_, _, _, _, uhel] ->
                 rotate(
-                    degrees = uhel,
-                    pivot = Offset(sirkaUlice / 2F, sirkaUlice / 2F),
+                    angle = uhel,
+                    pivot = intersectionSizeOffset / 2F,
                 ) {
                     drawRoundRect(
-                        color = barvaUlice,
-                        topLeft = Offset(-predsazeniKrizovatky + 2, -predsazeniKrizovatky + 2),
-                        size = Size(predsazeniKrizovatky, predsazeniKrizovatky),
+                        color = streetColor,
+                        topLeft = Offset(2F),
+                        size = Size(intersectionOffset, intersectionOffset),
                     )
                     drawArc(
                         useCenter = true,
                         style = Fill,
-                        color = barvaPozadi,
-                        center = Offset(x = -predsazeniKrizovatky, y = -predsazeniKrizovatky),
-                        quadSize = Size(
-                            width = predsazeniKrizovatky,
-                            height = predsazeniKrizovatky
-                        ),
+                        color = backgroundColor,
+                        center = Offset(),
+                        radius = intersectionOffset,
                         startAngle = 0F,
                         sweepAngle = 90F,
                     )
-                    drawArc(
-                        useCenter = false,
-                        style = Stroke(
-                            width = sirkaChodniku,
-                        ),
-                        color = barvaChodniku,
-                        center = Offset(x = -predsazeniKrizovatky, y = -predsazeniKrizovatky),
-                        quadSize = Size(
-                            width = predsazeniKrizovatky + sirkaChodniku / 2,
-                            height = predsazeniKrizovatky + sirkaChodniku / 2
-                        ),
+                    drawAnnulusSector(
+                        width = curbWidth,
+                        color = curbColor,
+                        innerRadius = intersectionOffset - curbWidth,
+                        startAngle = 0F,
+                        sweepAngle = 90F,
+                    )
+                    drawAnnulusSector(
+                        width = sidewalkWidth,
+                        color = sidewalkColor,
+                        innerRadius = intersectionOffset - curbWidth - sidewalkWidth,
                         startAngle = 0F,
                         sweepAngle = 90F,
                     )
@@ -241,40 +231,37 @@ fun namalovatKrizovatku(
             }
             .forEach { [_, _, _, _, uhel] ->
                 rotate(
-                    degrees = uhel,
-                    pivot = Offset(sirkaUlice / 2F, sirkaUlice / 2F),
+                    angle = uhel,
+                    pivot = intersectionSizeOffset / 2F,
                 ) {
                     drawPath(
                         path = Triangle(
-                            a = Offset(-predsazeniKrizovatky + 2, -predsazeniKrizovatky + 2),
-                            b = Offset(2F, 2F),
-                            c = Offset(2F, -predsazeniKrizovatky + 2),
+                            a = Offset(2F, 2F),
+                            b = Offset(2F + intersectionOffset, 2F + intersectionOffset),
+                            c = Offset(2F + intersectionOffset, 2F),
                         ),
-                        color = barvaUlice,
+                        color = streetColor,
                     )
                     drawArc(
                         useCenter = true,
                         style = Fill,
-                        color = barvaPozadi,
-                        center = Offset(x = -predsazeniKrizovatky, y = -predsazeniKrizovatky),
-                        quadSize = Size(
-                            width = predsazeniKrizovatky,
-                            height = predsazeniKrizovatky
-                        ),
+                        color = backgroundColor,
+                        center = Offset(),
+                        radius = intersectionOffset,
                         startAngle = 0F,
                         sweepAngle = 45F,
                     )
-                    drawArc(
-                        useCenter = false,
-                        style = Stroke(
-                            width = sirkaChodniku,
-                        ),
-                        color = barvaChodniku,
-                        center = Offset(x = -predsazeniKrizovatky, y = -predsazeniKrizovatky),
-                        quadSize = Size(
-                            width = predsazeniKrizovatky + sirkaChodniku / 2,
-                            height = predsazeniKrizovatky + sirkaChodniku / 2
-                        ),
+                    drawAnnulusSector(
+                        width = curbWidth,
+                        color = curbColor,
+                        innerRadius = intersectionOffset - curbWidth,
+                        startAngle = 0F,
+                        sweepAngle = 45F,
+                    )
+                    drawAnnulusSector(
+                        width = sidewalkWidth,
+                        color = sidewalkColor,
+                        innerRadius = intersectionOffset - curbWidth - sidewalkWidth,
                         startAngle = 0F,
                         sweepAngle = 45F,
                     )
@@ -288,40 +275,37 @@ fun namalovatKrizovatku(
             }
             .forEach { [_, _, _, _, uhel] ->
                 rotate(
-                    degrees = uhel,
-                    pivot = Offset(sirkaUlice / 2F, sirkaUlice / 2F),
+                    angle = uhel,
+                    pivot = intersectionSizeOffset / 2F,
                 ) {
                     drawPath(
                         path = Triangle(
-                            a = Offset(-predsazeniKrizovatky + 2, -predsazeniKrizovatky + 2),
-                            b = Offset(2F, 2F),
-                            c = Offset(-predsazeniKrizovatky + 2, 2F),
+                            a = Offset(2F, 2F),
+                            b = Offset(2F + intersectionOffset, 2F + intersectionOffset),
+                            c = Offset(2F, 2F + intersectionOffset),
                         ),
-                        color = barvaUlice,
+                        color = streetColor,
                     )
                     drawArc(
                         useCenter = true,
                         style = Fill,
-                        color = barvaPozadi,
-                        center = Offset(x = -predsazeniKrizovatky, y = -predsazeniKrizovatky),
-                        quadSize = Size(
-                            width = predsazeniKrizovatky,
-                            height = predsazeniKrizovatky
-                        ),
+                        color = backgroundColor,
+                        center = Offset(),
+                        radius = intersectionOffset,
                         startAngle = 45F,
                         sweepAngle = 45F,
                     )
-                    drawArc(
-                        useCenter = false,
-                        style = Stroke(
-                            width = sirkaChodniku,
-                        ),
-                        color = barvaChodniku,
-                        center = Offset(x = -predsazeniKrizovatky, y = -predsazeniKrizovatky),
-                        quadSize = Size(
-                            width = predsazeniKrizovatky + sirkaChodniku / 2,
-                            height = predsazeniKrizovatky + sirkaChodniku / 2
-                        ),
+                    drawAnnulusSector(
+                        width = curbWidth,
+                        color = curbColor,
+                        innerRadius = intersectionOffset - curbWidth,
+                        startAngle = 45F,
+                        sweepAngle = 45F,
+                    )
+                    drawAnnulusSector(
+                        width = sidewalkWidth,
+                        color = sidewalkColor,
+                        innerRadius = intersectionOffset - curbWidth - sidewalkWidth,
                         startAngle = 45F,
                         sweepAngle = 45F,
                     )
@@ -331,27 +315,47 @@ fun namalovatKrizovatku(
         // Kreslení kruháče
         if (krizovatka?.type == IntersectionType.Roundabout) {
             translate(
-                left = sirkaUlice / 2,
-                top = sirkaUlice / 2,
+                offset = intersectionSizeOffset / 2F,
             ) {
-                val rVnejsi =
-                    .5 * sqrt(2.0) * sirkaUlice + predsazeniKrizovatky * sqrt(2.0) - predsazeniKrizovatky - sirkaChodniku
-                val rVnitrni = rVnejsi - sirkaUlice / 2
-
                 drawCircle(
-                    color = barvaUlice,
-                    radius = rVnejsi.toFloat(),
+                    color = streetColor,
+                    radius = roundaboutStreetOuterRadius,
                     style = Fill,
                     center = Offset(),
                 )
                 drawCircle(
-                    color = barvaPozadi,
-                    radius = rVnitrni.toFloat(),
+                    color = backgroundColor,
+                    radius = roundaboutIslandRadius,
                     style = Fill,
                     center = Offset(),
                 )
             }
         }
+
+        // Kreslení čáry na ulici u křižovatky typu L
+        if (krizovatka?.type != IntersectionType.Roundabout) sousediUhly
+            .filter { [soused1, soused2, soused3, soused4, _] ->
+                soused4 && soused1 && !soused2 && !soused3
+            }
+            .forEach { [_, _, _, _, uhel] ->
+                rotate(
+                    angle = uhel,
+                    pivot = intersectionSizeOffset / 2F,
+                ) {
+                    drawAnnulusSector(
+                        width = markingWidth,
+                        color = lineMarkingColor,
+                        innerRadius = intersectionOffset + streetWidth / 2 - markingWidth / 2,
+                        startAngle = 0F,
+                        sweepAngle = 90F,
+                        pathEffect = PathEffect.dashPathEffect(
+                            intervals = floatArrayOf(turnMarkingPartLength, turnMarkingPartLength),
+                            phase = turnMarkingPartLength,
+                        )
+                    )
+                }
+            }
+
     }
 }
 

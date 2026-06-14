@@ -9,11 +9,13 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScopeMarker
 import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.DrawTransform
 import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.nativeCanvas
@@ -138,6 +140,25 @@ suspend fun <E> List<E>.mutate(mutator: suspend MutableList<E>.() -> Unit): List
 }
 
 
+@DrawScopeMarker
+fun DrawScope.drawRect(
+    color: Color,
+    center: Offset,
+    size: Size,
+    alpha: Float = 1.0f,
+    style: DrawStyle = Fill,
+    colorFilter: ColorFilter? = null,
+    blendMode: BlendMode = DrawScope.DefaultBlendMode
+) = drawRect(
+    color = color,
+    topLeft = center - size.toOffset() / 2F,
+    size = size,
+    alpha = alpha,
+    style = style,
+    colorFilter = colorFilter,
+    blendMode = blendMode,
+)
+
 fun DrawScope.drawRect(
     color: Color,
     topLeft: Offset,
@@ -182,13 +203,14 @@ fun DrawScope.drawRoundRect(
     blendMode = blendMode,
 )
 
+@DrawScopeMarker
 fun DrawScope.drawArc(
     color: Color,
     center: Offset,
     startAngle: Float,
     sweepAngle: Float,
     useCenter: Boolean,
-    quadSize: Size,
+    radius: Float,
     alpha: Float = 1.0f,
     style: DrawStyle = Fill,
     colorFilter: ColorFilter? = null,
@@ -198,10 +220,59 @@ fun DrawScope.drawArc(
     startAngle = startAngle,
     sweepAngle = sweepAngle,
     useCenter = useCenter,
-    topLeft = Offset(center.x - quadSize.width, center.y - quadSize.height),
-    size = quadSize * 2F,
+    topLeft = center - Offset(radius),
+    size = Size(radius) * 2F,
     alpha = alpha,
     style = style,
+    colorFilter = colorFilter,
+    blendMode = blendMode,
+)
+
+@DrawScopeMarker
+fun DrawScope.drawAnnulus(
+    color: Color,
+    innerRadius: Float,
+    width: Float,
+    center: Offset = Offset(),
+    alpha: Float = 1.0f,
+    colorFilter: ColorFilter? = null,
+    blendMode: BlendMode = DrawScope.DefaultBlendMode,
+) = drawCircle(
+    color = color,
+    radius = innerRadius + width / 2,
+    center = center,
+    alpha = alpha,
+    style = Stroke(
+        width = width,
+    ),
+    colorFilter = colorFilter,
+    blendMode = blendMode,
+)
+
+@DrawScopeMarker
+fun DrawScope.drawAnnulusSector(
+    color: Color,
+    innerRadius: Float,
+    width: Float,
+    pathEffect: PathEffect? = null,
+    startAngle: Float,
+    sweepAngle: Float,
+    center: Offset = Offset(),
+    alpha: Float = 1.0f,
+    colorFilter: ColorFilter? = null,
+    blendMode: BlendMode = DrawScope.DefaultBlendMode,
+) = drawArc(
+    color = color,
+    radius = innerRadius + width / 2,
+    startAngle = startAngle,
+    sweepAngle = sweepAngle,
+    center = center,
+    useCenter = false,
+    alpha = alpha,
+    style = Stroke(
+        width = width,
+        pathEffect = pathEffect,
+    ),
     colorFilter = colorFilter,
     blendMode = blendMode,
 )
@@ -242,18 +313,22 @@ fun DrawTransform.translate(
 inline fun DrawScope.translate(
     offset: Offset = Offset.Zero,
     block: DrawScope.() -> Unit,
-) = withTransform({ translate(
-    offset = offset,
-) }, block)
+) = withTransform({
+    translate(
+        offset = offset,
+    )
+}, block)
 
 inline fun DrawScope.rotate(
     angle: Angle,
     pivot: Offset = Offset.Zero,
     block: DrawScope.() -> Unit,
-) = withTransform({ rotate(
-    angle = angle,
-    pivot = pivot
-) }, block)
+) = withTransform({
+    rotate(
+        angle = angle,
+        pivot = pivot
+    )
+}, block)
 
 inline fun DrawScope.translate(
     radius: Float,
@@ -261,12 +336,14 @@ inline fun DrawScope.translate(
     pivot: Offset,
     isTurnRight: Boolean,
     block: DrawScope.() -> Unit,
-) = withTransform({ translate(
-    radius = radius,
-    degrees = degrees,
-    pivot = pivot,
-    isTurnRight = isTurnRight,
-) }, block)
+) = withTransform({
+    translate(
+        radius = radius,
+        degrees = degrees,
+        pivot = pivot,
+        isTurnRight = isTurnRight,
+    )
+}, block)
 
 fun <T, K> MutableList<T>.replaceBy(newValue: T, selector: (T) -> K) {
     val i = indexOfFirst { selector(it) == selector(newValue) }
@@ -653,3 +730,14 @@ fun <T> List<T>.reversedIf(reverse: Boolean): List<T> =
     if (reverse) reversed() else toList()
 
 fun validateRegistrationNumber(text: String) = text.toIntOrNull()?.takeIf { it >= 1 }
+
+fun Offset(x: Float = 0F, y: Float = 0F) = Offset(x, y)
+fun Offset(xy: Float) = Offset(xy, xy)
+
+fun Size(width: Float = 0F, height: Float = 0F) = Size(width, height)
+fun Size(size: Float) = Size(size, size)
+
+fun Size.toOffset() = Offset(x = width, y = height)
+
+typealias Offset = Offset
+typealias Size = Size

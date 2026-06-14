@@ -12,7 +12,6 @@ import cz.jaro.dopravnipodniky.data.dopravnipodnik.Krizovatka
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.Ulice
 import cz.jaro.dopravnipodniky.shared.Orientace
 import cz.jaro.dopravnipodniky.shared.Quintuple
-import cz.jaro.dopravnipodniky.shared.barvaTroleje
 import cz.jaro.dopravnipodniky.shared.drawArc
 import cz.jaro.dopravnipodniky.shared.existuje
 import cz.jaro.dopravnipodniky.shared.jednotky.UlicovyBlok
@@ -22,11 +21,12 @@ import cz.jaro.dopravnipodniky.shared.maTrolej
 import cz.jaro.dopravnipodniky.shared.neexistuje
 import cz.jaro.dopravnipodniky.shared.nemaTrolej
 import cz.jaro.dopravnipodniky.shared.odsazeniTroleji
+import cz.jaro.dopravnipodniky.shared.overheadLineColor
 import cz.jaro.dopravnipodniky.shared.predsazeniTrolejiL
 import cz.jaro.dopravnipodniky.shared.predsazeniTrolejiS
 import cz.jaro.dopravnipodniky.shared.sirkaTroleje
-import cz.jaro.dopravnipodniky.shared.sirkaUlice
 import cz.jaro.dopravnipodniky.shared.stavTroleje
+import cz.jaro.dopravnipodniky.shared.streetWidth
 import kotlin.math.sqrt
 
 private const val DEBUG_BARVY = false
@@ -47,7 +47,7 @@ fun Ulice.nakreslitTroleje() = with(drawScope) {
             Orientace.Vodorovne -> {
                 troleje.forEach { trolej ->
                     drawLine(
-                        color = barvaTroleje,
+                        color = overheadLineColor,
                         start = Offset(predsazeniS, trolej),
                         end = Offset(delkaUlice - predsazeniS, trolej),
                         strokeWidth = sirka,
@@ -58,7 +58,7 @@ fun Ulice.nakreslitTroleje() = with(drawScope) {
             Orientace.Svisle -> {
                 troleje.forEach { trolej ->
                     drawLine(
-                        color = barvaTroleje,
+                        color = overheadLineColor,
                         start = Offset(trolej, predsazeniS),
                         end = Offset(trolej, delkaUlice - predsazeniS),
                         strokeWidth = sirka,
@@ -94,7 +94,7 @@ fun nakreslitTrolejeNaKrizovatku(
     val zacatekY = pozice.y.toDpSKrizovatkama().toPx()
 
     val sirka = sirkaTroleje.toPx()
-    val sirkaUlice = sirkaUlice.toPx()
+    val sirkaUlice = streetWidth.toPx()
     val predsazeniS = predsazeniTrolejiS.toPx()
     val predsazeniL = predsazeniTrolejiL.toPx()
     val troleje = odsazeniTroleji.map { it.toPx() }
@@ -128,7 +128,7 @@ fun nakreslitTrolejeNaKrizovatku(
                 ) {
                     troleje.forEach { trolej ->
                         drawLine(
-                            color = if (DEBUG_BARVY) Color.Green else barvaTroleje,
+                            color = if (DEBUG_BARVY) Color.Green else overheadLineColor,
                             start = Offset(trolej, -predsazeniS),
                             end = Offset(trolej, sirkaUlice + predsazeniS),
                             strokeWidth = sirka,
@@ -155,9 +155,9 @@ fun nakreslitTrolejeNaKrizovatku(
                             style = Stroke(
                                 width = sirka,
                             ),
-                            color = if (DEBUG_BARVY) Color.Cyan else barvaTroleje,
+                            color = if (DEBUG_BARVY) Color.Cyan else overheadLineColor,
                             center = Offset(x = -predsazeni, y = -predsazeni),
-                            quadSize = Size(width = predsazeni + trolej, height = predsazeni + trolej),
+                            radius = predsazeni + trolej,
                             startAngle = 0F,
                             sweepAngle = 90F,
                         )
@@ -179,7 +179,7 @@ fun nakreslitTrolejeNaKrizovatku(
                 ) {
                     troleje.forEach { trolej ->
                         drawLine(
-                            color = if (DEBUG_BARVY) Color.Yellow else barvaTroleje,
+                            color = if (DEBUG_BARVY) Color.Yellow else overheadLineColor,
                             start = Offset(x = trolej, y = -predsazeniS),
                             end = Offset(x = trolej, y = posunuti),
                             strokeWidth = sirka,
@@ -210,7 +210,7 @@ fun nakreslitTrolejeNaKrizovatku(
                 val r = rVnejsi - trolej
 
                 drawCircle(
-                    color = barvaTroleje,
+                    color = overheadLineColor,
                     radius = r.toFloat(),
                     center = Offset(x = sirkaUlice / 2, y = sirkaUlice / 2),
                     style = Stroke(
@@ -236,9 +236,9 @@ fun nakreslitTrolejeNaKrizovatku(
                             style = Stroke(
                                 width = sirka,
                             ),
-                            color = if (DEBUG_BARVY) Color.Red else barvaTroleje,
+                            color = if (DEBUG_BARVY) Color.Red else overheadLineColor,
                             center = Offset(x = -predsazeniS, y = -predsazeniS),
-                            quadSize = Size(width = predsazeniS + trolej, height = predsazeniS + trolej),
+                            radius = predsazeniS + trolej,
                             startAngle = 0F,
                             sweepAngle = 45F,
                         )
@@ -262,9 +262,9 @@ fun nakreslitTrolejeNaKrizovatku(
                             style = Stroke(
                                 width = sirka,
                             ),
-                            color = if (DEBUG_BARVY) Color.Cyan else barvaTroleje,
+                            color = if (DEBUG_BARVY) Color.Cyan else overheadLineColor,
                             center = Offset(x = -predsazeniS, y = -predsazeniS),
-                            quadSize = Size(width = predsazeniS + trolej, height = predsazeniS + trolej),
+                            radius = predsazeniS + trolej,
                             startAngle = 45F,
                             sweepAngle = 45F,
                         )

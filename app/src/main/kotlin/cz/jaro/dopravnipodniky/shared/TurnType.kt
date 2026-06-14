@@ -7,6 +7,7 @@ import cz.jaro.dopravnipodniky.shared.jednotky.deg
 import cz.jaro.dopravnipodniky.shared.jednotky.degrees
 import cz.jaro.dopravnipodniky.shared.jednotky.radians
 import cz.jaro.dopravnipodniky.shared.jednotky.sin
+import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 sealed interface TurnType {
@@ -24,24 +25,24 @@ sealed interface TurnType {
 fun TurnType.turnParts(busWidth: Dp) = when (this) {
     TurnType.Straight -> listOf()
     TurnType.Right, TurnType.RoundaboutRight -> listOf(
-        TurnPart(radiusRight(busWidth), 90.deg, 0.deg),
+        TurnPart(rightTurnRadius(busWidth), 90.deg, 0.deg),
     )
 
     TurnType.Left -> listOf(
-        TurnPart(radiusLeft(busWidth), (-90).deg, 0.deg),
+        TurnPart(leftTurnRadius(busWidth), (-90).deg, 0.deg),
     )
 
     is TurnType.Roundabout -> listOf(
-        TurnPart(radiusRight(busWidth), 45.deg, 0.deg),
-        TurnPart(radiusRoundabout(busWidth), (-45).deg, -(90.deg * quarters - 45.deg)),
-        TurnPart(radiusRight(busWidth), 45.deg, 0.deg),
+        TurnPart(rightTurnRadius(busWidth), 45.deg, 0.deg),
+        TurnPart(roundaboutTurnRadius(busWidth), (-45).deg, -(90.deg * quarters - 45.deg)),
+        TurnPart(rightTurnRadius(busWidth), 45.deg, 0.deg),
     )
 }
 
-private fun radiusRight(busWidth: Dp): Dp = predsazeniKrizovatky + odsazeniBusu + busWidth / 2
-private fun radiusLeft(busWidth: Dp): Dp = predsazeniKrizovatky + sirkaUlice - (odsazeniBusu + busWidth / 2)
-private fun radiusRoundabout(busWidth: Dp): Dp =
-    sirkaUlice * (sqrt(2.0) / 2) + predsazeniKrizovatky * (sqrt(2.0) - 1) - (odsazeniBusu + busWidth / 2)
+private fun rightTurnRadius(busWidth: Dp): Dp = intersectionOffset + odsazeniBusu + busWidth / 2
+private fun leftTurnRadius(busWidth: Dp): Dp = intersectionOffset + streetWidth - (odsazeniBusu + busWidth / 2)
+private fun roundaboutTurnRadius(busWidth: Dp): Dp =
+    streetWidth * (sqrt(2.0) / 2) + intersectionOffset * (sqrt(2.0) - 1) - (odsazeniBusu + busWidth / 2)
 
 data class TurnPart(
     val radius: Dp,
@@ -76,3 +77,10 @@ fun TurnType.Basic?.onRoundabout() = when (this) {
 
 fun TurnType.Basic?.onRoundaboutIf(isRoundabout: Boolean) =
     if (isRoundabout) onRoundabout() else this ?: TurnType.RoundaboutReturn//error("Otočka nejde")
+
+val roundaboutStreetOuterRadius: Dp = streetWidth * (sqrt(2.0) / 2) + intersectionOffset * (sqrt(2.0) - 1)
+val roundaboutIslandRadius: Dp = roundaboutStreetOuterRadius - roundaboutLaneWidth
+
+val markingRadius = intersectionOffset + streetWidth / 2 + markingWidth / 2
+private val turnMarkingLength = arcLength(90.deg, markingRadius)
+val turnMarkingPartLength = turnMarkingLength / ((turnMarkingLength / (2 * markingPartLength)).roundToInt() * 2 - 1)

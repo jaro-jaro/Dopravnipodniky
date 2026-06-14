@@ -18,6 +18,7 @@ inline fun <T, K1, K2, V> Iterable<T>.groupByPair(keySelector: (T) -> Pair<K1, K
 
 fun Iterable<Boolean>.allTrue() = all { it }
 fun Iterable<Boolean>.anyTrue() = any { it }
+fun Iterable<Boolean>.countTrue() = count { it }
 
 fun <T, U : Comparable<T>> List<U>.sorted() = sortedWith(compareBy { it })
 

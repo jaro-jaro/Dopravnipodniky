@@ -88,7 +88,7 @@ import cz.jaro.dopravnipodniky.shared.maximalniOddaleni
 import cz.jaro.dopravnipodniky.shared.najitObdelnikVeKteremJe
 import cz.jaro.dopravnipodniky.shared.odNulaNula
 import cz.jaro.dopravnipodniky.shared.oddalenyRezim
-import cz.jaro.dopravnipodniky.shared.sirkaUlice
+import cz.jaro.dopravnipodniky.shared.streetWidth
 import cz.jaro.dopravnipodniky.shared.toOffsetSPriblizenim
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
 import cz.jaro.dopravnipodniky.ui.malovani.Mesto
@@ -201,7 +201,7 @@ fun VytvareniLinkyScreen(
             ) {
                 DpRect(
                     origin = (it.toDpSKrizovatkama() - ulicovyBlok / 2).toDpOffset(),
-                    size = DpSize(ulicovyBlok + sirkaUlice, ulicovyBlok + sirkaUlice)
+                    size = DpSize(ulicovyBlok + streetWidth, ulicovyBlok + streetWidth)
                 )
             } ?: let {
                 if (kliklyKrizovatky.size == 1)

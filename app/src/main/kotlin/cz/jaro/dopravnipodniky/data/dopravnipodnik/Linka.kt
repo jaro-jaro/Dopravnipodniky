@@ -4,8 +4,8 @@ import androidx.compose.ui.unit.times
 import cz.jaro.dopravnipodniky.shared.LinkaID
 import cz.jaro.dopravnipodniky.shared.Smer
 import cz.jaro.dopravnipodniky.shared.UliceID
-import cz.jaro.dopravnipodniky.shared.delkaUlice
-import cz.jaro.dopravnipodniky.shared.sirkaUlice
+import cz.jaro.dopravnipodniky.shared.streetLength
+import cz.jaro.dopravnipodniky.shared.streetWidth
 import cz.jaro.dopravnipodniky.ui.linky.rem
 import cz.jaro.dopravnipodniky.ui.theme.LineColor
 import kotlinx.serialization.SerialName
@@ -36,15 +36,15 @@ val Linka.rozmistitBusy: MutableList<Bus>.() -> Unit
     get() = {
         val pocetBusu = busy(this).size
         val ulicNaLince = ulice.size
-        val delkaLinky = ulicNaLince * (delkaUlice + sirkaUlice)
+        val delkaLinky = ulicNaLince * (streetLength + streetWidth)
         val odstupy = (2 * delkaLinky) / pocetBusu.toFloat()
 
         busy(this).forEachIndexed { i, bus ->
             val poziceOdZacatkuLinky = odstupy * i
 
             val jeDruhySmer = poziceOdZacatkuLinky / delkaLinky >= 1
-            val indexUlice = (poziceOdZacatkuLinky % delkaLinky) / (delkaUlice + sirkaUlice)
-            val poziceVUlici = poziceOdZacatkuLinky % (delkaUlice + sirkaUlice)
+            val indexUlice = (poziceOdZacatkuLinky % delkaLinky) / (streetLength + streetWidth)
+            val poziceVUlici = poziceOdZacatkuLinky % (streetLength + streetWidth)
 
             val index = indexOfFirst { it.id == bus.id }
 

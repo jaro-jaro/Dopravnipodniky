@@ -102,9 +102,9 @@ import cz.jaro.dopravnipodniky.shared.maximalniOddaleni
 import cz.jaro.dopravnipodniky.shared.najitObdelnikVeKteremJe
 import cz.jaro.dopravnipodniky.shared.odNulaNula
 import cz.jaro.dopravnipodniky.shared.oddalenyRezim
-import cz.jaro.dopravnipodniky.shared.predsazeniKrizovatky
+import cz.jaro.dopravnipodniky.shared.intersectionOffset
 import cz.jaro.dopravnipodniky.shared.replaceBy
-import cz.jaro.dopravnipodniky.shared.sirkaUlice
+import cz.jaro.dopravnipodniky.shared.streetWidth
 import cz.jaro.dopravnipodniky.shared.stavHry
 import cz.jaro.dopravnipodniky.shared.toOffsetSPriblizenim
 import cz.jaro.dopravnipodniky.shared.ulicovyBlok
@@ -248,10 +248,10 @@ fun MainScreen(
                                 tx = tx, ty = ty, priblizeni = priblizeni
                             ) { [pozice] ->
                                 DpRect(
-                                    left = pozice.x.toDpSKrizovatkama() - predsazeniKrizovatky - sirkaUlice / 2,
-                                    top = pozice.y.toDpSKrizovatkama() - predsazeniKrizovatky - sirkaUlice / 2,
-                                    right = pozice.x.toDpSKrizovatkama() + predsazeniKrizovatky + sirkaUlice * 3 / 2,
-                                    bottom = pozice.y.toDpSKrizovatkama() + predsazeniKrizovatky + sirkaUlice * 3 / 2,
+                                    left = pozice.x.toDpSKrizovatkama() - intersectionOffset - streetWidth / 2,
+                                    top = pozice.y.toDpSKrizovatkama() - intersectionOffset - streetWidth / 2,
+                                    right = pozice.x.toDpSKrizovatkama() + intersectionOffset + streetWidth * 3 / 2,
+                                    bottom = pozice.y.toDpSKrizovatkama() + intersectionOffset + streetWidth * 3 / 2,
                                 )
                             }
                             ?.let { [pozice, krizovatka] ->

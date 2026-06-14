@@ -72,7 +72,7 @@ import cz.jaro.better_dialog.AlertDialogManager
 import cz.jaro.better_dialog.showMaterial
 import cz.jaro.dopravnipodniky.R
 import cz.jaro.dopravnipodniky.data.dopravnipodnik.ikonka
-import cz.jaro.dopravnipodniky.shared.barvaNepouzivanehoBusu
+import cz.jaro.dopravnipodniky.shared.unusedBusColor
 import cz.jaro.dopravnipodniky.shared.composeString
 import cz.jaro.dopravnipodniky.shared.formatovat
 import cz.jaro.dopravnipodniky.shared.getSharedViewModel
@@ -309,7 +309,7 @@ private fun LazyItemScope.BusDetail(
                     .size(48.dp)
                     .clip(CircleShape)
                     .clickable(onClick = onHold),
-                colorFilter = ColorFilter.tint(color = bus.line?.color?.color ?: barvaNepouzivanehoBusu),
+                colorFilter = ColorFilter.tint(color = bus.line?.color?.color ?: unusedBusColor),
             )
         },
     )

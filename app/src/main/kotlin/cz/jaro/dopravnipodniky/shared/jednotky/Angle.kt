@@ -39,6 +39,9 @@ fun tan(angle: Angle) = tan(angle.radians)
 fun asin(number: Double) = kotlin.math.asin(number).rad
 fun acos(number: Double) = kotlin.math.acos(number).rad
 fun atan(number: Double) = kotlin.math.atan(number).rad
+fun asin(number: Float) = kotlin.math.asin(number).rad
+fun acos(number: Float) = kotlin.math.acos(number).rad
+fun atan(number: Float) = kotlin.math.atan(number).rad
 fun atan2(y: Dp, x: Dp) = kotlin.math.atan2(y.value, x.value).rad
 
 operator fun Number.times(other: Angle) = Angle(toDouble() * other.straightAngles)
